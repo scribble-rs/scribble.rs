@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Scribble.rs</title>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="/resources/style.css" />
+</head>
+
+<body>
+    <h1>WELCOME</h1>
+
+    <div class="center-container">
+        <div class="input-container">
+            <div class="grid-item"><b>Name</b></div>
+            <div class="grid-item"><input type="text" /></div>
+            <div class="grid-item"><b>Password (Leave empty for none)</b></div>
+            <div class="grid-item"><input type="password" /></div>
+            <div class="grid-item"><b>Drawing Time</b></div>
+            <div class="grid-item"><input type="number" name="drawing-time" min="60" max="300" /></div>
+            <div class="grid-item"><b>Rounds</b></div>
+            <div class="grid-item"><input type="number" name="rounds" min="1" max="20" /></div>
+            <div class="grid-item"><b>Maximum Players</b></div>
+            <div class="grid-item"><input type="number" name="max-palyers" min="2" max="24" /></div>
+            <button type="button" style="grid-column-start: 1; grid-column-end: 3;">Open Lobby</button>
+        </div>
+    </div>
+</body>
+
+{{template "footer"}}
+
+</html>

@@ -1,0 +1,70 @@
+@font-face {
+    font-family: 'Montserrat';
+    font-weight: normal;
+    src: local('Monserrat'), url(/resources/Montserrat-Regular.otf) format("opentype");
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    font-weight: bold;
+    src: local('Monserrat Bold'), url(/resources/Montserrat-Bold.otf) format("opentype");
+}
+
+a:link, a:visited {
+    color: inherit;
+}
+
+html {
+    font-family: 'Montserrat';
+}
+
+h1 {
+    font-size: 6em;
+    text-align: center;
+}
+
+footer {
+    display: grid;
+    grid-template-columns: auto auto auto auto auto;
+    grid-column-gap: 20px;
+    justify-content: center;
+    align-items: center;
+
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: lightslategray;
+    color: white;
+    text-align: center;
+}
+
+body {
+    margin: 0;
+    background-color: rgb(187, 206, 226);
+}
+
+.center-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.input-container {
+    padding: 10px;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(247, 243, 216);
+    border-radius: 20px;
+    padding: 20px;
+
+    display: inline-grid;
+    grid-template-columns: auto auto;
+    grid-column-gap: 20px;
+    grid-row-gap: 10px;
+}
+
+.input-item {
+    text-align: center;
+}  
