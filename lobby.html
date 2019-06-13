@@ -25,27 +25,31 @@
                 <br />
                 Fix the input and try again.
             </div>
+        
             {{end}}
 
-            <b>Name</b>
-            <input class="input-item" name="player_name" type="text" value="{{.Name}}" />
-            <b>Password (Leave empty for none)</b>
-            <input class="input-item" name="lobby_password" type="password" value="{{.Password}}" />
+            <b>Player-Name</b>
+            <input class="input-item" name="player_name" placeholder="Enter your name" type="text" value="{{.Name}}" />
+            
+            <hr width="100%" style="grid-column-start: 1; grid-column-end: 3;" />
+            
+            <b>Lobby-Password</b>
+            <input class="input-item" name="lobby_password" placeholder="Enter your password or leave empty" type="password" value="{{.Password}}" />
             <b>Drawing Time</b>
             <input class="input-item" type="number" name="drawing_time" min="{{.MinDrawingTime}}" max="{{.MaxDrawingTime}}" value="{{.DrawingTime}}" />
             <b>Rounds</b>
             <input class="input-item" type="number" name="rounds" min="{{.MinRounds}}" max="{{.MaxRounds}}" value="{{.Rounds}}" />
             <b>Maximum Players</b>
             <input class="input-item" type="number" name="max_players" min="{{.MinMaxPlayers}}" max="{{.MaxMaxPlayers}}" value="{{.MaxPlayers}}" />
-            <b>Custom Words</b>
+            <b>Additional Words</b>
             <textarea class="input-item" name="custom_words"
-                placeholder="Enter your custom words, seperating them by commas">{{.CustomWords}}</textarea>
+                placeholder="Enter your additional words, seperating them by commas">{{.CustomWords}}</textarea>
             <button type="submit" form="lobby-create" style="grid-column-start: 1; grid-column-end: 3;">Open
                 Lobby</button>
         </form>
     </div>
-</body>
 
-{{template "footer"}}
+    {{template "footer"}}
+</body>
 
 </html>
