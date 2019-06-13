@@ -19,6 +19,7 @@ html {
 }
 
 h1 {
+    margin-top: 0;
     font-size: 6em;
     text-align: center;
 }
@@ -66,5 +67,5 @@ body {
 }
 
 .input-item {
-    text-align: center;
-}  
+    width: inherit;
+}
