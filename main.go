@@ -6,11 +6,9 @@ import (
 	"net/http"
 )
 
-var index *template.Template
-
 func main() {
 	var err error
-	index, err = template.New("everything").ParseFiles("lobby.html", "footer.html")
+	lobbyCreatePage, err = template.New("everything").ParseFiles("lobby.html", "footer.html")
 	if err != nil {
 		panic(err)
 	}
@@ -22,11 +20,5 @@ func main() {
 func setupRoutes() {
 	http.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(http.Dir("resources"))))
 	http.HandleFunc("/", homePage)
-}
-
-func homePage(w http.ResponseWriter, r *http.Request) {
-	err := index.ExecuteTemplate(w, "lobby.html", nil)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	http.HandleFunc("/lobby/create", createLobby)
 }
