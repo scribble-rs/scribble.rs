@@ -97,7 +97,9 @@ body {
 .error-list {
     background-color: rgb(236, 93, 93);
     padding: 10px;
-    border-radius: 15px; 
+    border-radius: 15px;
+    color: white;
+    font-weight: bold;
 
     margin-bottom: 20px;
     grid-column-start: 1;
