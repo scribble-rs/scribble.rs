@@ -72,13 +72,16 @@ body {
     margin-bottom: 10px;
 }
 
+.content-container {
+    display: block;
+    background-color: rgb(247, 243, 216);
+    border-radius: 15px;
+    padding: 20px;
+}
+
 .input-container {
-    padding: 10px;
     justify-content: center;
     align-items: center;
-    background-color: rgb(247, 243, 216);
-    border-radius: 20px;
-    padding: 20px;
 
     display: inline-grid;
     grid-template-columns: auto auto;
@@ -94,7 +97,9 @@ body {
 .error-list {
     background-color: rgb(236, 93, 93);
     padding: 10px;
+    border-radius: 15px; 
 
+    margin-bottom: 20px;
     grid-column-start: 1;
     grid-column-end: 3;
 }
