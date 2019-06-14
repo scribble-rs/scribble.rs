@@ -1,4 +1,4 @@
-package main
+package lobby
 
 import (
 	"errors"
@@ -10,7 +10,7 @@ import (
 )
 
 var lobbyCreatePage *template.Template
-var lobbySettingBounds = &LobbySettingBounds{
+var lobbySettingBounds = &SettingBounds{
 	MinDrawingTime: 60,
 	MaxDrawingTime: 300,
 	MinRounds:      1,
@@ -19,9 +19,9 @@ var lobbySettingBounds = &LobbySettingBounds{
 	MaxMaxPlayers:  24,
 }
 
-// LobbySettingBounds defines the lower and upper bounds for the user-specified
+// SettingBounds defines the lower and upper bounds for the user-specified
 // lobby creation input.
-type LobbySettingBounds struct {
+type SettingBounds struct {
 	MinDrawingTime int64
 	MaxDrawingTime int64
 	MinRounds      int64
@@ -30,9 +30,9 @@ type LobbySettingBounds struct {
 	MaxMaxPlayers  int64
 }
 
-// LobbyCreatePageData defines all non-static data for the lobby create page.
-type LobbyCreatePageData struct {
-	*LobbySettingBounds
+// CreatePageData defines all non-static data for the lobby create page.
+type CreatePageData struct {
+	*SettingBounds
 	Errors      []string
 	Name        string
 	Password    string
@@ -42,23 +42,38 @@ type LobbyCreatePageData struct {
 	CustomWords string
 }
 
-func createDefaultLobbyCreatePageDat() *LobbyCreatePageData {
-	return &LobbyCreatePageData{
-		LobbySettingBounds: lobbySettingBounds,
-		DrawingTime:        "120",
-		Rounds:             "4",
-		MaxPlayers:         "4",
+func createDefaultLobbyCreatePageDat() *CreatePageData {
+	return &CreatePageData{
+		SettingBounds: lobbySettingBounds,
+		DrawingTime:   "120",
+		Rounds:        "4",
+		MaxPlayers:    "4",
 	}
 }
 
-func homePage(w http.ResponseWriter, r *http.Request) {
+func init() {
+	var err error
+	lobbyCreatePage, err = template.New("").ParseFiles("lobby/lobby.html", "footer.html")
+	if err != nil {
+		panic(err)
+	}
+
+	http.HandleFunc("/", HomePage)
+	http.HandleFunc("/lobby/create", CreateLobby)
+}
+
+// HomePage servers the default page for scribble.rs, which is the page to
+// create a new lobby.
+func HomePage(w http.ResponseWriter, r *http.Request) {
 	err := lobbyCreatePage.ExecuteTemplate(w, "lobby.html", createDefaultLobbyCreatePageDat())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
-func createLobby(w http.ResponseWriter, r *http.Request) {
+// CreateLobby allows creating a lobby, optionally returning errors that
+// occured during creation.
+func CreateLobby(w http.ResponseWriter, r *http.Request) {
 	formParseError := r.ParseForm()
 	if formParseError != nil {
 		panic(formParseError)
@@ -72,14 +87,14 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 	customWords, customWordsInvalid := parseCustomWords(r.Form.Get("custom_words"))
 
 	//Prevent resetting the form, since that would be annoying as hell.
-	pageData := LobbyCreatePageData{
-		LobbySettingBounds: lobbySettingBounds,
-		Name:               r.Form.Get("player_name"),
-		Password:           r.Form.Get("lobby_password"),
-		DrawingTime:        r.Form.Get("drawing_time"),
-		Rounds:             r.Form.Get("rounds"),
-		MaxPlayers:         r.Form.Get("max_players"),
-		CustomWords:        r.Form.Get("custom_words"),
+	pageData := CreatePageData{
+		SettingBounds: lobbySettingBounds,
+		Name:          r.Form.Get("player_name"),
+		Password:      r.Form.Get("lobby_password"),
+		DrawingTime:   r.Form.Get("drawing_time"),
+		Rounds:        r.Form.Get("rounds"),
+		MaxPlayers:    r.Form.Get("max_players"),
+		CustomWords:   r.Form.Get("custom_words"),
 	}
 
 	if lobbyPasswordInvalid != nil {
