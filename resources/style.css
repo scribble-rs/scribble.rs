@@ -14,6 +14,14 @@ a:link, a:visited {
     color: inherit;
 }
 
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
 html {
     font-family: 'Montserrat';
 }
@@ -31,19 +39,23 @@ h2 {
 }
 
 footer {
-    display: grid;
-    grid-template-columns: auto auto auto auto auto;
-    grid-column-gap: 20px;
+    display: flex;
     justify-content: center;
     align-items: center;
 
+    padding-top: 5px;
+    padding-bottom: 5px;
     position: fixed;
     left: 0;
     bottom: 0;
     width: 100%;
     background-color: lightslategray;
     color: white;
-    text-align: center;
+}
+
+.footer-item {
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 body {
@@ -67,7 +79,6 @@ body {
     background-color: rgb(247, 243, 216);
     border-radius: 20px;
     padding: 20px;
-
 
     display: inline-grid;
     grid-template-columns: auto auto;
