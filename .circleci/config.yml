@@ -1,0 +1,14 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.12
+
+    working_directory: /go/src/github.com/scribble-rs/scribble.rs
+    steps:
+      - checkout
+
+      - run: go get -v -t -d ./...
+      - run: go vet ./...
+      - run: go test -race -coverprofile=profile.out -covermode=atomic ./...
+      - run: bash <(curl -s https://codecov.io/bash) -f profile.out
