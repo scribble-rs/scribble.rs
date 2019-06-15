@@ -3,8 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-
-	_ "github.com/Bios-Marcel/scribble.rs/lobby"
 )
 
 func main() {

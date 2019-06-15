@@ -1,4 +1,4 @@
-package lobby
+package main
 
 import (
 	"errors"
@@ -53,7 +53,7 @@ func createDefaultLobbyCreatePageDat() *CreatePageData {
 
 func init() {
 	var err error
-	lobbyCreatePage, err = template.New("").ParseFiles("lobby/lobby.html", "footer.html")
+	lobbyCreatePage, err = template.New("").ParseFiles("lobby.html", "footer.html")
 	if err != nil {
 		panic(err)
 	}
@@ -143,7 +143,7 @@ func parseLobbyPassword(value string) (string, error) {
 func parseDrawingTime(value string) (int, error) {
 	result, parseErr := strconv.ParseInt(value, 10, 64)
 	if parseErr != nil {
-		return 0, parseErr
+		return 0, errors.New("the drawing time must be numeric")
 	}
 
 	if result < lobbySettingBounds.MinDrawingTime {
@@ -160,7 +160,7 @@ func parseDrawingTime(value string) (int, error) {
 func parseRounds(value string) (int, error) {
 	result, parseErr := strconv.ParseInt(value, 10, 64)
 	if parseErr != nil {
-		return 0, parseErr
+		return 0, errors.New("the rounds amount must be numeric")
 	}
 
 	if result < lobbySettingBounds.MinRounds {
@@ -177,7 +177,7 @@ func parseRounds(value string) (int, error) {
 func parseMaxPlayers(value string) (int, error) {
 	result, parseErr := strconv.ParseInt(value, 10, 64)
 	if parseErr != nil {
-		return 0, parseErr
+		return 0, errors.New("the max players amount must be numeric")
 	}
 
 	if result < lobbySettingBounds.MinMaxPlayers {
@@ -192,9 +192,18 @@ func parseMaxPlayers(value string) (int, error) {
 }
 
 func parseCustomWords(value string) ([]string, error) {
-	result := strings.Split(value, ",")
+	trimmedValue := strings.TrimSpace(value)
+	if trimmedValue == "" {
+		return nil, nil
+	}
+
+	result := strings.Split(trimmedValue, ",")
 	for index, item := range result {
-		result[index] = strings.ToLower(strings.TrimSpace(item))
+		trimmedItem := strings.ToLower(strings.TrimSpace(item))
+		if trimmedItem == "" {
+			return nil, errors.New("custom words must not be empty")
+		}
+		result[index] = trimmedItem
 	}
 
 	return result, nil
