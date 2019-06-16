@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Scribble.rs - Game</title>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="./resources/style.css" />
+    <link rel="stylesheet" type="text/css" href="./resources/lobby.css" />
+    <link rel="icon" type="image/png" href="./resources/favicon.png" />
+</head>
+
+<body>
+    <div class="content-wrapper">
+        <div class="lobby-header">
+            <span class="guess-letter guess-letter-nonspace">W</span>
+            <span class="guess-letter guess-letter-nonspace">O</span>
+            <span class="guess-letter guess-letter-nonspace">R</span>
+            <span class="guess-letter guess-letter-nonspace">L</span>
+            <span class="guess-letter guess-letter-nonspace">D</span>
+            <span class="guess-letter">&nbsp;</span>
+            <span class="guess-letter guess-letter-nonspace">W</span>
+            <span class="guess-letter guess-letter-nonspace">A</span>
+            <span class="guess-letter guess-letter-nonspace">R</span>
+        </div>
+        <div class="lobby-layout">
+            <div class=player-container">
+                <div class="player">
+                    <span class="rank">1</span>
+                    <span class="playername">Bruno Bucciarati</span>
+                    <span class="playerscore">50</span>
+                </div>
+                <div class="player">
+                    <span class="rank">2</span>
+                    <span class="playername">Vinegar Doppio</span>
+                    <span class="playerscore">5</span>
+                </div>
+            </div>
+            <canvas class="drawing-board"></canvas>
+            <div class="chat">
+                <div>
+                    Message 1<br />Message 2
+                </div>
+                <input type="message" placeholder="Type your message" />
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <a class="footer-item" href="https://github.com/scribble-rs/scribble.rs" target="_blank">Source Code</a>
+        <a class="footer-item" href="https://github.com/scribble-rs/scribble.rs/wiki" target="_blank">Help</a>
+        <a class="footer-item" href="mailto:marceloschr@googlemail.com" target="_blank">Contact</a>
+    </footer>
+</body>
+
+</html>

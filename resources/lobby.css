@@ -1,0 +1,80 @@
+
+.lobby-header {
+    display: flex;
+    height: 3rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.guess-letter-nonspace {
+    text-transform: uppercase;
+    border-bottom: 0.3rem black solid;
+}
+
+.guess-letter {
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.guess-letter+.guess-letter {
+    margin-left: 0.5rem;
+}
+
+.lobby-layout {
+    display: grid;
+    grid-template-columns: fit-content(100%) auto fit-content(100%);
+    grid-template-rows: fit-content(100%) auto;
+    grid-gap: 5px;
+    padding: 5px;
+}
+
+.player-container {
+    display: flex;
+    flex-direction: column;
+    margin: 5px;
+    background-color: red;
+}
+
+.player {
+    padding-right: 2rem;
+    border: 1px solid black;
+    display: grid;
+    grid-template-columns: fit-content(100%) auto;
+    grid-template-rows: 1fr 1fr;
+}
+
+.player+.player {
+    margin-top: 5px;
+}
+
+.rank {
+    display: flex;
+    grid-row-start: 1;
+    grid-row-end: 3;
+    justify-content: center;
+    align-items: center;
+    width: 4rem;
+    height: 4rem;
+    font-size: 2rem;
+}
+
+.playername, .playerscore {
+    display: flex;
+    align-items: center;
+    height: 2rem;
+    font-size: 1rem;
+}
+
+.drawing-board {
+    border: 1px solid black;
+    width: 100%;
+}
+
+.chat {
+    border: 1px solid black;
+    min-width: 15rem;
+
+    display: grid;
+    grid-template-rows: auto fit-content(100%);
+}
