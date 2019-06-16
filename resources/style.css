@@ -28,6 +28,12 @@ html {
 
 body {
     margin: 0;
+    position: relative;
+    min-height: 100vh;
+}
+
+.content-wrapper {
+    padding-bottom: 2rem;
 }
 
 h1, h2 {
@@ -37,11 +43,11 @@ h1, h2 {
 }
 
 h1 {
-    font-size: 6em;
+    font-size: 6rem;
 }
 
 h2 {
-    font-size: 4em;
+    font-size: 4rem;
 }
 
 ul {
@@ -52,19 +58,16 @@ footer {
     display: flex;
     justify-content: center;
     align-items: center;
-
-    padding-top: 5px;
-    padding-bottom: 5px;
-    position: fixed;
-    left: 0;
+    position: absolute;
     bottom: 0;
+    height: 2rem;
     width: 100%;
     background-color: lightslategray;
     color: white;
 }
 
 .footer-item+.footer-item {
-    margin-left: 1em;
+    margin-left: 1rem;
 }
 
 .center-container {
@@ -86,7 +89,6 @@ footer {
 .input-container {
     justify-content: center;
     align-items: center;
-
     display: inline-grid;
     grid-template-columns: auto auto;
     grid-column-gap: 20px;
@@ -104,7 +106,6 @@ footer {
     border-radius: 15px;
     color: white;
     font-weight: bold;
-
     margin-bottom: 20px;
     grid-column-start: 1;
     grid-column-end: 3;
