@@ -32,7 +32,7 @@ func Test_parsePlayerName(t *testing.T) {
 	}
 }
 
-func Test_parseLobbyPassword(t *testing.T) {
+func Test_parsePassword(t *testing.T) {
 	tests := []struct {
 		name    string
 		value   string
@@ -46,13 +46,13 @@ func Test_parseLobbyPassword(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseLobbyPassword(tt.value)
+			got, err := parsePassword(tt.value)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("parseLobbyPassword() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("parsePassword() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("parseLobbyPassword() = %v, want %v", got, tt.want)
+				t.Errorf("parsePassword() = %v, want %v", got, tt.want)
 			}
 		})
 	}

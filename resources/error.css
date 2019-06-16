@@ -1,0 +1,20 @@
+body {
+    background-color: white !important;
+}
+
+h1, h2 {
+    display: block;
+}
+
+h1 {
+    font-size: 13em;
+}
+
+h2 {
+    font-size: 4em;
+    margin: 2vw;
+}
+
+.go-back {
+    font-size: 3em;
+}

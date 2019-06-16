@@ -59,6 +59,7 @@ func init() {
 	}
 
 	http.HandleFunc("/", HomePage)
+	http.HandleFunc("/lobby", ShowLobby)
 	http.HandleFunc("/lobby/create", CreateLobby)
 }
 
@@ -80,7 +81,7 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 	}
 
 	playerName, playerNameInvalid := parsePlayerName(r.Form.Get("player_name"))
-	lobbyPassword, lobbyPasswordInvalid := parseLobbyPassword(r.Form.Get("lobby_password"))
+	password, passwordInvalid := parsePassword(r.Form.Get("lobby_password"))
 	drawingTime, drawingTimeInvalid := parseDrawingTime(r.Form.Get("drawing_time"))
 	rounds, roundsInvalid := parseRounds(r.Form.Get("rounds"))
 	maxPlayers, maxPlayersInvalid := parseMaxPlayers(r.Form.Get("max_players"))
@@ -97,8 +98,8 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 		CustomWords:   r.Form.Get("custom_words"),
 	}
 
-	if lobbyPasswordInvalid != nil {
-		pageData.Errors = append(pageData.Errors, lobbyPasswordInvalid.Error())
+	if passwordInvalid != nil {
+		pageData.Errors = append(pageData.Errors, passwordInvalid.Error())
 	}
 	if playerNameInvalid != nil {
 		pageData.Errors = append(pageData.Errors, playerNameInvalid.Error())
@@ -122,8 +123,57 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	} else {
-		//TODO CREATE LOBBY AND REDIRECT
-		fmt.Println(playerName, lobbyPassword, drawingTime, rounds, maxPlayers, customWords)
+		lobby := createLobby(password, drawingTime, rounds, maxPlayers, customWords)
+		player := createPlayer(playerName)
+
+		//FIXME Make a dedicated method that uses a mutex?
+		lobby.Players = append(lobby.Players, player)
+
+		// Use the players generated usersession and pass it as a cookie.
+		http.SetCookie(w, &http.Cookie{
+			Name:     "usersession",
+			Value:    player.UserSession,
+			Path:     "/",
+			Secure:   *useHTTPS,
+			SameSite: http.SameSiteStrictMode,
+		})
+	}
+}
+
+// ShowLobby opens a lobby, either opening it directly or asking for a username
+// and or a lobby password.
+func ShowLobby(w http.ResponseWriter, r *http.Request) {
+	lobbyID := r.URL.Query().Get("id")
+	if lobbyID == "" {
+		errorPage.ExecuteTemplate(w, "error.html", "The entered URL is incorrect.")
+		return
+	}
+
+	var lobby *Lobby
+	for _, l := range lobbies {
+		if l.ID == lobbyID {
+			lobby = l
+			break
+		}
+	}
+
+	if lobby == nil {
+		errorPage.ExecuteTemplate(w, "error.html", "The lobby does not exist.")
+		return
+	}
+
+	sessionCookie, noCookieError := r.Cookie("usersession")
+	var player *Player
+	if noCookieError == nil {
+		player = lobby.GetPlayer(sessionCookie.Value)
+	}
+
+	if player == nil {
+		fmt.Fprintln(w, "Welcome to my construction site, if this was done, you'd see a dialog asking you for a name and or a password.")
+		//TODO Authenticate
+	} else {
+		fmt.Fprintln(w, "Welcome to my construction site, if this was done, you'd see the actual game lobby.")
+		//TODO Serve lobby.
 	}
 }
 
@@ -136,7 +186,7 @@ func parsePlayerName(value string) (string, error) {
 	return trimmed, nil
 }
 
-func parseLobbyPassword(value string) (string, error) {
+func parsePassword(value string) (string, error) {
 	return value, nil
 }
 
