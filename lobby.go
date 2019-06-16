@@ -53,7 +53,7 @@ func createDefaultLobbyCreatePageDat() *CreatePageData {
 
 func init() {
 	var err error
-	lobbyCreatePage, err = template.New("").ParseFiles("lobby.html", "footer.html")
+	lobbyCreatePage, err = template.New("").ParseFiles("lobby_create.html", "footer.html")
 	if err != nil {
 		panic(err)
 	}
@@ -66,7 +66,7 @@ func init() {
 // HomePage servers the default page for scribble.rs, which is the page to
 // create a new lobby.
 func HomePage(w http.ResponseWriter, r *http.Request) {
-	err := lobbyCreatePage.ExecuteTemplate(w, "lobby.html", createDefaultLobbyCreatePageDat())
+	err := lobbyCreatePage.ExecuteTemplate(w, "lobby_create.html", createDefaultLobbyCreatePageDat())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -118,7 +118,7 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(pageData.Errors) != 0 {
-		err := lobbyCreatePage.ExecuteTemplate(w, "lobby.html", pageData)
+		err := lobbyCreatePage.ExecuteTemplate(w, "lobby_create.html", pageData)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
