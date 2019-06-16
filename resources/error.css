@@ -7,14 +7,14 @@ h1, h2 {
 }
 
 h1 {
-    font-size: 13em;
+    font-size: 13rem;
 }
 
 h2 {
-    font-size: 4em;
+    font-size: 4rem;
     margin: 2vw;
 }
 
 .go-back {
-    font-size: 3em;
+    font-size: 3rem;
 }
