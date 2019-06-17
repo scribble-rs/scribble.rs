@@ -134,7 +134,6 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 			Name:     "usersession",
 			Value:    player.UserSession,
 			Path:     "/",
-			Secure:   *useHTTPS,
 			SameSite: http.SameSiteStrictMode,
 		})
 	}
