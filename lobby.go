@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	petname "github.com/dustinkirkland/golang-petname"
 )
 
 var lobbyCreatePage *template.Template
@@ -34,7 +36,6 @@ type SettingBounds struct {
 type CreatePageData struct {
 	*SettingBounds
 	Errors      []string
-	Name        string
 	Password    string
 	DrawingTime string
 	Rounds      string
@@ -42,7 +43,7 @@ type CreatePageData struct {
 	CustomWords string
 }
 
-func createDefaultLobbyCreatePageDat() *CreatePageData {
+func createDefaultLobbyCreatePageData() *CreatePageData {
 	return &CreatePageData{
 		SettingBounds: lobbySettingBounds,
 		DrawingTime:   "120",
@@ -66,7 +67,7 @@ func init() {
 // HomePage servers the default page for scribble.rs, which is the page to
 // create a new lobby.
 func HomePage(w http.ResponseWriter, r *http.Request) {
-	err := lobbyCreatePage.ExecuteTemplate(w, "lobby_create.html", createDefaultLobbyCreatePageDat())
+	err := lobbyCreatePage.ExecuteTemplate(w, "lobby_create.html", createDefaultLobbyCreatePageData())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -80,7 +81,6 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 		panic(formParseError)
 	}
 
-	playerName, playerNameInvalid := parsePlayerName(r.Form.Get("player_name"))
 	password, passwordInvalid := parsePassword(r.Form.Get("lobby_password"))
 	drawingTime, drawingTimeInvalid := parseDrawingTime(r.Form.Get("drawing_time"))
 	rounds, roundsInvalid := parseRounds(r.Form.Get("rounds"))
@@ -90,7 +90,6 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 	//Prevent resetting the form, since that would be annoying as hell.
 	pageData := CreatePageData{
 		SettingBounds: lobbySettingBounds,
-		Name:          r.Form.Get("player_name"),
 		Password:      r.Form.Get("lobby_password"),
 		DrawingTime:   r.Form.Get("drawing_time"),
 		Rounds:        r.Form.Get("rounds"),
@@ -100,9 +99,6 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 
 	if passwordInvalid != nil {
 		pageData.Errors = append(pageData.Errors, passwordInvalid.Error())
-	}
-	if playerNameInvalid != nil {
-		pageData.Errors = append(pageData.Errors, playerNameInvalid.Error())
 	}
 	if drawingTimeInvalid != nil {
 		pageData.Errors = append(pageData.Errors, drawingTimeInvalid.Error())
@@ -124,7 +120,11 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		lobby := createLobby(password, drawingTime, rounds, maxPlayers, customWords)
-		player := createPlayer(playerName)
+
+		adjective := strings.Title(petname.Adjective())
+		adverb := strings.Title(petname.Adverb())
+		name := strings.Title(petname.Name())
+		player := createPlayer(adverb + adjective + name)
 
 		//FIXME Make a dedicated method that uses a mutex?
 		lobby.Players = append(lobby.Players, player)

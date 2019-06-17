@@ -29,12 +29,6 @@
 
                 {{end}}
                 <form id="lobby-create" class="input-container" action="/lobby/create" method="POST">
-                    <b>Player-Name</b>
-                    <input class="input-item" name="player_name" placeholder="Enter your name" type="text"
-                        value="{{.Name}}" />
-
-                    <hr width="100%" style="grid-column-start: 1; grid-column-end: 3;" />
-
                     <b>Lobby-Password</b>
                     <input class="input-item" name="lobby_password" placeholder="Enter your password or leave empty"
                         type="password" value="{{.Password}}" />
