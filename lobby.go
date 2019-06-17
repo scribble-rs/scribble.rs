@@ -136,6 +136,8 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 			Path:     "/",
 			SameSite: http.SameSiteStrictMode,
 		})
+
+		http.Redirect(w, r, "/lobby?id="+lobby.ID, http.StatusFound)
 	}
 }
 
@@ -168,10 +170,10 @@ func ShowLobby(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if player == nil {
-		fmt.Fprintln(w, "Welcome to my construction site, if this was done, you'd see a dialog asking you for a name and or a password.")
+		errorPage.ExecuteTemplate(w, "error.html", "Under construction - Come back later")
 		//TODO Authenticate
 	} else {
-		fmt.Fprintln(w, "Welcome to my construction site, if this was done, you'd see the actual game lobby.")
+		errorPage.ExecuteTemplate(w, "error.html", "Under construction - Come back later")
 		//TODO Serve lobby.
 	}
 }
