@@ -1,0 +1,9 @@
+{{define "players"}}
+    {{range .}}
+    <div class="player">
+        <span class="rank">{{.Rank}}</span>
+        <span class="playername">{{.Name}}</span>
+        <span class="playerscore">{{.Score}}</span>
+    </div>
+    {{end}}
+{{end}}

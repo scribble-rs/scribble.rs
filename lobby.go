@@ -9,17 +9,21 @@ import (
 	"strings"
 
 	petname "github.com/dustinkirkland/golang-petname"
+	"github.com/gorilla/websocket"
 )
 
-var lobbyCreatePage *template.Template
-var lobbySettingBounds = &SettingBounds{
-	MinDrawingTime: 60,
-	MaxDrawingTime: 300,
-	MinRounds:      1,
-	MaxRounds:      20,
-	MinMaxPlayers:  2,
-	MaxMaxPlayers:  24,
-}
+var (
+	lobbyCreatePage    *template.Template
+	lobbyPage          *template.Template
+	lobbySettingBounds = &SettingBounds{
+		MinDrawingTime: 60,
+		MaxDrawingTime: 300,
+		MinRounds:      1,
+		MaxRounds:      20,
+		MinMaxPlayers:  2,
+		MaxMaxPlayers:  24,
+	}
+)
 
 // SettingBounds defines the lower and upper bounds for the user-specified
 // lobby creation input.
@@ -59,9 +63,16 @@ func init() {
 		panic(err)
 	}
 
+	lobbyPage, err = template.New("").ParseFiles("lobby.html", "lobby_players.html", "footer.html")
+	if err != nil {
+		panic(err)
+	}
+
 	http.HandleFunc("/", HomePage)
 	http.HandleFunc("/lobby", ShowLobby)
 	http.HandleFunc("/lobby/create", CreateLobby)
+	http.HandleFunc("/lobby/players", GetPlayers)
+	http.HandleFunc("/ws", wsEndpoint)
 }
 
 // HomePage servers the default page for scribble.rs, which is the page to
@@ -70,6 +81,71 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 	err := lobbyCreatePage.ExecuteTemplate(w, "lobby_create.html", createDefaultLobbyCreatePageData())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin:     func(r *http.Request) bool { return true },
+}
+
+func wsEndpoint(w http.ResponseWriter, r *http.Request) {
+	lobbyID := r.URL.Query().Get("id")
+	if lobbyID == "" {
+		errorPage.ExecuteTemplate(w, "error.html", "The entered URL is incorrect.")
+		return
+	}
+
+	lobby := GetLobby(lobbyID)
+
+	if lobby == nil {
+		errorPage.ExecuteTemplate(w, "error.html", "The lobby does not exist.")
+		return
+	}
+
+	sessionCookie, noCookieError := r.Cookie("usersession")
+	var player *Player
+	if noCookieError == nil {
+		player = lobby.GetPlayer(sessionCookie.Value)
+	}
+
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Println(player.Name + " has connected")
+
+	player.ws = ws
+}
+
+// LobbyPageData is the data necessary for initially displaying all data of
+// the lobbies webpage.
+type LobbyPageData struct {
+	Players []*Player
+	LobbyID string
+}
+
+// GetPlayers returns divs for all players in the lobby to the calling client.
+func GetPlayers(w http.ResponseWriter, r *http.Request) {
+	lobbyID := r.URL.Query().Get("id")
+	if lobbyID == "" {
+		errorPage.ExecuteTemplate(w, "error.html", "The entered URL is incorrect.")
+		return
+	}
+
+	lobby := GetLobby(lobbyID)
+
+	if lobby == nil {
+		errorPage.ExecuteTemplate(w, "error.html", "The lobby does not exist.")
+		return
+	}
+
+	templatingError := lobbyPage.ExecuteTemplate(w, "players", lobby.Players)
+	if templatingError != nil {
+		errorPage.ExecuteTemplate(w, "error.html", templatingError.Error())
 	}
 }
 
@@ -141,6 +217,12 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// JSEvent contains an eventtype and optionally any data.
+type JSEvent struct {
+	Type int
+	Data interface{}
+}
+
 // ShowLobby opens a lobby, either opening it directly or asking for a username
 // and or a lobby password.
 func ShowLobby(w http.ResponseWriter, r *http.Request) {
@@ -150,13 +232,7 @@ func ShowLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var lobby *Lobby
-	for _, l := range lobbies {
-		if l.ID == lobbyID {
-			lobby = l
-			break
-		}
-	}
+	lobby := GetLobby(lobbyID)
 
 	if lobby == nil {
 		errorPage.ExecuteTemplate(w, "error.html", "The lobby does not exist.")
@@ -170,11 +246,41 @@ func ShowLobby(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if player == nil {
-		errorPage.ExecuteTemplate(w, "error.html", "Under construction - Come back later")
-		//TODO Authenticate
+		adjective := strings.Title(petname.Adjective())
+		adverb := strings.Title(petname.Adverb())
+		name := strings.Title(petname.Name())
+		player := createPlayer(adverb + adjective + name)
+
+		//FIXME Make a dedicated method that uses a mutex?
+		lobby.Players = append(lobby.Players, player)
+
+		pageData := &LobbyPageData{
+			Players: lobby.Players,
+			LobbyID: lobby.ID,
+		}
+
+		for _, player := range lobby.Players {
+			if player.ws != nil {
+				player.ws.WriteJSON(JSEvent{Type: 1})
+			}
+		}
+
+		// Use the players generated usersession and pass it as a cookie.
+		http.SetCookie(w, &http.Cookie{
+			Name:     "usersession",
+			Value:    player.UserSession,
+			Path:     "/",
+			SameSite: http.SameSiteStrictMode,
+		})
+
+		lobbyPage.ExecuteTemplate(w, "lobby.html", pageData)
 	} else {
-		errorPage.ExecuteTemplate(w, "error.html", "Under construction - Come back later")
-		//TODO Serve lobby.
+		pageData := &LobbyPageData{
+			Players: lobby.Players,
+			LobbyID: lobby.ID,
+		}
+
+		lobbyPage.ExecuteTemplate(w, "lobby.html", pageData)
 	}
 }
 

@@ -3,6 +3,7 @@ package main
 import (
 	"sync"
 
+	"github.com/gorilla/websocket"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -19,6 +20,8 @@ type Player struct {
 	UserSession string
 	// Score is the points that the player got in the current lobby.
 	Score int
+	Rank  int
+	ws    *websocket.Conn
 }
 
 // Lobby represents a game session.
@@ -43,6 +46,10 @@ type Lobby struct {
 
 	// Players references all participants of the Lobby.
 	Players []*Player
+
+	// CurrentWord represents the word that was last selected. If no word has
+	// been selected yet or the round is already over, this should be empty.
+	CurrentWord string
 }
 
 // GetPlayer searches for a player, identifying them by usersssion.
@@ -50,6 +57,16 @@ func (lobby *Lobby) GetPlayer(userSession string) *Player {
 	for _, player := range lobby.Players {
 		if player.UserSession == userSession {
 			return player
+		}
+	}
+
+	return nil
+}
+
+func GetLobby(id string) *Lobby {
+	for _, l := range lobbies {
+		if l.ID == id {
+			return l
 		}
 	}
 
