@@ -318,13 +318,18 @@ type Message struct {
 func ShowLobby(w http.ResponseWriter, r *http.Request) {
 	lobby := getLobby(w, r)
 	if lobby != nil {
+		// TODO Improve this. Return metadata or so instead.
+		userAgent := strings.ToLower(r.UserAgent())
+		if !(strings.Contains(userAgent, "gecko") || strings.Contains(userAgent, "chrom") || strings.Contains(userAgent, "opera") || strings.Contains(userAgent, "safari")) {
+			errorPage.ExecuteTemplate(w, "error.html", "Sorry, no robots allowed.")
+			return
+		}
+
 		sessionCookie, noCookieError := r.Cookie("usersession")
 		var player *Player
 		if noCookieError == nil {
 			player = lobby.GetPlayer(sessionCookie.Value)
 		}
-
-		fmt.Printf("Useragent of %s: %s", r.Host, r.UserAgent())
 
 		if player == nil {
 			if len(lobby.Players) >= lobby.MaxPlayers {
