@@ -155,7 +155,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 					} else {
 						trimmed := strings.TrimSpace(dataAsString)
 						if trimmed == "" {
-							return
+							continue
 						}
 
 						escaped := html.EscapeString(trimmed)
