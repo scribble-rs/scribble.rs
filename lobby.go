@@ -172,6 +172,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 // the lobbies webpage.
 type LobbyPageData struct {
 	Players   []*Player
+	Port      int
 	LobbyID   string
 	WordHints []*WordHint
 	Round     int
@@ -318,6 +319,11 @@ func ShowLobby(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if player == nil {
+			if len(lobby.Players) >= lobby.MaxPlayers {
+				errorPage.ExecuteTemplate(w, "error.html", "Sorry, but the lobby is full.")
+				return
+			}
+
 			adjective := strings.Title(petname.Adjective())
 			adverb := strings.Title(petname.Adverb())
 			name := strings.Title(petname.Name())
@@ -327,6 +333,7 @@ func ShowLobby(w http.ResponseWriter, r *http.Request) {
 			lobby.Players = append(lobby.Players, player)
 
 			pageData := &LobbyPageData{
+				Port:    *portHTTP,
 				Players: lobby.Players,
 				LobbyID: lobby.ID,
 				Round:   lobby.Round,
@@ -350,6 +357,7 @@ func ShowLobby(w http.ResponseWriter, r *http.Request) {
 			lobbyPage.ExecuteTemplate(w, "lobby.html", pageData)
 		} else {
 			pageData := &LobbyPageData{
+				Port:    *portHTTP,
 				Players: lobby.Players,
 				LobbyID: lobby.ID,
 				Round:   lobby.Round,

@@ -12,10 +12,11 @@ import (
 
 var (
 	errorPage *template.Template
+	portHTTP  *int
 )
 
 func main() {
-	portHTTP := flag.Int("portHTTP", 8080, "defines the port to be used for http mode")
+	portHTTP = flag.Int("portHTTP", 8080, "defines the port to be used for http mode")
 
 	flag.Parse()
 
