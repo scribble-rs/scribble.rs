@@ -47,9 +47,16 @@ type Lobby struct {
 	// Players references all participants of the Lobby.
 	Players []*Player
 
+	// Drawer references the Player that is currently drawing.
+	Drawer *Player
 	// CurrentWord represents the word that was last selected. If no word has
 	// been selected yet or the round is already over, this should be empty.
 	CurrentWord string
+	// WordHints for the current word.
+	WordHints []*WordHint
+	// Round is the round that the Lobby is currently in. This is a number
+	// between 0 and Rounds. 0 indicates that it hasn't started yet.
+	Round int
 }
 
 // GetPlayer searches for a player, identifying them by usersssion.
@@ -63,6 +70,8 @@ func (lobby *Lobby) GetPlayer(userSession string) *Player {
 	return nil
 }
 
+// GetLobby returns a Lobby that has a matching ID or no Lobby if none could
+// be found.
 func GetLobby(id string) *Lobby {
 	for _, l := range lobbies {
 		if l.ID == id {

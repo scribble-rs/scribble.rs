@@ -1,0 +1,7 @@
+{{define "word"}}
+    {{range .}}
+        {{if and .Show .Underline}}<span class="guess-letter guess-letter-underline">{{.Character}}</span>
+        {{else if .Underline}}<span class="guess-letter guess-letter-underline">&nbsp;</span>
+        {{else if .Show}}<span class="guess-letter">{{.Character}}</span>{{end}}
+    {{end}}
+{{end}}

@@ -1,12 +1,25 @@
-
-.lobby-header {
+.noscript {
     display: flex;
-    height: 3rem;
-    align-items: center;
+    font-size: 2.5rem;
+    font-weight: bold;
     justify-content: center;
+    border-bottom: 1rem solid black;
+    padding: 10px;
 }
 
-.guess-letter-nonspace {
+#rounds {
+    font-size: 2rem;
+}
+
+#time-left {
+    font-size: 2rem;
+}
+
+#word-container {
+    text-align: center;
+}
+
+.guess-letter-underline {
     text-transform: uppercase;
     border-bottom: 0.3rem black solid;
 }
@@ -22,15 +35,12 @@
 }
 
 .lobby-layout {
-    display: grid;
-    grid-template-columns: fit-content(100%) auto fit-content(100%);
-    grid-template-rows: fit-content(100%) auto;
-    grid-gap: 5px;
     padding: 5px;
-}
 
-iframe {
-    border: 0;
+    display: grid;
+    grid-template-columns: fit-content(100%) auto minmax(min-content, 25%);
+    grid-template-rows: auto auto;
+    grid-gap: 5px;
 }
 
 .drawing-board {
@@ -42,6 +52,35 @@ iframe {
     border: 1px solid black;
     min-width: 15rem;
 
+    height: 50vh;
+    max-height: 50vh;
+
     display: grid;
     grid-template-rows: auto fit-content(100%);
+}
+
+#message-container {
+    padding: 5px;
+    overflow-y: scroll;
+    word-break: break-all;
+}
+
+#word-container {
+    justify-items: center;
+}
+
+.chat-name {
+    font-weight: bold;
+}
+
+.chat-name:after {
+    content: ":";
+}
+
+.message-input-form {
+    display: flex;
+}
+
+#message-input {
+    flex: 1;
 }

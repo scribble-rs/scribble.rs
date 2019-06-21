@@ -8,6 +8,34 @@
     <link rel="stylesheet" type="text/css" href="/resources/lobby.css" />
     <link rel="stylesheet" type="text/css" href="/resources/lobby_players.css" />
     <link rel="icon" type="image/png" href="/resources/favicon.png" />
+</head>
+
+<body>
+    <noscript><span class="noscript">Hey, seems like you've disabled JavaScript.
+            I get it ... but you are trying to play an interactive drawing game
+            here, so you have to turn on JavaScript.</span></noscript>
+    <div class="content-wrapper">
+        <div class="lobby-layout">
+            <span id="rounds">Round {{.Round}} of {{.Rounds}}</span>
+            <div id="word-container">
+                {{template "word" .WordHints}}
+            </div>
+            <span id="time-left">Time Left: ∞</span>
+
+            <div id="player-container">
+                {{template "players" .Players}}
+            </div>
+            <canvas class="drawing-board"></canvas>
+            <div class="chat">
+                <div id="message-container"></div>
+                <form class="message-input-form" onsubmit="return sendMessage()">
+                    <input id="message-input" type="text" placeholder="Type your message" />
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{template "footer"}}
 
     <script>
         function httpGetAsync(theUrl, callback) {
@@ -29,20 +57,45 @@
         }
 
         console.log("Attempting Connection...");
-        let socket = new WebSocket("ws://" + location.hostname + ":8080/ws?id={{.LobbyID}}");
+        const socket = new WebSocket("ws://" + location.hostname + ":8080/ws?id={{.LobbyID}}");
+
+        const messageInput = document.getElementById("message-input");
+        const playerContainer = document.getElementById("player-container");
+        const wordContainer = document.getElementById("word-container");
+        const messageContainer = document.getElementById("message-container");
+        const roundsSpan = document.getElementById("rounds");
+
+        const sendMessage = () => {
+            socket.send(JSON.stringify({ Type: "message", Data: messageInput.value }));
+            messageInput.value = "";
+
+            // Necessary in order to keep the page from submitting.
+            return false;
+        }
 
         socket.onopen = () => {
             console.log("Successfully Connected");
         };
 
         socket.onmessage = event => {
-            if (JSON.parse(event.data).Type === 1) {
-                var playerContainer = document.getElementById("player-container")
-
+            var parsed = JSON.parse(event.data);
+            if (parsed.Type === "update-players") {
                 httpGetAsync("/lobby/players?id={{.LobbyID}}", response => {
-                    console.log(response.responseText)
-                    playerContainer.innerHTML = response.responseText
-                })
+                    playerContainer.innerHTML = response.responseText;
+                });
+            } else if (parsed.Type === "update-wordhint") {
+                httpGetAsync("/lobby/wordhint?id={{.LobbyID}}", response => {
+                    wordContainer.innerHTML = response.responseText;
+                });
+            } else if (parsed.Type === "update-rounds") {
+                httpGetAsync("/lobby/rounds?id={{.LobbyID}}", response => {
+                    roundsSpan.innerText = response.responseText;
+                });
+            } else if (parsed.Type === "message") {
+                messageContainer.innerHTML += `<div class="message">
+                        <span class="chat-name">` + parsed.Data.Author + `</span>
+                        <span class="message-content">` + parsed.Data.Content + `</span>
+                    </div>`;
             }
         };
 
@@ -54,36 +107,6 @@
             console.log("Socket Error: ", error);
         };
     </script>
-</head>
-
-<body>
-    <div class="content-wrapper">
-        <div class="lobby-header">
-            <span class="guess-letter guess-letter-nonspace">W</span>
-            <span class="guess-letter guess-letter-nonspace">O</span>
-            <span class="guess-letter guess-letter-nonspace">R</span>
-            <span class="guess-letter guess-letter-nonspace">L</span>
-            <span class="guess-letter guess-letter-nonspace">D</span>
-            <span class="guess-letter">&nbsp;</span>
-            <span class="guess-letter guess-letter-nonspace">W</span>
-            <span class="guess-letter guess-letter-nonspace">A</span>
-            <span class="guess-letter guess-letter-nonspace">R</span>
-        </div>
-        <div class="lobby-layout">
-            <div id="player-container">
-                {{template "players" .Players}}
-            </div>
-            <canvas class="drawing-board"></canvas>
-            <div class="chat">
-                <div>
-                    Message 1<br />Message 2
-                </div>
-                <input type="message" placeholder="Type your message" />
-            </div>
-        </div>
-    </div>
-
-    {{template "footer"}}
 </body>
 
 </html>

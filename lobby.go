@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
@@ -63,7 +64,7 @@ func init() {
 		panic(err)
 	}
 
-	lobbyPage, err = template.New("").ParseFiles("lobby.html", "lobby_players.html", "footer.html")
+	lobbyPage, err = template.New("").ParseFiles("lobby.html", "lobby_players.html", "lobby_word.html", "footer.html")
 	if err != nil {
 		panic(err)
 	}
@@ -72,6 +73,8 @@ func init() {
 	http.HandleFunc("/lobby", ShowLobby)
 	http.HandleFunc("/lobby/create", CreateLobby)
 	http.HandleFunc("/lobby/players", GetPlayers)
+	http.HandleFunc("/lobby/wordhint", GetWordHint)
+	http.HandleFunc("/lobby/rounds", GetRounds)
 	http.HandleFunc("/ws", wsEndpoint)
 }
 
@@ -119,33 +122,105 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(player.Name + " has connected")
 
 	player.ws = ws
+
+	go func(player *Player, socket *websocket.Conn) {
+		for {
+			messageType, data, err := socket.ReadMessage()
+			if err != nil {
+				fmt.Println(err)
+				return
+			} else if messageType == websocket.TextMessage {
+				received := &JSEvent{}
+				err := json.Unmarshal(data, received)
+				if err != nil {
+					//TODO NO PANICS!
+					panic(err)
+				}
+
+				if received.Type == "message" {
+					dataAsString := (received.Data).(string)
+					if dataAsString[0] == '!' {
+						command := dataAsString[1:]
+						switch command {
+						case "start":
+							//TODO
+						case "1":
+							//TODO
+						case "2":
+							//TODO
+						case "3":
+							//TODO
+						}
+					} else {
+						//TODO Validate message
+						for _, target := range lobby.Players {
+							if target.ws != nil {
+								target.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
+									Author:  player.Name,
+									Content: dataAsString,
+								}})
+							}
+						}
+					}
+				}
+			}
+		}
+	}(player, ws)
 }
 
 // LobbyPageData is the data necessary for initially displaying all data of
 // the lobbies webpage.
 type LobbyPageData struct {
-	Players []*Player
-	LobbyID string
+	Players   []*Player
+	LobbyID   string
+	WordHints []*WordHint
+	Round     int
+	Rounds    int
 }
 
-// GetPlayers returns divs for all players in the lobby to the calling client.
-func GetPlayers(w http.ResponseWriter, r *http.Request) {
+func getLobby(w http.ResponseWriter, r *http.Request) *Lobby {
 	lobbyID := r.URL.Query().Get("id")
 	if lobbyID == "" {
 		errorPage.ExecuteTemplate(w, "error.html", "The entered URL is incorrect.")
-		return
+		return nil
 	}
 
 	lobby := GetLobby(lobbyID)
 
 	if lobby == nil {
 		errorPage.ExecuteTemplate(w, "error.html", "The lobby does not exist.")
-		return
 	}
 
-	templatingError := lobbyPage.ExecuteTemplate(w, "players", lobby.Players)
-	if templatingError != nil {
-		errorPage.ExecuteTemplate(w, "error.html", templatingError.Error())
+	return lobby
+}
+
+// GetPlayers returns divs for all players in the lobby to the calling client.
+func GetPlayers(w http.ResponseWriter, r *http.Request) {
+	lobby := getLobby(w, r)
+	if lobby != nil {
+		templatingError := lobbyPage.ExecuteTemplate(w, "players", lobby.Players)
+		if templatingError != nil {
+			errorPage.ExecuteTemplate(w, "error.html", templatingError.Error())
+		}
+	}
+}
+
+// GetWordHint returns the html structure and data for the current word hint.
+func GetWordHint(w http.ResponseWriter, r *http.Request) {
+	lobby := getLobby(w, r)
+	if lobby != nil {
+		templatingError := lobbyPage.ExecuteTemplate(w, "word", lobby.WordHints)
+		if templatingError != nil {
+			errorPage.ExecuteTemplate(w, "error.html", templatingError.Error())
+		}
+	}
+}
+
+//GetRounds returns the html structure and data for the current round info.
+func GetRounds(w http.ResponseWriter, r *http.Request) {
+	lobby := getLobby(w, r)
+	if lobby != nil {
+		fmt.Fprintf(w, "Round %d of %d", lobby.Round, lobby.Rounds)
 	}
 }
 
@@ -219,69 +294,80 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 
 // JSEvent contains an eventtype and optionally any data.
 type JSEvent struct {
-	Type int
+	Type string
 	Data interface{}
+}
+
+// Message represents a message in the chatroom.
+type Message struct {
+	// Author is the player / thing that wrote the message
+	Author string
+	// Content is the actual message text.
+	Content string
 }
 
 // ShowLobby opens a lobby, either opening it directly or asking for a username
 // and or a lobby password.
 func ShowLobby(w http.ResponseWriter, r *http.Request) {
-	lobbyID := r.URL.Query().Get("id")
-	if lobbyID == "" {
-		errorPage.ExecuteTemplate(w, "error.html", "The entered URL is incorrect.")
-		return
-	}
-
-	lobby := GetLobby(lobbyID)
-
-	if lobby == nil {
-		errorPage.ExecuteTemplate(w, "error.html", "The lobby does not exist.")
-		return
-	}
-
-	sessionCookie, noCookieError := r.Cookie("usersession")
-	var player *Player
-	if noCookieError == nil {
-		player = lobby.GetPlayer(sessionCookie.Value)
-	}
-
-	if player == nil {
-		adjective := strings.Title(petname.Adjective())
-		adverb := strings.Title(petname.Adverb())
-		name := strings.Title(petname.Name())
-		player := createPlayer(adverb + adjective + name)
-
-		//FIXME Make a dedicated method that uses a mutex?
-		lobby.Players = append(lobby.Players, player)
-
-		pageData := &LobbyPageData{
-			Players: lobby.Players,
-			LobbyID: lobby.ID,
+	lobby := getLobby(w, r)
+	if lobby != nil {
+		sessionCookie, noCookieError := r.Cookie("usersession")
+		var player *Player
+		if noCookieError == nil {
+			player = lobby.GetPlayer(sessionCookie.Value)
 		}
 
-		for _, player := range lobby.Players {
-			if player.ws != nil {
-				player.ws.WriteJSON(JSEvent{Type: 1})
+		if player == nil {
+			adjective := strings.Title(petname.Adjective())
+			adverb := strings.Title(petname.Adverb())
+			name := strings.Title(petname.Name())
+			player := createPlayer(adverb + adjective + name)
+
+			//FIXME Make a dedicated method that uses a mutex?
+			lobby.Players = append(lobby.Players, player)
+
+			pageData := &LobbyPageData{
+				Players: lobby.Players,
+				LobbyID: lobby.ID,
+				Round:   lobby.Round,
+				Rounds:  lobby.Rounds,
 			}
+
+			for _, player := range lobby.Players {
+				if player.ws != nil {
+					player.ws.WriteJSON(JSEvent{Type: "update-players"})
+				}
+			}
+
+			// Use the players generated usersession and pass it as a cookie.
+			http.SetCookie(w, &http.Cookie{
+				Name:     "usersession",
+				Value:    player.UserSession,
+				Path:     "/",
+				SameSite: http.SameSiteStrictMode,
+			})
+
+			lobbyPage.ExecuteTemplate(w, "lobby.html", pageData)
+		} else {
+			pageData := &LobbyPageData{
+				Players: lobby.Players,
+				LobbyID: lobby.ID,
+				Round:   lobby.Round,
+				Rounds:  lobby.Rounds,
+			}
+
+			lobbyPage.ExecuteTemplate(w, "lobby.html", pageData)
 		}
-
-		// Use the players generated usersession and pass it as a cookie.
-		http.SetCookie(w, &http.Cookie{
-			Name:     "usersession",
-			Value:    player.UserSession,
-			Path:     "/",
-			SameSite: http.SameSiteStrictMode,
-		})
-
-		lobbyPage.ExecuteTemplate(w, "lobby.html", pageData)
-	} else {
-		pageData := &LobbyPageData{
-			Players: lobby.Players,
-			LobbyID: lobby.ID,
-		}
-
-		lobbyPage.ExecuteTemplate(w, "lobby.html", pageData)
 	}
+}
+
+// WordHint describes a character of the word that is to be guessed, whether
+// the character should be shown and whether it should be underlined on the
+// UI.
+type WordHint struct {
+	Character string
+	Show      bool
+	Underline bool
 }
 
 func parsePlayerName(value string) (string, error) {

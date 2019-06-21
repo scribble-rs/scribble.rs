@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"html/template"
 	"log"
+	"math/rand"
 	"net/http"
+	"time"
 )
 
 var (
@@ -16,6 +18,9 @@ func main() {
 	portHTTP := flag.Int("portHTTP", 8080, "defines the port to be used for http mode")
 
 	flag.Parse()
+
+	//Setting the seed in order for the petnames to be random.
+	rand.Seed(time.Now().UnixNano())
 
 	var parseError error
 	errorPage, parseError = template.New("").ParseFiles("error.html", "footer.html")
