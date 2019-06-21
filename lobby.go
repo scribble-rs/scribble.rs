@@ -324,6 +324,8 @@ func ShowLobby(w http.ResponseWriter, r *http.Request) {
 			player = lobby.GetPlayer(sessionCookie.Value)
 		}
 
+		fmt.Printf("Useragent of %s: %s", r.Host, r.UserAgent())
+
 		if player == nil {
 			if len(lobby.Players) >= lobby.MaxPlayers {
 				errorPage.ExecuteTemplate(w, "error.html", "Sorry, but the lobby is full.")
