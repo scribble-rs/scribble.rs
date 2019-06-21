@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -152,12 +153,17 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 							//TODO
 						}
 					} else {
-						//TODO Validate message
+						trimmed := strings.TrimSpace(dataAsString)
+						if trimmed == "" {
+							return
+						}
+
+						escaped := html.EscapeString(trimmed)
 						for _, target := range lobby.Players {
 							if target.ws != nil {
 								target.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
 									Author:  player.Name,
-									Content: dataAsString,
+									Content: escaped,
 								}})
 							}
 						}
