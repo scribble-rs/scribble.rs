@@ -25,7 +25,7 @@
             <div id="player-container">
                 {{template "players" .Players}}
             </div>
-            <canvas class="drawing-board"></canvas>
+            <canvas id="drawing-board" width="1100" height="600"></canvas>
             <div class="chat">
                 <div id="message-container"></div>
                 <form class="message-input-form" onsubmit="return sendMessage()">
@@ -64,6 +64,9 @@
         const wordContainer = document.getElementById("word-container");
         const messageContainer = document.getElementById("message-container");
         const roundsSpan = document.getElementById("rounds");
+        const drawingBoard = document.getElementById("drawing-board")
+        const context = drawingBoard.getContext('2d');
+        var allowDrawing = false
 
         const sendMessage = () => {
             socket.send(JSON.stringify({ Type: "message", Data: messageInput.value }));
@@ -98,9 +101,16 @@
                     </div>`;
             } else if (parsed.Type === "persist-username") {
                 //TODO GMT date for consistency?
-                document.cookie = "username="+parsed.Data+";expires=Tue, 19 Jan 2038 03:14:07 UTC;path=/;samesite=strict";
+                document.cookie = "username=" + parsed.Data + ";expires=Tue, 19 Jan 2038 03:14:07 UTC;path=/;samesite=strict";
             } else if (parsed.Type === "reset-username") {
                 document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+            } else if (parsed.Type === "pixel") {
+                drawLine(context, parsed.Data.FromX, parsed.Data.FromY, parsed.Data.ToX, parsed.Data.ToY, parsed.Data.Color, parsed.Data.LineWidth);
+            } else if (parsed.Type === "clear-drawing-board") {
+                context.clearRect(0, 0, drawingBoard.width, drawingBoard.height);
+                allowDrawing = false;
+            } else if (parsed.Type === "your-turn") {
+                allowDrawing = true;
             }
         };
 
@@ -111,6 +121,62 @@
         socket.onerror = error => {
             console.log("Socket Error: ", error);
         };
+
+        var isDrawing = false;
+        var x = 0;
+        var y = 0;
+
+        const rect = drawingBoard.getBoundingClientRect();
+
+        drawingBoard.onmousedown = function (e) {
+            if (allowDrawing) {
+                x = e.clientX - rect.left;
+                y = e.clientY - rect.top;
+                isDrawing = true;
+            }
+        };
+
+        drawingBoard.onmousemove = function (e) {
+            if (allowDrawing && isDrawing === true) {
+                drawLineAndSendEvent(context, x, y, e.clientX - rect.left, e.clientY - rect.top);
+                x = e.clientX - rect.left;
+                y = e.clientY - rect.top;
+            }
+        };
+
+        drawingBoard.onmouseup = function (e) {
+            if (allowDrawing && isDrawing === true) {
+                drawLineAndSendEvent(context, x, y, e.clientX - rect.left, e.clientY - rect.top, "black", 1);
+                x = 0;
+                y = 0;
+                isDrawing = false;
+            }
+        };
+
+        function drawLine(context, x1, y1, x2, y2, color, lineWidth) {
+            context.beginPath();
+            context.strokeStyle = color;
+            context.lineWidth = lineWidth;
+            context.moveTo(x1, y1);
+            context.lineTo(x2, y2);
+            context.stroke();
+            context.closePath();
+        }
+
+        function drawLineAndSendEvent(context, x1, y1, x2, y2, color, lineWidth) {
+            drawLine(context, x1, y1, x2, y2, color, lineWidth)
+            socket.send(JSON.stringify({
+                Type: "pixel", Data: {
+                    FromX: x1,
+                    FromY: y1,
+                    ToX: x2,
+                    ToY: y2,
+                    Color: "black",
+                    LineWidth: 1,
+                }
+            }));
+
+        }
     </script>
 </body>
 

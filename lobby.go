@@ -157,6 +157,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 						lobby.WordChoice = nil
 						lobby.WordHints = createWordHintFor(lobby.CurrentWord)
 						triggerWordHintUpdate(lobby)
+						lobby.Drawer.ws.WriteJSON(JSEvent{Type: "your-turn"})
 					case "help":
 						//TODO
 					case "nick", "name", "username", "nickname", "playername", "alias":
@@ -190,6 +191,10 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 							//TODO Change score based on some factors
 							player.Score += 100
 							player.State = Standby
+							player.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
+								Author:  "System",
+								Content: "You have correctly guessed the word.",
+							}})
 
 							var someoneStillGuesses bool
 							for _, otherPlayer := range lobby.Players {
@@ -200,6 +205,13 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 							}
 
 							if !someoneStillGuesses {
+								for _, otherPlayer := range lobby.Players {
+									otherPlayer.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
+										Author:  "System",
+										Content: "Round over.",
+									}})
+								}
+
 								advanceLobby(lobby)
 							}
 
@@ -216,6 +228,14 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 								Author:  player.Name,
 								Content: escaped,
 							}})
+						}
+					}
+				}
+			} else if received.Type == "pixel" {
+				if lobby.Drawer == player {
+					for _, otherPlayer := range lobby.Players {
+						if otherPlayer != player {
+							otherPlayer.ws.WriteMessage(websocket.TextMessage, data)
 						}
 					}
 				}
@@ -273,6 +293,7 @@ func advanceLobby(lobby *Lobby) {
 		a.Rank = playersThatAreHigher + 1
 	}
 
+	triggerClearingDrawingBoards(lobby)
 	triggerPlayersUpdate(lobby)
 	triggerRoundsUpdate(lobby)
 	triggerWordHintUpdate(lobby)
@@ -290,6 +311,10 @@ func createWordHintFor(word string) []*WordHint {
 	}
 
 	return wordHints
+}
+
+func triggerClearingDrawingBoards(lobby *Lobby) {
+	triggerSimpleUpdateEvent("clear-drawing-board", lobby)
 }
 
 func triggerPlayersUpdate(lobby *Lobby) {
