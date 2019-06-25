@@ -76,6 +76,10 @@
             return false;
         }
 
+        new MutationObserver(
+            () => { messageContainer.scrollTop = messageContainer.scrollHeight; }
+        ).observe(messageContainer, { attributes: false, childList: true, subtree: false });
+
         socket.onopen = () => {
             console.log("Successfully Connected");
         };
