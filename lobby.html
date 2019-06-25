@@ -134,23 +134,23 @@
 
         drawingBoard.onmousedown = function (e) {
             if (allowDrawing) {JSON.stringify({ Type: "message", Data: messageInput.value })
-                x = e.clientX - rect.left;
-                y = e.clientY - rect.top;
+                x = e.layerX - rect.left;
+                y = e.layerY - rect.top;
                 isDrawing = true;
             }
         };
 
         drawingBoard.onmousemove = function (e) {
             if (allowDrawing && isDrawing === true) {
-                drawLineAndSendEvent(context, x, y, e.clientX - rect.left, e.clientY - rect.top);
-                x = e.clientX - rect.left;
-                y = e.clientY - rect.top;
+                drawLineAndSendEvent(context, x, y, e.layerX - rect.left, e.layerY - rect.top, "black", 1);
+                x = e.layerX - rect.left;
+                y = e.layerY - rect.top;
             }
         };
 
         drawingBoard.onmouseup = function (e) {
             if (allowDrawing && isDrawing === true) {
-                drawLineAndSendEvent(context, x, y, e.clientX - rect.left, e.clientY - rect.top, "black", 1);
+                drawLineAndSendEvent(context, x, y, e.layerX - rect.left, e.layerY - rect.top, "black", 1);
                 x = 0;
                 y = 0;
                 isDrawing = false;
