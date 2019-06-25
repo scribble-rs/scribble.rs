@@ -12,17 +12,28 @@ var (
 	lobbies           = []*Lobby{}
 )
 
-// Player represents a participant in a lobby.
+// Player represents a participant in a Lobby.
 type Player struct {
-	// Name is the players displayed name
-	Name string
 	// UserSession uniquely identifies the player.
 	UserSession string
-	// Score is the points that the player got in the current lobby.
+	ws          *websocket.Conn
+
+	// Name is the players displayed name
+	Name string
+	// Score is the points that the player got in the current Lobby.
 	Score int
+	// Rank is the current ranking of the player in his Lobby
 	Rank  int
-	ws    *websocket.Conn
+	State PlayerState
 }
+
+type PlayerState int
+
+const (
+	Guessing PlayerState = 0
+	Drawing  PlayerState = 1
+	Standby  PlayerState = 2
+)
 
 // Lobby represents a game session.
 type Lobby struct {
@@ -57,6 +68,8 @@ type Lobby struct {
 	// Round is the round that the Lobby is currently in. This is a number
 	// between 0 and Rounds. 0 indicates that it hasn't started yet.
 	Round int
+	// WordChoice represents the current choice of words.
+	WordChoice []string
 }
 
 // GetPlayer searches for a player, identifying them by usersssion.

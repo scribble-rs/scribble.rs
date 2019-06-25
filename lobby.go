@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	commands "github.com/Bios-Marcel/cmdp"
 	petname "github.com/dustinkirkland/golang-petname"
 	"github.com/gorilla/websocket"
 )
@@ -124,54 +125,191 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 
 	player.ws = ws
 
-	go func(player *Player, socket *websocket.Conn) {
-		for {
-			messageType, data, err := socket.ReadMessage()
-			if err != nil {
-				fmt.Println(err)
-				return
-			} else if messageType == websocket.TextMessage {
-				received := &JSEvent{}
-				err := json.Unmarshal(data, received)
-				if err != nil {
-					//TODO NO PANICS!
-					panic(err)
-				}
+	go wsListen(lobby, player, ws)
+}
 
-				if received.Type == "message" {
-					dataAsString := (received.Data).(string)
-					if dataAsString[0] == '!' {
-						command := dataAsString[1:]
-						switch command {
-						case "start":
-							//TODO
-						case "1":
-							//TODO
-						case "2":
-							//TODO
-						case "3":
-							//TODO
+func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
+	for {
+		messageType, data, err := socket.ReadMessage()
+		if err != nil {
+			fmt.Println(err)
+			return
+		} else if messageType == websocket.TextMessage {
+			received := &JSEvent{}
+			err := json.Unmarshal(data, received)
+			if err != nil {
+				//TODO NO PANICS!
+				panic(err)
+			}
+
+			if received.Type == "message" {
+				dataAsString := (received.Data).(string)
+				if strings.HasPrefix(dataAsString, "!") {
+					command := commands.ParseCommand(dataAsString[1:])
+					switch strings.ToLower(command[0]) {
+					case "start":
+						if lobby.Round == 0 {
+							advanceLobby(lobby)
 						}
-					} else {
-						trimmed := strings.TrimSpace(dataAsString)
-						if trimmed == "" {
+					case "1", "2", "3":
+						choice, _ := strconv.ParseInt(command[0], 10, 8)
+						lobby.CurrentWord = lobby.WordChoice[choice-1]
+						lobby.WordChoice = nil
+						lobby.WordHints = createWordHintFor(lobby.CurrentWord)
+						triggerWordHintUpdate(lobby)
+					case "help":
+						//TODO
+					case "nick", "name", "username", "nickname", "playername", "alias":
+						if len(command) == 1 {
+							player.Name = generatePlayerName()
+							player.ws.WriteJSON(JSEvent{Type: "reset-username"})
+							triggerPlayersUpdate(lobby)
+						} else if len(command) == 2 {
+							newName := strings.TrimSpace(command[1])
+							if len(newName) == 0 {
+								player.Name = generatePlayerName()
+								player.ws.WriteJSON(JSEvent{Type: "reset-username"})
+								triggerPlayersUpdate(lobby)
+							} else if len(newName) <= 30 {
+								fmt.Printf("%s is now %s\n", player.Name, newName)
+								player.Name = newName
+								player.ws.WriteJSON(JSEvent{Type: "persist-username", Data: player.Name})
+								triggerPlayersUpdate(lobby)
+							}
+						}
+						//TODO Else, show error
+					}
+				} else {
+					trimmed := strings.TrimSpace(dataAsString)
+					if trimmed == "" {
+						continue
+					}
+
+					if player.State == Guessing && lobby.CurrentWord != "" {
+						if strings.ToLower(lobby.CurrentWord) == strings.ToLower(trimmed) {
+							//TODO Change score based on some factors
+							player.Score += 100
+							player.State = Standby
+
+							var someoneStillGuesses bool
+							for _, otherPlayer := range lobby.Players {
+								if otherPlayer.State == Guessing {
+									someoneStillGuesses = true
+									break
+								}
+							}
+
+							if !someoneStillGuesses {
+								advanceLobby(lobby)
+							}
+
 							continue
 						}
+					}
 
-						escaped := html.EscapeString(trimmed)
-						for _, target := range lobby.Players {
-							if target.ws != nil {
-								target.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
-									Author:  player.Name,
-									Content: escaped,
-								}})
-							}
+					//TODO Make sure only certain people see certain messages.
+
+					escaped := html.EscapeString(trimmed)
+					for _, target := range lobby.Players {
+						if target.ws != nil {
+							target.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
+								Author:  player.Name,
+								Content: escaped,
+							}})
 						}
 					}
 				}
 			}
 		}
-	}(player, ws)
+	}
+}
+
+func advanceLobby(lobby *Lobby) {
+	for _, otherPlayer := range lobby.Players {
+		otherPlayer.State = Guessing
+	}
+
+	//TODO Recalculate and update ranks
+	//TODO Anything else here?
+
+	if lobby.Drawer == nil {
+		lobby.Drawer = lobby.Players[0]
+		lobby.Round++
+	} else {
+		if lobby.Drawer == lobby.Players[len(lobby.Players)-1] {
+			if lobby.Round == lobby.Rounds {
+				//TODO game over
+				return
+			}
+
+			lobby.Round++
+			lobby.Drawer = lobby.Players[0]
+		} else {
+			for playerIndex, otherPlayer := range lobby.Players {
+				if otherPlayer == lobby.Drawer {
+					lobby.Drawer = lobby.Players[playerIndex+1]
+
+					break
+				}
+			}
+		}
+	}
+
+	lobby.Drawer.State = Drawing
+	lobby.WordChoice = GetRandomWords()
+	lobby.Drawer.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
+		Author:  "System",
+		Content: fmt.Sprintf("Your turn! Choose word:<br/>!1: %s<br/>!2: %s<br/>!3: %s", lobby.WordChoice[0], lobby.WordChoice[1], lobby.WordChoice[2]),
+	}})
+
+	for _, a := range lobby.Players {
+		playersThatAreHigher := 0
+		for _, b := range lobby.Players {
+			if b.Score > a.Score {
+				playersThatAreHigher++
+			}
+		}
+
+		a.Rank = playersThatAreHigher + 1
+	}
+
+	triggerPlayersUpdate(lobby)
+	triggerRoundsUpdate(lobby)
+	triggerWordHintUpdate(lobby)
+}
+
+func createWordHintFor(word string) []*WordHint {
+	wordHints := make([]*WordHint, 0, len(word))
+	for _, char := range word {
+		irrelevantChar := char == ' ' || char == '_' || char == '-'
+		wordHints = append(wordHints, &WordHint{
+			Character: string(char),
+			Show:      irrelevantChar,
+			Underline: !irrelevantChar,
+		})
+	}
+
+	return wordHints
+}
+
+func triggerPlayersUpdate(lobby *Lobby) {
+	triggerSimpleUpdateEvent("update-players", lobby)
+}
+
+func triggerWordHintUpdate(lobby *Lobby) {
+	triggerSimpleUpdateEvent("update-wordhint", lobby)
+}
+
+func triggerRoundsUpdate(lobby *Lobby) {
+	triggerSimpleUpdateEvent("update-rounds", lobby)
+}
+
+func triggerSimpleUpdateEvent(event string, lobby *Lobby) {
+	for _, otherPlayer := range lobby.Players {
+		if otherPlayer.ws != nil {
+			otherPlayer.ws.WriteJSON(JSEvent{Type: event})
+		}
+	}
 }
 
 // LobbyPageData is the data necessary for initially displaying all data of
@@ -279,10 +417,15 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 	} else {
 		lobby := createLobby(password, drawingTime, rounds, maxPlayers, customWords)
 
-		adjective := strings.Title(petname.Adjective())
-		adverb := strings.Title(petname.Adverb())
-		name := strings.Title(petname.Name())
-		player := createPlayer(adverb + adjective + name)
+		var playerName string
+		usernameCookie, noCookieError := r.Cookie("username")
+		if noCookieError == nil {
+			playerName = usernameCookie.Value
+		} else {
+			playerName = generatePlayerName()
+		}
+
+		player := createPlayer(playerName)
 
 		//FIXME Make a dedicated method that uses a mutex?
 		lobby.Players = append(lobby.Players, player)
@@ -297,6 +440,13 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 
 		http.Redirect(w, r, "/lobby?id="+lobby.ID, http.StatusFound)
 	}
+}
+
+func generatePlayerName() string {
+	adjective := strings.Title(petname.Adjective())
+	adverb := strings.Title(petname.Adverb())
+	name := strings.Title(petname.Name())
+	return adverb + adjective + name
 }
 
 // JSEvent contains an eventtype and optionally any data.
@@ -337,10 +487,15 @@ func ShowLobby(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			adjective := strings.Title(petname.Adjective())
-			adverb := strings.Title(petname.Adverb())
-			name := strings.Title(petname.Name())
-			player := createPlayer(adverb + adjective + name)
+			var playerName string
+			usernameCookie, noCookieError := r.Cookie("username")
+			if noCookieError == nil {
+				playerName = usernameCookie.Value
+			} else {
+				playerName = generatePlayerName()
+			}
+
+			player := createPlayer(playerName)
 
 			//FIXME Make a dedicated method that uses a mutex?
 			lobby.Players = append(lobby.Players, player)
