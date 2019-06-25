@@ -156,6 +156,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 						lobby.CurrentWord = lobby.WordChoice[choice-1]
 						lobby.WordChoice = nil
 						lobby.WordHints = createWordHintFor(lobby.CurrentWord)
+						lobby.WordHintsShown = showAllInWordHints(lobby.WordHints)
 						triggerWordHintUpdate(lobby)
 						lobby.Drawer.ws.WriteJSON(JSEvent{Type: "your-turn"})
 					case "help":
@@ -213,6 +214,9 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 								}
 
 								advanceLobby(lobby)
+							} else {
+								player.ws.WriteJSON(JSEvent{Type: "update-wordhint"})
+								triggerPlayersUpdate(lobby)
 							}
 
 							continue
@@ -277,6 +281,8 @@ func advanceLobby(lobby *Lobby) {
 
 	lobby.Drawer.State = Drawing
 	lobby.WordChoice = GetRandomWords()
+	lobby.WordHints = nil
+	lobby.WordHintsShown = nil
 	lobby.Drawer.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
 		Author:  "System",
 		Content: fmt.Sprintf("Your turn! Choose word:<br/>!1: %s<br/>!2: %s<br/>!3: %s", lobby.WordChoice[0], lobby.WordChoice[1], lobby.WordChoice[2]),
@@ -311,6 +317,19 @@ func createWordHintFor(word string) []*WordHint {
 	}
 
 	return wordHints
+}
+
+func showAllInWordHints(hints []*WordHint) []*WordHint {
+	newHints := make([]*WordHint, len(hints), len(hints))
+	for index, hint := range hints {
+		newHints[index] = &WordHint{
+			Character: hint.Character,
+			Show:      true,
+			Underline: hint.Underline,
+		}
+	}
+
+	return newHints
 }
 
 func triggerClearingDrawingBoards(lobby *Lobby) {
@@ -379,9 +398,20 @@ func GetPlayers(w http.ResponseWriter, r *http.Request) {
 func GetWordHint(w http.ResponseWriter, r *http.Request) {
 	lobby := getLobby(w, r)
 	if lobby != nil {
-		templatingError := lobbyPage.ExecuteTemplate(w, "word", lobby.WordHints)
-		if templatingError != nil {
-			errorPage.ExecuteTemplate(w, "error.html", templatingError.Error())
+		sessionCookie, noCookieError := r.Cookie("usersession")
+		if noCookieError == nil {
+			player := lobby.GetPlayer(sessionCookie.Value)
+			var wordHints []*WordHint
+			if player.State == Drawing || player.State == Standby {
+				wordHints = lobby.WordHintsShown
+			} else {
+				wordHints = lobby.WordHints
+			}
+
+			templatingError := lobbyPage.ExecuteTemplate(w, "word", wordHints)
+			if templatingError != nil {
+				errorPage.ExecuteTemplate(w, "error.html", templatingError.Error())
+			}
 		}
 	}
 }

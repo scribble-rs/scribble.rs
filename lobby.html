@@ -133,7 +133,7 @@
         const rect = drawingBoard.getBoundingClientRect();
 
         drawingBoard.onmousedown = function (e) {
-            if (allowDrawing) {
+            if (allowDrawing) {JSON.stringify({ Type: "message", Data: messageInput.value })
                 x = e.clientX - rect.left;
                 y = e.clientY - rect.top;
                 isDrawing = true;

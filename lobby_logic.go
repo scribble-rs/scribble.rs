@@ -65,6 +65,8 @@ type Lobby struct {
 	CurrentWord string
 	// WordHints for the current word.
 	WordHints []*WordHint
+	// WordHintsShown are the same as WordHints with characters visible.
+	WordHintsShown []*WordHint
 	// Round is the round that the Lobby is currently in. This is a number
 	// between 0 and Rounds. 0 indicates that it hasn't started yet.
 	Round int
