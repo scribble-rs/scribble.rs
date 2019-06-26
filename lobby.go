@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	commands "github.com/Bios-Marcel/cmdp"
+	"github.com/Bios-Marcel/discordemojimap"
 	petname "github.com/dustinkirkland/golang-petname"
 	"github.com/gorilla/websocket"
 )
@@ -226,7 +227,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 
 					//TODO Make sure only certain people see certain messages.
 
-					escaped := html.EscapeString(trimmed)
+					escaped := html.EscapeString(discordemojimap.Replace(trimmed))
 					for _, target := range lobby.Players {
 						if target.ws != nil {
 							target.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
