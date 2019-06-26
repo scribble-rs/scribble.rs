@@ -3,8 +3,10 @@
     <div class="player">
         <span class="rank">{{.Rank}}</span>
         <span class="playername">{{.Name}}</span>
-        <span class="playerscore">{{.Score}}</span>
-        <span>{{.Icon}}</span>
+        <div class="score-and-status">
+            <span class="playerscore">{{.Score}}</span>
+            <span>{{.Icon}}</span>
+        </div>
     </div>
     {{end}}
 {{end}}

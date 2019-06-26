@@ -7,7 +7,7 @@
     padding: 0.2rem;
     border: 1px solid black;
     display: grid;
-    grid-template-columns: fit-content(100%) fit-content(100%) auto;
+    grid-template-columns: fit-content(100%) auto;
     grid-template-rows: 1fr 1fr;
 }
 
@@ -25,12 +25,19 @@
     font-size: 1.5rem;
 }
 
+.score-and-status {
+    display: flex;
+    flex-direction: row;
+}
+
+.playerscore {
+    flex: 1;
+}
+
 .playername {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-    grid-column-start: 2;
-    grid-column-end: 4;
 }
 
 .playername, .playerscore {
