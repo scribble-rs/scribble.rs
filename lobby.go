@@ -138,8 +138,9 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 			received := &JSEvent{}
 			err := json.Unmarshal(data, received)
 			if err != nil {
-				//TODO NO PANICS!
-				panic(err)
+				socket.Close()
+				fmt.Println(err)
+				return
 			}
 
 			if received.Type == "message" {
@@ -281,8 +282,6 @@ func advanceLobby(lobby *Lobby) {
 
 	lobby.Drawer.State = Drawing
 	lobby.WordChoice = GetRandomWords()
-	lobby.WordHints = nil
-	lobby.WordHintsShown = nil
 	lobby.Drawer.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
 		Author:  "System",
 		Content: fmt.Sprintf("Your turn! Choose word:<br/>!1: %s<br/>!2: %s<br/>!3: %s", lobby.WordChoice[0], lobby.WordChoice[1], lobby.WordChoice[2]),
