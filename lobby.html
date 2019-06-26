@@ -170,17 +170,17 @@
 
         drawingBoard.onmousedown = function (e) {
             if (allowDrawing) {
-                x = e.layerX - rect.left;
-                y = e.layerY - rect.top;
+                x = e.pageX - rect.left;
+                y = e.pageY - rect.top;
                 isDrawing = true;
             }
         };
 
         drawingBoard.onmousemove = function (e) {
             if (allowDrawing && isDrawing === true) {
-                drawLineAndSendEvent(context, x, y, e.layerX - rect.left, e.layerY - rect.top, localColor, localLineWidth);
-                x = e.layerX - rect.left;
-                y = e.layerY - rect.top;
+                drawLineAndSendEvent(context, x, y, e.pageX - rect.left, e.pageY - rect.top, localColor, localLineWidth);
+                x = e.pageX - rect.left;
+                y = e.pageY - rect.top;
             }
         };
 
@@ -194,8 +194,8 @@
 
         drawingBoard.onclick = function (e) {
             if (allowDrawing) {
-                x = e.layerX - rect.left
-                y = e.layerY - rect.top
+                x = e.pageX - rect.left
+                y = e.pageY - rect.top
                 drawLineAndSendEvent(context, x - 1, y - 1, x, y, localColor, localLineWidth)
                 x = 0
                 y = 0
