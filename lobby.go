@@ -218,6 +218,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 							player.Score += playerScore
 							lobby.scoreEarnedByGuessers += playerScore
 							player.State = Standby
+							player.Icon = "✔️"
 							if player.State != Disconnected && player.ws != nil {
 								player.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
 									Author:  "System",
@@ -315,6 +316,7 @@ func advanceLobby(lobby *Lobby) {
 
 	for _, otherPlayer := range lobby.Players {
 		otherPlayer.State = Guessing
+		otherPlayer.Icon = ""
 	}
 
 	if lobby.Drawer == nil {
@@ -346,6 +348,7 @@ func advanceLobby(lobby *Lobby) {
 	}
 
 	lobby.Drawer.State = Drawing
+	lobby.Drawer.Icon = "✏️"
 	lobby.WordChoice = GetRandomWords()
 	if lobby.Drawer.State != Disconnected {
 		lobby.Drawer.ws.WriteJSON(JSEvent{Type: "message", Data: Message{

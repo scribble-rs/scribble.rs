@@ -26,6 +26,7 @@ type Player struct {
 	// Rank is the current ranking of the player in his Lobby
 	Rank  int
 	State PlayerState
+	Icon  string
 }
 
 type PlayerState int
