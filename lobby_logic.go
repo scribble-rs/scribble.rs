@@ -31,9 +31,10 @@ type Player struct {
 type PlayerState int
 
 const (
-	Guessing PlayerState = 0
-	Drawing  PlayerState = 1
-	Standby  PlayerState = 2
+	Guessing     PlayerState = 0
+	Drawing      PlayerState = 1
+	Standby      PlayerState = 2
+	Disconnected PlayerState = 3
 )
 
 // Lobby represents a game session.

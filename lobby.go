@@ -128,6 +128,12 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(player.Name + " has connected")
 
 	player.ws = ws
+	player.State = Guessing
+	ws.SetCloseHandler(func(code int, text string) error {
+		player.State = Disconnected
+		player.ws = nil
+		return nil
+	})
 
 	go wsListen(lobby, player, ws)
 }
@@ -165,25 +171,33 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 								lobby.WordHints = createWordHintFor(lobby.CurrentWord)
 								lobby.WordHintsShown = showAllInWordHints(lobby.WordHints)
 								triggerWordHintUpdate(lobby)
-								lobby.Drawer.ws.WriteJSON(JSEvent{Type: "your-turn"})
+								if lobby.Drawer.State != Disconnected && lobby.Drawer.ws != nil {
+									lobby.Drawer.ws.WriteJSON(JSEvent{Type: "your-turn"})
+								}
 							}
 						case "help":
 							//TODO
 						case "nick", "name", "username", "nickname", "playername", "alias":
 							if len(command) == 1 {
 								player.Name = generatePlayerName()
-								player.ws.WriteJSON(JSEvent{Type: "reset-username"})
+								if player.State != Disconnected && player.ws != nil {
+									player.ws.WriteJSON(JSEvent{Type: "reset-username"})
+								}
 								triggerPlayersUpdate(lobby)
 							} else if len(command) == 2 {
 								newName := strings.TrimSpace(command[1])
 								if len(newName) == 0 {
 									player.Name = generatePlayerName()
-									player.ws.WriteJSON(JSEvent{Type: "reset-username"})
+									if player.State != Disconnected && player.ws != nil {
+										player.ws.WriteJSON(JSEvent{Type: "reset-username"})
+									}
 									triggerPlayersUpdate(lobby)
 								} else if len(newName) <= 30 {
 									fmt.Printf("%s is now %s\n", player.Name, newName)
 									player.Name = newName
-									player.ws.WriteJSON(JSEvent{Type: "persist-username", Data: player.Name})
+									if player.State != Disconnected && player.ws != nil {
+										player.ws.WriteJSON(JSEvent{Type: "persist-username", Data: player.Name})
+									}
 									triggerPlayersUpdate(lobby)
 								}
 							}
@@ -204,10 +218,12 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 							player.Score += playerScore
 							lobby.scoreEarnedByGuessers += playerScore
 							player.State = Standby
-							player.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
-								Author:  "System",
-								Content: "You have correctly guessed the word.",
-							}})
+							if player.State != Disconnected && player.ws != nil {
+								player.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
+									Author:  "System",
+									Content: "You have correctly guessed the word.",
+								}})
+							}
 
 							var someoneStillGuesses bool
 							for _, otherPlayer := range lobby.Players {
@@ -220,12 +236,14 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 							if !someoneStillGuesses {
 								endRound(lobby)
 							} else {
-								player.ws.WriteJSON(JSEvent{Type: "update-wordhint"})
+								if player.State != Disconnected && player.ws != nil {
+									player.ws.WriteJSON(JSEvent{Type: "update-wordhint"})
+								}
 								triggerPlayersUpdate(lobby)
 							}
 
 							continue
-						} else if levenshtein.ComputeDistance(lowerCasedInput, lowerCasedSearched) == 1 {
+						} else if levenshtein.ComputeDistance(lowerCasedInput, lowerCasedSearched) == 1 && player.State != Disconnected && player.ws != nil {
 							player.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
 								Author:  "System",
 								Content: fmt.Sprintf("'%s' is very close.", trimmed),
@@ -238,7 +256,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 
 					escaped := html.EscapeString(discordemojimap.Replace(trimmed))
 					for _, target := range lobby.Players {
-						if target.ws != nil {
+						if target.State != Disconnected && target.ws != nil {
 							target.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
 								Author:  player.Name,
 								Content: escaped,
@@ -249,7 +267,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 			} else if received.Type == "pixel" {
 				if lobby.Drawer == player {
 					for _, otherPlayer := range lobby.Players {
-						if otherPlayer != player && otherPlayer.ws != nil {
+						if otherPlayer != player && otherPlayer.State != Disconnected && otherPlayer.ws != nil {
 							otherPlayer.ws.WriteMessage(websocket.TextMessage, data)
 						}
 					}
@@ -257,7 +275,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 			} else if received.Type == "clear-drawing-board" {
 				if lobby.Drawer == player {
 					for _, otherPlayer := range lobby.Players {
-						if otherPlayer.ws != nil {
+						if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
 							otherPlayer.ws.WriteMessage(websocket.TextMessage, data)
 						}
 					}
@@ -278,7 +296,7 @@ func endRound(lobby *Lobby) {
 	lobby.scoreEarnedByGuessers = 0
 
 	for _, otherPlayer := range lobby.Players {
-		if otherPlayer.ws != nil {
+		if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
 			otherPlayer.ws.WriteJSON(overEvent)
 		}
 	}
@@ -312,7 +330,7 @@ func advanceLobby(lobby *Lobby) {
 					Content: "Game over. Type !start again to start a new round.",
 				}}
 				for _, otherPlayer := range lobby.Players {
-					if otherPlayer.ws != nil {
+					if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
 						otherPlayer.ws.WriteJSON(gameOverEvent)
 					}
 				}
@@ -323,22 +341,18 @@ func advanceLobby(lobby *Lobby) {
 			lobby.Round++
 			lobby.Drawer = lobby.Players[0]
 		} else {
-			for playerIndex, otherPlayer := range lobby.Players {
-				if otherPlayer == lobby.Drawer {
-					lobby.Drawer = lobby.Players[playerIndex+1]
-
-					break
-				}
-			}
+			selectNextDrawer(lobby)
 		}
 	}
 
 	lobby.Drawer.State = Drawing
 	lobby.WordChoice = GetRandomWords()
-	lobby.Drawer.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
-		Author:  "System",
-		Content: fmt.Sprintf("Your turn! Choose word:<br/>!1: %s<br/>!2: %s<br/>!3: %s", lobby.WordChoice[0], lobby.WordChoice[1], lobby.WordChoice[2]),
-	}})
+	if lobby.Drawer.State != Disconnected {
+		lobby.Drawer.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
+			Author:  "System",
+			Content: fmt.Sprintf("Your turn! Choose word:<br/>!1: %s<br/>!2: %s<br/>!3: %s", lobby.WordChoice[0], lobby.WordChoice[1], lobby.WordChoice[2]),
+		}})
+	}
 
 	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
 	go func() {
@@ -346,7 +360,6 @@ func advanceLobby(lobby *Lobby) {
 			select {
 			case <-lobby.timeLeftTicker.C:
 				lobby.TimeLeft--
-				fmt.Println(lobby.TimeLeft)
 				triggerTimeLeftUpdate(lobby)
 				if lobby.TimeLeft == 0 {
 					go endRound(lobby)
@@ -372,6 +385,27 @@ func advanceLobby(lobby *Lobby) {
 	triggerPlayersUpdate(lobby)
 	triggerRoundsUpdate(lobby)
 	triggerWordHintUpdate(lobby)
+}
+
+func selectNextDrawer(lobby *Lobby) {
+	for playerIndex, otherPlayer := range lobby.Players {
+		if otherPlayer == lobby.Drawer {
+			lobby.Drawer = lobby.Players[playerIndex+1]
+			return
+		}
+	}
+
+	for _, otherPlayer := range lobby.Players {
+		if otherPlayer == lobby.Drawer {
+			return
+		}
+
+		if otherPlayer.State == Disconnected {
+			continue
+		}
+
+		lobby.Drawer = otherPlayer
+	}
 }
 
 func createWordHintFor(word string) []*WordHint {
@@ -424,7 +458,7 @@ func triggerRoundsUpdate(lobby *Lobby) {
 func triggerTimeLeftUpdate(lobby *Lobby) {
 	event := &JSEvent{Type: "update-time", Data: lobby.TimeLeft}
 	for _, otherPlayer := range lobby.Players {
-		if otherPlayer.ws != nil {
+		if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
 			otherPlayer.ws.WriteJSON(event)
 		}
 	}
@@ -433,7 +467,7 @@ func triggerTimeLeftUpdate(lobby *Lobby) {
 func triggerSimpleUpdateEvent(eventType string, lobby *Lobby) {
 	event := &JSEvent{Type: eventType}
 	for _, otherPlayer := range lobby.Players {
-		if otherPlayer.ws != nil {
+		if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
 			otherPlayer.ws.WriteJSON(event)
 		}
 	}
