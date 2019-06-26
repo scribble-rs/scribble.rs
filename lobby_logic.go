@@ -72,10 +72,13 @@ type Lobby struct {
 	// between 0 and Rounds. 0 indicates that it hasn't started yet.
 	Round int
 	// WordChoice represents the current choice of words.
-	WordChoice          []string
-	TimeLeft            int
-	TimeLeftTicker      *time.Ticker
-	TimeLeftTickerReset chan struct{}
+	WordChoice []string
+	// TimeLeft is the current TimeLeft during a turn.
+	TimeLeft int
+
+	timeLeftTicker        *time.Ticker
+	timeLeftTickerReset   chan struct{}
+	scoreEarnedByGuessers int
 }
 
 // GetPlayer searches for a player, identifying them by usersssion.
@@ -117,7 +120,7 @@ func createLobby(
 		Rounds:              rounds,
 		MaxPlayers:          maxPlayers,
 		CustomWords:         customWords,
-		TimeLeftTickerReset: make(chan struct{}),
+		timeLeftTickerReset: make(chan struct{}),
 	}
 
 	lobbies = append(lobbies, lobby)

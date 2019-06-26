@@ -200,7 +200,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 						if lowerCasedSearched == lowerCasedInput {
 							playerScore := int(math.Ceil(math.Pow(math.Max(float64(lobby.TimeLeft), 1), 1.3) * 2))
 							player.Score += playerScore
-							lobby.Drawer.Score += playerScore * ((len(lobby.Players) - 1) / 10)
+							lobby.scoreEarnedByGuessers += playerScore
 							player.State = Standby
 							player.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
 								Author:  "System",
@@ -270,6 +270,11 @@ func endRound(lobby *Lobby) {
 		Author:  "System",
 		Content: "Round over.",
 	}}
+
+	averageScore := float64(lobby.scoreEarnedByGuessers) / float64(len(lobby.Players)-1)
+	lobby.Drawer.Score += int(averageScore * float64(1.1))
+	lobby.scoreEarnedByGuessers = 0
+
 	for _, otherPlayer := range lobby.Players {
 		if otherPlayer.ws != nil {
 			otherPlayer.ws.WriteJSON(overEvent)
@@ -280,9 +285,9 @@ func endRound(lobby *Lobby) {
 }
 
 func advanceLobby(lobby *Lobby) {
-	if lobby.TimeLeftTicker != nil {
-		lobby.TimeLeftTicker.Stop()
-		lobby.TimeLeftTickerReset <- struct{}{}
+	if lobby.timeLeftTicker != nil {
+		lobby.timeLeftTicker.Stop()
+		lobby.timeLeftTickerReset <- struct{}{}
 	}
 
 	lobby.TimeLeft = lobby.DrawingTime
@@ -332,18 +337,18 @@ func advanceLobby(lobby *Lobby) {
 		Content: fmt.Sprintf("Your turn! Choose word:<br/>!1: %s<br/>!2: %s<br/>!3: %s", lobby.WordChoice[0], lobby.WordChoice[1], lobby.WordChoice[2]),
 	}})
 
-	lobby.TimeLeftTicker = time.NewTicker(1 * time.Second)
+	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
 	go func() {
 		for {
 			select {
-			case <-lobby.TimeLeftTicker.C:
+			case <-lobby.timeLeftTicker.C:
 				lobby.TimeLeft--
 				fmt.Println(lobby.TimeLeft)
 				triggerTimeLeftUpdate(lobby)
 				if lobby.TimeLeft == 0 {
 					go endRound(lobby)
 				}
-			case <-lobby.TimeLeftTickerReset:
+			case <-lobby.timeLeftTickerReset:
 				return
 			}
 		}
