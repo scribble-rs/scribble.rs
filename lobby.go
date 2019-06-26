@@ -270,7 +270,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 func endRound(lobby *Lobby) {
 	overEvent := &JSEvent{Type: "message", Data: Message{
 		Author:  "System",
-		Content: "Round over.",
+		Content: fmt.Sprintf("Round over. The word was '%s'", lobby.CurrentWord),
 	}}
 
 	averageScore := float64(lobby.scoreEarnedByGuessers) / float64(len(lobby.Players)-1)
