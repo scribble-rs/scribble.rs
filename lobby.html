@@ -132,8 +132,14 @@
 
         const rect = drawingBoard.getBoundingClientRect();
 
+        drawingBoard.onmouseleave = function (e) {
+            x = 0;
+            y = 0;
+            isDrawing = false
+        }
+
         drawingBoard.onmousedown = function (e) {
-            if (allowDrawing) {JSON.stringify({ Type: "message", Data: messageInput.value })
+            if (allowDrawing) {
                 x = e.layerX - rect.left;
                 y = e.layerY - rect.top;
                 isDrawing = true;
@@ -149,13 +155,23 @@
         };
 
         drawingBoard.onmouseup = function (e) {
-            if (allowDrawing && isDrawing === true) {
-                drawLineAndSendEvent(context, x, y, e.layerX - rect.left, e.layerY - rect.top, "black", 1);
+            if (isDrawing === true) {
                 x = 0;
                 y = 0;
                 isDrawing = false;
             }
         };
+
+        drawingBoard.onclick = function (e) {
+            if (allowDrawing) {
+                x = e.layerX - rect.left
+                y = e.layerY - rect.top
+                drawLineAndSendEvent(context, x - 1, y - 1, x, y, "black", 1)
+                x = 0
+                y = 0
+                isDrawing = false
+            }
+        }
 
         function drawLine(context, x1, y1, x2, y2, color, lineWidth) {
             context.beginPath();
