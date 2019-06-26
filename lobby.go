@@ -273,7 +273,15 @@ func advanceLobby(lobby *Lobby) {
 	} else {
 		if lobby.Drawer == lobby.Players[len(lobby.Players)-1] {
 			if lobby.Round == lobby.Rounds {
-				//TODO game over
+				lobby.Round = 0
+
+				for _, otherPlayer := range lobby.Players {
+					otherPlayer.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
+						Author:  "System",
+						Content: "Game over. Type !start again to start a new round.",
+					}})
+				}
+
 				return
 			}
 
