@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html"
 	"html/template"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -197,8 +198,9 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 						lowerCasedInput := strings.ToLower(trimmed)
 						lowerCasedSearched := strings.ToLower(lobby.CurrentWord)
 						if lowerCasedSearched == lowerCasedInput {
-							//TODO Change score based on some factors
-							player.Score += 100
+							playerScore := int(math.Ceil(math.Pow(math.Max(float64(lobby.TimeLeft), 1), 1.3) * 2))
+							player.Score += playerScore
+							lobby.Drawer.Score += playerScore * ((len(lobby.Players) - 1) / 10)
 							player.State = Standby
 							player.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
 								Author:  "System",
