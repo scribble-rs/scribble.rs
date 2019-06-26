@@ -259,7 +259,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 					for _, target := range lobby.Players {
 						if target.State != Disconnected && target.ws != nil {
 							target.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
-								Author:  player.Name,
+								Author:  html.EscapeString(player.Name),
 								Content: escaped,
 							}})
 						}
