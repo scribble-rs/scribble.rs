@@ -158,13 +158,15 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 								advanceLobby(lobby)
 							}
 						case "1", "2", "3":
-							choice, _ := strconv.ParseInt(command[0], 10, 8)
-							lobby.CurrentWord = lobby.WordChoice[choice-1]
-							lobby.WordChoice = nil
-							lobby.WordHints = createWordHintFor(lobby.CurrentWord)
-							lobby.WordHintsShown = showAllInWordHints(lobby.WordHints)
-							triggerWordHintUpdate(lobby)
-							lobby.Drawer.ws.WriteJSON(JSEvent{Type: "your-turn"})
+							if player == lobby.Drawer && len(lobby.WordChoice) > 0 {
+								choice, _ := strconv.ParseInt(command[0], 10, 8)
+								lobby.CurrentWord = lobby.WordChoice[choice-1]
+								lobby.WordChoice = nil
+								lobby.WordHints = createWordHintFor(lobby.CurrentWord)
+								lobby.WordHintsShown = showAllInWordHints(lobby.WordHints)
+								triggerWordHintUpdate(lobby)
+								lobby.Drawer.ws.WriteJSON(JSEvent{Type: "your-turn"})
+							}
 						case "help":
 							//TODO
 						case "nick", "name", "username", "nickname", "playername", "alias":
