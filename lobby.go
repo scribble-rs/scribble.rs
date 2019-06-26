@@ -254,6 +254,12 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 						}
 					}
 				}
+			} else if received.Type == "clear-drawing-board" {
+				if lobby.Drawer == player {
+					for _, otherPlayer := range lobby.Players {
+						otherPlayer.ws.WriteMessage(websocket.TextMessage, data)
+					}
+				}
 			}
 		}
 	}
@@ -316,7 +322,7 @@ func advanceLobby(lobby *Lobby) {
 		a.Rank = playersThatAreHigher + 1
 	}
 
-	triggerClearingDrawingBoards(lobby)
+	triggerNextTurn(lobby)
 	triggerPlayersUpdate(lobby)
 	triggerRoundsUpdate(lobby)
 	triggerWordHintUpdate(lobby)
@@ -351,6 +357,10 @@ func showAllInWordHints(hints []*WordHint) []*WordHint {
 
 func triggerClearingDrawingBoards(lobby *Lobby) {
 	triggerSimpleUpdateEvent("clear-drawing-board", lobby)
+}
+
+func triggerNextTurn(lobby *Lobby) {
+	triggerSimpleUpdateEvent("next-turn", lobby)
 }
 
 func triggerPlayersUpdate(lobby *Lobby) {
