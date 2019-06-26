@@ -30,6 +30,8 @@
                 <div style="display: flex; flex-direction: row;">
                     <input type="color" id="color-picker" onchange="setColor()" value="#000000">
                     <button onclick="clearCanvas()">Clear canvas</button>
+                    Pencilsize
+                    <input id="line-width" type="number" onchange="setLineWidth()" min="1" max="30" value="1" />
                 </div>
             </div>
             <div class="chat">
@@ -70,15 +72,22 @@
         const wordContainer = document.getElementById("word-container");
         const messageContainer = document.getElementById("message-container");
         const roundsSpan = document.getElementById("rounds");
+        const timeLeft = document.getElementById("time-left")
         const drawingBoard = document.getElementById("drawing-board")
         const context = drawingBoard.getContext("2d");
         const colorPicker = document.getElementById("color-picker")
+        const lineWidthChooser = document.getElementById("line-width")
 
         var allowDrawing = false;
-        var color = "black";
+        var localColor = "black";
+        var localLineWidth = 1;
 
         function setColor() {
-            color = colorPicker.value;
+            localColor = colorPicker.value;
+        }
+
+        function setLineWidth() {
+            localLineWidth = lineWidthChooser.value
         }
 
         function clearCanvas() {
@@ -134,6 +143,8 @@
                 allowDrawing = false;
             } else if (parsed.Type === "your-turn") {
                 allowDrawing = true;
+            } else if (parsed.Type === "update-time") {
+                timeLeft.innerText= "Time Left: " + parsed.Data;
             }
         };
 
@@ -167,7 +178,7 @@
 
         drawingBoard.onmousemove = function (e) {
             if (allowDrawing && isDrawing === true) {
-                drawLineAndSendEvent(context, x, y, e.layerX - rect.left, e.layerY - rect.top, color, 1);
+                drawLineAndSendEvent(context, x, y, e.layerX - rect.left, e.layerY - rect.top, localColor, localLineWidth);
                 x = e.layerX - rect.left;
                 y = e.layerY - rect.top;
             }
@@ -185,7 +196,7 @@
             if (allowDrawing) {
                 x = e.layerX - rect.left
                 y = e.layerY - rect.top
-                drawLineAndSendEvent(context, x - 1, y - 1, x, y, color, 1)
+                drawLineAndSendEvent(context, x - 1, y - 1, x, y, localColor, localLineWidth)
                 x = 0
                 y = 0
                 isDrawing = false
@@ -196,6 +207,7 @@
             context.beginPath();
             context.strokeStyle = color;
             context.lineWidth = lineWidth;
+
             context.moveTo(x1, y1);
             context.lineTo(x2, y2);
             context.stroke();
@@ -211,7 +223,7 @@
                     ToX: x2,
                     ToY: y2,
                     Color: color,
-                    LineWidth: 1,
+                    LineWidth: lineWidth,
                 }
             }));
 

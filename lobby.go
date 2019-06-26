@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	commands "github.com/Bios-Marcel/cmdp"
 	"github.com/Bios-Marcel/discordemojimap"
@@ -149,40 +150,42 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 				dataAsString := (received.Data).(string)
 				if strings.HasPrefix(dataAsString, "!") {
 					command := commands.ParseCommand(dataAsString[1:])
-					switch strings.ToLower(command[0]) {
-					case "start":
-						if lobby.Round == 0 {
-							advanceLobby(lobby)
-						}
-					case "1", "2", "3":
-						choice, _ := strconv.ParseInt(command[0], 10, 8)
-						lobby.CurrentWord = lobby.WordChoice[choice-1]
-						lobby.WordChoice = nil
-						lobby.WordHints = createWordHintFor(lobby.CurrentWord)
-						lobby.WordHintsShown = showAllInWordHints(lobby.WordHints)
-						triggerWordHintUpdate(lobby)
-						lobby.Drawer.ws.WriteJSON(JSEvent{Type: "your-turn"})
-					case "help":
-						//TODO
-					case "nick", "name", "username", "nickname", "playername", "alias":
-						if len(command) == 1 {
-							player.Name = generatePlayerName()
-							player.ws.WriteJSON(JSEvent{Type: "reset-username"})
-							triggerPlayersUpdate(lobby)
-						} else if len(command) == 2 {
-							newName := strings.TrimSpace(command[1])
-							if len(newName) == 0 {
+					if len(command) >= 1 {
+						switch strings.ToLower(command[0]) {
+						case "start":
+							if lobby.Round == 0 {
+								advanceLobby(lobby)
+							}
+						case "1", "2", "3":
+							choice, _ := strconv.ParseInt(command[0], 10, 8)
+							lobby.CurrentWord = lobby.WordChoice[choice-1]
+							lobby.WordChoice = nil
+							lobby.WordHints = createWordHintFor(lobby.CurrentWord)
+							lobby.WordHintsShown = showAllInWordHints(lobby.WordHints)
+							triggerWordHintUpdate(lobby)
+							lobby.Drawer.ws.WriteJSON(JSEvent{Type: "your-turn"})
+						case "help":
+							//TODO
+						case "nick", "name", "username", "nickname", "playername", "alias":
+							if len(command) == 1 {
 								player.Name = generatePlayerName()
 								player.ws.WriteJSON(JSEvent{Type: "reset-username"})
 								triggerPlayersUpdate(lobby)
-							} else if len(newName) <= 30 {
-								fmt.Printf("%s is now %s\n", player.Name, newName)
-								player.Name = newName
-								player.ws.WriteJSON(JSEvent{Type: "persist-username", Data: player.Name})
-								triggerPlayersUpdate(lobby)
+							} else if len(command) == 2 {
+								newName := strings.TrimSpace(command[1])
+								if len(newName) == 0 {
+									player.Name = generatePlayerName()
+									player.ws.WriteJSON(JSEvent{Type: "reset-username"})
+									triggerPlayersUpdate(lobby)
+								} else if len(newName) <= 30 {
+									fmt.Printf("%s is now %s\n", player.Name, newName)
+									player.Name = newName
+									player.ws.WriteJSON(JSEvent{Type: "persist-username", Data: player.Name})
+									triggerPlayersUpdate(lobby)
+								}
 							}
+							//TODO Else, show error
 						}
-						//TODO Else, show error
 					}
 				} else {
 					trimmed := strings.TrimSpace(dataAsString)
@@ -211,17 +214,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 							}
 
 							if !someoneStillGuesses {
-								overEvent := &JSEvent{Type: "message", Data: Message{
-									Author:  "System",
-									Content: "Round over.",
-								}}
-								for _, otherPlayer := range lobby.Players {
-									if otherPlayer.ws != nil {
-										otherPlayer.ws.WriteJSON(overEvent)
-									}
-								}
-
-								advanceLobby(lobby)
+								endRound(lobby)
 							} else {
 								player.ws.WriteJSON(JSEvent{Type: "update-wordhint"})
 								triggerPlayersUpdate(lobby)
@@ -270,13 +263,31 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 	}
 }
 
+func endRound(lobby *Lobby) {
+	overEvent := &JSEvent{Type: "message", Data: Message{
+		Author:  "System",
+		Content: "Round over.",
+	}}
+	for _, otherPlayer := range lobby.Players {
+		if otherPlayer.ws != nil {
+			otherPlayer.ws.WriteJSON(overEvent)
+		}
+	}
+
+	advanceLobby(lobby)
+}
+
 func advanceLobby(lobby *Lobby) {
+	if lobby.TimeLeftTicker != nil {
+		lobby.TimeLeftTicker.Stop()
+		lobby.TimeLeftTickerReset <- struct{}{}
+	}
+
+	lobby.TimeLeft = lobby.DrawingTime
+
 	for _, otherPlayer := range lobby.Players {
 		otherPlayer.State = Guessing
 	}
-
-	//TODO Recalculate and update ranks
-	//TODO Anything else here?
 
 	if lobby.Drawer == nil {
 		lobby.Drawer = lobby.Players[0]
@@ -318,6 +329,22 @@ func advanceLobby(lobby *Lobby) {
 		Author:  "System",
 		Content: fmt.Sprintf("Your turn! Choose word:<br/>!1: %s<br/>!2: %s<br/>!3: %s", lobby.WordChoice[0], lobby.WordChoice[1], lobby.WordChoice[2]),
 	}})
+
+	lobby.TimeLeftTicker = time.NewTicker(1 * time.Second)
+	go func() {
+		for {
+			select {
+			case <-lobby.TimeLeftTicker.C:
+				lobby.TimeLeft--
+				triggerTimeLeftUpdate(lobby)
+				if lobby.TimeLeft == 0 {
+					advanceLobby(lobby)
+				}
+			case <-lobby.TimeLeftTickerReset:
+				return
+			}
+		}
+	}()
 
 	for _, a := range lobby.Players {
 		playersThatAreHigher := 0
@@ -381,6 +408,15 @@ func triggerWordHintUpdate(lobby *Lobby) {
 
 func triggerRoundsUpdate(lobby *Lobby) {
 	triggerSimpleUpdateEvent("update-rounds", lobby)
+}
+
+func triggerTimeLeftUpdate(lobby *Lobby) {
+	event := &JSEvent{Type: "update-time", Data: lobby.TimeLeft}
+	for _, otherPlayer := range lobby.Players {
+		if otherPlayer.ws != nil {
+			otherPlayer.ws.WriteJSON(event)
+		}
+	}
 }
 
 func triggerSimpleUpdateEvent(eventType string, lobby *Lobby) {

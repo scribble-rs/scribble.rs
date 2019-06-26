@@ -2,6 +2,7 @@ package main
 
 import (
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 	uuid "github.com/satori/go.uuid"
@@ -71,7 +72,10 @@ type Lobby struct {
 	// between 0 and Rounds. 0 indicates that it hasn't started yet.
 	Round int
 	// WordChoice represents the current choice of words.
-	WordChoice []string
+	WordChoice          []string
+	TimeLeft            int
+	TimeLeftTicker      *time.Ticker
+	TimeLeftTickerReset chan struct{}
 }
 
 // GetPlayer searches for a player, identifying them by usersssion.
@@ -107,12 +111,13 @@ func createLobby(
 	createDeleteMutex.Lock()
 
 	lobby := &Lobby{
-		ID:          uuid.NewV4().String(),
-		Password:    password,
-		DrawingTime: drawingTime,
-		Rounds:      rounds,
-		MaxPlayers:  maxPlayers,
-		CustomWords: customWords,
+		ID:                  uuid.NewV4().String(),
+		Password:            password,
+		DrawingTime:         drawingTime,
+		Rounds:              rounds,
+		MaxPlayers:          maxPlayers,
+		CustomWords:         customWords,
+		TimeLeftTickerReset: make(chan struct{}),
 	}
 
 	lobbies = append(lobbies, lobby)
