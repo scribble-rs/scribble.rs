@@ -350,7 +350,7 @@ func advanceLobby(lobby *Lobby) {
 	lobby.Drawer.State = Drawing
 	lobby.Drawer.Icon = "✏️"
 	lobby.WordChoice = GetRandomWords()
-	if lobby.Drawer.State != Disconnected {
+	if lobby.Drawer.State != Disconnected && lobby.Drawer.ws != nil {
 		lobby.Drawer.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
 			Author:  "System",
 			Content: fmt.Sprintf("Your turn! Choose word:<br/>!1: %s<br/>!2: %s<br/>!3: %s", lobby.WordChoice[0], lobby.WordChoice[1], lobby.WordChoice[2]),
