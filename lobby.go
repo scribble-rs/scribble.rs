@@ -336,9 +336,10 @@ func advanceLobby(lobby *Lobby) {
 			select {
 			case <-lobby.TimeLeftTicker.C:
 				lobby.TimeLeft--
+				fmt.Println(lobby.TimeLeft)
 				triggerTimeLeftUpdate(lobby)
 				if lobby.TimeLeft == 0 {
-					advanceLobby(lobby)
+					go endRound(lobby)
 				}
 			case <-lobby.TimeLeftTickerReset:
 				return
