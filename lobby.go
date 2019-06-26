@@ -117,6 +117,8 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	var player *Player
 	if noCookieError == nil {
 		player = lobby.GetPlayer(sessionCookie.Value)
+	} else {
+		errorPage.ExecuteTemplate(w, "error.html", "You are not a player of this lobby.")
 	}
 
 	ws, err := upgrader.Upgrade(w, r, nil)
@@ -296,7 +298,9 @@ func endRound(lobby *Lobby) {
 	}}
 
 	averageScore := float64(lobby.scoreEarnedByGuessers) / float64(len(lobby.Players)-1)
-	lobby.Drawer.Score += int(averageScore * float64(1.1))
+	if averageScore > 0 {
+		lobby.Drawer.Score += int(averageScore * float64(1.1))
+	}
 	lobby.scoreEarnedByGuessers = 0
 
 	for _, otherPlayer := range lobby.Players {
