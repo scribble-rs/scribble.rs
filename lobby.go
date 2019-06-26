@@ -12,6 +12,7 @@ import (
 
 	commands "github.com/Bios-Marcel/cmdp"
 	"github.com/Bios-Marcel/discordemojimap"
+	"github.com/agnivade/levenshtein"
 	petname "github.com/dustinkirkland/golang-petname"
 	"github.com/gorilla/websocket"
 )
@@ -190,7 +191,9 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 					}
 
 					if player.State == Guessing && lobby.CurrentWord != "" {
-						if strings.ToLower(lobby.CurrentWord) == strings.ToLower(trimmed) {
+						lowerCasedInput := strings.ToLower(trimmed)
+						lowerCasedSearched := strings.ToLower(lobby.CurrentWord)
+						if lowerCasedSearched == lowerCasedInput {
 							//TODO Change score based on some factors
 							player.Score += 100
 							player.State = Standby
@@ -222,6 +225,12 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 							}
 
 							continue
+						} else if levenshtein.ComputeDistance(lowerCasedInput, lowerCasedSearched) == 1 {
+							player.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
+								Author:  "System",
+								Content: fmt.Sprintf("'%s' is very close.", trimmed),
+							}})
+
 						}
 					}
 
