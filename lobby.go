@@ -196,7 +196,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 						continue
 					}
 
-					if player.State == Guessing && lobby.CurrentWord != "" {
+					if player.State == Guessing && lobby.CurrentWord != "" && player != lobby.Drawer {
 						lowerCasedInput := strings.ToLower(trimmed)
 						lowerCasedSearched := strings.ToLower(lobby.CurrentWord)
 						if lowerCasedSearched == lowerCasedInput {
@@ -293,6 +293,7 @@ func advanceLobby(lobby *Lobby) {
 	}
 
 	lobby.TimeLeft = lobby.DrawingTime
+	lobby.CurrentWord = ""
 
 	for _, otherPlayer := range lobby.Players {
 		otherPlayer.State = Guessing
