@@ -154,7 +154,10 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 			}
 
 			if received.Type == "message" {
-				dataAsString := (received.Data).(string)
+				dataAsString, isString := (received.Data).(string)
+				if !isString {
+					continue
+				}
 				if strings.HasPrefix(dataAsString, "!") {
 					command := commands.ParseCommand(dataAsString[1:])
 					if len(command) >= 1 {
