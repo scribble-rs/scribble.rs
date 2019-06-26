@@ -211,11 +211,14 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 							}
 
 							if !someoneStillGuesses {
+								overEvent := &JSEvent{Type: "message", Data: Message{
+									Author:  "System",
+									Content: "Round over.",
+								}}
 								for _, otherPlayer := range lobby.Players {
-									otherPlayer.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
-										Author:  "System",
-										Content: "Round over.",
-									}})
+									if otherPlayer.ws != nil {
+										otherPlayer.ws.WriteJSON(overEvent)
+									}
 								}
 
 								advanceLobby(lobby)
@@ -249,7 +252,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 			} else if received.Type == "pixel" {
 				if lobby.Drawer == player {
 					for _, otherPlayer := range lobby.Players {
-						if otherPlayer != player {
+						if otherPlayer != player && otherPlayer.ws != nil {
 							otherPlayer.ws.WriteMessage(websocket.TextMessage, data)
 						}
 					}
@@ -257,7 +260,9 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 			} else if received.Type == "clear-drawing-board" {
 				if lobby.Drawer == player {
 					for _, otherPlayer := range lobby.Players {
-						otherPlayer.ws.WriteMessage(websocket.TextMessage, data)
+						if otherPlayer.ws != nil {
+							otherPlayer.ws.WriteMessage(websocket.TextMessage, data)
+						}
 					}
 				}
 			}
@@ -281,11 +286,14 @@ func advanceLobby(lobby *Lobby) {
 			if lobby.Round == lobby.Rounds {
 				lobby.Round = 0
 
+				gameOverEvent := &JSEvent{Type: "message", Data: Message{
+					Author:  "System",
+					Content: "Game over. Type !start again to start a new round.",
+				}}
 				for _, otherPlayer := range lobby.Players {
-					otherPlayer.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
-						Author:  "System",
-						Content: "Game over. Type !start again to start a new round.",
-					}})
+					if otherPlayer.ws != nil {
+						otherPlayer.ws.WriteJSON(gameOverEvent)
+					}
 				}
 
 				return
@@ -375,10 +383,11 @@ func triggerRoundsUpdate(lobby *Lobby) {
 	triggerSimpleUpdateEvent("update-rounds", lobby)
 }
 
-func triggerSimpleUpdateEvent(event string, lobby *Lobby) {
+func triggerSimpleUpdateEvent(eventType string, lobby *Lobby) {
+	event := &JSEvent{Type: eventType}
 	for _, otherPlayer := range lobby.Players {
 		if otherPlayer.ws != nil {
-			otherPlayer.ws.WriteJSON(JSEvent{Type: event})
+			otherPlayer.ws.WriteJSON(event)
 		}
 	}
 }
