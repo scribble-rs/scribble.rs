@@ -173,12 +173,21 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 							if player != lobby.Drawer {
 								lobby.votekickMapping[player.UserSession] = true
 								if len(lobby.votekickMapping) >= 3 {
+
+									toKick := -1
 									for index, otherPlayer := range lobby.Players {
 										if otherPlayer == lobby.Drawer {
-											endRound(lobby)
-											lobby.Players = append(lobby.Players[:index], lobby.Players[index+1:]...)
+											toKick = index
 											break
 										}
+									}
+
+									endRound(lobby)
+
+									if toKick != -1 {
+										lobby.Players[toKick].ws.Close()
+										lobby.Players = append(lobby.Players[:toKick], lobby.Players[toKick+1:]...)
+										triggerPlayersUpdate(lobby)
 									}
 								}
 							}
