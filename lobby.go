@@ -173,9 +173,9 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 							if player != lobby.Drawer {
 								lobby.votekickMapping[player.UserSession] = true
 								if len(lobby.votekickMapping) >= 3 {
-									endRound(lobby)
 									for index, otherPlayer := range lobby.Players {
 										if otherPlayer == lobby.Drawer {
+											endRound(lobby)
 											lobby.Players = append(lobby.Players[:index], lobby.Players[index+1:]...)
 											break
 										}
