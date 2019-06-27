@@ -7,6 +7,7 @@ import (
 	"html"
 	"html/template"
 	"math"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
@@ -372,12 +373,29 @@ func advanceLobby(lobby *Lobby) {
 	}
 
 	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
+	showNextHintInSeconds := lobby.DrawingTime / 3
+	hintsLeft := 2
 	go func() {
 		for {
 			select {
 			case <-lobby.timeLeftTicker.C:
 				lobby.TimeLeft--
 				triggerTimeLeftUpdate(lobby)
+				if hintsLeft > 0 {
+					showNextHintInSeconds--
+					if showNextHintInSeconds == 0 {
+						showNextHintInSeconds = lobby.DrawingTime / 3
+						hintsLeft--
+						randomIndex := rand.Int() % len(lobby.WordHints)
+						for {
+							if !lobby.WordHints[randomIndex].Show {
+								lobby.WordHints[randomIndex].Show = true
+								triggerWordHintUpdate(lobby)
+								break
+							}
+						}
+					}
+				}
 				if lobby.TimeLeft == 0 {
 					go endRound(lobby)
 				}
