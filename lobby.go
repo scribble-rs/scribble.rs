@@ -60,7 +60,7 @@ func createDefaultLobbyCreatePageData() *CreatePageData {
 		SettingBounds: lobbySettingBounds,
 		DrawingTime:   "120",
 		Rounds:        "4",
-		MaxPlayers:    "4",
+		MaxPlayers:    "12",
 	}
 }
 
