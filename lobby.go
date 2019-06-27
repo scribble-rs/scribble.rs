@@ -186,6 +186,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 
 									if toKick != -1 {
 										lobby.Players[toKick].ws.Close()
+										lobby.Players[toKick].ws = nil
 										lobby.Players = append(lobby.Players[:toKick], lobby.Players[toKick+1:]...)
 										triggerPlayersUpdate(lobby)
 									}
@@ -373,6 +374,7 @@ func advanceLobby(lobby *Lobby) {
 					Author:  "System",
 					Content: "Game over. Type !start again to start a new round.",
 				}}
+
 				for _, otherPlayer := range lobby.Players {
 					if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
 						otherPlayer.ws.WriteJSON(gameOverEvent)
