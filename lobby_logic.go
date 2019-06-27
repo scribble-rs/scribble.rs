@@ -81,6 +81,7 @@ type Lobby struct {
 	timeLeftTicker        *time.Ticker
 	timeLeftTickerReset   chan struct{}
 	scoreEarnedByGuessers int
+	votekickMapping       map[string]bool
 }
 
 // GetPlayer searches for a player, identifying them by usersssion.
@@ -123,6 +124,7 @@ func createLobby(
 		MaxPlayers:          maxPlayers,
 		CustomWords:         customWords,
 		timeLeftTickerReset: make(chan struct{}),
+		votekickMapping:     make(map[string]bool),
 	}
 
 	lobbies = append(lobbies, lobby)

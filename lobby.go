@@ -169,6 +169,19 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 							if lobby.Round == 0 {
 								advanceLobby(lobby)
 							}
+						case "kick":
+							if player != lobby.Drawer {
+								lobby.votekickMapping[player.UserSession] = true
+								if len(lobby.votekickMapping) >= 3 {
+									endRound(lobby)
+									for index, otherPlayer := range lobby.Players {
+										if otherPlayer == lobby.Drawer {
+											lobby.Players = append(lobby.Players[:index], lobby.Players[index+1:]...)
+											break
+										}
+									}
+								}
+							}
 						case "help":
 							//TODO
 						case "nick", "name", "username", "nickname", "playername", "alias":
@@ -315,6 +328,7 @@ func endRound(lobby *Lobby) {
 	lobby.scoreEarnedByGuessers = 0
 	lobby.CurrentWord = ""
 	lobby.WordHints = nil
+	lobby.votekickMapping = make(map[string]bool)
 
 	for _, otherPlayer := range lobby.Players {
 		if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
