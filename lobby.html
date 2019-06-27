@@ -158,7 +158,6 @@
             } else if (parsed.Type === "next-turn") {
                 context.clearRect(0, 0, drawingBoard.width, drawingBoard.height);
                 allowDrawing = false;
-                wordDialog.style.visibility = "hidden";
             } else if (parsed.Type === "your-turn") {
                 allowDrawing = true;
             } else if (parsed.Type === "update-time") {
