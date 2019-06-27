@@ -313,6 +313,8 @@ func endRound(lobby *Lobby) {
 		lobby.Drawer.Score += int(averageScore * float64(1.1))
 	}
 	lobby.scoreEarnedByGuessers = 0
+	lobby.CurrentWord = ""
+	lobby.WordHints = nil
 
 	for _, otherPlayer := range lobby.Players {
 		if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
@@ -330,7 +332,6 @@ func advanceLobby(lobby *Lobby) {
 	}
 
 	lobby.TimeLeft = lobby.DrawingTime
-	lobby.CurrentWord = ""
 
 	for _, otherPlayer := range lobby.Players {
 		otherPlayer.State = Guessing
@@ -386,12 +387,15 @@ func advanceLobby(lobby *Lobby) {
 					if showNextHintInSeconds == 0 {
 						showNextHintInSeconds = lobby.DrawingTime / 3
 						hintsLeft--
-						for {
-							randomIndex := rand.Int() % len(lobby.WordHints)
-							if !lobby.WordHints[randomIndex].Show {
-								lobby.WordHints[randomIndex].Show = true
-								triggerWordHintUpdate(lobby)
-								break
+						//FIXME If a word is chosen lates, less hints will come overall.
+						if lobby.WordHints != nil {
+							for {
+								randomIndex := rand.Int() % len(lobby.WordHints)
+								if !lobby.WordHints[randomIndex].Show {
+									lobby.WordHints[randomIndex].Show = true
+									triggerWordHintUpdate(lobby)
+									break
+								}
 							}
 						}
 					}
