@@ -168,18 +168,6 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 							if lobby.Round == 0 {
 								advanceLobby(lobby)
 							}
-						case "1", "2", "3":
-							if player == lobby.Drawer && len(lobby.WordChoice) > 0 {
-								choice, _ := strconv.ParseInt(command[0], 10, 8)
-								lobby.CurrentWord = lobby.WordChoice[choice-1]
-								lobby.WordChoice = nil
-								lobby.WordHints = createWordHintFor(lobby.CurrentWord)
-								lobby.WordHintsShown = showAllInWordHints(lobby.WordHints)
-								triggerWordHintUpdate(lobby)
-								if lobby.Drawer.State != Disconnected && lobby.Drawer.ws != nil {
-									lobby.Drawer.ws.WriteJSON(JSEvent{Type: "your-turn"})
-								}
-							}
 						case "help":
 							//TODO
 						case "nick", "name", "username", "nickname", "playername", "alias":
@@ -286,6 +274,28 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 						}
 					}
 				}
+			} else if received.Type == "choose-word" {
+				chosenIndex, isInt := (received.Data).(int)
+				if !isInt {
+					asFloat, isFloat32 := (received.Data).(float64)
+					if isFloat32 && asFloat < 4 {
+						chosenIndex = int(asFloat)
+					} else {
+						fmt.Println("Invalid data")
+						continue
+					}
+				}
+
+				if player == lobby.Drawer && len(lobby.WordChoice) > 0 && chosenIndex >= 0 && chosenIndex <= 2 {
+					lobby.CurrentWord = lobby.WordChoice[chosenIndex]
+					lobby.WordChoice = nil
+					lobby.WordHints = createWordHintFor(lobby.CurrentWord)
+					lobby.WordHintsShown = showAllInWordHints(lobby.WordHints)
+					triggerWordHintUpdate(lobby)
+					if lobby.Drawer.State != Disconnected && lobby.Drawer.ws != nil {
+						lobby.Drawer.ws.WriteJSON(JSEvent{Type: "your-turn"})
+					}
+				}
 			}
 		}
 	}
@@ -358,10 +368,7 @@ func advanceLobby(lobby *Lobby) {
 	lobby.Drawer.Icon = "✏️"
 	lobby.WordChoice = GetRandomWords()
 	if lobby.Drawer.State != Disconnected && lobby.Drawer.ws != nil {
-		lobby.Drawer.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
-			Author:  "System",
-			Content: fmt.Sprintf("Your turn! Choose word:<br/>!1: %s<br/>!2: %s<br/>!3: %s", lobby.WordChoice[0], lobby.WordChoice[1], lobby.WordChoice[2]),
-		}})
+		lobby.Drawer.ws.WriteJSON(JSEvent{Type: "prompt-words", Data: lobby.WordChoice})
 	}
 
 	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)

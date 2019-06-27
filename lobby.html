@@ -14,6 +14,14 @@
     <noscript><span class="noscript">Hey, seems like you've disabled JavaScript.
             I get it ... but you are trying to play an interactive drawing game
             here, so you have to turn on JavaScript.</span></noscript>
+    <div id="word-dialog">
+        <span class="word-dialog-text">Choose a word</span>
+        <div class="word-button-container">
+            <button id="word-button-zero" class="word-button" onclick="chooseWord(0)">Placeholder</button>
+            <button id="word-button-one" class="word-button" onclick="chooseWord(1)">Placeholder</button>
+            <button id="word-button-two" class="word-button" onclick="chooseWord(2)">Placeholder</button>
+        </div>
+    </div>
     <div class="content-wrapper">
         <div class="lobby-layout">
             <span id="rounds">Round {{.Round}} of {{.Rounds}}</span>
@@ -72,11 +80,15 @@
         const wordContainer = document.getElementById("word-container");
         const messageContainer = document.getElementById("message-container");
         const roundsSpan = document.getElementById("rounds");
-        const timeLeft = document.getElementById("time-left")
-        const drawingBoard = document.getElementById("drawing-board")
+        const timeLeft = document.getElementById("time-left");
+        const drawingBoard = document.getElementById("drawing-board");
         const context = drawingBoard.getContext("2d");
-        const colorPicker = document.getElementById("color-picker")
-        const lineWidthChooser = document.getElementById("line-width")
+        const colorPicker = document.getElementById("color-picker");
+        const lineWidthChooser = document.getElementById("line-width");
+        const wordDialog = document.getElementById("word-dialog");
+        const wordButtonZero = document.getElementById("word-button-zero");
+        const wordButtonOne = document.getElementById("word-button-one");
+        const wordButtonTwo = document.getElementById("word-button-two");
 
         var allowDrawing = false;
         var localColor = "black";
@@ -100,6 +112,11 @@
 
             // Necessary in order to keep the page from submitting.
             return false;
+        }
+
+        function chooseWord(index) {
+            socket.send(JSON.stringify({ Type: "choose-word", Data: index }));
+            wordDialog.style.visibility = "hidden";
         }
 
         new MutationObserver(
@@ -144,7 +161,12 @@
             } else if (parsed.Type === "your-turn") {
                 allowDrawing = true;
             } else if (parsed.Type === "update-time") {
-                timeLeft.innerText= "Time Left: " + parsed.Data;
+                timeLeft.innerText = "Time Left: " + parsed.Data;
+            } else if (parsed.Type === "prompt-words") {
+                wordButtonZero.textContent = parsed.Data[0];
+                wordButtonOne.textContent = parsed.Data[1];
+                wordButtonTwo.textContent = parsed.Data[2];
+                wordDialog.style.visibility = "visible";
             }
         };
 
@@ -165,7 +187,7 @@
         drawingBoard.onmouseleave = function (e) {
             x = 0;
             y = 0;
-            isDrawing = false
+            isDrawing = false;
         }
 
         drawingBoard.onmousedown = function (e) {
@@ -194,14 +216,14 @@
 
         drawingBoard.onclick = function (e) {
             if (allowDrawing) {
-                x = e.pageX - rect.left
-                y = e.pageY - rect.top
-                drawLineAndSendEvent(context, x - 1, y - 1, x, y, localColor, localLineWidth)
-                x = 0
-                y = 0
-                isDrawing = false
+                x = e.pageX - rect.left;
+                y = e.pageY - rect.top;
+                drawLineAndSendEvent(context, x - 1, y - 1, x, y, localColor, localLineWidth);
+                x = 0;
+                y = 0;
+                isDrawing = false;
             }
-        }
+        };
 
         function drawLine(context, x1, y1, x2, y2, color, lineWidth) {
             context.beginPath();
@@ -226,7 +248,6 @@
                     LineWidth: lineWidth,
                 }
             }));
-
         }
     </script>
 </body>

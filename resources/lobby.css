@@ -36,7 +36,6 @@
 
 .lobby-layout {
     padding: 5px;
-
     display: grid;
     grid-template-columns: 23rem 1100px auto;
     grid-template-rows: auto 600px;
@@ -51,10 +50,8 @@
 .chat {
     border: 1px solid black;
     min-width: 15rem;
-
     height: 50vh;
     max-height: 50vh;
-
     display: grid;
     grid-template-rows: auto fit-content(100%);
 }
@@ -83,4 +80,54 @@
 
 #message-input {
     flex: 1;
+}
+
+#word-dialog {
+    background-color: #CCCCCC;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: auto;
+    height: 150px;
+    transform: translate(-50%, -50%);
+    align-items: center;
+    justify-content: center;
+    visibility: hidden;
+}
+
+.word-dialog-text {
+    margin-bottom: 15px;
+    font-size: 3rem;
+    font-weight: bold;
+    color: rgb(240, 105, 127);
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.word-button-container {
+    display: flex;
+    flex-direction: row;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.word-button {
+    border: 0;
+    border-radius: 0;
+    background-color: white;
+    padding: 10px;
+}
+
+.word-button:hover {
+    background-color: rgb(244, 183, 247);
+}
+
+.word-button:active {
+    background-color: rgb(243, 132, 247);
+}
+
+.word-button+.word-button {
+    margin-left: 10px;
 }
