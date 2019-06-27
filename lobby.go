@@ -386,8 +386,8 @@ func advanceLobby(lobby *Lobby) {
 					if showNextHintInSeconds == 0 {
 						showNextHintInSeconds = lobby.DrawingTime / 3
 						hintsLeft--
-						randomIndex := rand.Int() % len(lobby.WordHints)
 						for {
+							randomIndex := rand.Int() % len(lobby.WordHints)
 							if !lobby.WordHints[randomIndex].Show {
 								lobby.WordHints[randomIndex].Show = true
 								triggerWordHintUpdate(lobby)
