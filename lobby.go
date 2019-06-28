@@ -192,6 +192,50 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 									}
 								}
 							}
+						case "setmp":
+							if player == lobby.Owner {
+								newMaxPlayersValue := strings.TrimSpace(command[1])
+								newMaxPlayersValueInt, err := strconv.ParseInt(newMaxPlayersValue, 10, 64)
+								if err == nil {
+									if int(newMaxPlayersValueInt) > len(lobby.Players) && newMaxPlayersValueInt <= lobbySettingBounds.MaxMaxPlayers && newMaxPlayersValueInt >= lobbySettingBounds.MinMaxPlayers {
+										lobby.MaxPlayers = int(newMaxPlayersValueInt)
+
+										maxPlayerChangeEvent := &JSEvent{Type: "message", Data: Message{
+											Author:  "System",
+											Content: fmt.Sprintf("MaxPlayers value has been changed to %d", lobby.MaxPlayers),
+										}}
+
+										for _, otherPlayer := range lobby.Players {
+											if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
+												otherPlayer.ws.WriteJSON(maxPlayerChangeEvent)
+											}
+										}
+
+									} else {
+										if len(lobby.Players) > int(lobbySettingBounds.MinMaxPlayers) {
+											player.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
+												Author:  "System",
+												Content: fmt.Sprintf("MaxPlayers value should be between %d and %d.", len(lobby.Players), lobbySettingBounds.MaxMaxPlayers),
+											}})
+										} else {
+											player.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
+												Author:  "System",
+												Content: fmt.Sprintf("MaxPlayers value should be between %d and %d.", lobbySettingBounds.MinMaxPlayers, lobbySettingBounds.MaxMaxPlayers),
+											}})
+										}
+									}
+								} else {
+									player.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
+										Author:  "System",
+										Content: fmt.Sprintf("MaxPlayers value must be numeric."),
+									}})
+								}
+							} else {
+								player.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
+									Author:  "System",
+									Content: fmt.Sprintf("Only lobby owner can change MaxPlayers value."),
+								}})
+							}
 						case "help":
 							//TODO
 						case "nick", "name", "username", "nickname", "playername", "alias":
