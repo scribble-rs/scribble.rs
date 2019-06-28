@@ -63,6 +63,8 @@ type Lobby struct {
 
 	// Drawer references the Player that is currently drawing.
 	Drawer *Player
+	// Owner references the Player that created the lobby.
+	Owner *Player
 	// CurrentWord represents the word that was last selected. If no word has
 	// been selected yet or the round is already over, this should be empty.
 	CurrentWord string

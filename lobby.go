@@ -665,6 +665,7 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 
 		//FIXME Make a dedicated method that uses a mutex?
 		lobby.Players = append(lobby.Players, player)
+		lobby.Owner = player
 
 		// Use the players generated usersession and pass it as a cookie.
 		http.SetCookie(w, &http.Cookie{
