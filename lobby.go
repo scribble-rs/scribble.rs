@@ -197,7 +197,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 								newMaxPlayersValue := strings.TrimSpace(command[1])
 								newMaxPlayersValueInt, err := strconv.ParseInt(newMaxPlayersValue, 10, 64)
 								if err == nil {
-									if int(newMaxPlayersValueInt) > len(lobby.Players) && newMaxPlayersValueInt <= lobbySettingBounds.MaxMaxPlayers && newMaxPlayersValueInt >= lobbySettingBounds.MinMaxPlayers {
+									if int(newMaxPlayersValueInt) >= len(lobby.Players) && newMaxPlayersValueInt <= lobbySettingBounds.MaxMaxPlayers && newMaxPlayersValueInt >= lobbySettingBounds.MinMaxPlayers {
 										lobby.MaxPlayers = int(newMaxPlayersValueInt)
 
 										maxPlayerChangeEvent := &JSEvent{Type: "message", Data: Message{
@@ -233,7 +233,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 							} else {
 								player.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
 									Author:  "System",
-									Content: fmt.Sprintf("Only lobby owner can change MaxPlayers value."),
+									Content: fmt.Sprintf("Only the lobby owner can change MaxPlayers setting."),
 								}})
 							}
 						case "help":
