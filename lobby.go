@@ -795,8 +795,8 @@ type Message struct {
 	Content string
 }
 
-// ShowLobby opens a lobby, either opening it directly or asking for a username
-// and or a lobby password.
+// ShowLobby opens a lobby, either opening it directly or asking for a lobby
+// password.
 func ShowLobby(w http.ResponseWriter, r *http.Request) {
 	lobby := getLobby(w, r)
 	if lobby != nil {
