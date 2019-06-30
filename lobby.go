@@ -161,170 +161,11 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 				if !isString {
 					continue
 				}
+
 				if strings.HasPrefix(dataAsString, "!") {
-					command := commands.ParseCommand(dataAsString[1:])
-					if len(command) >= 1 {
-						switch strings.ToLower(command[0]) {
-						case "start":
-							if lobby.Round == 0 {
-								advanceLobby(lobby)
-							}
-						case "kick":
-							if player != lobby.Drawer {
-								lobby.votekickMapping[player.UserSession] = true
-								if len(lobby.votekickMapping) >= 3 {
-
-									toKick := -1
-									for index, otherPlayer := range lobby.Players {
-										if otherPlayer == lobby.Drawer {
-											toKick = index
-											break
-										}
-									}
-
-									endRound(lobby)
-
-									if toKick != -1 {
-										lobby.Players[toKick].ws.Close()
-										lobby.Players[toKick].ws = nil
-										lobby.Players = append(lobby.Players[:toKick], lobby.Players[toKick+1:]...)
-										triggerPlayersUpdate(lobby)
-									}
-								}
-							}
-						case "setmp":
-							if player == lobby.Owner {
-								newMaxPlayersValue := strings.TrimSpace(command[1])
-								newMaxPlayersValueInt, err := strconv.ParseInt(newMaxPlayersValue, 10, 64)
-								if err == nil {
-									if int(newMaxPlayersValueInt) >= len(lobby.Players) && newMaxPlayersValueInt <= lobbySettingBounds.MaxMaxPlayers && newMaxPlayersValueInt >= lobbySettingBounds.MinMaxPlayers {
-										lobby.MaxPlayers = int(newMaxPlayersValueInt)
-
-										maxPlayerChangeEvent := &JSEvent{Type: "message", Data: Message{
-											Author:  "System",
-											Content: fmt.Sprintf("MaxPlayers value has been changed to %d", lobby.MaxPlayers),
-										}}
-
-										for _, otherPlayer := range lobby.Players {
-											if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
-												otherPlayer.ws.WriteJSON(maxPlayerChangeEvent)
-											}
-										}
-
-									} else {
-										if len(lobby.Players) > int(lobbySettingBounds.MinMaxPlayers) {
-											player.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
-												Author:  "System",
-												Content: fmt.Sprintf("MaxPlayers value should be between %d and %d.", len(lobby.Players), lobbySettingBounds.MaxMaxPlayers),
-											}})
-										} else {
-											player.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
-												Author:  "System",
-												Content: fmt.Sprintf("MaxPlayers value should be between %d and %d.", lobbySettingBounds.MinMaxPlayers, lobbySettingBounds.MaxMaxPlayers),
-											}})
-										}
-									}
-								} else {
-									player.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
-										Author:  "System",
-										Content: fmt.Sprintf("MaxPlayers value must be numeric."),
-									}})
-								}
-							} else {
-								player.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
-									Author:  "System",
-									Content: fmt.Sprintf("Only the lobby owner can change MaxPlayers setting."),
-								}})
-							}
-						case "help":
-							//TODO
-						case "nick", "name", "username", "nickname", "playername", "alias":
-							if len(command) == 1 {
-								player.Name = generatePlayerName()
-								if player.State != Disconnected && player.ws != nil {
-									player.ws.WriteJSON(JSEvent{Type: "reset-username"})
-								}
-								triggerPlayersUpdate(lobby)
-							} else if len(command) == 2 {
-								newName := strings.TrimSpace(command[1])
-								if len(newName) == 0 {
-									player.Name = generatePlayerName()
-									if player.State != Disconnected && player.ws != nil {
-										player.ws.WriteJSON(JSEvent{Type: "reset-username"})
-									}
-									triggerPlayersUpdate(lobby)
-								} else if len(newName) <= 30 {
-									fmt.Printf("%s is now %s\n", player.Name, newName)
-									player.Name = newName
-									if player.State != Disconnected && player.ws != nil {
-										player.ws.WriteJSON(JSEvent{Type: "persist-username", Data: player.Name})
-									}
-									triggerPlayersUpdate(lobby)
-								}
-							}
-							//TODO Else, show error
-						}
-					}
+					handleCommand(dataAsString[1:], player, lobby)
 				} else {
-					trimmed := strings.TrimSpace(dataAsString)
-					if trimmed == "" {
-						continue
-					}
-
-					if player.State == Guessing && lobby.CurrentWord != "" && player != lobby.Drawer {
-						lowerCasedInput := strings.ToLower(trimmed)
-						lowerCasedSearched := strings.ToLower(lobby.CurrentWord)
-						if lowerCasedSearched == lowerCasedInput {
-							playerScore := int(math.Ceil(math.Pow(math.Max(float64(lobby.TimeLeft), 1), 1.3) * 2))
-							player.Score += playerScore
-							lobby.scoreEarnedByGuessers += playerScore
-							player.State = Standby
-							player.Icon = "✔️"
-							if player.State != Disconnected && player.ws != nil {
-								player.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
-									Author:  "System",
-									Content: "You have correctly guessed the word.",
-								}})
-							}
-
-							var someoneStillGuesses bool
-							for _, otherPlayer := range lobby.Players {
-								if otherPlayer.State == Guessing {
-									someoneStillGuesses = true
-									break
-								}
-							}
-
-							if !someoneStillGuesses {
-								endRound(lobby)
-							} else {
-								if player.State != Disconnected && player.ws != nil {
-									player.ws.WriteJSON(JSEvent{Type: "update-wordhint"})
-								}
-								triggerPlayersUpdate(lobby)
-							}
-
-							continue
-						} else if levenshtein.ComputeDistance(lowerCasedInput, lowerCasedSearched) == 1 && player.State != Disconnected && player.ws != nil {
-							player.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
-								Author:  "System",
-								Content: fmt.Sprintf("'%s' is very close.", trimmed),
-							}})
-
-						}
-					}
-
-					//TODO Make sure only certain people see certain messages.
-
-					escaped := html.EscapeString(discordemojimap.Replace(trimmed))
-					for _, target := range lobby.Players {
-						if target.State != Disconnected && target.ws != nil {
-							target.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
-								Author:  html.EscapeString(player.Name),
-								Content: escaped,
-							}})
-						}
-					}
+					handleMessage(dataAsString, player, lobby)
 				}
 			} else if received.Type == "pixel" {
 				if lobby.Drawer == player {
@@ -366,6 +207,194 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 				}
 			}
 		}
+	}
+}
+
+func handleMessage(input string, sender *Player, lobby *Lobby) {
+	trimmed := strings.TrimSpace(input)
+	if trimmed == "" {
+		return
+	}
+
+	if sender.State == Guessing && lobby.CurrentWord != "" && sender != lobby.Drawer {
+		lowerCasedInput := strings.ToLower(trimmed)
+		lowerCasedSearched := strings.ToLower(lobby.CurrentWord)
+		if lowerCasedSearched == lowerCasedInput {
+			playerScore := int(math.Ceil(math.Pow(math.Max(float64(lobby.TimeLeft), 1), 1.3) * 2))
+			sender.Score += playerScore
+			lobby.scoreEarnedByGuessers += playerScore
+			sender.State = Standby
+			sender.Icon = "✔️"
+			if sender.State != Disconnected && sender.ws != nil {
+				sender.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
+					Author:  "System",
+					Content: "You have correctly guessed the word.",
+				}})
+			}
+
+			var someoneStillGuesses bool
+			for _, otherPlayer := range lobby.Players {
+				if otherPlayer.State == Guessing {
+					someoneStillGuesses = true
+					break
+				}
+			}
+
+			if !someoneStillGuesses {
+				endRound(lobby)
+			} else {
+				if sender.State != Disconnected && sender.ws != nil {
+					sender.ws.WriteJSON(JSEvent{Type: "update-wordhint"})
+				}
+				triggerPlayersUpdate(lobby)
+			}
+
+			return
+		} else if levenshtein.ComputeDistance(lowerCasedInput, lowerCasedSearched) == 1 && sender.State != Disconnected && sender.ws != nil {
+			sender.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
+				Author:  "System",
+				Content: fmt.Sprintf("'%s' is very close.", trimmed),
+			}})
+
+		}
+	}
+
+	//TODO Make sure only certain people see certain messages.
+
+	escaped := html.EscapeString(discordemojimap.Replace(trimmed))
+	for _, target := range lobby.Players {
+		if target.State != Disconnected && target.ws != nil {
+			target.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
+				Author:  html.EscapeString(sender.Name),
+				Content: escaped,
+			}})
+		}
+	}
+}
+
+func handleCommand(commandString string, caller *Player, lobby *Lobby) {
+	command := commands.ParseCommand(commandString)
+	if len(command) >= 1 {
+		switch strings.ToLower(command[0]) {
+		case "start":
+			commandStart(lobby)
+		case "kick":
+			commandKick(caller, lobby)
+		case "setmp":
+			commandSetMP(caller, lobby, command)
+		case "help":
+			//TODO
+		case "nick", "name", "username", "nickname", "playername", "alias":
+			commandNick(caller, lobby, command)
+		}
+	}
+}
+
+func commandStart(lobby *Lobby) {
+	if lobby.Round == 0 {
+		advanceLobby(lobby)
+	}
+}
+
+func commandKick(caller *Player, lobby *Lobby) {
+	if caller != lobby.Drawer {
+		lobby.votekickMapping[caller.UserSession] = true
+		if len(lobby.votekickMapping) >= 3 {
+
+			toKick := -1
+			for index, otherPlayer := range lobby.Players {
+				if otherPlayer == lobby.Drawer {
+					toKick = index
+					break
+				}
+			}
+
+			endRound(lobby)
+
+			if toKick != -1 {
+				lobby.Players[toKick].ws.Close()
+				lobby.Players[toKick].ws = nil
+				lobby.Players = append(lobby.Players[:toKick], lobby.Players[toKick+1:]...)
+				triggerPlayersUpdate(lobby)
+			}
+		}
+	}
+}
+
+func commandNick(caller *Player, lobby *Lobby, args []string) {
+	if len(args) == 1 {
+		caller.Name = generatePlayerName()
+		if caller.State != Disconnected && caller.ws != nil {
+			caller.ws.WriteJSON(JSEvent{Type: "reset-username"})
+		}
+		triggerPlayersUpdate(lobby)
+	} else if len(args) == 2 {
+		newName := strings.TrimSpace(args[1])
+		if len(newName) == 0 {
+			caller.Name = generatePlayerName()
+			if caller.State != Disconnected && caller.ws != nil {
+				caller.ws.WriteJSON(JSEvent{Type: "reset-username"})
+			}
+			triggerPlayersUpdate(lobby)
+		} else if len(newName) <= 30 {
+			fmt.Printf("%s is now %s\n", caller.Name, newName)
+			caller.Name = newName
+			if caller.State != Disconnected && caller.ws != nil {
+				caller.ws.WriteJSON(JSEvent{Type: "persist-username", Data: caller.Name})
+			}
+			triggerPlayersUpdate(lobby)
+		}
+	}
+	//TODO Else, show error
+}
+
+func commandSetMP(caller *Player, lobby *Lobby, args []string) {
+	if caller == lobby.Owner {
+		if len(args) < 2 {
+			return
+		}
+
+		newMaxPlayersValue := strings.TrimSpace(args[1])
+		newMaxPlayersValueInt, err := strconv.ParseInt(newMaxPlayersValue, 10, 64)
+		if err == nil {
+			if int(newMaxPlayersValueInt) >= len(lobby.Players) && newMaxPlayersValueInt <= lobbySettingBounds.MaxMaxPlayers && newMaxPlayersValueInt >= lobbySettingBounds.MinMaxPlayers {
+				lobby.MaxPlayers = int(newMaxPlayersValueInt)
+
+				maxPlayerChangeEvent := &JSEvent{Type: "message", Data: Message{
+					Author:  "System",
+					Content: fmt.Sprintf("MaxPlayers value has been changed to %d", lobby.MaxPlayers),
+				}}
+
+				for _, otherPlayer := range lobby.Players {
+					if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
+						otherPlayer.ws.WriteJSON(maxPlayerChangeEvent)
+					}
+				}
+
+			} else {
+				if len(lobby.Players) > int(lobbySettingBounds.MinMaxPlayers) {
+					caller.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
+						Author:  "System",
+						Content: fmt.Sprintf("MaxPlayers value should be between %d and %d.", len(lobby.Players), lobbySettingBounds.MaxMaxPlayers),
+					}})
+				} else {
+					caller.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
+						Author:  "System",
+						Content: fmt.Sprintf("MaxPlayers value should be between %d and %d.", lobbySettingBounds.MinMaxPlayers, lobbySettingBounds.MaxMaxPlayers),
+					}})
+				}
+			}
+		} else {
+			caller.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
+				Author:  "System",
+				Content: fmt.Sprintf("MaxPlayers value must be numeric."),
+			}})
+		}
+	} else {
+		caller.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
+			Author:  "System",
+			Content: fmt.Sprintf("Only the lobby owner can change MaxPlayers setting."),
+		}})
 	}
 }
 
@@ -443,9 +472,10 @@ func advanceLobby(lobby *Lobby) {
 	}
 
 	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
-	showNextHintInSeconds := lobby.DrawingTime / 3
-	hintsLeft := 2
 	go func() {
+		showNextHintInSeconds := lobby.DrawingTime / 3
+		hintsLeft := 2
+
 		for {
 			select {
 			case <-lobby.timeLeftTicker.C:
