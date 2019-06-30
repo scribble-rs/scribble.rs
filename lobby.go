@@ -216,7 +216,14 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 		return
 	}
 
-	if sender.State == Guessing && lobby.CurrentWord != "" && sender != lobby.Drawer {
+	if lobby.CurrentWord == "" {
+		sendMessageToAll(trimmed, sender, lobby)
+		return
+	}
+
+	if sender.State == Drawing || sender.State == Standby {
+		sendMessageToAllNonGuessing(trimmed, sender, lobby)
+	} else if sender.State == Guessing {
 		lowerCasedInput := strings.ToLower(trimmed)
 		lowerCasedSearched := strings.ToLower(lobby.CurrentWord)
 		if lowerCasedSearched == lowerCasedInput {
@@ -250,21 +257,35 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 			}
 
 			return
-		} else if levenshtein.ComputeDistance(lowerCasedInput, lowerCasedSearched) == 1 && sender.State != Disconnected && sender.ws != nil {
+		} else if levenshtein.ComputeDistance(lowerCasedInput, lowerCasedSearched) == 1 &&
+			sender.State != Disconnected && sender.ws != nil {
 			sender.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
 				Author:  "System",
 				Content: fmt.Sprintf("'%s' is very close.", trimmed),
 			}})
-
 		}
+
+		sendMessageToAll(trimmed, sender, lobby)
 	}
+}
 
-	//TODO Make sure only certain people see certain messages.
-
-	escaped := html.EscapeString(discordemojimap.Replace(trimmed))
+func sendMessageToAll(message string, sender *Player, lobby *Lobby) {
+	escaped := html.EscapeString(discordemojimap.Replace(message))
 	for _, target := range lobby.Players {
 		if target.State != Disconnected && target.ws != nil {
 			target.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
+				Author:  html.EscapeString(sender.Name),
+				Content: escaped,
+			}})
+		}
+	}
+}
+
+func sendMessageToAllNonGuessing(message string, sender *Player, lobby *Lobby) {
+	escaped := html.EscapeString(discordemojimap.Replace(message))
+	for _, target := range lobby.Players {
+		if target.State != Disconnected && target.State != Guessing && target.ws != nil {
+			target.ws.WriteJSON(JSEvent{Type: "non-guessing-player-message", Data: Message{
 				Author:  html.EscapeString(sender.Name),
 				Content: escaped,
 			}})

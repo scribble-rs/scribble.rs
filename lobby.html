@@ -146,6 +146,11 @@
                         <span class="chat-name">` + parsed.Data.Author + `</span>
                         <span class="message-content">` + parsed.Data.Content + `</span>
                     </div>`;
+            } else if (parsed.Type === "non-guessing-player-message") {
+                messageContainer.innerHTML += `<div class="non-guessing-player-message">
+                        <span class="chat-name">` + parsed.Data.Author + `</span>
+                        <span class="message-content">` + parsed.Data.Content + `</span>
+                    </div>`;
             } else if (parsed.Type === "persist-username") {
                 //TODO GMT date for consistency?
                 document.cookie = "username=" + parsed.Data + ";expires=Tue, 19 Jan 2038 03:14:07 UTC;path=/;samesite=strict";
