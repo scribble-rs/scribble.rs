@@ -432,7 +432,9 @@ func endRound(lobby *Lobby) {
 		lobby.Drawer.Score += int(averageScore * float64(1.1))
 	}
 	lobby.scoreEarnedByGuessers = 0
+	lobby.alreadyUsedWords = append(lobby.alreadyUsedWords, lobby.CurrentWord)
 	lobby.CurrentWord = ""
+
 	lobby.WordHints = nil
 	lobby.votekickMapping = make(map[string]bool)
 
