@@ -30,11 +30,65 @@ func init() {
 	}
 }
 
-func GetRandomWords() []string {
+// GetRandomWords gets 3 random words for the passed Lobby. The words will be
+// chosen from the custom words and the default dictionary, depending on the
+// settings specified by ther Lobby-Owner.
+func GetRandomWords(lobby *Lobby) []string {
+	wordsNotToPick := lobby.alreadyUsedWords
+	wordOne := getRandomWordWithCustomWordChance(wordsNotToPick, lobby.CustomWords, lobby.CustomWordsChance)
+	wordsNotToPick = append(wordsNotToPick, wordOne)
+	wordTwo := getRandomWordWithCustomWordChance(wordsNotToPick, lobby.CustomWords, lobby.CustomWordsChance)
+	wordsNotToPick = append(wordsNotToPick, wordTwo)
+	wordThree := getRandomWordWithCustomWordChance(wordsNotToPick, lobby.CustomWords, lobby.CustomWordsChance)
+
 	return []string{
-		englishWords[rand.Int()%len(englishWords)],
-		englishWords[rand.Int()%len(englishWords)],
-		englishWords[rand.Int()%len(englishWords)],
+		wordOne,
+		wordTwo,
+		wordThree,
+	}
+}
+
+func getRandomWordWithCustomWordChance(wordsAlreadyUsed []string, customWords []string, customWordChance int) string {
+	if rand.Intn(100)+1 <= customWordChance {
+		return getUnusedCustomWord(wordsAlreadyUsed, customWords)
 	}
 
+	return getUnusedRandomWord(wordsAlreadyUsed)
+}
+
+func getUnusedCustomWord(wordsAlreadyUsed []string, customWords []string) string {
+OUTER_LOOP:
+	for _, word := range customWords {
+		for _, usedWord := range wordsAlreadyUsed {
+			if usedWord == word {
+				continue OUTER_LOOP
+			}
+		}
+
+		return word
+	}
+
+	return getUnusedRandomWord(wordsAlreadyUsed)
+}
+
+func getUnusedRandomWord(wordsAlreadyUsed []string) string {
+	//We attempt to find a random word for a hundred times, afterwards we just use any.
+	randomnessAttempts := 0
+	var word string
+	for {
+		word = englishWords[rand.Int()%len(englishWords)]
+		for _, usedWord := range wordsAlreadyUsed {
+			if usedWord == word {
+				if randomnessAttempts == 100 {
+					break
+				}
+
+				randomnessAttempts++
+				continue
+			}
+		}
+		break
+	}
+
+	return word
 }

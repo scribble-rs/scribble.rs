@@ -175,3 +175,32 @@ func Test_parseCustomWords(t *testing.T) {
 		})
 	}
 }
+
+func Test_parseCustomWordChance(t *testing.T) {
+	tests := []struct {
+		name    string
+		value   string
+		want    int
+		wantErr bool
+	}{
+		{"empty value", "", 0, true},
+		{"space", " ", 0, true},
+		{"less than minimum", "-1", 0, true},
+		{"more than maximum", "101", 0, true},
+		{"maximum", "100", 100, false},
+		{"minimum", "0", 0, false},
+		{"something valid", "60", 60, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := parseCustomWordsChance(tt.value)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("parseCustomWordsChance() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("parseCustomWordsChance() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

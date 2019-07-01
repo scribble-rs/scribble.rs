@@ -47,20 +47,22 @@ type SettingBounds struct {
 // CreatePageData defines all non-static data for the lobby create page.
 type CreatePageData struct {
 	*SettingBounds
-	Errors      []string
-	Password    string
-	DrawingTime string
-	Rounds      string
-	MaxPlayers  string
-	CustomWords string
+	Errors            []string
+	Password          string
+	DrawingTime       string
+	Rounds            string
+	MaxPlayers        string
+	CustomWords       string
+	CustomWordsChance string
 }
 
 func createDefaultLobbyCreatePageData() *CreatePageData {
 	return &CreatePageData{
-		SettingBounds: lobbySettingBounds,
-		DrawingTime:   "120",
-		Rounds:        "4",
-		MaxPlayers:    "12",
+		SettingBounds:     lobbySettingBounds,
+		DrawingTime:       "120",
+		Rounds:            "4",
+		MaxPlayers:        "12",
+		CustomWordsChance: "50",
 	}
 }
 
@@ -487,7 +489,7 @@ func advanceLobby(lobby *Lobby) {
 
 	lobby.Drawer.State = Drawing
 	lobby.Drawer.Icon = "✏️"
-	lobby.WordChoice = GetRandomWords()
+	lobby.WordChoice = GetRandomWords(lobby)
 	if lobby.Drawer.State != Disconnected && lobby.Drawer.ws != nil {
 		lobby.Drawer.ws.WriteJSON(JSEvent{Type: "prompt-words", Data: lobby.WordChoice})
 	}
@@ -713,15 +715,17 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 	rounds, roundsInvalid := parseRounds(r.Form.Get("rounds"))
 	maxPlayers, maxPlayersInvalid := parseMaxPlayers(r.Form.Get("max_players"))
 	customWords, customWordsInvalid := parseCustomWords(r.Form.Get("custom_words"))
+	customWordChance, customWordChanceInvalid := parseCustomWordsChance(r.Form.Get("custom_words_chance"))
 
 	//Prevent resetting the form, since that would be annoying as hell.
 	pageData := CreatePageData{
-		SettingBounds: lobbySettingBounds,
-		Password:      r.Form.Get("lobby_password"),
-		DrawingTime:   r.Form.Get("drawing_time"),
-		Rounds:        r.Form.Get("rounds"),
-		MaxPlayers:    r.Form.Get("max_players"),
-		CustomWords:   r.Form.Get("custom_words"),
+		SettingBounds:     lobbySettingBounds,
+		Password:          r.Form.Get("lobby_password"),
+		DrawingTime:       r.Form.Get("drawing_time"),
+		Rounds:            r.Form.Get("rounds"),
+		MaxPlayers:        r.Form.Get("max_players"),
+		CustomWords:       r.Form.Get("custom_words"),
+		CustomWordsChance: r.Form.Get("custom_words_chance"),
 	}
 
 	if passwordInvalid != nil {
@@ -739,6 +743,9 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 	if customWordsInvalid != nil {
 		pageData.Errors = append(pageData.Errors, customWordsInvalid.Error())
 	}
+	if customWordChanceInvalid != nil {
+		pageData.Errors = append(pageData.Errors, customWordChanceInvalid.Error())
+	}
 
 	if len(pageData.Errors) != 0 {
 		err := lobbyCreatePage.ExecuteTemplate(w, "lobby_create.html", pageData)
@@ -746,7 +753,7 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	} else {
-		lobby := createLobby(password, drawingTime, rounds, maxPlayers, customWords)
+		lobby := createLobby(password, drawingTime, rounds, maxPlayers, customWords, customWordChance)
 
 		var playerName string
 		usernameCookie, noCookieError := r.Cookie("username")
@@ -958,4 +965,21 @@ func parseCustomWords(value string) ([]string, error) {
 	}
 
 	return result, nil
+}
+
+func parseCustomWordsChance(value string) (int, error) {
+	result, parseErr := strconv.ParseInt(value, 10, 64)
+	if parseErr != nil {
+		return 0, errors.New("the custom word chance must be numeric")
+	}
+
+	if result < 0 {
+		return 0, errors.New("custom word chance must not be lower than 0")
+	}
+
+	if result > 100 {
+		return 0, errors.New("custom word chance must not be higher than 100")
+	}
+
+	return int(result), nil
 }

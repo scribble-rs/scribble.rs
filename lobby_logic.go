@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math/rand"
 	"sync"
 	"time"
 
@@ -84,6 +85,8 @@ type Lobby struct {
 	timeLeftTickerReset   chan struct{}
 	scoreEarnedByGuessers int
 	votekickMapping       map[string]bool
+	alreadyUsedWords      []string
+	CustomWordsChance     int
 }
 
 // GetPlayer searches for a player, identifying them by usersssion.
@@ -114,7 +117,8 @@ func createLobby(
 	drawingTime int,
 	rounds int,
 	maxPlayers int,
-	customWords []string) *Lobby {
+	customWords []string,
+	customWordsChance int) *Lobby {
 
 	createDeleteMutex.Lock()
 
@@ -125,8 +129,15 @@ func createLobby(
 		Rounds:              rounds,
 		MaxPlayers:          maxPlayers,
 		CustomWords:         customWords,
+		CustomWordsChance:   customWordsChance,
 		timeLeftTickerReset: make(chan struct{}),
 		votekickMapping:     make(map[string]bool),
+	}
+
+	if len(customWords) > 1 {
+		rand.Shuffle(len(lobby.CustomWords), func(i, j int) {
+			lobby.CustomWords[i], lobby.CustomWords[j] = lobby.CustomWords[j], lobby.CustomWords[i]
+		})
 	}
 
 	lobbies = append(lobbies, lobby)
