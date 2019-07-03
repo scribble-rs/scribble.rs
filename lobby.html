@@ -83,6 +83,7 @@
         const timeLeft = document.getElementById("time-left");
         const drawingBoard = document.getElementById("drawing-board");
         const context = drawingBoard.getContext("2d");
+        context.lineJoin = "round"
         const colorPicker = document.getElementById("color-picker");
         const lineWidthChooser = document.getElementById("line-width");
         const wordDialog = document.getElementById("word-dialog");
@@ -237,8 +238,8 @@
 
             context.moveTo(x1, y1);
             context.lineTo(x2, y2);
-            context.stroke();
             context.closePath();
+            context.stroke();
         }
 
         function drawLineAndSendEvent(context, x1, y1, x2, y2, color, lineWidth) {
