@@ -135,3 +135,58 @@
 .word-button+.word-button {
     margin-left: 10px;
 }
+
+.line-width-button {
+    /* Little hack in order to hide the checkbox of the radiobutton */
+    opacity: 0.0;
+    position: absolute;
+}
+
+.dot {
+    background-color: black;
+    border-radius: 50%;
+}
+
+.size-2 {
+    height: 2px;
+    width: 2px;
+}
+
+.size-5 {
+    height: 5px;
+    width: 5px;
+}
+
+.size-15 {
+    height: 15px;
+    width: 15px;
+}
+
+.size-30 {
+    height: 30px;
+    width: 30px;
+}
+.size-40 {
+    height: 40px;
+    width: 40px;
+}
+
+.line-width-button+.line-width-button-content {
+    height: 50px;
+    width: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.line-width-button-content {
+    background-color: rgb(218, 218, 218);
+}
+
+.line-width-button:checked+.line-width-button-content {
+    background-color: rgb(243, 132, 247);
+}
+
+.line-width-button-content:hover {
+    background-color: rgb(244, 183, 247);
+}
