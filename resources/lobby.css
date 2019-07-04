@@ -180,6 +180,7 @@
     height: 30px;
     width: 30px;
 }
+
 .size-40 {
     height: 40px;
     width: 40px;
@@ -197,10 +198,69 @@
     background-color: rgb(218, 218, 218);
 }
 
+.line-width-button-content:hover {
+    background-color: rgb(244, 183, 247);
+}
+
 .line-width-button:checked+.line-width-button-content {
     background-color: rgb(243, 132, 247);
 }
 
-.line-width-button-content:hover {
+#color-picker {
+    border: 0;
+    background-color: rgb(218, 218, 218);
+    height: 50px;
+    width: 50px;
+    margin-right: 10px;
+    padding: 5px;
+}
+
+#color-picker:hover {
     background-color: rgb(244, 183, 247);
+}
+
+#color-picker:active {
+    background-color: rgb(243, 132, 247);
+}
+
+.canvas-button {
+    height: 50px;
+    width: 50px;
+    border: 0;
+    background-color: rgb(218, 218, 218);
+    margin-left: 10px;
+}
+
+.canvas-button:hover {
+    background-color: rgb(244, 183, 247);
+}
+
+.canvas-button:active {
+    background-color: rgb(243, 132, 247);
+}
+
+.canvas-button::-moz-focus-inner {
+    border: 0;
+}
+
+.color-button-container {
+    border: 1px solid black;
+    display: flex;
+    flex-direction: column;
+    margin-right: 10px;
+}
+
+.color-button-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.color-button {
+    height: 24px;
+    width: 24px;
+    border: 0;
+}
+
+.color-button::-moz-focus-inner {
+    border: 0;
 }

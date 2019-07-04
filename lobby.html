@@ -27,7 +27,8 @@
             <div class="top-left-container">
                 <span id="rounds">Round {{.Round}} of {{.Rounds}}</span>
                 <label for="sound-toggle">
-                    <input class="custom-check-or-radio sound-toggle-input" type="checkbox" name="sound-toggle" onchange="toggleSound()"/>
+                    <input class="custom-check-or-radio sound-toggle-input" type="checkbox" name="sound-toggle"
+                        onchange="toggleSound()" />
                     <span id="sound-toggle-label"></span>
                 </label>
             </div>
@@ -43,7 +44,57 @@
                 <canvas id="drawing-board" width="1100" height="600"></canvas>
                 <div style="display: flex; flex-direction: row;">
                     <input type="color" id="color-picker" onchange="setColor()" value="#000000">
-                    <button onclick="clearCanvas()">Clear canvas</button>
+                    <div class="color-button-container">
+                        <div class="color-button-row">
+                            <button class="color-button" style="background-color: #ffffff"
+                                onclick="setColor('#ffffff')"></button>
+                            <button class="color-button" style="background-color: #c1c1c1"
+                                onclick="setColor('#c1c1c1')"></button>
+                            <button class="color-button" style="background-color: #ef130b"
+                                onclick="setColor('#ef130b')"></button>
+                            <button class="color-button" style="background-color: #ff7100"
+                                onclick="setColor('#ff7100')"></button>
+                            <button class="color-button" style="background-color: #ffe400"
+                                onclick="setColor('#ffe400')"></button>
+                            <button class="color-button" style="background-color: #00cc00"
+                                onclick="setColor('#00cc00')"></button>
+                            <button class="color-button" style="background-color: #00b2ff"
+                                onclick="setColor('#00b2ff')"></button>
+                            <button class="color-button" style="background-color: #231fd3"
+                                onclick="setColor('#231fd3')"></button>
+                            <button class="color-button" style="background-color: #a300ba"
+                                onclick="setColor('#a300ba')"></button>
+                            <button class="color-button" style="background-color: #d37caa"
+                                onclick="setColor('#d37caa')"></button>
+                            <button class="color-button" style="background-color: #a0522d"
+                                onclick="setColor('#a0522d')"></button>
+                        </div>
+                        <div class="color-button-row">
+                            <button class="color-button" style="background-color: #000000"
+                                onclick="setColor('#000000')"></button>
+                            <button class="color-button" style="background-color: #4c4c4c"
+                                onclick="setColor('#4c4c4c')"></button>
+                            <button class="color-button" style="background-color: #740b07"
+                                onclick="setColor('#740b07')"></button>
+                            <button class="color-button" style="background-color: #c23800"
+                                onclick="setColor('#c23800')"></button>
+                            <button class="color-button" style="background-color: #e8a200"
+                                onclick="setColor('#e8a200')"></button>
+                            <button class="color-button" style="background-color: #005510"
+                                onclick="setColor('#005510')"></button>
+                            <button class="color-button" style="background-color: #00569e"
+                                onclick="setColor('#00569e')"></button>
+                            <button class="color-button" style="background-color: #0e0865"
+                                onclick="setColor('#0e0865')"></button>
+                            <button class="color-button" style="background-color: #550069"
+                                onclick="setColor('#550069')"></button>
+                            <button class="color-button" style="background-color: #a75574"
+                                onclick="setColor('#a75574')"></button>
+                            <button class="color-button" style="background-color: #63300d"
+                                onclick="setColor('#63300d')"></button>
+
+                        </div>
+                    </div>
                     <label for="size2">
                         <input id="size2" class="custom-check-or-radio line-width-button" onchange="setLineWidth(2)"
                             type="radio" name="line-width" checked>
@@ -79,6 +130,7 @@
                             <div class="dot size-40"></div>
                         </div>
                     </label>
+                    <button class="canvas-button" style="font-size: 2rem;" onclick="clearCanvas()">🗑</button>
                 </div>
             </div>
             <div class="chat">
@@ -158,8 +210,13 @@
         var localColor = "black";
         var localLineWidth = 2;
 
-        function setColor() {
-            localColor = colorPicker.value;
+        function setColor(value) {
+            if (value === undefined) {
+                localColor = colorPicker.value;
+            } else {
+                localColor = value;
+                colorPicker.value = value;
+            }
         }
 
         function setLineWidth(value) {
@@ -236,7 +293,7 @@
                 if (sound) {
                     var audio = new Audio('/resources/your-turn.wav');
                     audio.type = 'audio/wav';
-    
+
                     audio.play();
                 }
 
