@@ -294,7 +294,7 @@ func handleCommand(commandString string, caller *Player, lobby *Lobby) {
 	if len(command) >= 1 {
 		switch strings.ToLower(command[0]) {
 		case "start":
-			commandStart(lobby)
+			commandStart(caller, lobby)
 		case "kick":
 			commandKick(caller, lobby)
 		case "setmp":
@@ -307,8 +307,8 @@ func handleCommand(commandString string, caller *Player, lobby *Lobby) {
 	}
 }
 
-func commandStart(lobby *Lobby) {
-	if lobby.Round == 0 {
+func commandStart(caller *Player, lobby *Lobby) {
+	if lobby.Round == 0 && caller == lobby.Owner {
 		advanceLobby(lobby)
 	}
 }
