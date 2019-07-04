@@ -235,10 +235,7 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 			sender.State = Standby
 			sender.Icon = "✔️"
 			if sender.State != Disconnected && sender.ws != nil {
-				sender.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
-					Author:  "System",
-					Content: "You have correctly guessed the word.",
-				}})
+				sender.ws.WriteJSON(JSEvent{Type: "system-message", Data: "You have correctly guessed the word."})
 			}
 
 			var someoneStillGuesses bool
@@ -261,10 +258,7 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 			return
 		} else if levenshtein.ComputeDistance(lowerCasedInput, lowerCasedSearched) == 1 &&
 			sender.State != Disconnected && sender.ws != nil {
-			sender.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
-				Author:  "System",
-				Content: fmt.Sprintf("'%s' is very close.", trimmed),
-			}})
+			sender.ws.WriteJSON(JSEvent{Type: "system-message", Data: fmt.Sprintf("'%s' is very close.", trimmed)})
 		}
 
 		sendMessageToAll(trimmed, sender, lobby)
@@ -386,10 +380,7 @@ func commandSetMP(caller *Player, lobby *Lobby, args []string) {
 			if int(newMaxPlayersValueInt) >= len(lobby.Players) && newMaxPlayersValueInt <= lobbySettingBounds.MaxMaxPlayers && newMaxPlayersValueInt >= lobbySettingBounds.MinMaxPlayers {
 				lobby.MaxPlayers = int(newMaxPlayersValueInt)
 
-				maxPlayerChangeEvent := &JSEvent{Type: "message", Data: Message{
-					Author:  "System",
-					Content: fmt.Sprintf("MaxPlayers value has been changed to %d", lobby.MaxPlayers),
-				}}
+				maxPlayerChangeEvent := &JSEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value has been changed to %d", lobby.MaxPlayers)}
 
 				for _, otherPlayer := range lobby.Players {
 					if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
@@ -399,36 +390,21 @@ func commandSetMP(caller *Player, lobby *Lobby, args []string) {
 
 			} else {
 				if len(lobby.Players) > int(lobbySettingBounds.MinMaxPlayers) {
-					caller.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
-						Author:  "System",
-						Content: fmt.Sprintf("MaxPlayers value should be between %d and %d.", len(lobby.Players), lobbySettingBounds.MaxMaxPlayers),
-					}})
+					caller.ws.WriteJSON(JSEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value should be between %d and %d.", len(lobby.Players), lobbySettingBounds.MaxMaxPlayers)})
 				} else {
-					caller.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
-						Author:  "System",
-						Content: fmt.Sprintf("MaxPlayers value should be between %d and %d.", lobbySettingBounds.MinMaxPlayers, lobbySettingBounds.MaxMaxPlayers),
-					}})
+					caller.ws.WriteJSON(JSEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value should be between %d and %d.", lobbySettingBounds.MinMaxPlayers, lobbySettingBounds.MaxMaxPlayers)})
 				}
 			}
 		} else {
-			caller.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
-				Author:  "System",
-				Content: fmt.Sprintf("MaxPlayers value must be numeric."),
-			}})
+			caller.ws.WriteJSON(JSEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value must be numeric.")})
 		}
 	} else {
-		caller.ws.WriteJSON(JSEvent{Type: "message", Data: Message{
-			Author:  "System",
-			Content: fmt.Sprintf("Only the lobby owner can change MaxPlayers setting."),
-		}})
+		caller.ws.WriteJSON(JSEvent{Type: "system-message", Data: fmt.Sprintf("Only the lobby owner can change MaxPlayers setting.")})
 	}
 }
 
 func endRound(lobby *Lobby) {
-	overEvent := &JSEvent{Type: "message", Data: Message{
-		Author:  "System",
-		Content: fmt.Sprintf("Round over. The word was '%s'", lobby.CurrentWord),
-	}}
+	overEvent := &JSEvent{Type: "system-message", Data: fmt.Sprintf("Round over. The word was '%s'", lobby.CurrentWord)}
 
 	averageScore := float64(lobby.scoreEarnedByGuessers) / float64(len(lobby.Players)-1)
 	if averageScore > 0 {
@@ -471,10 +447,7 @@ func advanceLobby(lobby *Lobby) {
 			if lobby.Round == lobby.Rounds {
 				lobby.Round = 0
 
-				gameOverEvent := &JSEvent{Type: "message", Data: Message{
-					Author:  "System",
-					Content: "Game over. Type !start again to start a new round.",
-				}}
+				gameOverEvent := &JSEvent{Type: "system-message", Data: "Game over. Type !start again to start a new round."}
 
 				for _, otherPlayer := range lobby.Players {
 					if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
