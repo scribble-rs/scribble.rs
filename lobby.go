@@ -682,19 +682,27 @@ func GetWordHint(w http.ResponseWriter, r *http.Request) {
 	lobby := getLobby(w, r)
 	if lobby != nil {
 		sessionCookie, noCookieError := r.Cookie("usersession")
-		if noCookieError == nil {
-			player := lobby.GetPlayer(sessionCookie.Value)
-			var wordHints []*WordHint
-			if player.State == Drawing || player.State == Standby {
-				wordHints = lobby.WordHintsShown
-			} else {
-				wordHints = lobby.WordHints
-			}
+		if noCookieError != nil {
+			errorPage.ExecuteTemplate(w, "error.html", "You aren't part of this lobby.")
+			return
+		}
 
-			templatingError := lobbyPage.ExecuteTemplate(w, "word", wordHints)
-			if templatingError != nil {
-				errorPage.ExecuteTemplate(w, "error.html", templatingError.Error())
-			}
+		player := lobby.GetPlayer(sessionCookie.Value)
+		if player == nil {
+			errorPage.ExecuteTemplate(w, "error.html", "You aren't part of this lobby.")
+			return
+		}
+
+		var wordHints []*WordHint
+		if player.State == Drawing || player.State == Standby {
+			wordHints = lobby.WordHintsShown
+		} else {
+			wordHints = lobby.WordHints
+		}
+
+		templatingError := lobbyPage.ExecuteTemplate(w, "word", wordHints)
+		if templatingError != nil {
+			errorPage.ExecuteTemplate(w, "error.html", templatingError.Error())
 		}
 	}
 }
