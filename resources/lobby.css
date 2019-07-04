@@ -7,8 +7,13 @@
     padding: 10px;
 }
 
+.top-left-container {
+    display: flex;
+}
+
 #rounds {
     font-size: 2rem;
+    flex: 1;
 }
 
 #time-left {
@@ -136,8 +141,17 @@
     margin-left: 10px;
 }
 
-.line-width-button {
-    /* Little hack in order to hide the checkbox of the radiobutton */
+#sound-toggle-label {
+    font-size: 2rem;
+}
+
+.sound-toggle-input {
+    height: 2rem;
+    width: 2rem;
+}
+
+.custom-check-or-radio {
+    /* Little hack in order to hide the original components of the check/radio button */
     opacity: 0.0;
     position: absolute;
 }

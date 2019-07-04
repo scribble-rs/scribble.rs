@@ -24,7 +24,13 @@
     </div>
     <div class="content-wrapper">
         <div class="lobby-layout">
-            <span id="rounds">Round {{.Round}} of {{.Rounds}}</span>
+            <div class="top-left-container">
+                <span id="rounds">Round {{.Round}} of {{.Rounds}}</span>
+                <label for="sound-toggle">
+                    <input class="custom-check-or-radio sound-toggle-input" type="checkbox" name="sound-toggle" onchange="toggleSound()"/>
+                    <span id="sound-toggle-label"></span>
+                </label>
+            </div>
             <div id="word-container">
                 {{template "word" .WordHints}}
             </div>
@@ -39,36 +45,36 @@
                     <input type="color" id="color-picker" onchange="setColor()" value="#000000">
                     <button onclick="clearCanvas()">Clear canvas</button>
                     <label for="size2">
-                        <input id="size2" class="line-width-button" onchange="setLineWidth(2)" type="radio"
-                            name="line-width" checked>
+                        <input id="size2" class="custom-check-or-radio line-width-button" onchange="setLineWidth(2)"
+                            type="radio" name="line-width" checked>
                         <div class="line-width-button-content">
                             <div class="dot size-2"></div>
                         </div>
                     </label>
                     <label for="size5">
-                        <input id="size5" class="line-width-button" onchange="setLineWidth(5)" type="radio"
-                            name="line-width">
+                        <input id="size5" class="custom-check-or-radio line-width-button" onchange="setLineWidth(5)"
+                            type="radio" name="line-width">
                         <div class="line-width-button-content">
                             <div class="dot size-5"></div>
                         </div>
                     </label>
                     <label for="size15">
-                        <input id="size15" class="line-width-button" onchange="setLineWidth(15)" type="radio"
-                            name="line-width">
+                        <input id="size15" class="custom-check-or-radio line-width-button" onchange="setLineWidth(15)"
+                            type="radio" name="line-width">
                         <div class="line-width-button-content">
                             <div class="dot size-15"></div>
                         </div>
                     </label>
                     <label for="size30">
-                        <input id="size30" class="line-width-button" onchange="setLineWidth(30)" type="radio"
-                            name="line-width">
+                        <input id="size30" class="custom-check-or-radio line-width-button" onchange="setLineWidth(30)"
+                            type="radio" name="line-width">
                         <div class="line-width-button-content">
                             <div class="dot size-30"></div>
                         </div>
                     </label>
                     <label for="size40">
-                        <input id="size40" class="line-width-button" onchange="setLineWidth(40)" type="radio"
-                            name="line-width">
+                        <input id="size40" class="custom-check-or-radio line-width-button" onchange="setLineWidth(40)"
+                            type="radio" name="line-width">
                         <div class="line-width-button-content">
                             <div class="dot size-40"></div>
                         </div>
@@ -123,6 +129,30 @@
         const wordButtonZero = document.getElementById("word-button-zero");
         const wordButtonOne = document.getElementById("word-button-one");
         const wordButtonTwo = document.getElementById("word-button-two");
+
+        const noSoundIcon = "🔇"
+        const soundIcon = "🔊"
+        const soundToggleLabel = document.getElementById("sound-toggle-label");
+        var sound;
+        if (localStorage.getItem("sound") === "false") {
+            sound = false;
+            soundToggleLabel.innerText = noSoundIcon;
+        } else {
+            sound = true;
+            soundToggleLabel.innerText = soundIcon;
+        }
+
+        function toggleSound() {
+            if (sound) {
+                localStorage.setItem("sound", "false")
+                sound = false;
+                soundToggleLabel.innerText = noSoundIcon;
+            } else {
+                localStorage.setItem("sound", "true")
+                sound = true;
+                soundToggleLabel.innerText = soundIcon;
+            }
+        }
 
         var allowDrawing = false;
         var localColor = "black";
@@ -203,6 +233,13 @@
             } else if (parsed.Type === "update-time") {
                 timeLeft.innerText = "Time Left: " + parsed.Data;
             } else if (parsed.Type === "prompt-words") {
+                if (sound) {
+                    var audio = new Audio('/resources/your-turn.wav');
+                    audio.type = 'audio/wav';
+    
+                    audio.play();
+                }
+
                 wordButtonZero.textContent = parsed.Data[0];
                 wordButtonOne.textContent = parsed.Data[1];
                 wordButtonTwo.textContent = parsed.Data[2];
