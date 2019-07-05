@@ -309,6 +309,10 @@ func handleCommand(commandString string, caller *Player, lobby *Lobby) {
 
 func commandStart(caller *Player, lobby *Lobby) {
 	if lobby.Round == 0 && caller == lobby.Owner {
+		for _, otherPlayer := range lobby.Players {
+			otherPlayer.Score = 0
+		}
+
 		advanceLobby(lobby)
 	}
 }
