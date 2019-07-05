@@ -207,7 +207,8 @@
 
         var allowDrawing = false;
         var localColor = "black";
-        var localLineWidth = 2;
+        var localLineWidth;
+        setLineWidth(2);
 
         function setColor(value) {
             if (value === undefined) {
@@ -219,7 +220,7 @@
         }
 
         function setLineWidth(value) {
-            console.log(value)
+            drawingBoard.style.cursor = "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"" + (value + 2) + "\" height=\"" + (value + 2) + "\"><circle cx=\"" + (value / 2) + "\" cy=\"" + (value / 2) + "\" r=\"" + (value / 2) + "\" style=\"fill: red;\"/></svg>') " + (value / 2) + " " + (value / 2) + ", auto";
             localLineWidth = value
         }
 
