@@ -330,15 +330,16 @@ func commandKick(caller *Player, lobby *Lobby) {
 				}
 			}
 
-			endRound(lobby)
-
 			if toKick != -1 {
+				endRound(lobby)
+
 				playerToKick := lobby.Players[toKick]
 				if playerToKick.ws != nil {
 					playerToKick.ws.Close()
 					playerToKick.ws = nil
 				}
 				lobby.Players = append(lobby.Players[:toKick], lobby.Players[toKick+1:]...)
+				recalculateRanks(lobby)
 				triggerPlayersUpdate(lobby)
 			}
 		}
