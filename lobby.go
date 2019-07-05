@@ -429,6 +429,7 @@ func endRound(lobby *Lobby) {
 func advanceLobby(lobby *Lobby) {
 	if lobby.timeLeftTicker != nil {
 		lobby.timeLeftTicker.Stop()
+		lobby.timeLeftTicker = nil
 		lobby.timeLeftTickerReset <- struct{}{}
 	}
 
@@ -445,9 +446,13 @@ func advanceLobby(lobby *Lobby) {
 	} else {
 		if lobby.Drawer == lobby.Players[len(lobby.Players)-1] {
 			if lobby.Round == lobby.Rounds {
+				lobby.Drawer = nil
 				lobby.Round = 0
 
 				gameOverEvent := &JSEvent{Type: "system-message", Data: "Game over. Type !start again to start a new round."}
+
+				recalculateRanks(lobby)
+				triggerPlayersUpdate(lobby)
 
 				for _, otherPlayer := range lobby.Players {
 					if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
@@ -509,6 +514,15 @@ func advanceLobby(lobby *Lobby) {
 		}
 	}()
 
+	recalculateRanks(lobby)
+
+	triggerNextTurn(lobby)
+	triggerPlayersUpdate(lobby)
+	triggerRoundsUpdate(lobby)
+	triggerWordHintUpdate(lobby)
+}
+
+func recalculateRanks(lobby *Lobby) {
 	for _, a := range lobby.Players {
 		playersThatAreHigher := 0
 		for _, b := range lobby.Players {
@@ -519,11 +533,6 @@ func advanceLobby(lobby *Lobby) {
 
 		a.Rank = playersThatAreHigher + 1
 	}
-
-	triggerNextTurn(lobby)
-	triggerPlayersUpdate(lobby)
-	triggerRoundsUpdate(lobby)
-	triggerWordHintUpdate(lobby)
 }
 
 func selectNextDrawer(lobby *Lobby) {
