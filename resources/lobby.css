@@ -209,10 +209,16 @@
 #color-picker {
     border: 0;
     background-color: rgb(218, 218, 218);
+    margin-right: 10px;
     height: 50px;
     width: 50px;
-    margin-right: 10px;
-    padding: 5px;
+    padding: 0px;
+}
+
+@-moz-document url-prefix() {
+    #color-picker {
+        padding: 5px;
+    }
 }
 
 #color-picker:hover {
