@@ -804,6 +804,12 @@ func ShowLobby(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		//FIXME Temporary
+		if strings.Contains(userAgent, "iphone") || strings.Contains(userAgent, "android") {
+			errorPage.ExecuteTemplate(w, "error.html", "Sorry, mobile is currently not supported.")
+			return
+		}
+
 		sessionCookie, noCookieError := r.Cookie("usersession")
 		var player *Player
 		if noCookieError == nil {
