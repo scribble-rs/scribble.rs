@@ -252,7 +252,7 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 				if sender.State != Disconnected && sender.ws != nil {
 					sender.ws.WriteJSON(JSEvent{Type: "update-wordhint"})
 				}
-				triggerPlayersUpdate(lobby)
+				triggerCorrectGuessEvent(lobby)
 			}
 
 			return
@@ -584,6 +584,10 @@ func triggerNextTurn(lobby *Lobby) {
 
 func triggerPlayersUpdate(lobby *Lobby) {
 	triggerSimpleUpdateEvent("update-players", lobby)
+}
+
+func triggerCorrectGuessEvent(lobby *Lobby) {
+	triggerSimpleUpdateEvent("correct-guess", lobby)
 }
 
 func triggerWordHintUpdate(lobby *Lobby) {

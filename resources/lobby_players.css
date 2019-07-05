@@ -11,6 +11,10 @@
     grid-template-rows: 1fr 1fr;
 }
 
+.player-done {
+    background-color: rgb(141, 224, 15);
+}
+
 .player+.player {
     margin-top: 5px;
 }

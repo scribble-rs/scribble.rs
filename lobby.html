@@ -254,6 +254,17 @@
                 httpGetAsync("/lobby/players?id={{.LobbyID}}", response => {
                     playerContainer.innerHTML = response.responseText;
                 });
+            } else if (parsed.Type === "correct-guess") {
+                if (sound) {
+                    var audio = new Audio('/resources/plop.wav');
+                    audio.type = 'audio/wav';
+
+                    audio.play();
+                }
+
+                httpGetAsync("/lobby/players?id={{.LobbyID}}", response => {
+                    playerContainer.innerHTML = response.responseText;
+                });
             } else if (parsed.Type === "update-wordhint") {
                 httpGetAsync("/lobby/wordhint?id={{.LobbyID}}", response => {
                     wordContainer.innerHTML = response.responseText;
@@ -287,7 +298,15 @@
             } else if (parsed.Type === "clear-drawing-board") {
                 context.clearRect(0, 0, drawingBoard.width, drawingBoard.height);
             } else if (parsed.Type === "next-turn") {
+                if (sound) {
+                    var audio = new Audio('/resources/end-turn.wav');
+                    audio.type = 'audio/wav';
+
+                    audio.play();
+                }
+
                 context.clearRect(0, 0, drawingBoard.width, drawingBoard.height);
+
                 allowDrawing = false;
             } else if (parsed.Type === "your-turn") {
                 allowDrawing = true;
