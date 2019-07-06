@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"strings"
+	"time"
 )
 
 var englishWords []string
@@ -75,6 +76,7 @@ func getUnusedRandomWord(wordsAlreadyUsed []string) string {
 	//We attempt to find a random word for a hundred times, afterwards we just use any.
 	randomnessAttempts := 0
 	var word string
+	rand.Seed(time.Now().Unix())
 	for {
 		word = englishWords[rand.Int()%len(englishWords)]
 		for _, usedWord := range wordsAlreadyUsed {
