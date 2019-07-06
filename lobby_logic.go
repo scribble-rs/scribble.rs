@@ -152,5 +152,6 @@ func createPlayer(name string) *Player {
 		Name:        name,
 		UserSession: uuid.NewV4().String(),
 		Score:       0,
+		Rank:        1,
 	}
 }
