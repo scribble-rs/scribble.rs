@@ -35,6 +35,7 @@ func init() {
 // chosen from the custom words and the default dictionary, depending on the
 // settings specified by ther Lobby-Owner.
 func GetRandomWords(lobby *Lobby) []string {
+	rand.Seed(time.Now().Unix())
 	wordsNotToPick := lobby.alreadyUsedWords
 	wordOne := getRandomWordWithCustomWordChance(wordsNotToPick, lobby.CustomWords, lobby.CustomWordsChance)
 	wordsNotToPick = append(wordsNotToPick, wordOne)
@@ -50,7 +51,7 @@ func GetRandomWords(lobby *Lobby) []string {
 }
 
 func getRandomWordWithCustomWordChance(wordsAlreadyUsed []string, customWords []string, customWordChance int) string {
-	if rand.Intn(100)+1 <= customWordChance {
+	if rand.Intn(100)+1 <= customWordChance && len(customWords) > 1 {
 		return getUnusedCustomWord(wordsAlreadyUsed, customWords)
 	}
 
@@ -76,7 +77,6 @@ func getUnusedRandomWord(wordsAlreadyUsed []string) string {
 	//We attempt to find a random word for a hundred times, afterwards we just use any.
 	randomnessAttempts := 0
 	var word string
-	rand.Seed(time.Now().Unix())
 	for {
 		word = englishWords[rand.Int()%len(englishWords)]
 		for _, usedWord := range wordsAlreadyUsed {
