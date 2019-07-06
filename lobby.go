@@ -849,6 +849,8 @@ func ShowLobby(w http.ResponseWriter, r *http.Request) {
 			//FIXME Make a dedicated method that uses a mutex?
 			lobby.Players = append(lobby.Players, player)
 
+			recalculateRanks(lobby)
+
 			pageData := &LobbyPageData{
 				Port:    *portHTTP,
 				Players: lobby.Players,
