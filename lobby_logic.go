@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"math/rand"
 	"sync"
 	"time"
@@ -19,6 +20,10 @@ type Player struct {
 	// UserSession uniquely identifies the player.
 	UserSession string
 	ws          *websocket.Conn
+	// Since gorilla websockets shits it self when two calls happen at
+	// the same time, we need a mutex per player, since each player has their
+	// own socket.
+	socketMutex *sync.Mutex
 
 	// Name is the players displayed name
 	Name string
@@ -154,4 +159,18 @@ func createPlayer(name string) *Player {
 		Score:       0,
 		Rank:        1,
 	}
+}
+
+// WriteAsJSON marshals the given input into a JSON string and sends it to the
+// player using the currently established websocket connection.
+func (p *Player) WriteAsJSON(object interface{}) error {
+	if p.ws == nil || p.State == Disconnected {
+		return errors.New("player not connected")
+	}
+
+	p.socketMutex.Lock()
+	err := p.ws.WriteJSON(object)
+	p.socketMutex.Unlock()
+
+	return err
 }
