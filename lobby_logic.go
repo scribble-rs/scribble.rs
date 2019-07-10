@@ -158,6 +158,7 @@ func createPlayer(name string) *Player {
 		UserSession: uuid.NewV4().String(),
 		Score:       0,
 		Rank:        1,
+		socketMutex: &sync.Mutex{},
 	}
 }
 
