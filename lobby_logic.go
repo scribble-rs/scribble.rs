@@ -25,6 +25,8 @@ type Player struct {
 	// own socket.
 	socketMutex *sync.Mutex
 
+	// ID uniquely identified the Lobby.
+	ID string
 	// Name is the players displayed name
 	Name string
 	// Score is the points that the player got in the current Lobby.
@@ -155,7 +157,7 @@ func createLobby(
 func createPlayer(name string) *Player {
 	return &Player{
 		Name:        name,
-		UserSession: uuid.NewV4().String(),
+		ID:            uuid.NewV4().String(),
 		Score:       0,
 		Rank:        1,
 		socketMutex: &sync.Mutex{},
