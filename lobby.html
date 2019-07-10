@@ -220,12 +220,82 @@
         }
 
         function setLineWidth(value) {
-            drawingBoard.style.cursor = "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"" + (value + 2) + "\" height=\"" + (value + 2) + "\"><circle cx=\"" + (value / 2) + "\" cy=\"" + (value / 2) + "\" r=\"" + (value / 2) + "\" style=\"fill: red;\"/></svg>') " + (value / 2) + " " + (value / 2) + ", auto";
+            drawingBoard.style.cursor = "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"" + (value + 2) + "\" height=\"" + (value + 2) + "\"><circle cx=\"" + (value / 2) + "\" cy=\"" + (value / 2) + "\" r=\"" + (value / 2) + "\" style=\"fill: black;\"/></svg>') " + (value / 2) + " " + (value / 2) + ", auto";
             localLineWidth = value
         }
 
         function clearCanvas() {
             socket.send(JSON.stringify({ Type: "clear-drawing-board" }));
+        }
+
+        function fill() {
+            var pixelStack = [[e.offsetX, e.offsetY]];
+
+            while (pixelStack.length) {
+                var newPos, x, y, pixelPos, reachLeft, reachRight;
+                newPos = pixelStack.pop();
+                x = newPos[0];
+                y = newPos[1];
+
+                pixelPos = (y * canvasWidth + x) * 4;
+                while (y-- >= drawingBoundTop && matchStartColor(pixelPos)) {
+                    pixelPos -= canvasWidth * 4;
+                }
+                pixelPos += canvasWidth * 4;
+                ++y;
+                reachLeft = false;
+                reachRight = false;
+                while (y++ < canvasHeight - 1 && matchStartColor(pixelPos)) {
+                    colorPixel(pixelPos);
+
+                    if (x > 0) {
+                        if (matchStartColor(pixelPos - 4)) {
+                            if (!reachLeft) {
+                                pixelStack.push([x - 1, y]);
+                                reachLeft = true;
+                            }
+                        }
+                        else if (reachLeft) {
+                            reachLeft = false;
+                        }
+                    }
+
+                    if (x < canvasWidth - 1) {
+                        if (matchStartColor(pixelPos + 4)) {
+                            if (!reachRight) {
+                                pixelStack.push([x + 1, y]);
+                                reachRight = true;
+                            }
+                        }
+                        else if (reachRight) {
+                            reachRight = false;
+                        }
+                    }
+
+                    pixelPos += canvasWidth * 4;
+                }
+            }
+            context.putImageData(colorLayer, 0, 0);
+        }
+
+        function matchStartColor(pixelPos) {
+            var r = colorLayer.data[pixelPos];
+            var g = colorLayer.data[pixelPos + 1];
+            var b = colorLayer.data[pixelPos + 2];
+
+            return (r == startR && g == startG && b == startB);
+        }
+
+        function colorPixel(pixelPos) {
+            var d = document.createElement("div");
+            d.style.color = localColor;
+            var colorProperty = window.getComputedStyle(d, null).getPropertyValue("color");
+            var rgb = colorProperty.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+
+            colorLayer.data[pixelPos] = rgb[1];
+            colorLayer.data[pixelPos + 1] = rgb[2];
+            colorLayer.data[pixelPos + 2] = rgb[3];
+            colorLayer.data[pixelPos + 3] = 255;
         }
 
         const sendMessage = () => {
@@ -400,7 +470,7 @@
                 context.beginPath();
                 context.strokeStyle = color;
                 context.lineWidth = lineWidth;
-    
+
                 context.moveTo(x1, y1);
                 context.lineTo(x2, y2);
                 context.closePath();
