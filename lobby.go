@@ -207,6 +207,50 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 						lobby.Drawer.WriteAsJSON(JSEvent{Type: "your-turn"})
 					}
 				}
+			} else if received.Type == "on-kick-button" {
+				toKickID, isString := (received.Data).(string)
+				toKick := -1
+				if !isString {
+					fmt.Println("Invalid data")
+					continue
+				}
+
+				for index, otherPlayer := range lobby.Players {
+					if otherPlayer.ID == toKickID {
+						toKick = index
+					}
+				}
+
+				if toKick != -1 {
+					if player.votedForKick[toKickID] {
+						continue
+					}
+
+					player.votedForKick[toKickID] = true
+					playerToKick := lobby.Players[toKick]
+					playerToKick.voteKickCount++
+
+					if playerToKick.voteKickCount > 2 {
+						if lobby.Drawer == playerToKick {
+							endRound(lobby)
+						}
+						isPlayerToKickTheLobbyOwner := (lobby.Owner == playerToKick)
+						player.votedForKick[toKickID] = false
+						if playerToKick.ws != nil {
+							playerToKick.ws.Close()
+							playerToKick.ws = nil
+						}
+						lobby.Players = append(lobby.Players[:toKick], lobby.Players[toKick+1:]...)
+
+						recalculateRanks(lobby)
+
+						if isPlayerToKickTheLobbyOwner {
+							lobby.Owner = lobby.Players[rand.Intn(len(lobby.Players))]
+						}
+
+						triggerPlayersUpdate(lobby)
+					}
+				}
 			}
 		}
 	}
@@ -411,6 +455,8 @@ func advanceLobby(lobby *Lobby) {
 	for _, otherPlayer := range lobby.Players {
 		otherPlayer.State = Guessing
 		otherPlayer.Icon = ""
+		otherPlayer.voteKickCount = 0
+		otherPlayer.votedForKick = make(map[string]bool)
 	}
 
 	if lobby.Drawer == nil {

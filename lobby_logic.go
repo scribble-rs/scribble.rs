@@ -32,9 +32,11 @@ type Player struct {
 	// Score is the points that the player got in the current Lobby.
 	Score int
 	// Rank is the current ranking of the player in his Lobby
-	Rank  int
-	State PlayerState
-	Icon  string
+	Rank          int
+	State         PlayerState
+	Icon          string
+	votedForKick  map[string]bool
+	voteKickCount int
 }
 
 type PlayerState int
@@ -91,7 +93,6 @@ type Lobby struct {
 	timeLeftTicker        *time.Ticker
 	timeLeftTickerReset   chan struct{}
 	scoreEarnedByGuessers int
-	votekickMapping       map[string]bool
 	alreadyUsedWords      []string
 	CustomWordsChance     int
 }
@@ -138,7 +139,6 @@ func createLobby(
 		CustomWords:         customWords,
 		CustomWordsChance:   customWordsChance,
 		timeLeftTickerReset: make(chan struct{}),
-		votekickMapping:     make(map[string]bool),
 	}
 
 	if len(customWords) > 1 {
@@ -156,11 +156,14 @@ func createLobby(
 
 func createPlayer(name string) *Player {
 	return &Player{
-		Name:        name,
+		Name:          name,
 		ID:            uuid.NewV4().String(),
-		Score:       0,
-		Rank:        1,
-		socketMutex: &sync.Mutex{},
+		UserSession:   uuid.NewV4().String(),
+		Score:         0,
+		Rank:          1,
+		voteKickCount: 0,
+		votedForKick:  make(map[string]bool),
+		socketMutex:   &sync.Mutex{},
 	}
 }
 

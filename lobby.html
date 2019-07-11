@@ -311,6 +311,10 @@
             wordDialog.style.visibility = "hidden";
         }
 
+        function onClickKickButton(playerId) {
+            socket.send(JSON.stringify({ Type: "on-kick-button", Data: playerId }));
+        }
+
         new MutationObserver(
             () => { messageContainer.scrollTop = messageContainer.scrollHeight; }
         ).observe(messageContainer, { attributes: false, childList: true, subtree: false });
