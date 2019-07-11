@@ -231,7 +231,14 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 					playerToKick := lobby.Players[toKick]
 					playerToKick.voteKickCount++
 
-					if playerToKick.voteKickCount > 2 {
+					votesNeeded := 1
+					if len(lobby.Players) % 2 == 0 {
+						votesNeeded = len(lobby.Players) / 2
+					} else {
+						votesNeeded = (len(lobby.Players) / 2) + 1
+					}
+
+					if playerToKick.voteKickCount > votesNeeded {
 						if lobby.Drawer == playerToKick {
 							endRound(lobby)
 						}
