@@ -312,7 +312,7 @@
         }
 
         function onClickKickButton(playerId) {
-            socket.send(JSON.stringify({ Type: "on-kick-button", Data: playerId }));
+            socket.send(JSON.stringify({ Type: "kick-vote", Data: playerId }));
         }
 
         new MutationObserver(

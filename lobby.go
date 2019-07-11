@@ -207,7 +207,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 						lobby.Drawer.WriteAsJSON(JSEvent{Type: "your-turn"})
 					}
 				}
-			} else if received.Type == "on-kick-button" {
+			} else if received.Type == "kick-vote" {
 				toKickID, isString := (received.Data).(string)
 				toKick := -1
 				if !isString {
