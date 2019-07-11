@@ -295,8 +295,6 @@ func handleCommand(commandString string, caller *Player, lobby *Lobby) {
 		switch strings.ToLower(command[0]) {
 		case "start":
 			commandStart(caller, lobby)
-		case "kick":
-			commandKick(caller, lobby)
 		case "setmp":
 			commandSetMP(caller, lobby, command)
 		case "help":
@@ -314,35 +312,6 @@ func commandStart(caller *Player, lobby *Lobby) {
 		}
 
 		advanceLobby(lobby)
-	}
-}
-
-func commandKick(caller *Player, lobby *Lobby) {
-	if caller != lobby.Drawer {
-		lobby.votekickMapping[caller.UserSession] = true
-		if len(lobby.votekickMapping) >= 3 {
-
-			toKick := -1
-			for index, otherPlayer := range lobby.Players {
-				if otherPlayer == lobby.Drawer {
-					toKick = index
-					break
-				}
-			}
-
-			if toKick != -1 {
-				endRound(lobby)
-
-				playerToKick := lobby.Players[toKick]
-				if playerToKick.ws != nil {
-					playerToKick.ws.Close()
-					playerToKick.ws = nil
-				}
-				lobby.Players = append(lobby.Players[:toKick], lobby.Players[toKick+1:]...)
-				recalculateRanks(lobby)
-				triggerPlayersUpdate(lobby)
-			}
-		}
 	}
 }
 
@@ -420,7 +389,6 @@ func endRound(lobby *Lobby) {
 	lobby.CurrentWord = ""
 
 	lobby.WordHints = nil
-	lobby.votekickMapping = make(map[string]bool)
 
 	for _, otherPlayer := range lobby.Players {
 		if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
