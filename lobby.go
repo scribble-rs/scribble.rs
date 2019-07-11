@@ -321,7 +321,21 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 			votesNeeded = (len(lobby.Players) / 2) + 1
 		}
 
+		kickMessage := &JSEvent{Type: "system-message", Data: fmt.Sprintf("(%d/%d) players voted to kick %s", playerToKick.voteKickCount, votesNeeded, playerToKick.Name)}
+		for _, otherPlayer := range lobby.Players {
+			if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
+				otherPlayer.WriteAsJSON(kickMessage)
+			}
+		}
+
 		if playerToKick.voteKickCount >= votesNeeded {
+			playerHasBeenKickedMsg := &JSEvent{Type: "system-message", Data: fmt.Sprintf("%s has been kicked from the lobby", playerToKick.Name)}
+			for _, otherPlayer := range lobby.Players {
+				if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
+					otherPlayer.WriteAsJSON(playerHasBeenKickedMsg)
+				}
+			}
+			
 			if lobby.Drawer == playerToKick {
 				endRound(lobby)
 			}
