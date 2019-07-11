@@ -209,56 +209,11 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 				}
 			} else if received.Type == "kick-vote" {
 				toKickID, isString := (received.Data).(string)
-				toKick := -1
 				if !isString {
 					fmt.Println("Invalid data")
 					continue
 				}
-
-				for index, otherPlayer := range lobby.Players {
-					if otherPlayer.ID == toKickID {
-						toKick = index
-						break
-					}
-				}
-
-				if toKick != -1 {
-					if player.votedForKick[toKickID] {
-						continue
-					}
-
-					player.votedForKick[toKickID] = true
-					playerToKick := lobby.Players[toKick]
-					playerToKick.voteKickCount++
-
-					votesNeeded := 1
-					if len(lobby.Players) % 2 == 0 {
-						votesNeeded = len(lobby.Players) / 2
-					} else {
-						votesNeeded = (len(lobby.Players) / 2) + 1
-					}
-
-					if playerToKick.voteKickCount > votesNeeded {
-						if lobby.Drawer == playerToKick {
-							endRound(lobby)
-						}
-						isPlayerToKickTheLobbyOwner := (lobby.Owner == playerToKick)
-						player.votedForKick[toKickID] = false
-						if playerToKick.ws != nil {
-							playerToKick.ws.Close()
-							playerToKick.ws = nil
-						}
-						lobby.Players = append(lobby.Players[:toKick], lobby.Players[toKick+1:]...)
-
-						recalculateRanks(lobby)
-
-						if isPlayerToKickTheLobbyOwner {
-							lobby.Owner = lobby.Players[rand.Intn(len(lobby.Players))]
-						}
-
-						triggerPlayersUpdate(lobby)
-					}
-				}
+				handleKickEvent(lobby, player, toKickID)
 			}
 		}
 	}
@@ -337,6 +292,59 @@ func sendMessageToAllNonGuessing(message string, sender *Player, lobby *Lobby) {
 				Author:  html.EscapeString(sender.Name),
 				Content: escaped,
 			}})
+		}
+	}
+}
+
+func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
+	toKick := -1
+	for index, otherPlayer := range lobby.Players {
+		if otherPlayer.ID == toKickID {
+			toKick = index
+			break
+		}
+	}
+
+	if toKick != -1 {
+		if player.votedForKick[toKickID] {
+			return
+		}
+
+		player.votedForKick[toKickID] = true
+		playerToKick := lobby.Players[toKick]
+		playerToKick.voteKickCount++
+
+		votesNeeded := 1
+		if len(lobby.Players) % 2 == 0 {
+			votesNeeded = len(lobby.Players) / 2
+		} else {
+			votesNeeded = (len(lobby.Players) / 2) + 1
+		}
+
+		if playerToKick.voteKickCount >= votesNeeded {
+			if lobby.Drawer == playerToKick {
+				endRound(lobby)
+			}
+			isPlayerToKickTheLobbyOwner := (lobby.Owner == playerToKick)
+			for _, otherPlayer := range lobby.Players {
+				if otherPlayer.votedForKick[toKickID] == true {
+					delete(player.votedForKick, toKickID)
+					break
+				}
+			}
+			if playerToKick.ws != nil {
+				playerToKick.ws.Close()
+				playerToKick.ws = nil
+			}
+			lobby.Players = append(lobby.Players[:toKick], lobby.Players[toKick+1:]...)
+
+			recalculateRanks(lobby)
+
+			if isPlayerToKickTheLobbyOwner {
+				lobby.Owner = lobby.Players[rand.Intn(len(lobby.Players))]
+			}
+
+			triggerPlayersUpdate(lobby)
 		}
 	}
 }
