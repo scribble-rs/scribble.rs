@@ -218,6 +218,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 				for index, otherPlayer := range lobby.Players {
 					if otherPlayer.ID == toKickID {
 						toKick = index
+						break
 					}
 				}
 
