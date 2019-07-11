@@ -2,7 +2,10 @@
     {{range .}}
     <div class="player {{if or (eq .State 2) (eq .State 3) }}player-done{{end}}">
         <span class="rank">{{.Rank}}</span>
-        <span class="playername">{{.Name}}</span>
+        <div class="name-and-buttons">
+            <span class="playername">{{.Name}}</span>
+            <button class="kick-button" id="kick-button" type="button" onclick="onClickKickButton({{.ID}})">👋</button>
+        </div>
         <div class="score-and-status">
             <span class="playerscore">{{.Score}}</span>
             <span>{{.Icon}}</span>
