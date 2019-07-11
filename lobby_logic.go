@@ -25,7 +25,7 @@ type Player struct {
 	// own socket.
 	socketMutex *sync.Mutex
 
-	// ID uniquely identified the Lobby.
+	// ID uniquely identified the Player.
 	ID string
 	// Name is the players displayed name
 	Name string
