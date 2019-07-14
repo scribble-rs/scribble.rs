@@ -213,9 +213,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 					fmt.Println("Invalid data")
 					continue
 				}
-				if toKickID != player.ID {
-					handleKickEvent(lobby, player, toKickID)
-				}
+				handleKickEvent(lobby, player, toKickID)
 			}
 		}
 	}
@@ -305,6 +303,10 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 			toKick = index
 			break
 		}
+	}
+
+	if toKickID == player.ID {
+		return 
 	}
 
 	if toKick != -1 {
