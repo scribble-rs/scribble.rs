@@ -305,6 +305,10 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 		}
 	}
 
+	if toKickID == player.ID {
+		return 
+	}
+
 	if toKick != -1 {
 		if player.votedForKick[toKickID] {
 			return
