@@ -43,7 +43,7 @@
             <div>
                 <canvas id="drawing-board" width="1100" height="600"></canvas>
                 <div style="display: flex; flex-direction: row;">
-                    <input type="color" id="color-picker" onchange="setColor()" value="#000000">
+                    <input type="color" id="color-picker" onchange="setColor()" value="#000000" alt="Current color (Click to change)" title="Current color (Click to change)">
                     <div class="color-button-container">
                         <div class="color-button-row">
                             <button class="color-button" style="background-color: #ffffff"
@@ -129,7 +129,7 @@
                             <div class="dot size-40"></div>
                         </div>
                     </label>
-                    <button class="canvas-button" style="font-size: 2rem;" onclick="clearCanvas()">🗑</button>
+                    <button class="canvas-button" style="font-size: 2rem;" onclick="clearCanvas()" alt="Clear the canvas" title="Clear the canvas">🗑</button>
                 </div>
             </div>
             <div class="chat">
