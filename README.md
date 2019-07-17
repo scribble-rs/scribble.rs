@@ -20,6 +20,10 @@ simply be installed via `go get github.com/scribble-rs/scribble.rs`.
 
 It should run on any system that go supports as a compilation target.
 
+This application uses go modules, therefore you need to make sure that you
+have go version `1.11` or higher and the environment variable `GO111MODULE`
+set to `on`.
+
 ## Contributing
 
 There are many ways you can contribute:
