@@ -300,11 +300,19 @@
                     roundsSpan.innerText = response.responseText;
                 });
             } else if (parsed.Type === "message") {
+                if (messageContainer.childElementCount >= 100) {
+                    messageContainer.removeChild(messageContainer.firstChild)
+                }
+
                 messageContainer.innerHTML += `<div class="message">
                         <span class="chat-name">` + parsed.Data.Author + `</span>
                         <span class="message-content">` + parsed.Data.Content + `</span>
                     </div>`;
             } else if (parsed.Type === "system-message") {
+                if (messageContainer.childElementCount >= 100) {
+                    messageContainer.removeChild(messageContainer.firstChild)
+                }
+
                 messageContainer.innerHTML += `<div class="message system-message">
                         <span class="chat-name">System</span>
                         <span class="message-content">` + parsed.Data + `</span>
