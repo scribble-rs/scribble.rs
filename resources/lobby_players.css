@@ -46,6 +46,7 @@
 .name-and-buttons {
     flex-direction: row;
     display: flex;
+    overflow: hidden;
     justify-content: space-between;
 }
 
