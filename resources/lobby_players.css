@@ -1,6 +1,9 @@
 #player-container {
     display: flex;
     flex-direction: column;
+    grid-column: 1;
+    grid-row-start: 2;
+    grid-row-end: 4;
 }
 
 .player {

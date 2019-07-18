@@ -23,8 +23,8 @@
         </div>
     </div>
     <div class="content-wrapper">
-        <div class="lobby-layout">
-            <div class="top-left-container">
+        <div id="lobby">
+            <div id="top-left-cell">
                 <span id="rounds">Round {{.Round}} of {{.Rounds}}</span>
                 <label for="sound-toggle">
                     <input class="custom-check-or-radio sound-toggle-input" type="checkbox" name="sound-toggle"
@@ -40,103 +40,105 @@
             <div id="player-container">
                 {{template "players" .Players}}
             </div>
-            <div>
-                <canvas id="drawing-board" width="1100" height="600"></canvas>
-                <div style="display: flex; flex-direction: row;">
-                    <input type="color" id="color-picker" onchange="setColor()" value="#000000" alt="Current color (Click to change)" title="Current color (Click to change)">
-                    <div class="color-button-container">
-                        <div class="color-button-row">
-                            <button class="color-button" style="background-color: #ffffff"
-                                onclick="setColor('#ffffff')"></button>
-                            <button class="color-button" style="background-color: #c1c1c1"
-                                onclick="setColor('#c1c1c1')"></button>
-                            <button class="color-button" style="background-color: #ef130b"
-                                onclick="setColor('#ef130b')"></button>
-                            <button class="color-button" style="background-color: #ff7100"
-                                onclick="setColor('#ff7100')"></button>
-                            <button class="color-button" style="background-color: #ffe400"
-                                onclick="setColor('#ffe400')"></button>
-                            <button class="color-button" style="background-color: #00cc00"
-                                onclick="setColor('#00cc00')"></button>
-                            <button class="color-button" style="background-color: #00b2ff"
-                                onclick="setColor('#00b2ff')"></button>
-                            <button class="color-button" style="background-color: #231fd3"
-                                onclick="setColor('#231fd3')"></button>
-                            <button class="color-button" style="background-color: #a300ba"
-                                onclick="setColor('#a300ba')"></button>
-                            <button class="color-button" style="background-color: #d37caa"
-                                onclick="setColor('#d37caa')"></button>
-                            <button class="color-button" style="background-color: #a0522d"
-                                onclick="setColor('#a0522d')"></button>
-                        </div>
-                        <div class="color-button-row">
-                            <button class="color-button" style="background-color: #000000"
-                                onclick="setColor('#000000')"></button>
-                            <button class="color-button" style="background-color: #4c4c4c"
-                                onclick="setColor('#4c4c4c')"></button>
-                            <button class="color-button" style="background-color: #740b07"
-                                onclick="setColor('#740b07')"></button>
-                            <button class="color-button" style="background-color: #c23800"
-                                onclick="setColor('#c23800')"></button>
-                            <button class="color-button" style="background-color: #e8a200"
-                                onclick="setColor('#e8a200')"></button>
-                            <button class="color-button" style="background-color: #005510"
-                                onclick="setColor('#005510')"></button>
-                            <button class="color-button" style="background-color: #00569e"
-                                onclick="setColor('#00569e')"></button>
-                            <button class="color-button" style="background-color: #0e0865"
-                                onclick="setColor('#0e0865')"></button>
-                            <button class="color-button" style="background-color: #550069"
-                                onclick="setColor('#550069')"></button>
-                            <button class="color-button" style="background-color: #a75574"
-                                onclick="setColor('#a75574')"></button>
-                            <button class="color-button" style="background-color: #63300d"
-                                onclick="setColor('#63300d')"></button>
-                        </div>
-                    </div>
-                    <label for="size2">
-                        <input id="size2" class="custom-check-or-radio line-width-button" onchange="setLineWidth(2)"
-                            type="radio" name="line-width" checked>
-                        <div class="line-width-button-content">
-                            <div class="dot size-2"></div>
-                        </div>
-                    </label>
-                    <label for="size5">
-                        <input id="size5" class="custom-check-or-radio line-width-button" onchange="setLineWidth(5)"
-                            type="radio" name="line-width">
-                        <div class="line-width-button-content">
-                            <div class="dot size-5"></div>
-                        </div>
-                    </label>
-                    <label for="size15">
-                        <input id="size15" class="custom-check-or-radio line-width-button" onchange="setLineWidth(15)"
-                            type="radio" name="line-width">
-                        <div class="line-width-button-content">
-                            <div class="dot size-15"></div>
-                        </div>
-                    </label>
-                    <label for="size30">
-                        <input id="size30" class="custom-check-or-radio line-width-button" onchange="setLineWidth(30)"
-                            type="radio" name="line-width">
-                        <div class="line-width-button-content">
-                            <div class="dot size-30"></div>
-                        </div>
-                    </label>
-                    <label for="size40">
-                        <input id="size40" class="custom-check-or-radio line-width-button" onchange="setLineWidth(40)"
-                            type="radio" name="line-width">
-                        <div class="line-width-button-content">
-                            <div class="dot size-40"></div>
-                        </div>
-                    </label>
-                    <button class="canvas-button" style="font-size: 2rem;" onclick="clearCanvas()" alt="Clear the canvas" title="Clear the canvas">🗑</button>
-                </div>
-            </div>
-            <div class="chat">
+
+            <div id="drawing-board-wrapper"><canvas id="drawing-board"></canvas></div>
+
+            <div id="chat">
                 <div id="message-container"></div>
                 <form class="message-input-form" onsubmit="return sendMessage()">
                     <input id="message-input" type="text" autocomplete="off" placeholder="Type your message" />
                 </form>
+            </div>
+            <div id="toolbox">
+                <input type="color" id="color-picker" onchange="setColor()" value="#000000"
+                    alt="Current color (Click to change)" title="Current color (Click to change)">
+                <div class="color-button-container">
+                    <div class="color-button-row">
+                        <button class="color-button" style="background-color: #ffffff"
+                            onclick="setColor('#ffffff')"></button>
+                        <button class="color-button" style="background-color: #c1c1c1"
+                            onclick="setColor('#c1c1c1')"></button>
+                        <button class="color-button" style="background-color: #ef130b"
+                            onclick="setColor('#ef130b')"></button>
+                        <button class="color-button" style="background-color: #ff7100"
+                            onclick="setColor('#ff7100')"></button>
+                        <button class="color-button" style="background-color: #ffe400"
+                            onclick="setColor('#ffe400')"></button>
+                        <button class="color-button" style="background-color: #00cc00"
+                            onclick="setColor('#00cc00')"></button>
+                        <button class="color-button" style="background-color: #00b2ff"
+                            onclick="setColor('#00b2ff')"></button>
+                        <button class="color-button" style="background-color: #231fd3"
+                            onclick="setColor('#231fd3')"></button>
+                        <button class="color-button" style="background-color: #a300ba"
+                            onclick="setColor('#a300ba')"></button>
+                        <button class="color-button" style="background-color: #d37caa"
+                            onclick="setColor('#d37caa')"></button>
+                        <button class="color-button" style="background-color: #a0522d"
+                            onclick="setColor('#a0522d')"></button>
+                    </div>
+                    <div class="color-button-row">
+                        <button class="color-button" style="background-color: #000000"
+                            onclick="setColor('#000000')"></button>
+                        <button class="color-button" style="background-color: #4c4c4c"
+                            onclick="setColor('#4c4c4c')"></button>
+                        <button class="color-button" style="background-color: #740b07"
+                            onclick="setColor('#740b07')"></button>
+                        <button class="color-button" style="background-color: #c23800"
+                            onclick="setColor('#c23800')"></button>
+                        <button class="color-button" style="background-color: #e8a200"
+                            onclick="setColor('#e8a200')"></button>
+                        <button class="color-button" style="background-color: #005510"
+                            onclick="setColor('#005510')"></button>
+                        <button class="color-button" style="background-color: #00569e"
+                            onclick="setColor('#00569e')"></button>
+                        <button class="color-button" style="background-color: #0e0865"
+                            onclick="setColor('#0e0865')"></button>
+                        <button class="color-button" style="background-color: #550069"
+                            onclick="setColor('#550069')"></button>
+                        <button class="color-button" style="background-color: #a75574"
+                            onclick="setColor('#a75574')"></button>
+                        <button class="color-button" style="background-color: #63300d"
+                            onclick="setColor('#63300d')"></button>
+                    </div>
+                </div>
+                <label for="size2">
+                    <input id="size2" class="custom-check-or-radio line-width-button" onchange="setLineWidth(2)"
+                        type="radio" name="line-width" checked>
+                    <div class="line-width-button-content">
+                        <div id="size-2-button" class="dot"></div>
+                    </div>
+                </label>
+                <label for="size5">
+                    <input id="size5" class="custom-check-or-radio line-width-button" onchange="setLineWidth(5)"
+                        type="radio" name="line-width">
+                    <div class="line-width-button-content">
+                        <div id="size-5-button" class="dot"></div>
+                    </div>
+                </label>
+                <label for="size15">
+                    <input id="size15" class="custom-check-or-radio line-width-button" onchange="setLineWidth(15)"
+                        type="radio" name="line-width">
+                    <div class="line-width-button-content">
+                        <div id="size-15-button" class="dot"></div>
+                    </div>
+                </label>
+                <label for="size30">
+                    <input id="size30" class="custom-check-or-radio line-width-button" onchange="setLineWidth(30)"
+                        type="radio" name="line-width">
+                    <div class="line-width-button-content">
+                        <div id="size-30-button" class="dot"></div>
+                    </div>
+                </label>
+                <label for="size40">
+                    <input id="size40" class="custom-check-or-radio line-width-button" onchange="setLineWidth(40)"
+                        type="radio" name="line-width">
+                    <div class="line-width-button-content">
+                        <div id="size-40-button" class="dot"></div>
+                    </div>
+                </label>
+                <button class="canvas-button" style="font-size: 2rem;" onclick="clearCanvas()" alt="Clear the canvas"
+                    title="Clear the canvas">🗑</button>
             </div>
         </div>
     </div>
@@ -205,10 +207,31 @@
             }
         }
 
+        const baseWidth = 1461;
+        const baseHeight = 821;
+
+        drawingBoard.width = (document.getElementById("drawing-board-wrapper").clientWidth - 2);
+        drawingBoard.height = (document.getElementById("drawing-board-wrapper").clientWidth - 2) / (16 / 9);
+        drawingBoard.style.maxWidth = drawingBoard.width + 2;
+        drawingBoard.style.maxHeight = drawingBoard.height + 2;
+        const scaleUpFactor = baseWidth / drawingBoard.width;
+        const scaleDownFactor = drawingBoard.width / baseWidth;
+
         var allowDrawing = false;
         var localColor = "black";
         var localLineWidth;
         setLineWidth(2);
+
+        document.getElementById("size-2-button").style.width = (2 * scaleDownFactor)+"px";
+        document.getElementById("size-2-button").style.height = (2 * scaleDownFactor)+"px";
+        document.getElementById("size-5-button").style.width = (5 * scaleDownFactor)+"px";
+        document.getElementById("size-5-button").style.height = (5 * scaleDownFactor)+"px";
+        document.getElementById("size-15-button").style.width = (15 * scaleDownFactor)+"px";
+        document.getElementById("size-15-button").style.height = (15 * scaleDownFactor)+"px";
+        document.getElementById("size-30-button").style.width = (30 * scaleDownFactor)+"px";
+        document.getElementById("size-30-button").style.height = (30 * scaleDownFactor)+"px";
+        document.getElementById("size-40-button").style.width = (40 * scaleDownFactor)+"px";
+        document.getElementById("size-40-button").style.height = (40 * scaleDownFactor)+"px";
 
         function setColor(value) {
             if (value === undefined) {
@@ -221,7 +244,7 @@
         }
 
         function setLineWidth(value) {
-            localLineWidth = value;
+            localLineWidth = value * scaleDownFactor;
             updateCursor();
         }
 
@@ -229,20 +252,19 @@
             return hex.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i
                 , (m, r, g, b) => '#' + r + r + g + g + b + b)
                 .substring(1).match(/.{2}/g)
-                .map(x => parseInt(x, 16))
+                .map(x => parseInt(x, 16));
         }
 
         function updateCursor() {
             var cursorColor;
             if (localColor.startsWith("#")) {
                 cursorColor = hexToRgb(localColor);
-                cursorColor = "rgb(" + cursorColor[0]+ "," + cursorColor[1] +"," + cursorColor[2] + ")";
+                cursorColor = "rgb(" + cursorColor[0] + "," + cursorColor[1] + "," + cursorColor[2] + ")";
             } else {
                 cursorColor = localColor;
             }
 
             drawingBoard.style.cursor = "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"" + (localLineWidth + 2) + "\" height=\"" + (localLineWidth + 2) + "\"><circle cx=\"" + (localLineWidth / 2) + "\" cy=\"" + (localLineWidth / 2) + "\" r=\"" + (localLineWidth / 2) + "\" style=\"fill: " + cursorColor + ";\"/></svg>') " + (localLineWidth / 2) + " " + (localLineWidth / 2) + ", auto";
-            console.log(drawingBoard.style.cursor)
         }
 
         function clearCanvas() {
@@ -328,7 +350,7 @@
             } else if (parsed.Type === "reset-username") {
                 document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
             } else if (parsed.Type === "pixel") {
-                drawLine(context, parsed.Data.FromX, parsed.Data.FromY, parsed.Data.ToX, parsed.Data.ToY, parsed.Data.Color, parsed.Data.LineWidth);
+                drawLine(context, parsed.Data.FromX * scaleDownFactor, parsed.Data.FromY * scaleDownFactor, parsed.Data.ToX * scaleDownFactor, parsed.Data.ToY * scaleDownFactor, parsed.Data.Color, parsed.Data.LineWidth * scaleDownFactor);
             } else if (parsed.Type === "clear-drawing-board") {
                 context.clearRect(0, 0, drawingBoard.width, drawingBoard.height);
             } else if (parsed.Type === "next-turn") {
@@ -429,16 +451,15 @@
                 context.beginPath();
                 context.fillStyle = color;
                 context.arc(x1, y2, lineWidth / 2, 0, 2 * Math.PI);
-                context.closePath();
                 context.fill();
             } else {
                 context.beginPath();
                 context.strokeStyle = color;
                 context.lineWidth = lineWidth;
+                context.lineCap = "round"
 
                 context.moveTo(x1, y1);
                 context.lineTo(x2, y2);
-                context.closePath();
                 context.stroke();
             }
         }
@@ -447,12 +468,12 @@
             drawLine(context, x1, y1, x2, y2, color, lineWidth)
             socket.send(JSON.stringify({
                 Type: "pixel", Data: {
-                    FromX: x1,
-                    FromY: y1,
-                    ToX: x2,
-                    ToY: y2,
+                    FromX: x1 * scaleUpFactor,
+                    FromY: y1 * scaleUpFactor,
+                    ToX: x2 * scaleUpFactor,
+                    ToY: y2 * scaleUpFactor,
                     Color: color,
-                    LineWidth: lineWidth,
+                    LineWidth: lineWidth * scaleUpFactor,
                 }
             }));
         }
