@@ -24,24 +24,28 @@ var (
 	lobbyCreatePage    *template.Template
 	lobbyPage          *template.Template
 	lobbySettingBounds = &SettingBounds{
-		MinDrawingTime: 60,
-		MaxDrawingTime: 300,
-		MinRounds:      1,
-		MaxRounds:      20,
-		MinMaxPlayers:  2,
-		MaxMaxPlayers:  24,
+		MinDrawingTime:       60,
+		MaxDrawingTime:       300,
+		MinRounds:            1,
+		MaxRounds:            20,
+		MinMaxPlayers:        2,
+		MaxMaxPlayers:        24,
+		MinClientsPerIPLimit: 1,
+		MaxClientsPerIPLimit: 24,
 	}
 )
 
 // SettingBounds defines the lower and upper bounds for the user-specified
 // lobby creation input.
 type SettingBounds struct {
-	MinDrawingTime int64
-	MaxDrawingTime int64
-	MinRounds      int64
-	MaxRounds      int64
-	MinMaxPlayers  int64
-	MaxMaxPlayers  int64
+	MinDrawingTime       int64
+	MaxDrawingTime       int64
+	MinRounds            int64
+	MaxRounds            int64
+	MinMaxPlayers        int64
+	MaxMaxPlayers        int64
+	MinClientsPerIPLimit int64
+	MaxClientsPerIPLimit int64
 }
 
 // CreatePageData defines all non-static data for the lobby create page.
@@ -54,6 +58,7 @@ type CreatePageData struct {
 	MaxPlayers        string
 	CustomWords       string
 	CustomWordsChance string
+	ClientsPerIPLimit string
 }
 
 func createDefaultLobbyCreatePageData() *CreatePageData {
@@ -63,6 +68,7 @@ func createDefaultLobbyCreatePageData() *CreatePageData {
 		Rounds:            "4",
 		MaxPlayers:        "12",
 		CustomWordsChance: "50",
+		ClientsPerIPLimit: "1",
 	}
 }
 
@@ -306,7 +312,7 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 	}
 
 	if toKickID == player.ID {
-		return 
+		return
 	}
 
 	if toKick != -1 {
@@ -319,7 +325,7 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 		playerToKick.voteKickCount++
 
 		votesNeeded := 1
-		if len(lobby.Players) % 2 == 0 {
+		if len(lobby.Players)%2 == 0 {
 			votesNeeded = len(lobby.Players) / 2
 		} else {
 			votesNeeded = (len(lobby.Players) / 2) + 1
@@ -339,7 +345,7 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 					otherPlayer.WriteAsJSON(playerHasBeenKickedMsg)
 				}
 			}
-			
+
 			if lobby.Drawer == playerToKick {
 				endRound(lobby)
 			}
@@ -768,6 +774,7 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 	maxPlayers, maxPlayersInvalid := parseMaxPlayers(r.Form.Get("max_players"))
 	customWords, customWordsInvalid := parseCustomWords(r.Form.Get("custom_words"))
 	customWordChance, customWordChanceInvalid := parseCustomWordsChance(r.Form.Get("custom_words_chance"))
+	clientsPerIPLimit, clientsPerIPLimitInvalid := parseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
 
 	//Prevent resetting the form, since that would be annoying as hell.
 	pageData := CreatePageData{
@@ -778,6 +785,7 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 		MaxPlayers:        r.Form.Get("max_players"),
 		CustomWords:       r.Form.Get("custom_words"),
 		CustomWordsChance: r.Form.Get("custom_words_chance"),
+		ClientsPerIPLimit: r.Form.Get("clients_per_ip_limit"),
 	}
 
 	if passwordInvalid != nil {
@@ -798,6 +806,9 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 	if customWordChanceInvalid != nil {
 		pageData.Errors = append(pageData.Errors, customWordChanceInvalid.Error())
 	}
+	if clientsPerIPLimitInvalid != nil {
+		pageData.Errors = append(pageData.Errors, clientsPerIPLimitInvalid.Error())
+	}
 
 	if len(pageData.Errors) != 0 {
 		err := lobbyCreatePage.ExecuteTemplate(w, "lobby_create.html", pageData)
@@ -805,7 +816,7 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	} else {
-		lobby := createLobby(password, drawingTime, rounds, maxPlayers, customWords, customWordChance)
+		lobby := createLobby(password, drawingTime, rounds, maxPlayers, customWords, customWordChance, clientsPerIPLimit)
 
 		var playerName string
 		usernameCookie, noCookieError := r.Cookie("username")
@@ -884,6 +895,18 @@ func ShowLobby(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			matches := 0
+			for _, otherPlayer := range lobby.Players {
+				if remoteAddressToSimpleIP(otherPlayer.ws.RemoteAddr().String()) == remoteAddressToSimpleIP(r.RemoteAddr) {
+					matches++
+				}
+			}
+
+			if matches >= lobby.clientsPerIPLimit {
+				errorPage.ExecuteTemplate(w, "error.html", "Sorry, but you have exceeded the maximum number of clients per IP.")
+				return
+			}
+
 			var playerName string
 			usernameCookie, noCookieError := r.Cookie("username")
 			if noCookieError == nil {
@@ -934,6 +957,17 @@ func ShowLobby(w http.ResponseWriter, r *http.Request) {
 			lobbyPage.ExecuteTemplate(w, "lobby.html", pageData)
 		}
 	}
+}
+
+func remoteAddressToSimpleIP(input string) string {
+	address := input
+	lastIndexOfDoubleColon := strings.LastIndex(address, ":")
+	if lastIndexOfDoubleColon != -1 {
+		address = address[:lastIndexOfDoubleColon]
+	}
+
+	return strings.TrimSuffix(strings.TrimPrefix(address, "["), "]")
+
 }
 
 // WordHint describes a character of the word that is to be guessed, whether
@@ -1025,6 +1059,23 @@ func parseCustomWords(value string) ([]string, error) {
 	}
 
 	return result, nil
+}
+
+func parseClientsPerIPLimit(value string) (int, error) {
+	result, parseErr := strconv.ParseInt(value, 10, 64)
+	if parseErr != nil {
+		return 0, errors.New("the clients per IP limit must be numeric")
+	}
+
+	if result < lobbySettingBounds.MinClientsPerIPLimit {
+		return 0, fmt.Errorf("the clients per IP limit must not be lower than %d", lobbySettingBounds.MinClientsPerIPLimit)
+	}
+
+	if result > lobbySettingBounds.MaxClientsPerIPLimit {
+		return 0, fmt.Errorf("the clients per IP limit must not be higher than %d", lobbySettingBounds.MaxClientsPerIPLimit)
+	}
+
+	return int(result), nil
 }
 
 func parseCustomWordsChance(value string) (int, error) {

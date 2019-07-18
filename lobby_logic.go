@@ -95,6 +95,7 @@ type Lobby struct {
 	scoreEarnedByGuessers int
 	alreadyUsedWords      []string
 	CustomWordsChance     int
+	clientsPerIPLimit     int
 }
 
 // GetPlayer searches for a player, identifying them by usersssion.
@@ -126,7 +127,8 @@ func createLobby(
 	rounds int,
 	maxPlayers int,
 	customWords []string,
-	customWordsChance int) *Lobby {
+	customWordsChance int,
+	clientsPerIPLimit int) *Lobby {
 
 	createDeleteMutex.Lock()
 
@@ -139,6 +141,7 @@ func createLobby(
 		CustomWords:         customWords,
 		CustomWordsChance:   customWordsChance,
 		timeLeftTickerReset: make(chan struct{}),
+		clientsPerIPLimit:   clientsPerIPLimit,
 	}
 
 	if len(customWords) > 1 {
