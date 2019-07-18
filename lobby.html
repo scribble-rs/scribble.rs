@@ -212,26 +212,26 @@
 
         drawingBoard.width = (document.getElementById("drawing-board-wrapper").clientWidth - 2);
         drawingBoard.height = (document.getElementById("drawing-board-wrapper").clientWidth - 2) / (16 / 9);
-        drawingBoard.style.maxWidth = drawingBoard.width + 2;
-        drawingBoard.style.maxHeight = drawingBoard.height + 2;
+        drawingBoard.style.maxWidth = (drawingBoard.width + 2) + "px";
+        drawingBoard.style.maxHeight = (drawingBoard.height + 2) + "px";
         const scaleUpFactor = baseWidth / drawingBoard.width;
         const scaleDownFactor = drawingBoard.width / baseWidth;
 
         var allowDrawing = false;
-        var localColor = "black";
+        var localColor = "#000000";
         var localLineWidth;
         setLineWidth(2);
 
-        document.getElementById("size-2-button").style.width = (2 * scaleDownFactor)+"px";
-        document.getElementById("size-2-button").style.height = (2 * scaleDownFactor)+"px";
-        document.getElementById("size-5-button").style.width = (5 * scaleDownFactor)+"px";
-        document.getElementById("size-5-button").style.height = (5 * scaleDownFactor)+"px";
-        document.getElementById("size-15-button").style.width = (15 * scaleDownFactor)+"px";
-        document.getElementById("size-15-button").style.height = (15 * scaleDownFactor)+"px";
-        document.getElementById("size-30-button").style.width = (30 * scaleDownFactor)+"px";
-        document.getElementById("size-30-button").style.height = (30 * scaleDownFactor)+"px";
-        document.getElementById("size-40-button").style.width = (40 * scaleDownFactor)+"px";
-        document.getElementById("size-40-button").style.height = (40 * scaleDownFactor)+"px";
+        document.getElementById("size-2-button").style.width = (2 * scaleDownFactor) + "px";
+        document.getElementById("size-2-button").style.height = (2 * scaleDownFactor) + "px";
+        document.getElementById("size-5-button").style.width = (5 * scaleDownFactor) + "px";
+        document.getElementById("size-5-button").style.height = (5 * scaleDownFactor) + "px";
+        document.getElementById("size-15-button").style.width = (15 * scaleDownFactor) + "px";
+        document.getElementById("size-15-button").style.height = (15 * scaleDownFactor) + "px";
+        document.getElementById("size-30-button").style.width = (30 * scaleDownFactor) + "px";
+        document.getElementById("size-30-button").style.height = (30 * scaleDownFactor) + "px";
+        document.getElementById("size-40-button").style.width = (40 * scaleDownFactor) + "px";
+        document.getElementById("size-40-button").style.height = (40 * scaleDownFactor) + "px";
 
         function setColor(value) {
             if (value === undefined) {
