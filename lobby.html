@@ -211,11 +211,11 @@
         const baseHeight = 821;
 
         //FIXME Disgusting trick to fick the layout, css didn't do it for me.
-        document.getElementById("chat").style.maxHeight = (document.getElementById("drawing-board-wrapper").clientWidth - 2) / (16 / 9) + "px";
-        drawingBoard.width = (document.getElementById("drawing-board-wrapper").clientWidth - 2);
-        drawingBoard.height = (document.getElementById("drawing-board-wrapper").clientWidth - 2) / (16 / 9);
-        drawingBoard.style.maxWidth = (drawingBoard.width + 2) + "px";
-        drawingBoard.style.maxHeight = (drawingBoard.height + 2) + "px";
+        document.getElementById("chat").style.maxHeight = (document.getElementById("drawing-board-wrapper").clientWidth) / (16 / 9) + "px";
+        drawingBoard.width = (document.getElementById("drawing-board-wrapper").clientWidth);
+        drawingBoard.height = (document.getElementById("drawing-board-wrapper").clientWidth) / (16 / 9);
+        drawingBoard.style.maxWidth = (drawingBoard.width) + "px";
+        drawingBoard.style.maxHeight = (drawingBoard.height) + "px";
         const scaleUpFactor = baseWidth / drawingBoard.width;
         const scaleDownFactor = drawingBoard.width / baseWidth;
 
