@@ -463,7 +463,12 @@ func commandSetMP(caller *Player, lobby *Lobby, args []string) {
 }
 
 func endRound(lobby *Lobby) {
-	overEvent := &JSEvent{Type: "system-message", Data: fmt.Sprintf("Round over. The word was '%s'", lobby.CurrentWord)}
+	var overEvent *JSEvent
+	if lobby.CurrentWord == "" {
+		overEvent = &JSEvent{Type: "system-message", Data: "Round over. No word was chosen."}
+	} else {
+		overEvent = &JSEvent{Type: "system-message", Data: fmt.Sprintf("Round over. The word was '%s'", lobby.CurrentWord)}
+	}
 
 	averageScore := float64(lobby.scoreEarnedByGuessers) / float64(len(lobby.Players)-1)
 	if averageScore > 0 {
