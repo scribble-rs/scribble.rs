@@ -265,6 +265,7 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 				if sender.State != Disconnected && sender.ws != nil {
 					sender.WriteAsJSON(JSEvent{Type: "update-wordhint"})
 				}
+				recalculateRanks(lobby)
 				triggerCorrectGuessEvent(lobby)
 			}
 
