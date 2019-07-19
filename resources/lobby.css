@@ -1,3 +1,7 @@
+body {
+    background-color: antiquewhite;
+}
+
 .noscript {
     display: flex;
     font-size: 2.5rem;
@@ -49,11 +53,10 @@
 }
 
 #drawing-board {
-    border: 1px solid black;
+    background-color: white;
 }
 
 #chat {
-    border: 1px solid black;
     min-width: 15rem;
     height: 100%;
     display: grid;
@@ -67,6 +70,7 @@
     padding: 5px;
     overflow-y: scroll;
     word-break: break-all;
+    background-color: white;
 }
 
 #word-container {
