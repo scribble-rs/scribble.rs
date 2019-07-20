@@ -198,7 +198,6 @@ body {
 #color-picker {
     border: 0;
     background-color: rgb(218, 218, 218);
-    margin-right: 10px;
     height: 50px;
     width: 50px;
     padding: 0px;
@@ -223,7 +222,6 @@ body {
     width: 50px;
     border: 0;
     background-color: rgb(218, 218, 218);
-    margin-left: 10px;
 }
 
 .canvas-button:hover {
@@ -242,7 +240,6 @@ body {
     border: 1px solid black;
     display: flex;
     flex-direction: column;
-    margin-right: 10px;
 }
 
 .color-button-row {
@@ -270,4 +267,17 @@ body {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+}
+
+.toolbox-group {
+    margin-bottom: 10px;
+    margin-right: 10px;
+}
+
+.toolbox-group:last-child {
+    margin-right: 0;
+}
+
+.pencil-sizes-container {
+    display: flex;
 }
