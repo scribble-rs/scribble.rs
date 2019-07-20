@@ -416,7 +416,7 @@
         }
 
         drawingBoard.onmousedown = function (e) {
-            if (allowDrawing) {
+            if (allowDrawing && e.button === 0) {
                 x = e.offsetX;
                 y = e.offsetY;
                 isDrawing = true;
@@ -440,11 +440,15 @@
         };
 
         var isMouseDown = false;
-        document.onmousedown = function () {
-            isMouseDown = true;
+        document.onmousedown = function (e) {
+            if (e.button === 0) {
+                isMouseDown = true;
+            }
         };
-        document.onmouseup = function () {
-            isMouseDown = false;
+        document.onmouseup = function (e) {
+            if (e.button === 0) {
+                isMouseDown = false;
+            }
         };
 
         drawingBoard.onmouseenter = function (e) {
@@ -456,7 +460,7 @@
         };
 
         drawingBoard.onclick = function (e) {
-            if (allowDrawing) {
+            if (allowDrawing && e.button === 0) {
                 drawLineAndSendEvent(context, e.offsetX, e.offsetY, e.offsetX, e.offsetY, localColor, localLineWidth);
                 isDrawing = false;
             }
