@@ -34,3 +34,7 @@ There are many ways you can contribute:
 * Solve issues by creating Pull Requests
 * Tell your friends about the project
 * Curating the word lists
+
+## Credits
+
+* Favicon - [Fredy Sujono](https://www.iconfinder.com/freud)
