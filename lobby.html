@@ -103,6 +103,23 @@
                     </div>
                 </div>
                 <div class="pencil-sizes-container toolbox-group">
+                    <label for="tool-type-pencil">
+                        <input id="tool-type-pencil" class="custom-check-or-radio line-width-button"
+                            onchange="chooseTool(0)" type="radio" name="tool-type" checked>
+                        <div class="line-width-button-content">
+                            <span id="tool-type-pencil-button" style="font-size: 2rem;">✏️</span>
+                        </div>
+                    </label>
+                    <label for="tool-type-rubber">
+                        <input id="tool-type-rubber" class="custom-check-or-radio line-width-button"
+                            onchange="chooseTool(1)" type="radio" name="tool-type">
+                        <div class="line-width-button-content">
+                            <img alt="Rubber" title="Rubber tool" src="/resources/rubber.svg" width="40px"
+                                height="40px" />
+                        </div>
+                    </label>
+                </div>
+                <div class="pencil-sizes-container toolbox-group">
                     <label for="size2">
                         <input id="size2" class="custom-check-or-radio line-width-button" onchange="setLineWidth(2)"
                             type="radio" name="line-width" checked>
@@ -139,8 +156,8 @@
                         </div>
                     </label>
                 </div>
-                <button class="canvas-button toolbox-group" style="font-size: 2rem;" onclick="clearCanvas()" alt="Clear the canvas"
-                    title="Clear the canvas">🗑</button>
+                <button class="canvas-button toolbox-group" style="font-size: 2rem;" onclick="clearCanvas()"
+                    alt="Clear the canvas" title="Clear the canvas">🗑</button>
             </div>
         </div>
     </div>
@@ -224,6 +241,8 @@
         var allowDrawing = false;
         var localColor = "#000000";
         var localLineWidth;
+        // 0 = pencil; 1 = rubber;
+        var localTool = 0;
         setLineWidth(2);
 
         document.getElementById("size-2-button").style.width = (2 * scaleDownFactor) + "px";
@@ -250,6 +269,15 @@
         function setLineWidth(value) {
             localLineWidth = value * scaleDownFactor;
             updateCursor();
+        }
+
+        function chooseTool(value) {
+            if (value === 1) {
+                localTool = 1;
+            } else {
+                //Everything not Rubber is a pencil.
+                localTool = 0;
+            }
         }
 
         function hexToRgb(hex) {
@@ -487,7 +515,12 @@
         }
 
         function drawLineAndSendEvent(context, x1, y1, x2, y2, color, lineWidth) {
-            drawLine(context, x1, y1, x2, y2, color, lineWidth)
+            if (localTool === 1) {
+                drawLine(context, x1, y1, x2, y2, "white", lineWidth)
+            } else {
+                drawLine(context, x1, y1, x2, y2, color, lineWidth)
+            }
+
             socket.send(JSON.stringify({
                 Type: "pixel", Data: {
                     FromX: x1 * scaleUpFactor,

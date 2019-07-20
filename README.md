@@ -38,3 +38,4 @@ There are many ways you can contribute:
 ## Credits
 
 * Favicon - [Fredy Sujono](https://www.iconfinder.com/freud)
+* Rubber Icon - Made by [Pixel Buddga](https://www.flaticon.com/authors/pixel-buddha) from [flaticon.com](https://flaticon.com)
