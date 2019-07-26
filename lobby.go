@@ -242,9 +242,9 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 		lowerCasedInput := strings.ToLower(trimmed)
 		lowerCasedSearched := strings.ToLower(lobby.CurrentWord)
 		if lowerCasedSearched == lowerCasedInput {
-			playerScore := int(math.Ceil(math.Pow(math.Max(float64(lobby.TimeLeft), 1), 1.3) * 2))
-			sender.Score += playerScore
-			lobby.scoreEarnedByGuessers += playerScore
+			sender.LastScore = int(math.Ceil(math.Pow(math.Max(float64(lobby.TimeLeft), 1), 1.3) * 2))
+			sender.Score += sender.LastScore
+			lobby.scoreEarnedByGuessers += sender.LastScore
 			sender.State = Standby
 			sender.Icon = "✔️"
 			if sender.State != Disconnected && sender.ws != nil {
@@ -472,7 +472,8 @@ func endRound(lobby *Lobby) {
 
 	averageScore := float64(lobby.scoreEarnedByGuessers) / float64(len(lobby.Players)-1)
 	if averageScore > 0 {
-		lobby.Drawer.Score += int(averageScore * float64(1.1))
+		lobby.Drawer.LastScore = int(averageScore * float64(1.1))
+		lobby.Drawer.Score += lobby.Drawer.LastScore
 	}
 	lobby.scoreEarnedByGuessers = 0
 	lobby.alreadyUsedWords = append(lobby.alreadyUsedWords, lobby.CurrentWord)
@@ -903,7 +904,8 @@ func ShowLobby(w http.ResponseWriter, r *http.Request) {
 
 			matches := 0
 			for _, otherPlayer := range lobby.Players {
-				if remoteAddressToSimpleIP(otherPlayer.ws.RemoteAddr().String()) == remoteAddressToSimpleIP(r.RemoteAddr) {
+				socket := otherPlayer.ws
+				if socket != nil && remoteAddressToSimpleIP(socket.RemoteAddr().String()) == remoteAddressToSimpleIP(r.RemoteAddr) {
 					matches++
 				}
 			}
