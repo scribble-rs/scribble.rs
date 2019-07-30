@@ -32,6 +32,7 @@ type Player struct {
 	// Score is the points that the player got in the current Lobby.
 	Score int
 	// Rank is the current ranking of the player in his Lobby
+	LastScore     int
 	Rank          int
 	State         PlayerState
 	Icon          string
