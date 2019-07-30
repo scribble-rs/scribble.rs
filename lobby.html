@@ -516,11 +516,10 @@
 
         function drawLineAndSendEvent(context, x1, y1, x2, y2, color, lineWidth) {
             if (localTool === 1) {
-                drawLine(context, x1, y1, x2, y2, "white", lineWidth)
-            } else {
-                drawLine(context, x1, y1, x2, y2, color, lineWidth)
+                color = "white";
             }
 
+            drawLine(context, x1, y1, x2, y2, color, lineWidth)
             socket.send(JSON.stringify({
                 Type: "pixel", Data: {
                     FromX: x1 * scaleUpFactor,
