@@ -62,6 +62,11 @@
     flex: 1;
 }
 
+.last-turn-score {
+    font-size: 0.8rem;
+    color: lightslategray;
+}
+
 .playername {
     text-overflow: ellipsis;
     white-space: nowrap;

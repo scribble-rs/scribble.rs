@@ -7,7 +7,10 @@
             <button class="kick-button" id="kick-button" type="button" title="Vote to kick this player" alt="Vote to kick this player" onclick="onClickKickButton({{.ID}})">👋</button>
         </div>
         <div class="score-and-status">
-            <span class="playerscore">{{.Score}}</span>
+            <div>
+                <span class="playerscore">{{.Score}}</span>
+                <span class="last-turn-score">(Last turn: {{.LastScore}})</span>
+            </div>
             <span>{{.Icon}}</span>
         </div>
     </div>
