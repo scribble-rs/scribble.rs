@@ -56,10 +56,16 @@
 .score-and-status {
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
 }
 
 .playerscore {
     flex: 1;
+}
+
+.last-turn-score {
+    font-size: 0.8rem;
+    color: lightslategray;
 }
 
 .playername {

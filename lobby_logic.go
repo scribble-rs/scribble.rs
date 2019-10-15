@@ -164,6 +164,7 @@ func createPlayer(name string) *Player {
 		ID:            uuid.NewV4().String(),
 		UserSession:   uuid.NewV4().String(),
 		Score:         0,
+		LastScore:     0,
 		Rank:          1,
 		voteKickCount: 0,
 		votedForKick:  make(map[string]bool),
