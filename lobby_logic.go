@@ -175,13 +175,25 @@ func createPlayer(name string) *Player {
 // WriteAsJSON marshals the given input into a JSON string and sends it to the
 // player using the currently established websocket connection.
 func (p *Player) WriteAsJSON(object interface{}) error {
+	p.socketMutex.Lock()
+	defer p.socketMutex.Unlock()
+
 	if p.ws == nil || p.State == Disconnected {
 		return errors.New("player not connected")
 	}
 
-	p.socketMutex.Lock()
-	err := p.ws.WriteJSON(object)
-	p.socketMutex.Unlock()
+	return p.ws.WriteJSON(object)
+}
 
-	return err
+// WriteMessage sends the given data to the player using the currently
+// established websocket connection.
+func (p *Player) WriteMessage(messageType int, data []byte) error {
+	p.socketMutex.Lock()
+	defer p.socketMutex.Unlock()
+
+	if p.ws == nil || p.State == Disconnected {
+		return errors.New("player not connected")
+	}
+
+	return p.ws.WriteMessage(messageType, data)
 }

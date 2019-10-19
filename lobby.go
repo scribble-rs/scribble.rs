@@ -179,7 +179,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 				if lobby.Drawer == player {
 					for _, otherPlayer := range lobby.Players {
 						if otherPlayer != player && otherPlayer.State != Disconnected && otherPlayer.ws != nil {
-							otherPlayer.ws.WriteMessage(websocket.TextMessage, data)
+							otherPlayer.WriteMessage(websocket.TextMessage, data)
 						}
 					}
 				}
@@ -187,7 +187,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 				if lobby.Drawer == player {
 					for _, otherPlayer := range lobby.Players {
 						if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
-							otherPlayer.ws.WriteMessage(websocket.TextMessage, data)
+							otherPlayer.WriteMessage(websocket.TextMessage, data)
 						}
 					}
 				}
