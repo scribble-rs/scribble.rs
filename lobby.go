@@ -160,7 +160,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if len(lobby.currentDrawing) > 0 {
-		sendError := player.ws.WriteJSON(&JSEvent{
+		sendError := player.WriteAsJSON(&JSEvent{
 			Type: "pixels",
 			Data: lobby.currentDrawing,
 		})
