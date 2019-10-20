@@ -144,6 +144,18 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	ws.SetCloseHandler(func(code int, text string) error {
 		player.State = Disconnected
 		player.ws = nil
+		isAnyPlayerConnected := false
+		for _, player := range lobby.Players {
+			if player.ws != nil && player.State != Disconnected {
+				isAnyPlayerConnected = true
+				break
+			}
+		}
+
+		if !isAnyPlayerConnected {
+			RemoveLobby(lobbyID)
+		}
+
 		return nil
 	})
 
@@ -167,7 +179,6 @@ type PixelEvent struct {
 	Type string
 	Data Pixel
 }
-
 
 func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 	for {

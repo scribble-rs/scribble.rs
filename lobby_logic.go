@@ -141,6 +141,20 @@ func GetLobby(id string) *Lobby {
 	return nil
 }
 
+// RemoveLobby deletes a lobby, not allowing anyone to connect to it again.
+func RemoveLobby(id string) {
+	indexToDelete := -1
+	for index, l := range lobbies {
+		if l.ID == id {
+			indexToDelete = index
+		}
+	}
+
+	if indexToDelete != -1 {
+		lobbies = append(lobbies [:indexToDelete], lobbies[indexToDelete+1:]...)
+	}
+}
+
 func createLobby(
 	password string,
 	drawingTime int,
