@@ -3,535 +3,544 @@
 
 <head>
     <title>Scribble.rs - Game</title>
-    <meta charset="UTF-8" />
-    <link rel="stylesheet" type="text/css" href="/resources/style.css" />
-    <link rel="stylesheet" type="text/css" href="/resources/lobby.css" />
-    <link rel="stylesheet" type="text/css" href="/resources/lobby_players.css" />
-    <link rel="icon" type="image/png" href="/resources/favicon.png" />
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" type="text/css" href="/resources/style.css"/>
+    <link rel="stylesheet" type="text/css" href="/resources/lobby.css"/>
+    <link rel="stylesheet" type="text/css" href="/resources/lobby_players.css"/>
+    <link rel="icon" type="image/png" href="/resources/favicon.png"/>
 </head>
 
 <body>
-    <noscript><span class="noscript">Hey, seems like you've disabled JavaScript.
+<noscript><span class="noscript">Hey, seems like you've disabled JavaScript.
             I get it ... but you are trying to play an interactive drawing game
             here, so you have to turn on JavaScript.</span></noscript>
-    <div id="word-dialog">
-        <span class="word-dialog-text">Choose a word</span>
-        <div class="word-button-container">
-            <button id="word-button-zero" class="word-button" onclick="chooseWord(0)">Placeholder</button>
-            <button id="word-button-one" class="word-button" onclick="chooseWord(1)">Placeholder</button>
-            <button id="word-button-two" class="word-button" onclick="chooseWord(2)">Placeholder</button>
-        </div>
+<div id="word-dialog">
+    <span class="word-dialog-text">Choose a word</span>
+    <div class="word-button-container">
+        <button id="word-button-zero" class="word-button" onclick="chooseWord(0)">Placeholder</button>
+        <button id="word-button-one" class="word-button" onclick="chooseWord(1)">Placeholder</button>
+        <button id="word-button-two" class="word-button" onclick="chooseWord(2)">Placeholder</button>
     </div>
-    <div class="content-wrapper">
-        <div id="lobby">
-            <div id="top-left-cell">
-                <span id="rounds">Round {{.Round}} of {{.Rounds}}</span>
-                <label for="sound-toggle">
-                    <input class="custom-check-or-radio sound-toggle-input" type="checkbox" name="sound-toggle"
-                        onchange="toggleSound()" />
-                    <span id="sound-toggle-label"></span>
+</div>
+<div class="content-wrapper">
+    <div id="lobby">
+        <div id="top-left-cell">
+            <span id="rounds">Round {{.Round}} of {{.Rounds}}</span>
+            <label for="sound-toggle">
+                <input class="custom-check-or-radio sound-toggle-input" type="checkbox" name="sound-toggle"
+                       onchange="toggleSound()"/>
+                <span id="sound-toggle-label"></span>
+            </label>
+        </div>
+        <div id="word-container">
+            {{template "word" .WordHints}}
+        </div>
+        <span id="time-left">Time Left: ∞</span>
+
+        <div id="player-container">
+            {{template "players" .Players}}
+        </div>
+
+        <div id="drawing-board-wrapper">
+            <canvas id="drawing-board"></canvas>
+        </div>
+
+        <div id="chat">
+            <div id="message-container"></div>
+            <form class="message-input-form" onsubmit="return sendMessage()">
+                <input id="message-input" type="text" autocomplete="off" placeholder="Type your message"/>
+            </form>
+        </div>
+        <div id="toolbox">
+            <input class="toolbox-group" type="color" id="color-picker" onchange="setColor()" value="#000000"
+                   alt="Current color (Click to change)" title="Current color (Click to change)">
+            <div class="color-button-container toolbox-group">
+                <div class="color-button-row">
+                    <button class="color-button" style="background-color: #ffffff"
+                            onclick="setColor('#ffffff')"></button>
+                    <button class="color-button" style="background-color: #c1c1c1"
+                            onclick="setColor('#c1c1c1')"></button>
+                    <button class="color-button" style="background-color: #ef130b"
+                            onclick="setColor('#ef130b')"></button>
+                    <button class="color-button" style="background-color: #ff7100"
+                            onclick="setColor('#ff7100')"></button>
+                    <button class="color-button" style="background-color: #ffe400"
+                            onclick="setColor('#ffe400')"></button>
+                    <button class="color-button" style="background-color: #00cc00"
+                            onclick="setColor('#00cc00')"></button>
+                    <button class="color-button" style="background-color: #00b2ff"
+                            onclick="setColor('#00b2ff')"></button>
+                    <button class="color-button" style="background-color: #231fd3"
+                            onclick="setColor('#231fd3')"></button>
+                    <button class="color-button" style="background-color: #a300ba"
+                            onclick="setColor('#a300ba')"></button>
+                    <button class="color-button" style="background-color: #d37caa"
+                            onclick="setColor('#d37caa')"></button>
+                    <button class="color-button" style="background-color: #a0522d"
+                            onclick="setColor('#a0522d')"></button>
+                </div>
+                <div class="color-button-row">
+                    <button class="color-button" style="background-color: #000000"
+                            onclick="setColor('#000000')"></button>
+                    <button class="color-button" style="background-color: #4c4c4c"
+                            onclick="setColor('#4c4c4c')"></button>
+                    <button class="color-button" style="background-color: #740b07"
+                            onclick="setColor('#740b07')"></button>
+                    <button class="color-button" style="background-color: #c23800"
+                            onclick="setColor('#c23800')"></button>
+                    <button class="color-button" style="background-color: #e8a200"
+                            onclick="setColor('#e8a200')"></button>
+                    <button class="color-button" style="background-color: #005510"
+                            onclick="setColor('#005510')"></button>
+                    <button class="color-button" style="background-color: #00569e"
+                            onclick="setColor('#00569e')"></button>
+                    <button class="color-button" style="background-color: #0e0865"
+                            onclick="setColor('#0e0865')"></button>
+                    <button class="color-button" style="background-color: #550069"
+                            onclick="setColor('#550069')"></button>
+                    <button class="color-button" style="background-color: #a75574"
+                            onclick="setColor('#a75574')"></button>
+                    <button class="color-button" style="background-color: #63300d"
+                            onclick="setColor('#63300d')"></button>
+                </div>
+            </div>
+            <div class="pencil-sizes-container toolbox-group">
+                <label for="tool-type-pencil">
+                    <input id="tool-type-pencil" class="custom-check-or-radio line-width-button"
+                           onchange="chooseTool(0)" type="radio" name="tool-type" checked>
+                    <div class="line-width-button-content">
+                        <span id="tool-type-pencil-button" style="font-size: 2rem;">✏️</span>
+                    </div>
+                </label>
+                <label for="tool-type-rubber">
+                    <input id="tool-type-rubber" class="custom-check-or-radio line-width-button"
+                           onchange="chooseTool(1)" type="radio" name="tool-type">
+                    <div class="line-width-button-content">
+                        <img alt="Rubber" title="Rubber tool" src="/resources/rubber.svg" width="40px"
+                             height="40px"/>
+                    </div>
                 </label>
             </div>
-            <div id="word-container">
-                {{template "word" .WordHints}}
-            </div>
-            <span id="time-left">Time Left: ∞</span>
-
-            <div id="player-container">
-                {{template "players" .Players}}
-            </div>
-
-            <div id="drawing-board-wrapper"><canvas id="drawing-board"></canvas></div>
-
-            <div id="chat">
-                <div id="message-container"></div>
-                <form class="message-input-form" onsubmit="return sendMessage()">
-                    <input id="message-input" type="text" autocomplete="off" placeholder="Type your message" />
-                </form>
-            </div>
-            <div id="toolbox">
-                <input class="toolbox-group" type="color" id="color-picker" onchange="setColor()" value="#000000"
-                    alt="Current color (Click to change)" title="Current color (Click to change)">
-                <div class="color-button-container toolbox-group">
-                    <div class="color-button-row">
-                        <button class="color-button" style="background-color: #ffffff"
-                            onclick="setColor('#ffffff')"></button>
-                        <button class="color-button" style="background-color: #c1c1c1"
-                            onclick="setColor('#c1c1c1')"></button>
-                        <button class="color-button" style="background-color: #ef130b"
-                            onclick="setColor('#ef130b')"></button>
-                        <button class="color-button" style="background-color: #ff7100"
-                            onclick="setColor('#ff7100')"></button>
-                        <button class="color-button" style="background-color: #ffe400"
-                            onclick="setColor('#ffe400')"></button>
-                        <button class="color-button" style="background-color: #00cc00"
-                            onclick="setColor('#00cc00')"></button>
-                        <button class="color-button" style="background-color: #00b2ff"
-                            onclick="setColor('#00b2ff')"></button>
-                        <button class="color-button" style="background-color: #231fd3"
-                            onclick="setColor('#231fd3')"></button>
-                        <button class="color-button" style="background-color: #a300ba"
-                            onclick="setColor('#a300ba')"></button>
-                        <button class="color-button" style="background-color: #d37caa"
-                            onclick="setColor('#d37caa')"></button>
-                        <button class="color-button" style="background-color: #a0522d"
-                            onclick="setColor('#a0522d')"></button>
+            <div class="pencil-sizes-container toolbox-group">
+                <label for="size2">
+                    <input id="size2" class="custom-check-or-radio line-width-button" onchange="setLineWidth(2)"
+                           type="radio" name="line-width" checked>
+                    <div class="line-width-button-content">
+                        <div id="size-2-button" class="dot"></div>
                     </div>
-                    <div class="color-button-row">
-                        <button class="color-button" style="background-color: #000000"
-                            onclick="setColor('#000000')"></button>
-                        <button class="color-button" style="background-color: #4c4c4c"
-                            onclick="setColor('#4c4c4c')"></button>
-                        <button class="color-button" style="background-color: #740b07"
-                            onclick="setColor('#740b07')"></button>
-                        <button class="color-button" style="background-color: #c23800"
-                            onclick="setColor('#c23800')"></button>
-                        <button class="color-button" style="background-color: #e8a200"
-                            onclick="setColor('#e8a200')"></button>
-                        <button class="color-button" style="background-color: #005510"
-                            onclick="setColor('#005510')"></button>
-                        <button class="color-button" style="background-color: #00569e"
-                            onclick="setColor('#00569e')"></button>
-                        <button class="color-button" style="background-color: #0e0865"
-                            onclick="setColor('#0e0865')"></button>
-                        <button class="color-button" style="background-color: #550069"
-                            onclick="setColor('#550069')"></button>
-                        <button class="color-button" style="background-color: #a75574"
-                            onclick="setColor('#a75574')"></button>
-                        <button class="color-button" style="background-color: #63300d"
-                            onclick="setColor('#63300d')"></button>
+                </label>
+                <label for="size5">
+                    <input id="size5" class="custom-check-or-radio line-width-button" onchange="setLineWidth(5)"
+                           type="radio" name="line-width">
+                    <div class="line-width-button-content">
+                        <div id="size-5-button" class="dot"></div>
                     </div>
-                </div>
-                <div class="pencil-sizes-container toolbox-group">
-                    <label for="tool-type-pencil">
-                        <input id="tool-type-pencil" class="custom-check-or-radio line-width-button"
-                            onchange="chooseTool(0)" type="radio" name="tool-type" checked>
-                        <div class="line-width-button-content">
-                            <span id="tool-type-pencil-button" style="font-size: 2rem;">✏️</span>
-                        </div>
-                    </label>
-                    <label for="tool-type-rubber">
-                        <input id="tool-type-rubber" class="custom-check-or-radio line-width-button"
-                            onchange="chooseTool(1)" type="radio" name="tool-type">
-                        <div class="line-width-button-content">
-                            <img alt="Rubber" title="Rubber tool" src="/resources/rubber.svg" width="40px"
-                                height="40px" />
-                        </div>
-                    </label>
-                </div>
-                <div class="pencil-sizes-container toolbox-group">
-                    <label for="size2">
-                        <input id="size2" class="custom-check-or-radio line-width-button" onchange="setLineWidth(2)"
-                            type="radio" name="line-width" checked>
-                        <div class="line-width-button-content">
-                            <div id="size-2-button" class="dot"></div>
-                        </div>
-                    </label>
-                    <label for="size5">
-                        <input id="size5" class="custom-check-or-radio line-width-button" onchange="setLineWidth(5)"
-                            type="radio" name="line-width">
-                        <div class="line-width-button-content">
-                            <div id="size-5-button" class="dot"></div>
-                        </div>
-                    </label>
-                    <label for="size15">
-                        <input id="size15" class="custom-check-or-radio line-width-button" onchange="setLineWidth(15)"
-                            type="radio" name="line-width">
-                        <div class="line-width-button-content">
-                            <div id="size-15-button" class="dot"></div>
-                        </div>
-                    </label>
-                    <label for="size30">
-                        <input id="size30" class="custom-check-or-radio line-width-button" onchange="setLineWidth(30)"
-                            type="radio" name="line-width">
-                        <div class="line-width-button-content">
-                            <div id="size-30-button" class="dot"></div>
-                        </div>
-                    </label>
-                    <label for="size40">
-                        <input id="size40" class="custom-check-or-radio line-width-button" onchange="setLineWidth(40)"
-                            type="radio" name="line-width">
-                        <div class="line-width-button-content">
-                            <div id="size-40-button" class="dot"></div>
-                        </div>
-                    </label>
-                </div>
-                <button class="canvas-button toolbox-group" style="font-size: 2rem;" onclick="clearCanvas()"
-                    alt="Clear the canvas" title="Clear the canvas">🗑</button>
+                </label>
+                <label for="size15">
+                    <input id="size15" class="custom-check-or-radio line-width-button" onchange="setLineWidth(15)"
+                           type="radio" name="line-width">
+                    <div class="line-width-button-content">
+                        <div id="size-15-button" class="dot"></div>
+                    </div>
+                </label>
+                <label for="size30">
+                    <input id="size30" class="custom-check-or-radio line-width-button" onchange="setLineWidth(30)"
+                           type="radio" name="line-width">
+                    <div class="line-width-button-content">
+                        <div id="size-30-button" class="dot"></div>
+                    </div>
+                </label>
+                <label for="size40">
+                    <input id="size40" class="custom-check-or-radio line-width-button" onchange="setLineWidth(40)"
+                           type="radio" name="line-width">
+                    <div class="line-width-button-content">
+                        <div id="size-40-button" class="dot"></div>
+                    </div>
+                </label>
             </div>
+            <button class="canvas-button toolbox-group" style="font-size: 2rem;" onclick="clearCanvas()"
+                    alt="Clear the canvas" title="Clear the canvas">🗑
+            </button>
         </div>
     </div>
+</div>
 
-    {{template "footer"}}
+{{template "footer"}}
 
-    <script>
-        function httpGetAsync(theUrl, callback) {
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", theUrl, true);
-            xhr.onload = function (e) {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        callback(xhr);
-                    } else {
-                        console.error(xhr.statusText);
-                    }
+<script>
+    function httpGetAsync(theUrl, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", theUrl, true);
+        xhr.onload = function (e) {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    callback(xhr);
+                } else {
+                    console.error(xhr.statusText);
                 }
-            };
-            xhr.onerror = function (e) {
-                console.error(xhr.statusText);
-            };
-            xhr.send(null);
-        }
+            }
+        };
+        xhr.onerror = function (e) {
+            console.error(xhr.statusText);
+        };
+        xhr.send(null);
+    }
 
-        console.log("Attempting Connection...");
-        const socket = new WebSocket("ws://" + location.hostname + ":{{.Port}}/ws?id={{.LobbyID}}");
+    console.log("Attempting Connection...");
+    const socket = new WebSocket("ws://" + location.hostname + ":{{.Port}}/ws?id={{.LobbyID}}");
 
-        const messageInput = document.getElementById("message-input");
-        const playerContainer = document.getElementById("player-container");
-        const wordContainer = document.getElementById("word-container");
-        const messageContainer = document.getElementById("message-container");
-        const roundsSpan = document.getElementById("rounds");
-        const timeLeft = document.getElementById("time-left");
-        const drawingBoard = document.getElementById("drawing-board");
-        const context = drawingBoard.getContext("2d");
-        context.lineJoin = "round"
-        const colorPicker = document.getElementById("color-picker");
-        const lineWidthChooser = document.getElementById("line-width");
-        const wordDialog = document.getElementById("word-dialog");
-        const wordButtonZero = document.getElementById("word-button-zero");
-        const wordButtonOne = document.getElementById("word-button-one");
-        const wordButtonTwo = document.getElementById("word-button-two");
+    const messageInput = document.getElementById("message-input");
+    const playerContainer = document.getElementById("player-container");
+    const wordContainer = document.getElementById("word-container");
+    const messageContainer = document.getElementById("message-container");
+    const roundsSpan = document.getElementById("rounds");
+    const timeLeft = document.getElementById("time-left");
+    const drawingBoard = document.getElementById("drawing-board");
+    const context = drawingBoard.getContext("2d");
+    context.lineJoin = "round"
+    const colorPicker = document.getElementById("color-picker");
+    const lineWidthChooser = document.getElementById("line-width");
+    const wordDialog = document.getElementById("word-dialog");
+    const wordButtonZero = document.getElementById("word-button-zero");
+    const wordButtonOne = document.getElementById("word-button-one");
+    const wordButtonTwo = document.getElementById("word-button-two");
 
-        const noSoundIcon = "🔇"
-        const soundIcon = "🔊"
-        const soundToggleLabel = document.getElementById("sound-toggle-label");
-        var sound;
-        if (localStorage.getItem("sound") === "false") {
+    const noSoundIcon = "🔇"
+    const soundIcon = "🔊"
+    const soundToggleLabel = document.getElementById("sound-toggle-label");
+    var sound;
+    if (localStorage.getItem("sound") === "false") {
+        sound = false;
+        soundToggleLabel.innerText = noSoundIcon;
+    } else {
+        sound = true;
+        soundToggleLabel.innerText = soundIcon;
+    }
+
+    function toggleSound() {
+        if (sound) {
+            localStorage.setItem("sound", "false")
             sound = false;
             soundToggleLabel.innerText = noSoundIcon;
         } else {
+            localStorage.setItem("sound", "true")
             sound = true;
             soundToggleLabel.innerText = soundIcon;
         }
+    }
 
-        function toggleSound() {
+    const baseWidth = 1461;
+    const baseHeight = 821;
+
+    //FIXME Disgusting trick to fick the layout, css didn't do it for me.
+    document.getElementById("chat").style.maxHeight = (document.getElementById("drawing-board-wrapper").clientWidth) / (16 / 9) + "px";
+    drawingBoard.width = (document.getElementById("drawing-board-wrapper").clientWidth);
+    drawingBoard.height = (document.getElementById("drawing-board-wrapper").clientWidth) / (16 / 9);
+    drawingBoard.style.maxWidth = (drawingBoard.width) + "px";
+    drawingBoard.style.maxHeight = (drawingBoard.height) + "px";
+    const scaleUpFactor = baseWidth / drawingBoard.width;
+    const scaleDownFactor = drawingBoard.width / baseWidth;
+
+    var allowDrawing = false;
+    var localColor = "#000000";
+    var localLineWidth;
+    // 0 = pencil; 1 = rubber;
+    var localTool = 0;
+    setLineWidth(2);
+
+    document.getElementById("size-2-button").style.width = (2 * scaleDownFactor) + "px";
+    document.getElementById("size-2-button").style.height = (2 * scaleDownFactor) + "px";
+    document.getElementById("size-5-button").style.width = (5 * scaleDownFactor) + "px";
+    document.getElementById("size-5-button").style.height = (5 * scaleDownFactor) + "px";
+    document.getElementById("size-15-button").style.width = (15 * scaleDownFactor) + "px";
+    document.getElementById("size-15-button").style.height = (15 * scaleDownFactor) + "px";
+    document.getElementById("size-30-button").style.width = (30 * scaleDownFactor) + "px";
+    document.getElementById("size-30-button").style.height = (30 * scaleDownFactor) + "px";
+    document.getElementById("size-40-button").style.width = (40 * scaleDownFactor) + "px";
+    document.getElementById("size-40-button").style.height = (40 * scaleDownFactor) + "px";
+
+    function setColor(value) {
+        if (value === undefined) {
+            localColor = colorPicker.value;
+        } else {
+            localColor = value;
+            colorPicker.value = value;
+        }
+        updateCursor();
+    }
+
+    function setLineWidth(value) {
+        localLineWidth = value * scaleDownFactor;
+        updateCursor();
+    }
+
+    function chooseTool(value) {
+        if (value === 1) {
+            localTool = 1;
+        } else {
+            //Everything not Rubber is a pencil.
+            localTool = 0;
+        }
+    }
+
+    function hexToRgb(hex) {
+        return hex.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i
+            , (m, r, g, b) => '#' + r + r + g + g + b + b)
+            .substring(1).match(/.{2}/g)
+            .map(x => parseInt(x, 16));
+    }
+
+    function updateCursor() {
+        var cursorColor;
+        var borderColor = "white";
+        if (localColor.startsWith("#")) {
+            cursorColor = hexToRgb(localColor);
+
+            hsp = Math.sqrt(
+                0.299 * (cursorColor[0] * cursorColor[0]) +
+                0.587 * (cursorColor[1] * cursorColor[1]) +
+                0.114 * (cursorColor[2] * cursorColor[2])
+            );
+
+            if (hsp > 127.5) {
+                borderColor = "rgb(0,0,0)";
+            } else {
+                borderColor = "rgb(255,255,255)";
+            }
+
+            cursorColor = "rgb(" + cursorColor[0] + "," + cursorColor[1] + "," + cursorColor[2] + ")";
+        } else {
+            cursorColor = localColor;
+        }
+
+        drawingBoard.style.cursor = "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"" + (localLineWidth + 2) + "\" height=\"" + (localLineWidth + 2) + "\"><circle cx=\"" + (localLineWidth / 2) + "\" cy=\"" + (localLineWidth / 2) + "\" r=\"" + (localLineWidth / 2) + "\" style=\"fill: " + cursorColor + "; stroke: " + borderColor + ";\"/></svg>') " + (localLineWidth / 2) + " " + (localLineWidth / 2) + ", auto";
+    }
+
+    function clearCanvas() {
+        socket.send(JSON.stringify({Type: "clear-drawing-board"}));
+    }
+
+    const sendMessage = () => {
+        socket.send(JSON.stringify({Type: "message", Data: messageInput.value}));
+        messageInput.value = "";
+
+        // Necessary in order to keep the page from submitting.
+        return false;
+    }
+
+    function chooseWord(index) {
+        socket.send(JSON.stringify({Type: "choose-word", Data: index}));
+        wordDialog.style.visibility = "hidden";
+    }
+
+    function onClickKickButton(playerId) {
+        socket.send(JSON.stringify({Type: "kick-vote", Data: playerId}));
+    }
+
+    new MutationObserver(
+        () => {
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+    ).observe(messageContainer, {attributes: false, childList: true, subtree: false});
+
+    socket.onopen = () => {
+        console.log("Successfully Connected");
+    };
+
+    socket.onmessage = event => {
+        var parsed = JSON.parse(event.data);
+        if (parsed.Type === "update-players") {
+            httpGetAsync("/lobby/players?id={{.LobbyID}}", response => {
+                playerContainer.innerHTML = response.responseText;
+            });
+        } else if (parsed.Type === "correct-guess") {
             if (sound) {
-                localStorage.setItem("sound", "false")
-                sound = false;
-                soundToggleLabel.innerText = noSoundIcon;
-            } else {
-                localStorage.setItem("sound", "true")
-                sound = true;
-                soundToggleLabel.innerText = soundIcon;
-            }
-        }
+                var audio = new Audio('/resources/plop.wav');
+                audio.type = 'audio/wav';
 
-        const baseWidth = 1461;
-        const baseHeight = 821;
-
-        //FIXME Disgusting trick to fick the layout, css didn't do it for me.
-        document.getElementById("chat").style.maxHeight = (document.getElementById("drawing-board-wrapper").clientWidth) / (16 / 9) + "px";
-        drawingBoard.width = (document.getElementById("drawing-board-wrapper").clientWidth);
-        drawingBoard.height = (document.getElementById("drawing-board-wrapper").clientWidth) / (16 / 9);
-        drawingBoard.style.maxWidth = (drawingBoard.width) + "px";
-        drawingBoard.style.maxHeight = (drawingBoard.height) + "px";
-        const scaleUpFactor = baseWidth / drawingBoard.width;
-        const scaleDownFactor = drawingBoard.width / baseWidth;
-
-        var allowDrawing = false;
-        var localColor = "#000000";
-        var localLineWidth;
-        // 0 = pencil; 1 = rubber;
-        var localTool = 0;
-        setLineWidth(2);
-
-        document.getElementById("size-2-button").style.width = (2 * scaleDownFactor) + "px";
-        document.getElementById("size-2-button").style.height = (2 * scaleDownFactor) + "px";
-        document.getElementById("size-5-button").style.width = (5 * scaleDownFactor) + "px";
-        document.getElementById("size-5-button").style.height = (5 * scaleDownFactor) + "px";
-        document.getElementById("size-15-button").style.width = (15 * scaleDownFactor) + "px";
-        document.getElementById("size-15-button").style.height = (15 * scaleDownFactor) + "px";
-        document.getElementById("size-30-button").style.width = (30 * scaleDownFactor) + "px";
-        document.getElementById("size-30-button").style.height = (30 * scaleDownFactor) + "px";
-        document.getElementById("size-40-button").style.width = (40 * scaleDownFactor) + "px";
-        document.getElementById("size-40-button").style.height = (40 * scaleDownFactor) + "px";
-
-        function setColor(value) {
-            if (value === undefined) {
-                localColor = colorPicker.value;
-            } else {
-                localColor = value;
-                colorPicker.value = value;
-            }
-            updateCursor();
-        }
-
-        function setLineWidth(value) {
-            localLineWidth = value * scaleDownFactor;
-            updateCursor();
-        }
-
-        function chooseTool(value) {
-            if (value === 1) {
-                localTool = 1;
-            } else {
-                //Everything not Rubber is a pencil.
-                localTool = 0;
-            }
-        }
-
-        function hexToRgb(hex) {
-            return hex.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i
-                , (m, r, g, b) => '#' + r + r + g + g + b + b)
-                .substring(1).match(/.{2}/g)
-                .map(x => parseInt(x, 16));
-        }
-
-        function updateCursor() {
-            var cursorColor;
-            var borderColor = "white";
-            if (localColor.startsWith("#")) {
-                cursorColor = hexToRgb(localColor);
-
-                hsp = Math.sqrt(
-                    0.299 * (cursorColor[0] * cursorColor[0]) +
-                    0.587 * (cursorColor[1] * cursorColor[1]) +
-                    0.114 * (cursorColor[2] * cursorColor[2])
-                );
-
-                if (hsp > 127.5) {
-                    borderColor = "rgb(0,0,0)";
-                } else {
-                    borderColor = "rgb(255,255,255)";
-                }
-
-                cursorColor = "rgb(" + cursorColor[0] + "," + cursorColor[1] + "," + cursorColor[2] + ")";
-            } else {
-                cursorColor = localColor;
+                audio.play();
             }
 
-            drawingBoard.style.cursor = "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"" + (localLineWidth + 2) + "\" height=\"" + (localLineWidth + 2) + "\"><circle cx=\"" + (localLineWidth / 2) + "\" cy=\"" + (localLineWidth / 2) + "\" r=\"" + (localLineWidth / 2) + "\" style=\"fill: " + cursorColor + "; stroke: " + borderColor + ";\"/></svg>') " + (localLineWidth / 2) + " " + (localLineWidth / 2) + ", auto";
-        }
+            httpGetAsync("/lobby/players?id={{.LobbyID}}", response => {
+                playerContainer.innerHTML = response.responseText;
+            });
+        } else if (parsed.Type === "update-wordhint") {
+            httpGetAsync("/lobby/wordhint?id={{.LobbyID}}", response => {
+                wordContainer.innerHTML = response.responseText;
+            });
+        } else if (parsed.Type === "update-rounds") {
+            httpGetAsync("/lobby/rounds?id={{.LobbyID}}", response => {
+                roundsSpan.innerText = response.responseText;
+            });
+        } else if (parsed.Type === "message") {
+            if (messageContainer.childElementCount >= 100) {
+                messageContainer.removeChild(messageContainer.firstChild)
+            }
 
-        function clearCanvas() {
-            socket.send(JSON.stringify({ Type: "clear-drawing-board" }));
-        }
-
-        const sendMessage = () => {
-            socket.send(JSON.stringify({ Type: "message", Data: messageInput.value }));
-            messageInput.value = "";
-
-            // Necessary in order to keep the page from submitting.
-            return false;
-        }
-
-        function chooseWord(index) {
-            socket.send(JSON.stringify({ Type: "choose-word", Data: index }));
-            wordDialog.style.visibility = "hidden";
-        }
-
-        function onClickKickButton(playerId) {
-            socket.send(JSON.stringify({ Type: "kick-vote", Data: playerId }));
-        }
-
-        new MutationObserver(
-            () => { messageContainer.scrollTop = messageContainer.scrollHeight; }
-        ).observe(messageContainer, { attributes: false, childList: true, subtree: false });
-
-        socket.onopen = () => {
-            console.log("Successfully Connected");
-        };
-
-        socket.onmessage = event => {
-            var parsed = JSON.parse(event.data);
-            if (parsed.Type === "update-players") {
-                httpGetAsync("/lobby/players?id={{.LobbyID}}", response => {
-                    playerContainer.innerHTML = response.responseText;
-                });
-            } else if (parsed.Type === "correct-guess") {
-                if (sound) {
-                    var audio = new Audio('/resources/plop.wav');
-                    audio.type = 'audio/wav';
-
-                    audio.play();
-                }
-
-                httpGetAsync("/lobby/players?id={{.LobbyID}}", response => {
-                    playerContainer.innerHTML = response.responseText;
-                });
-            } else if (parsed.Type === "update-wordhint") {
-                httpGetAsync("/lobby/wordhint?id={{.LobbyID}}", response => {
-                    wordContainer.innerHTML = response.responseText;
-                });
-            } else if (parsed.Type === "update-rounds") {
-                httpGetAsync("/lobby/rounds?id={{.LobbyID}}", response => {
-                    roundsSpan.innerText = response.responseText;
-                });
-            } else if (parsed.Type === "message") {
-                if (messageContainer.childElementCount >= 100) {
-                    messageContainer.removeChild(messageContainer.firstChild)
-                }
-
-                messageContainer.innerHTML += `<div class="message">
+            messageContainer.innerHTML += `<div class="message">
                         <span class="chat-name">` + parsed.Data.Author + `</span>
                         <span class="message-content">` + parsed.Data.Content + `</span>
                     </div>`;
-            } else if (parsed.Type === "system-message") {
-                if (messageContainer.childElementCount >= 100) {
-                    messageContainer.removeChild(messageContainer.firstChild)
-                }
+        } else if (parsed.Type === "system-message") {
+            if (messageContainer.childElementCount >= 100) {
+                messageContainer.removeChild(messageContainer.firstChild)
+            }
 
-                messageContainer.innerHTML += `<div class="message system-message">
+            messageContainer.innerHTML += `<div class="message system-message">
                         <span class="chat-name">System</span>
                         <span class="message-content">` + parsed.Data + `</span>
                     </div>`;
-            } else if (parsed.Type === "non-guessing-player-message") {
-                messageContainer.innerHTML += `<div class="non-guessing-player-message">
+        } else if (parsed.Type === "non-guessing-player-message") {
+            messageContainer.innerHTML += `<div class="non-guessing-player-message">
                         <span class="chat-name">` + parsed.Data.Author + `</span>
                         <span class="message-content">` + parsed.Data.Content + `</span>
                     </div>`;
-            } else if (parsed.Type === "persist-username") {
-                //TODO GMT date for consistency?
-                document.cookie = "username=" + parsed.Data + ";expires=Tue, 19 Jan 2038 03:14:07 UTC;path=/;samesite=strict";
-            } else if (parsed.Type === "reset-username") {
-                document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-            } else if (parsed.Type === "pixel") {
-                drawLine(context, parsed.Data.FromX * scaleDownFactor, parsed.Data.FromY * scaleDownFactor, parsed.Data.ToX * scaleDownFactor, parsed.Data.ToY * scaleDownFactor, parsed.Data.Color, parsed.Data.LineWidth * scaleDownFactor);
-            } else if (parsed.Type === "clear-drawing-board") {
-                context.clearRect(0, 0, drawingBoard.width, drawingBoard.height);
-            } else if (parsed.Type === "next-turn") {
-                if (sound) {
-                    var audio = new Audio('/resources/end-turn.wav');
-                    audio.type = 'audio/wav';
+        } else if (parsed.Type === "persist-username") {
+            //TODO GMT date for consistency?
+            document.cookie = "username=" + parsed.Data + ";expires=Tue, 19 Jan 2038 03:14:07 UTC;path=/;samesite=strict";
+        } else if (parsed.Type === "reset-username") {
+            document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        } else if (parsed.Type === "pixel") {
+            drawLine(context, parsed.Data.FromX * scaleDownFactor, parsed.Data.FromY * scaleDownFactor, parsed.Data.ToX * scaleDownFactor, parsed.Data.ToY * scaleDownFactor, parsed.Data.Color, parsed.Data.LineWidth * scaleDownFactor);
+        } else if (parsed.Type === "pixels") {
+            parsed.Data.forEach(function(pixel) {
+                drawLine(context, pixel.FromX * scaleDownFactor, pixel.FromY * scaleDownFactor, pixel.ToX * scaleDownFactor, pixel.ToY * scaleDownFactor, pixel.Color, pixel.LineWidth * scaleDownFactor);
+            });
+        } else if (parsed.Type === "clear-drawing-board") {
+            context.clearRect(0, 0, drawingBoard.width, drawingBoard.height);
+        } else if (parsed.Type === "next-turn") {
+            if (sound) {
+                var audio = new Audio('/resources/end-turn.wav');
+                audio.type = 'audio/wav';
 
-                    audio.play();
-                }
-
-                context.clearRect(0, 0, drawingBoard.width, drawingBoard.height);
-
-                allowDrawing = false;
-            } else if (parsed.Type === "your-turn") {
-                allowDrawing = true;
-            } else if (parsed.Type === "update-time") {
-                timeLeft.innerText = "Time Left: " + parsed.Data;
-            } else if (parsed.Type === "prompt-words") {
-                if (sound) {
-                    var audio = new Audio('/resources/your-turn.wav');
-                    audio.type = 'audio/wav';
-
-                    audio.play();
-                }
-
-                wordButtonZero.textContent = parsed.Data[0];
-                wordButtonOne.textContent = parsed.Data[1];
-                wordButtonTwo.textContent = parsed.Data[2];
-                wordDialog.style.visibility = "visible";
+                audio.play();
             }
-        };
 
-        socket.onclose = event => {
-            console.log("Socket Closed Connection: ", event);
-        };
+            context.clearRect(0, 0, drawingBoard.width, drawingBoard.height);
 
-        socket.onerror = error => {
-            console.log("Socket Error: ", error);
-        };
+            allowDrawing = false;
+        } else if (parsed.Type === "your-turn") {
+            allowDrawing = true;
+        } else if (parsed.Type === "update-time") {
+            timeLeft.innerText = "Time Left: " + parsed.Data;
+        } else if (parsed.Type === "prompt-words") {
+            if (sound) {
+                var audio = new Audio('/resources/your-turn.wav');
+                audio.type = 'audio/wav';
 
-        var isDrawing = false;
-        var x = 0;
-        var y = 0;
+                audio.play();
+            }
 
-        drawingBoard.onmouseleave = function (e) {
+            wordButtonZero.textContent = parsed.Data[0];
+            wordButtonOne.textContent = parsed.Data[1];
+            wordButtonTwo.textContent = parsed.Data[2];
+            wordDialog.style.visibility = "visible";
+        }
+    };
+
+    socket.onclose = event => {
+        console.log("Socket Closed Connection: ", event);
+    };
+
+    socket.onerror = error => {
+        console.log("Socket Error: ", error);
+    };
+
+    var isDrawing = false;
+    var x = 0;
+    var y = 0;
+
+    drawingBoard.onmouseleave = function (e) {
+        isDrawing = false;
+    }
+
+    drawingBoard.onmousedown = function (e) {
+        if (allowDrawing && e.button === 0) {
+            x = e.offsetX;
+            y = e.offsetY;
+            isDrawing = true;
+        }
+
+        return false;
+    };
+
+    drawingBoard.onmousemove = function (e) {
+        if (allowDrawing && isDrawing === true) {
+            drawLineAndSendEvent(context, x, y, e.offsetX, e.offsetY, localColor, localLineWidth);
+            x = e.offsetX;
+            y = e.offsetY;
+        }
+    };
+
+    drawingBoard.onmouseup = function (e) {
+        if (isDrawing === true) {
             isDrawing = false;
         }
+    };
 
-        drawingBoard.onmousedown = function (e) {
-            if (allowDrawing && e.button === 0) {
-                x = e.offsetX;
-                y = e.offsetY;
-                isDrawing = true;
-            }
+    var isMouseDown = false;
+    document.onmousedown = function (e) {
+        if (e.button === 0) {
+            isMouseDown = true;
+        }
+    };
+    document.onmouseup = function (e) {
+        if (e.button === 0) {
+            isMouseDown = false;
+        }
+    };
 
-            return false;
-        };
+    drawingBoard.onmouseenter = function (e) {
+        if (isMouseDown && allowDrawing) {
+            x = e.offsetX;
+            y = e.offsetY;
+            isDrawing = true;
+        }
+    };
 
-        drawingBoard.onmousemove = function (e) {
-            if (allowDrawing && isDrawing === true) {
-                drawLineAndSendEvent(context, x, y, e.offsetX, e.offsetY, localColor, localLineWidth);
-                x = e.offsetX;
-                y = e.offsetY;
-            }
-        };
+    drawingBoard.onclick = function (e) {
+        if (allowDrawing && e.button === 0) {
+            drawLineAndSendEvent(context, e.offsetX, e.offsetY, e.offsetX, e.offsetY, localColor, localLineWidth);
+            isDrawing = false;
+        }
+    };
 
-        drawingBoard.onmouseup = function (e) {
-            if (isDrawing === true) {
-                isDrawing = false;
-            }
-        };
+    function drawLine(context, x1, y1, x2, y2, color, lineWidth) {
+        if (x1 === x2 && y1 === y2) {
+            context.beginPath();
+            context.fillStyle = color;
+            context.arc(x1, y2, lineWidth / 2, 0, 2 * Math.PI);
+            context.fill();
+        } else {
+            context.beginPath();
+            context.strokeStyle = color;
+            context.lineWidth = lineWidth;
+            context.lineCap = "round"
 
-        var isMouseDown = false;
-        document.onmousedown = function (e) {
-            if (e.button === 0) {
-                isMouseDown = true;
-            }
-        };
-        document.onmouseup = function (e) {
-            if (e.button === 0) {
-                isMouseDown = false;
-            }
-        };
+            context.moveTo(x1, y1);
+            context.lineTo(x2, y2);
+            context.stroke();
+        }
+    }
 
-        drawingBoard.onmouseenter = function (e) {
-            if (isMouseDown && allowDrawing) {
-                x = e.offsetX;
-                y = e.offsetY;
-                isDrawing = true;
-            }
-        };
-
-        drawingBoard.onclick = function (e) {
-            if (allowDrawing && e.button === 0) {
-                drawLineAndSendEvent(context, e.offsetX, e.offsetY, e.offsetX, e.offsetY, localColor, localLineWidth);
-                isDrawing = false;
-            }
-        };
-
-        function drawLine(context, x1, y1, x2, y2, color, lineWidth) {
-            if (x1 === x2 && y1 === y2) {
-                context.beginPath();
-                context.fillStyle = color;
-                context.arc(x1, y2, lineWidth / 2, 0, 2 * Math.PI);
-                context.fill();
-            } else {
-                context.beginPath();
-                context.strokeStyle = color;
-                context.lineWidth = lineWidth;
-                context.lineCap = "round"
-
-                context.moveTo(x1, y1);
-                context.lineTo(x2, y2);
-                context.stroke();
-            }
+    function drawLineAndSendEvent(context, x1, y1, x2, y2, color, lineWidth) {
+        if (localTool === 1) {
+            color = "white";
         }
 
-        function drawLineAndSendEvent(context, x1, y1, x2, y2, color, lineWidth) {
-            if (localTool === 1) {
-                color = "white";
+        drawLine(context, x1, y1, x2, y2, color, lineWidth)
+        socket.send(JSON.stringify({
+            Type: "pixel", Data: {
+                FromX: x1 * scaleUpFactor,
+                FromY: y1 * scaleUpFactor,
+                ToX: x2 * scaleUpFactor,
+                ToY: y2 * scaleUpFactor,
+                Color: color,
+                LineWidth: lineWidth * scaleUpFactor,
             }
-
-            drawLine(context, x1, y1, x2, y2, color, lineWidth)
-            socket.send(JSON.stringify({
-                Type: "pixel", Data: {
-                    FromX: x1 * scaleUpFactor,
-                    FromY: y1 * scaleUpFactor,
-                    ToX: x2 * scaleUpFactor,
-                    ToY: y2 * scaleUpFactor,
-                    Color: color,
-                    LineWidth: lineWidth * scaleUpFactor,
-                }
-            }));
-        }
-    </script>
+        }));
+    }
+</script>
 </body>
 
 </html>

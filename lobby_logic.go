@@ -97,6 +97,17 @@ type Lobby struct {
 	alreadyUsedWords      []string
 	CustomWordsChance     int
 	clientsPerIPLimit     int
+	currentDrawing        []*Pixel
+}
+
+// Pixel is the struct that a client send when drawing
+type Pixel struct {
+	FromX     float32
+	FromY     float32
+	ToX       float32
+	ToY       float32
+	Color     string
+	LineWidth int
 }
 
 // GetPlayer searches for a player, identifying them by usersssion.
@@ -108,6 +119,14 @@ func (lobby *Lobby) GetPlayer(userSession string) *Player {
 	}
 
 	return nil
+}
+
+func (lobby *Lobby) ClearDrawing() {
+	lobby.currentDrawing = []*Pixel{}
+}
+
+func (lobby *Lobby) AppendPixel(pixel *Pixel) {
+	lobby.currentDrawing = append(lobby.currentDrawing, pixel)
 }
 
 // GetLobby returns a Lobby that has a matching ID or no Lobby if none could
@@ -143,6 +162,7 @@ func createLobby(
 		CustomWordsChance:   customWordsChance,
 		timeLeftTickerReset: make(chan struct{}),
 		clientsPerIPLimit:   clientsPerIPLimit,
+		currentDrawing:      []*Pixel{},
 	}
 
 	if len(customWords) > 1 {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html"
 	"html/template"
+	"log"
 	"math"
 	"math/rand"
 	"net/http"
@@ -146,8 +147,25 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 		return nil
 	})
 
+	sendError := player.ws.WriteJSON(&JSEvent{
+		Type: "pixels",
+		Data: lobby.currentDrawing,
+	})
+	if sendError != nil {
+		log.Printf("Error sending drawing to player: %s", sendError)
+	}
+
 	go wsListen(lobby, player, ws)
 }
+
+// PixelEvent is basically the same as JSEvent, but with a specific Data type.
+// We use this for reparsing as soon as we know that the type is right. It's
+// a bit unperformant, but will do for now.
+type PixelEvent struct {
+	Type string
+	Data Pixel
+}
+
 
 func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 	for {
@@ -177,6 +195,13 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 				}
 			} else if received.Type == "pixel" {
 				if lobby.Drawer == player {
+					var pixel PixelEvent
+					pixelErr := json.Unmarshal(data, &pixel)
+					if pixelErr != nil {
+						log.Printf("Error unmarshalling pixel: %s", pixelErr)
+					} else {
+						lobby.AppendPixel(&pixel.Data)
+					}
 					for _, otherPlayer := range lobby.Players {
 						if otherPlayer != player && otherPlayer.State != Disconnected && otherPlayer.ws != nil {
 							otherPlayer.WriteMessage(websocket.TextMessage, data)
@@ -185,6 +210,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 				}
 			} else if received.Type == "clear-drawing-board" {
 				if lobby.Drawer == player {
+					lobby.ClearDrawing()
 					for _, otherPlayer := range lobby.Players {
 						if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
 							otherPlayer.WriteMessage(websocket.TextMessage, data)
