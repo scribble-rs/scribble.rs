@@ -122,16 +122,9 @@
                 </label>
             </div>
             <div class="pencil-sizes-container toolbox-group">
-                <label for="size2">
-                    <input id="size2" class="custom-check-or-radio line-width-button" onchange="setLineWidth(2)"
-                           type="radio" name="line-width" checked>
-                    <div class="line-width-button-content">
-                        <div id="size-2-button" class="dot"></div>
-                    </div>
-                </label>
                 <label for="size5">
                     <input id="size5" class="custom-check-or-radio line-width-button" onchange="setLineWidth(5)"
-                           type="radio" name="line-width">
+                           type="radio" name="line-width" checked>
                     <div class="line-width-button-content">
                         <div id="size-5-button" class="dot"></div>
                     </div>
@@ -246,10 +239,8 @@
     var localLineWidth;
     // 0 = pencil; 1 = rubber;
     var localTool = 0;
-    setLineWidth(2);
+    setLineWidth(5);
 
-    document.getElementById("size-2-button").style.width = (2 * scaleDownFactor) + "px";
-    document.getElementById("size-2-button").style.height = (2 * scaleDownFactor) + "px";
     document.getElementById("size-5-button").style.width = (5 * scaleDownFactor) + "px";
     document.getElementById("size-5-button").style.height = (5 * scaleDownFactor) + "px";
     document.getElementById("size-15-button").style.width = (15 * scaleDownFactor) + "px";
