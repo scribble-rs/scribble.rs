@@ -540,6 +540,7 @@ func advanceLobby(lobby *Lobby) {
 			if lobby.Round == lobby.Rounds {
 				lobby.Drawer = nil
 				lobby.Round = 0
+				lobby.ClearDrawing()
 
 				gameOverEvent := &JSEvent{Type: "system-message", Data: "Game over. Type !start again to start a new round."}
 
