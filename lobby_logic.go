@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	createDeleteMutex = &sync.Mutex{}
-	lobbies           = []*Lobby{}
+	createDeleteMutex          = &sync.Mutex{}
+	lobbies           []*Lobby = nil
 )
 
 // Player represents a participant in a Lobby.
