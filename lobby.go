@@ -145,8 +145,8 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 		player.State = Disconnected
 		player.ws = nil
 		isAnyPlayerConnected := false
-		for _, player := range lobby.Players {
-			if player.ws != nil && player.State != Disconnected {
+		for _, otherPlayer := range lobby.Players {
+			if otherPlayer.ws != nil && otherPlayer.State != Disconnected {
 				isAnyPlayerConnected = true
 				break
 			}
