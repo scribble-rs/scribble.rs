@@ -147,12 +147,14 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 		return nil
 	})
 
-	sendError := player.ws.WriteJSON(&JSEvent{
-		Type: "pixels",
-		Data: lobby.currentDrawing,
-	})
-	if sendError != nil {
-		log.Printf("Error sending drawing to player: %s", sendError)
+	if len(lobby.currentDrawing) > 0 {
+		sendError := player.ws.WriteJSON(&JSEvent{
+			Type: "pixels",
+			Data: lobby.currentDrawing,
+		})
+		if sendError != nil {
+			log.Printf("Error sending drawing to player: %s", sendError)
+		}
 	}
 
 	go wsListen(lobby, player, ws)
