@@ -1,4 +1,4 @@
-module github.com/Bios-Marcel/scribble.rs
+module github.com/scribble-rs/scribble.rs
 
 go 1.12
 
