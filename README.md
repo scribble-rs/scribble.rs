@@ -15,8 +15,20 @@ The site will not display any ads or share any data with third parties.
 
 ## Building
 
-Currently there are no external dependencies, therefore the application can
-simply be installed via `go get github.com/scribble-rs/scribble.rs`.
+Run the following to build the application:
+
+```shell
+git clone https://github.com/scribble-rs/scribble.rs.git
+cd scribble.rs
+go build . -o scribblers
+```
+
+This will produce a binary called `scribblers`. The binary will still depend
+on the sourec folder and should just be called from within. This is due to the
+fact, that the HTML templates and the resource data aren't part of the binary.
+
+The default port will be `8080`. The parameter `portHTTP` allows changing the
+port though.
 
 It should run on any system that go supports as a compilation target.
 
