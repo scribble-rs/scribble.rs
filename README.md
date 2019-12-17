@@ -20,7 +20,7 @@ Run the following to build the application:
 ```shell
 git clone https://github.com/scribble-rs/scribble.rs.git
 cd scribble.rs
-go build . -o scribblers
+go build -o scribblers .
 ```
 
 This will produce a binary called `scribblers`. The binary will still depend
