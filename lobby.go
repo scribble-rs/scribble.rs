@@ -545,6 +545,8 @@ func advanceLobby(lobby *Lobby) {
 		otherPlayer.votedForKick = make(map[string]bool)
 	}
 
+	lobby.ClearDrawing()
+
 	if lobby.Drawer == nil {
 		lobby.Drawer = lobby.Players[0]
 		lobby.Round++
@@ -553,7 +555,6 @@ func advanceLobby(lobby *Lobby) {
 			if lobby.Round == lobby.Rounds {
 				lobby.Drawer = nil
 				lobby.Round = 0
-				lobby.ClearDrawing()
 
 				gameOverEvent := &JSEvent{Type: "system-message", Data: "Game over. Type !start again to start a new round."}
 
