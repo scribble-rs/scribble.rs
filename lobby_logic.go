@@ -107,7 +107,7 @@ type Pixel struct {
 	ToX       float32
 	ToY       float32
 	Color     string
-	LineWidth int
+	LineWidth float32
 }
 
 // GetPlayer searches for a player, identifying them by usersssion.
