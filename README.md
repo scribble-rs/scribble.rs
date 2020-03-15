@@ -9,7 +9,7 @@ issues. This project will try addressing as many of the usuability issues
 as possible.
 
 Even though there is an official instance at
-[scribble.rs](https://scribble.rs), you can still host your own instance.
+[scribble.rs](http://scribble.rs), you can still host your own instance.
 
 The site will not display any ads or share any data with third parties.
 
