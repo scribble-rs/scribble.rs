@@ -137,7 +137,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(player.Name + " has connected")
+	log.Println(player.Name + " has connected")
 
 	player.ws = ws
 	player.State = Guessing
@@ -154,6 +154,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 
 		if !isAnyPlayerConnected {
 			RemoveLobby(lobbyID)
+			log.Printf("There are currently %d open lobbies.\n", len(lobbies))
 		}
 
 		return nil
