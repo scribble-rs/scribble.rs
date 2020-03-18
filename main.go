@@ -2,11 +2,11 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"html/template"
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -31,7 +31,9 @@ func main() {
 
 	setupRoutes()
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *portHTTP), nil))
+	// "When you deploy an app through heroku, it does not allow you to specify the port number"
+	// https://stackoverflow.com/a/51344239/3927431
+	log.Fatal(http.ListenAndServe(":" + os.Getenv("PORT"), nil))
 }
 
 func setupRoutes() {
