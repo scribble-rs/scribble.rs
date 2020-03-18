@@ -110,7 +110,7 @@ type Pixel struct {
 	LineWidth float32
 }
 
-// GetPlayer searches for a player, identifying them by usersssion.
+// GetPlayer searches for a player, identifying them by usersession.
 func (lobby *Lobby) GetPlayer(userSession string) *Player {
 	for _, player := range lobby.Players {
 		if player.UserSession == userSession {
