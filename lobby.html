@@ -114,6 +114,15 @@
                         <span id="tool-type-pencil-button" style="font-size: 2rem;">✏️</span>
                     </div>
                 </label>
+                <label for="tool-type-fill">
+                    <input id="tool-type-fill" class="custom-check-or-radio line-width-button"
+                           onchange="chooseTool(2)" type="radio" name="tool-type">
+                    <div class="line-width-button-content">
+                        <img alt="Fill" title="Fill tool" src="/resources/fill.svg" width="40px"
+                             height="40px"/>
+                    </div>
+                </label>
+
                 <label for="tool-type-rubber">
                     <input id="tool-type-rubber" class="custom-check-or-radio line-width-button"
                            onchange="chooseTool(1)" type="radio" name="tool-type">
@@ -270,8 +279,10 @@
     function chooseTool(value) {
         if (value === 1) {
             localTool = 1;
+        } else if(value ===2) {
+            localTool = 2;
         } else {
-            //Everything not Rubber is a pencil.
+            //Everything not Rubber or Fill Bucket is a pencil.
             localTool = 0;
         }
     }
@@ -397,9 +408,15 @@
             drawLine(context, parsed.Data.FromX * scaleDownFactor, parsed.Data.FromY * scaleDownFactor, parsed.Data.ToX * scaleDownFactor, parsed.Data.ToY * scaleDownFactor, parsed.Data.Color, parsed.Data.LineWidth * scaleDownFactor);
         } else if (parsed.Type === "pixels") {
             parsed.Data.forEach(function(pixel) {
-                drawLine(context, pixel.FromX * scaleDownFactor, pixel.FromY * scaleDownFactor, pixel.ToX * scaleDownFactor, pixel.ToY * scaleDownFactor, pixel.Color, pixel.LineWidth * scaleDownFactor);
+                if(pixel.Type === "fill") {
+                    fill(context, pixel.FromX, pixel.FromY, pixel.Color);
+                } else {
+                    drawLine(context, pixel.FromX * scaleDownFactor, pixel.FromY * scaleDownFactor, pixel.ToX * scaleDownFactor, pixel.ToY * scaleDownFactor, pixel.Color, pixel.LineWidth * scaleDownFactor);
+                }
             });
-        } else if (parsed.Type === "clear-drawing-board") {
+        } else if (parsed.Type === "fill") {
++            fill(context, parsed.Data.FromX, parsed.Data.FromY, parsed.Data.Color);
+         } else if (parsed.Type === "clear-drawing-board") {
             context.clearRect(0, 0, drawingBoard.width, drawingBoard.height);
         } else if (parsed.Type === "next-turn") {
             if (sound) {
@@ -519,6 +536,16 @@
     function drawLineAndSendEvent(context, x1, y1, x2, y2, color, lineWidth) {
         if (localTool === 1) {
             color = "white";
+        } else if (localTool === 2) {
+          fill(context, x1, y1, color);
+          socket.send(JSON.stringify({
+              Type: "fill", Data: {
+                  FromX: x1,
+                  FromY: y1,
+                  Color: color
+              }
+          }));
+          return;
         }
 
         drawLine(context, x1, y1, x2, y2, color, lineWidth)
@@ -533,6 +560,74 @@
             }
         }));
     }
+
+    function getPixel(imageData, x, y) {
+     if (x < 0 || y < 0 || x >= imageData.width || y >= imageData.height) {
+       return [-1, -1, -1, -1];  // impossible color
+     } else {
+       const offset = (y * imageData.width + x) * 4;
+       return imageData.data.slice(offset, offset + 4);
+     }
+    }
+
+    function setPixel(imageData, x, y, color) {
+     const offset = (y * imageData.width + x) * 4;
+         imageData.data[offset + 0] = color[0];
+         imageData.data[offset + 1] = color[1];
+         imageData.data[offset + 2] = color[2];
+         imageData.data[offset + 3] = color[3];
+    }
+
+    function colorsMatch(a, b) {
+     //return fuzzyMatch(a[0], b[0]) && fuzzyMatch(a[1], b[1]) && fuzzyMatch(a[2], b[2]);
+      return a[0] === b[0] && a[1] === b[1] && a[2] === b[2] && a[3] === b[3];
+    }
+
+    function hexToRgb(hex) {
+       return hex.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i
+           , (m, r, g, b) => '#' + r + r + g + g + b + b)
+           .substring(1).match(/.{2}/g)
+           .map(x => parseInt(x, 16));
+    }
+
+    function fill(ctx, x, y, color) {
+        rgbColor=hexToRgb(color);
+        console.log(color);
+        console.log(rgbColor);
+        rgbColor[3] = 255; //alpha channel
+
+        // read the pixels in the canvas
+        const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+        // get the color we're filling
+        const targetColor = getPixel(imageData, x, y);
+
+        // check we are actually filling a different color
+        if (!colorsMatch(targetColor, rgbColor)) {
+            const pixelsToCheck = [x, y];
+            while (pixelsToCheck.length > 0) {
+            const y = pixelsToCheck.pop();
+            const x = pixelsToCheck.pop();
+
+            const currentColor = getPixel(imageData, x, y);
+            //if ((currentColor[3] != 0 && currentColor[3] != 255) || colorsMatch(currentColor, targetColor)) {
+            if (colorsMatch(currentColor, targetColor)) {
+                setPixel(imageData, x, y, rgbColor);
+                pixelsToCheck.push(x + 1, y);
+                pixelsToCheck.push(x - 1, y);
+                pixelsToCheck.push(x, y + 1);
+                pixelsToCheck.push(x, y - 1);
+                }
+            }
+
+            // put the data back
+            ctx.putImageData(imageData, 0, 0);
+        }
+    }
+
+
+
+
 </script>
 </body>
 

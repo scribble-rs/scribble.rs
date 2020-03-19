@@ -108,6 +108,7 @@ type Pixel struct {
 	ToY       float32
 	Color     string
 	LineWidth float32
+	Type 	  string // either "pixel" or "fill"
 }
 
 // GetPlayer searches for a player, identifying them by usersession.
