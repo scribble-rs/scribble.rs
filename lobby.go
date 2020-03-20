@@ -124,12 +124,13 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sessionCookie, noCookieError := r.Cookie("usersession")
-	var player *Player
-	if noCookieError == nil {
-		player = lobby.GetPlayer(sessionCookie.Value)
-	} else {
+	//This issue can happen if you illegally request a websocket connection without ever having had
+	//a usersession or your client having deleted the usersession cookie.
+	if noCookieError != nil {
 		errorPage.ExecuteTemplate(w, "error.html", "You are not a player of this lobby.")
+		return
 	}
+	player := lobby.GetPlayer(sessionCookie.Value)
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
