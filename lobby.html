@@ -353,6 +353,7 @@
 
     socket.onmessage = event => {
         var parsed = JSON.parse(event.data);
+        console.log("event: " + parsed.Type);
         if (parsed.Type === "update-players") {
             httpGetAsync("/lobby/players?id={{.LobbyID}}", response => {
                 playerContainer.innerHTML = response.responseText;
@@ -409,13 +410,13 @@
         } else if (parsed.Type === "pixels") {
             parsed.Data.forEach(function(pixel) {
                 if(pixel.Type === "fill") {
-                    fill(context, pixel.FromX, pixel.FromY, pixel.Color);
+                    fill(context, pixel.FromX * scaleDownFactor, pixel.FromY * scaleDownFactor, pixel.Color);
                 } else {
                     drawLine(context, pixel.FromX * scaleDownFactor, pixel.FromY * scaleDownFactor, pixel.ToX * scaleDownFactor, pixel.ToY * scaleDownFactor, pixel.Color, pixel.LineWidth * scaleDownFactor);
                 }
             });
         } else if (parsed.Type === "fill") {
-+            fill(context, parsed.Data.FromX, parsed.Data.FromY, parsed.Data.Color);
++            fill(context, parsed.Data.FromX * scaleDownFactor, parsed.Data.FromY * scaleDownFactor, parsed.Data.Color);
          } else if (parsed.Type === "clear-drawing-board") {
             context.clearRect(0, 0, drawingBoard.width, drawingBoard.height);
         } else if (parsed.Type === "next-turn") {
@@ -516,32 +517,83 @@
     };
 
     function drawLine(context, x1, y1, x2, y2, color, lineWidth) {
-        if (x1 === x2 && y1 === y2) {
-            context.beginPath();
-            context.fillStyle = color;
-            context.arc(x1, y2, lineWidth / 2, 0, 2 * Math.PI);
-            context.fill();
-        } else {
-            context.beginPath();
-            context.strokeStyle = color;
-            context.lineWidth = lineWidth;
-            context.lineCap = "round"
+        x1 = Math.floor(x1);
+        y1 = Math.floor(y1);
+        x2 = Math.floor(x2);
+        y2 = Math.floor(y2);
 
-            context.moveTo(x1, y1);
-            context.lineTo(x2, y2);
-            context.stroke();
+        rgbaColor=hexToRgb(color);
+        rgbaColor[3] = 255; //alpha channel
+
+        circleMap = generateCircleMap(Math.floor(lineWidth/2));
+
+        offset = Math.floor(circleMap.length / 2);
+        const imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
+
+        for(ix = 0; ix < circleMap.length; ix++) {
+            for(iy = 0; iy < circleMap[ix].length; iy++) {
+                if(circleMap[ix][iy] === 1 || (x1 === x2 && y1 === y2 && circleMap[ix][iy] === 2)) {
+                    var newX1 = x1+ix-offset;
+                    var newY1 = y1+iy-offset;
+                    var newX2 = x2+ix-offset;
+                    var newY2 = y2+iy-offset;
+                    drawBresenhamLine(imageData, newX1, newY1, newX2, newY2, rgbaColor);
+                }
+            }
+        }
+        context.putImageData(imageData,0,0);
+    }
+
+    function drawBresenhamLine(imageData,x0,y0,x1,y1,color) {
+        var dx = Math.abs(x1 - x0);
+        var dy = Math.abs(y1 - y0);
+        var sx = (x0 < x1) ? 1 : -1;
+        var sy = (y0 < y1) ? 1 : -1;
+        var err = dx - dy;
+
+        while(true) {
+            setPixel(imageData, x0, y0, color); // Do what you need to for this
+
+            if ((x0 === x1) && (y0 === y1)) break;
+            var e2 = 2*err;
+            if (e2 > -dy) { err -= dy; x0  += sx; }
+            if (e2 < dx) { err += dx; y0  += sy; }
         }
     }
 
+    function generateCircleMap(radius) {
+        //console.log("generateCircleData: radius:" + radius);
+        var circleData = [];
+
+        for(x = 0; x < 2*radius; x++) {
+            circleData[x] = [];
+            for(y = 0; y < 2*radius; y++) {
+                distanceToRadius = Math.sqrt(Math.pow(radius-x,2)+Math.pow(radius-y,2));
+                if(distanceToRadius > radius) {
+                    circleData[x][y] = 0;
+                } else if (distanceToRadius < radius-2){
+                    //optimize for performance: fill circle only when mouse was not moved
+                    circleData[x][y] = 2;
+                } else {
+                    circleData[x][y] = 1;
+                }
+            }
+        }
+
+        return circleData;
+    }
+
+
+
     function drawLineAndSendEvent(context, x1, y1, x2, y2, color, lineWidth) {
         if (localTool === 1) {
-            color = "white";
+            color = "#ffffff";
         } else if (localTool === 2) {
           fill(context, x1, y1, color);
           socket.send(JSON.stringify({
               Type: "fill", Data: {
-                  FromX: x1,
-                  FromY: y1,
+                  FromX: x1 * scaleUpFactor,
+                  FromY: y1 * scaleUpFactor,
                   Color: color
               }
           }));
@@ -571,11 +623,14 @@
     }
 
     function setPixel(imageData, x, y, color) {
-     const offset = (y * imageData.width + x) * 4;
-         imageData.data[offset + 0] = color[0];
-         imageData.data[offset + 1] = color[1];
-         imageData.data[offset + 2] = color[2];
-         imageData.data[offset + 3] = color[3];
+        //check if pixel is still inside the canvas
+        if(x < 0 || x > imageData.width || y < 0 || y > imageData.height) return;
+
+        const offset = (y * imageData.width + x) * 4;
+        imageData.data[offset + 0] = color[0];
+        imageData.data[offset + 1] = color[1];
+        imageData.data[offset + 2] = color[2];
+        imageData.data[offset + 3] = color[3];
     }
 
     function colorsMatch(a, b) {
@@ -591,9 +646,9 @@
     }
 
     function fill(ctx, x, y, color) {
+        x = Math.floor(x);
+        y = Math.floor(y);
         rgbColor=hexToRgb(color);
-        console.log(color);
-        console.log(rgbColor);
         rgbColor[3] = 255; //alpha channel
 
         // read the pixels in the canvas
