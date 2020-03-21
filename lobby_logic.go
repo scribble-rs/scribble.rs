@@ -151,7 +151,7 @@ func RemoveLobby(id string) {
 	}
 
 	if indexToDelete != -1 {
-		lobbies = append(lobbies [:indexToDelete], lobbies[indexToDelete+1:]...)
+		lobbies = append(lobbies[:indexToDelete], lobbies[indexToDelete+1:]...)
 	}
 }
 
@@ -203,6 +203,7 @@ func createPlayer(name string) *Player {
 		voteKickCount: 0,
 		votedForKick:  make(map[string]bool),
 		socketMutex:   &sync.Mutex{},
+		State:         Disconnected,
 	}
 }
 

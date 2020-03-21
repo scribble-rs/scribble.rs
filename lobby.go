@@ -553,6 +553,7 @@ func advanceLobby(lobby *Lobby) {
 		lobby.Drawer = lobby.Players[0]
 		lobby.Round++
 	} else {
+		//If everyone has drawn once (e.g. a round has passed)
 		if lobby.Drawer == lobby.Players[len(lobby.Players)-1] {
 			if lobby.Round == lobby.Rounds {
 				lobby.Drawer = nil
