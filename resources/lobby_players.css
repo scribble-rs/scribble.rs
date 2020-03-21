@@ -18,7 +18,11 @@
     background-color: rgb(141, 224, 15);
 }
 
-.player+.player {
+.player-disconnected {
+    background-color: rgb(221, 88, 90);
+}
+
+.player + .player {
     margin-top: 5px;
 }
 

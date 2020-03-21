@@ -1,6 +1,6 @@
 {{define "players"}}
     {{range .}}
-    <div class="player {{if or (eq .State 2) (eq .State 3) }}player-done{{end}}">
+    <div class="player {{if eq .State 2}}player-done{{else if eq .State 3}}player-disconnected{{end}}">
         <span class="rank">{{.Rank}}</span>
         <div class="name-and-buttons">
             <span class="playername">{{.Name}}</span>

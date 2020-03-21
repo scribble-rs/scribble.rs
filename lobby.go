@@ -142,6 +142,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 
 	player.ws = ws
 	player.State = Guessing
+	triggerPlayersUpdate(lobby)
 	ws.SetCloseHandler(func(code int, text string) error {
 		player.State = Disconnected
 		player.ws = nil
@@ -156,6 +157,8 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 		if !isAnyPlayerConnected {
 			RemoveLobby(lobbyID)
 			log.Printf("There are currently %d open lobbies.\n", len(lobbies))
+		} else {
+			triggerPlayersUpdate(lobby)
 		}
 
 		return nil
@@ -186,8 +189,13 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 	for {
 		messageType, data, err := socket.ReadMessage()
 		if err != nil {
-			fmt.Println(err)
-			return
+			if websocket.IsCloseError(err) || websocket.IsUnexpectedCloseError(err) {
+				socket.CloseHandler()
+				log.Println(player.Name + " disconnected.")
+				return
+			} else {
+				log.Printf("Error reading from socket: %s\n", err)
+			}
 		} else if messageType == websocket.TextMessage {
 			received := &JSEvent{}
 			err := json.Unmarshal(data, received)
