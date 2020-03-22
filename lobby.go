@@ -760,6 +760,7 @@ type LobbyPageData struct {
 	WordHints []*WordHint
 	Round     int
 	Rounds    int
+	EnableVotekick bool
 }
 
 func getLobby(w http.ResponseWriter, r *http.Request) *Lobby {
@@ -782,7 +783,7 @@ func getLobby(w http.ResponseWriter, r *http.Request) *Lobby {
 func GetPlayers(w http.ResponseWriter, r *http.Request) {
 	lobby := getLobby(w, r)
 	if lobby != nil {
-		templatingError := lobbyPage.ExecuteTemplate(w, "players", lobby.Players)
+		templatingError := lobbyPage.ExecuteTemplate(w, "players", lobby)
 		if templatingError != nil {
 			errorPage.ExecuteTemplate(w, "error.html", templatingError.Error())
 		}
@@ -997,6 +998,7 @@ func ShowLobby(w http.ResponseWriter, r *http.Request) {
 				LobbyID: lobby.ID,
 				Round:   lobby.Round,
 				Rounds:  lobby.Rounds,
+				EnableVotekick: lobby.EnableVotekick,
 			}
 
 			for _, player := range lobby.Players {
@@ -1021,6 +1023,7 @@ func ShowLobby(w http.ResponseWriter, r *http.Request) {
 				LobbyID: lobby.ID,
 				Round:   lobby.Round,
 				Rounds:  lobby.Rounds,
+				EnableVotekick: lobby.EnableVotekick,
 			}
 
 			lobbyPage.ExecuteTemplate(w, "lobby.html", pageData)
