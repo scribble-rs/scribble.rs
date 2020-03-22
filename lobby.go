@@ -21,6 +21,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+const supportedLanguages = []string{"English", "Italian"}
+
 var (
 	lobbyCreatePage    *template.Template
 	lobbyPage          *template.Template
@@ -54,24 +56,27 @@ type CreatePageData struct {
 	*SettingBounds
 	Errors            []string
 	Password          string
+	Languages         []string
 	DrawingTime       string
 	Rounds            string
 	MaxPlayers        string
 	CustomWords       string
 	CustomWordsChance string
 	ClientsPerIPLimit string
-	EnableVotekick bool
+	EnableVotekick    bool
 }
 
 func createDefaultLobbyCreatePageData() *CreatePageData {
+
 	return &CreatePageData{
 		SettingBounds:     lobbySettingBounds,
+		Languages:         supportedLanguages,
 		DrawingTime:       "120",
 		Rounds:            "4",
 		MaxPlayers:        "12",
 		CustomWordsChance: "50",
 		ClientsPerIPLimit: "1",
-		EnableVotekick: true,
+		EnableVotekick:    true,
 	}
 }
 
@@ -274,7 +279,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 					// Votekicking is disabled in the lobby
 					// We tell the user and do not continue with the event
 					player.WriteAsJSON(JSEvent{Type: "system-message", Data: "Votekick is disabled in this lobby!"})
-				}else{
+				} else {
 					handleKickEvent(lobby, player, toKickID)
 				}
 			}
@@ -754,12 +759,12 @@ func triggerSimpleUpdateEvent(eventType string, lobby *Lobby) {
 // LobbyPageData is the data necessary for initially displaying all data of
 // the lobbies webpage.
 type LobbyPageData struct {
-	Players   []*Player
-	Port      int
-	LobbyID   string
-	WordHints []*WordHint
-	Round     int
-	Rounds    int
+	Players        []*Player
+	Port           int
+	LobbyID        string
+	WordHints      []*WordHint
+	Round          int
+	Rounds         int
 	EnableVotekick bool
 }
 
@@ -837,6 +842,7 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 	}
 
 	password, passwordInvalid := parsePassword(r.Form.Get("lobby_password"))
+	language := r.Form.Get("language")
 	drawingTime, drawingTimeInvalid := parseDrawingTime(r.Form.Get("drawing_time"))
 	rounds, roundsInvalid := parseRounds(r.Form.Get("rounds"))
 	maxPlayers, maxPlayersInvalid := parseMaxPlayers(r.Form.Get("max_players"))
@@ -844,6 +850,9 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 	customWordChance, customWordChanceInvalid := parseCustomWordsChance(r.Form.Get("custom_words_chance"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := parseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
 	enableVotekick := r.Form.Get("enable_votekick") == "true"
+
+	// Read wordlist according to the chosen language
+	readWordList(language)
 
 	//Prevent resetting the form, since that would be annoying as hell.
 	pageData := CreatePageData{
@@ -855,7 +864,7 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 		CustomWords:       r.Form.Get("custom_words"),
 		CustomWordsChance: r.Form.Get("custom_words_chance"),
 		ClientsPerIPLimit: r.Form.Get("clients_per_ip_limit"),
-		EnableVotekick: r.Form.Get("enable_votekick") == "true",
+		EnableVotekick:    r.Form.Get("enable_votekick") == "true",
 	}
 
 	if passwordInvalid != nil {
@@ -993,11 +1002,11 @@ func ShowLobby(w http.ResponseWriter, r *http.Request) {
 			recalculateRanks(lobby)
 
 			pageData := &LobbyPageData{
-				Port:    *portHTTP,
-				Players: lobby.Players,
-				LobbyID: lobby.ID,
-				Round:   lobby.Round,
-				Rounds:  lobby.Rounds,
+				Port:           *portHTTP,
+				Players:        lobby.Players,
+				LobbyID:        lobby.ID,
+				Round:          lobby.Round,
+				Rounds:         lobby.Rounds,
 				EnableVotekick: lobby.EnableVotekick,
 			}
 
@@ -1018,11 +1027,11 @@ func ShowLobby(w http.ResponseWriter, r *http.Request) {
 			lobbyPage.ExecuteTemplate(w, "lobby.html", pageData)
 		} else {
 			pageData := &LobbyPageData{
-				Port:    *portHTTP,
-				Players: lobby.Players,
-				LobbyID: lobby.ID,
-				Round:   lobby.Round,
-				Rounds:  lobby.Rounds,
+				Port:           *portHTTP,
+				Players:        lobby.Players,
+				LobbyID:        lobby.ID,
+				Round:          lobby.Round,
+				Rounds:         lobby.Rounds,
 				EnableVotekick: lobby.EnableVotekick,
 			}
 

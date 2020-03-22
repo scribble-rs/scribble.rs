@@ -32,6 +32,12 @@
                     <b>Lobby-Password</b>
                     <input class="input-item" name="lobby_password" placeholder="Enter your password or leave empty"
                         type="password" value="{{.Password}}" />
+                    <b>Lobby-Language</b>
+                    <select class="input-item" name="language" placeholder="Choose your language">
+                        {{range .Languages}}
+                        <option value="{{.}}">{{.}}</option>
+                        {{end}}
+                    </select>
                     <b>Drawing Time</b>
                     <input class="input-item" type="number" name="drawing_time" min="{{.MinDrawingTime}}"
                         max="{{.MaxDrawingTime}}" value="{{.DrawingTime}}" />
