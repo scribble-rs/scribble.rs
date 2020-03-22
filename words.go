@@ -7,10 +7,16 @@ import (
 	"time"
 )
 
-var englishWords []string
+const wordPath string = "resources/words/"
 
-func init() {
-	data, err := ioutil.ReadFile("resources/words_en")
+var wordList []string
+
+func readWordList(chosenLanguage string) {
+	languageMap := map[string]string{
+		"English": "words_en",
+		"Italian": "words_it",
+	}
+	data, err := ioutil.ReadFile(wordPath + languageMap[chosenLanguage])
 	if err != nil {
 		panic(err)
 	}
@@ -24,9 +30,9 @@ func init() {
 
 		lastIndexNumberSign := strings.LastIndex(word, "#")
 		if lastIndexNumberSign == -1 {
-			englishWords = append(englishWords, word)
+			wordList = append(wordList, word)
 		} else {
-			englishWords = append(englishWords, word[:len(word)-2])
+			wordList = append(wordList, word[:len(word)-2])
 		}
 	}
 }
@@ -79,7 +85,7 @@ func getUnusedRandomWord(wordsAlreadyUsed []string) string {
 	var word string
 OUTER_LOOP:
 	for {
-		word = englishWords[rand.Int()%len(englishWords)]
+		word = wordList[rand.Int()%len(wordList)]
 		for _, usedWord := range wordsAlreadyUsed {
 			if usedWord == word {
 				if randomnessAttempts == 100 {

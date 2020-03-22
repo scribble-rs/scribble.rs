@@ -21,6 +21,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+const supportedLanguages = []string{"English", "Italian"}
+
 var (
 	lobbyCreatePage    *template.Template
 	lobbyPage          *template.Template
@@ -54,6 +56,7 @@ type CreatePageData struct {
 	*SettingBounds
 	Errors            []string
 	Password          string
+	Languages         []string
 	DrawingTime       string
 	Rounds            string
 	MaxPlayers        string
@@ -64,8 +67,10 @@ type CreatePageData struct {
 }
 
 func createDefaultLobbyCreatePageData() *CreatePageData {
+
 	return &CreatePageData{
 		SettingBounds:     lobbySettingBounds,
+		Languages:         supportedLanguages,
 		DrawingTime:       "120",
 		Rounds:            "4",
 		MaxPlayers:        "12",
@@ -866,6 +871,7 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 	}
 
 	password, passwordInvalid := parsePassword(r.Form.Get("lobby_password"))
+	language := r.Form.Get("language")
 	drawingTime, drawingTimeInvalid := parseDrawingTime(r.Form.Get("drawing_time"))
 	rounds, roundsInvalid := parseRounds(r.Form.Get("rounds"))
 	maxPlayers, maxPlayersInvalid := parseMaxPlayers(r.Form.Get("max_players"))
@@ -873,6 +879,9 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 	customWordChance, customWordChanceInvalid := parseCustomWordsChance(r.Form.Get("custom_words_chance"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := parseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
 	enableVotekick := r.Form.Get("enable_votekick") == "true"
+
+	// Read wordlist according to the chosen language
+	readWordList(language)
 
 	//Prevent resetting the form, since that would be annoying as hell.
 	pageData := CreatePageData{
