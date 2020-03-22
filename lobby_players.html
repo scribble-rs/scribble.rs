@@ -1,10 +1,13 @@
 {{define "players"}}
-    {{range .}}
+    {{$kickable := .EnableVotekick}}
+    {{range .Players}}
     <div class="player {{if eq .State 2}}player-done{{else if eq .State 3}}player-disconnected{{end}}">
         <span class="rank">{{.Rank}}</span>
         <div class="name-and-buttons">
             <span class="playername">{{.Name}}</span>
-            <button class="kick-button" id="kick-button" type="button" title="Vote to kick this player" alt="Vote to kick this player" onclick="onClickKickButton({{.ID}})">👋</button>
+            {{if $kickable}}
+              <button class="kick-button" id="kick-button" type="button" title="Vote to kick this player" alt="Vote to kick this player" onclick="onClickKickButton({{.ID}})">👋</button>
+            {{end}}
         </div>
         <div class="score-and-status">
             <div>

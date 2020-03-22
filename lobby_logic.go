@@ -98,6 +98,7 @@ type Lobby struct {
 	CustomWordsChance     int
 	clientsPerIPLimit     int
 	currentDrawing        []*Pixel
+	EnableVotekick bool
 }
 
 // Pixel is the struct that a client send when drawing
@@ -162,7 +163,8 @@ func createLobby(
 	maxPlayers int,
 	customWords []string,
 	customWordsChance int,
-	clientsPerIPLimit int) *Lobby {
+	clientsPerIPLimit int,
+	enableVotekick bool) *Lobby {
 
 	createDeleteMutex.Lock()
 
@@ -176,6 +178,7 @@ func createLobby(
 		CustomWordsChance:   customWordsChance,
 		timeLeftTickerReset: make(chan struct{}),
 		clientsPerIPLimit:   clientsPerIPLimit,
+		EnableVotekick: enableVotekick,
 		currentDrawing:      []*Pixel{},
 	}
 

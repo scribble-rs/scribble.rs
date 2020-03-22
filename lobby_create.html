@@ -49,6 +49,8 @@
                     <b>Clients per IP Limit</b>
                     <input class="input-item" type="number" name="clients_per_ip_limit" min="{{.MinClientsPerIPLimit}}"
                         max="{{.MaxClientsPerIPLimit}}" value="{{.ClientsPerIPLimit}}" />
+                   <b>Enable Votekick</b>
+                    <input class="input-item" type="checkbox" name="enable_votekick" value="true" checked="{{.EnableVotekick}}" />
                     <button type="submit" form="lobby-create" style="grid-column-start: 1; grid-column-end: 3;">Open
                         Lobby</button>
                 </form>
