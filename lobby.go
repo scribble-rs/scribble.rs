@@ -60,6 +60,7 @@ type CreatePageData struct {
 	CustomWords       string
 	CustomWordsChance string
 	ClientsPerIPLimit string
+	EnableVotekick bool
 }
 
 func createDefaultLobbyCreatePageData() *CreatePageData {
@@ -70,6 +71,7 @@ func createDefaultLobbyCreatePageData() *CreatePageData {
 		MaxPlayers:        "12",
 		CustomWordsChance: "50",
 		ClientsPerIPLimit: "1",
+		EnableVotekick: true,
 	}
 }
 
@@ -268,7 +270,13 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 					fmt.Println("Invalid data")
 					continue
 				}
-				handleKickEvent(lobby, player, toKickID)
+				if !lobby.EnableVotekick {
+					// Votekicking is disabled in the lobby
+					// We tell the user and do not continue with the event
+					player.WriteAsJSON(JSEvent{Type: "system-message", Data: "Votekick is disabled in this lobby!"})
+				}else{
+					handleKickEvent(lobby, player, toKickID)
+				}
 			}
 		}
 	}
@@ -834,6 +842,7 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 	customWords, customWordsInvalid := parseCustomWords(r.Form.Get("custom_words"))
 	customWordChance, customWordChanceInvalid := parseCustomWordsChance(r.Form.Get("custom_words_chance"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := parseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
+	enableVotekick := r.Form.Get("enable_votekick") == "true"
 
 	//Prevent resetting the form, since that would be annoying as hell.
 	pageData := CreatePageData{
@@ -845,6 +854,7 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 		CustomWords:       r.Form.Get("custom_words"),
 		CustomWordsChance: r.Form.Get("custom_words_chance"),
 		ClientsPerIPLimit: r.Form.Get("clients_per_ip_limit"),
+		EnableVotekick: r.Form.Get("enable_votekick") == "true",
 	}
 
 	if passwordInvalid != nil {
@@ -875,8 +885,7 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	} else {
-		lobby := createLobby(password, drawingTime, rounds, maxPlayers, customWords, customWordChance, clientsPerIPLimit)
-
+		lobby := createLobby(password, drawingTime, rounds, maxPlayers, customWords, customWordChance, clientsPerIPLimit, enableVotekick)
 		var playerName string
 		usernameCookie, noCookieError := r.Cookie("username")
 		if noCookieError == nil {
