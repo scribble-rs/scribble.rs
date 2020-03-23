@@ -98,7 +98,7 @@ type Lobby struct {
 	CustomWordsChance     int
 	clientsPerIPLimit     int
 	currentDrawing        []*Pixel
-	EnableVotekick bool
+	EnableVotekick        bool
 }
 
 // Pixel is the struct that a client send when drawing
@@ -109,7 +109,7 @@ type Pixel struct {
 	ToY       float32
 	Color     string
 	LineWidth float32
-	Type 	  string // either "pixel" or "fill"
+	Type      string // either "pixel" or "fill"
 }
 
 // GetPlayer searches for a player, identifying them by usersession.
@@ -179,7 +179,7 @@ func createLobby(
 		CustomWordsChance:   customWordsChance,
 		timeLeftTickerReset: make(chan struct{}),
 		clientsPerIPLimit:   clientsPerIPLimit,
-		EnableVotekick: enableVotekick,
+		EnableVotekick:      enableVotekick,
 		currentDrawing:      []*Pixel{},
 	}
 
