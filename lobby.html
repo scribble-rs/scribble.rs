@@ -367,7 +367,6 @@
 
     socket.onmessage = event => {
         var parsed = JSON.parse(event.data);
-        console.log("event: " + parsed.Type);
         if (parsed.Type === "update-players") {
             httpGetAsync("/lobby/players?id={{.LobbyID}}", response => {
                 playerContainer.innerHTML = response.responseText;
@@ -580,7 +579,6 @@
                 const x = pixelsToCheck.pop();
 
                 const currentColor = getPixel(imageData, x, y);
-                //if ((currentColor[3] != 0 && currentColor[3] != 255) || colorsMatch(currentColor, targetColor)) {
                 if (colorsMatch(currentColor, targetColor)) {
                     setPixel(imageData, x, y, rgbColor);
                     pixelsToCheck.push(x + 1, y);
@@ -634,7 +632,7 @@
         var err = dx - dy;
 
         while (true) {
-            setPixel(imageData, x0, y0, color); // Do what you need to for this
+            setPixel(imageData, x0, y0, color);
 
             if ((x0 === x1) && (y0 === y1)) break;
             var e2 = 2 * err;
@@ -650,7 +648,6 @@
     }
 
     function generateCircleMap(radius) {
-        //console.log("generateCircleData: radius:" + radius);
         var circleData = [];
 
         for (x = 0; x < 2 * radius; x++) {
@@ -670,10 +667,6 @@
 
         return circleData;
     }
-
-
-
-
 
     function getPixel(imageData, x, y) {
         if (x < 0 || y < 0 || x >= imageData.width || y >= imageData.height) {
@@ -696,7 +689,6 @@
     }
 
     function colorsMatch(a, b) {
-        //return fuzzyMatch(a[0], b[0]) && fuzzyMatch(a[1], b[1]) && fuzzyMatch(a[2], b[2]);
         return a[0] === b[0] && a[1] === b[1] && a[2] === b[2] && a[3] === b[3];
     }
 
