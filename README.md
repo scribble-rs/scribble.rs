@@ -51,3 +51,4 @@ There are many ways you can contribute:
 
 * Favicon - [Fredy Sujono](https://www.iconfinder.com/freud)
 * Rubber Icon - Made by [Pixel Buddha](https://www.flaticon.com/authors/pixel-buddha) from [flaticon.com](https://flaticon.com)
+* Fill Bucket Icon - Made by [inipagistudio](https://www.flaticon.com/authors/inipagistudio) from [flaticon.com](https://flaticon.com)
