@@ -146,6 +146,11 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	player.State = Guessing
 	triggerPlayersUpdate(lobby)
 	ws.SetCloseHandler(func(code int, text string) error {
+		//We want to avoid calling the handler twice.
+		if player.ws == nil {
+			return nil
+		}
+
 		player.State = Disconnected
 		player.ws = nil
 		isAnyPlayerConnected := false
@@ -191,7 +196,10 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 	for {
 		messageType, data, err := socket.ReadMessage()
 		if err != nil {
-			if websocket.IsCloseError(err) || websocket.IsUnexpectedCloseError(err) {
+			if websocket.IsCloseError(err) || websocket.IsUnexpectedCloseError(err) ||
+				//This happens when the server closes the connection. It will cause 1000 retries followed by a panic.
+				strings.Contains(err.Error(), "use of closed network connection") {
+				//Make sure that the sockethandler is called
 				socket.CloseHandler()
 				log.Println(player.Name + " disconnected.")
 				return
@@ -202,9 +210,12 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 			received := &JSEvent{}
 			err := json.Unmarshal(data, received)
 			if err != nil {
-				socket.Close()
-				fmt.Println(err)
-				return
+				log.Printf("Error unmarshalling message: %s\n", err)
+				sendError := player.WriteAsJSON(JSEvent{Type: "system-message", Data: fmt.Sprintf("An error occured trying to read your request, please report the error via GitHub: %s!", err)})
+				if sendError != nil {
+					log.Printf("Error sending errormessage: %s\n", sendError)
+				}
+				continue
 			}
 
 			if received.Type == "message" {
@@ -433,8 +444,8 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 				}
 			}
 			if playerToKick.ws != nil {
+				playerToKick.State = Disconnected
 				playerToKick.ws.Close()
-				playerToKick.ws = nil
 			}
 			lobby.Players = append(lobby.Players[:toKick], lobby.Players[toKick+1:]...)
 
