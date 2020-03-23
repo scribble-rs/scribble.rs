@@ -225,6 +225,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 					if pixelErr != nil {
 						log.Printf("Error unmarshalling pixel: %s", pixelErr)
 					} else {
+                        pixel.Data.Type = "pixel";
 						lobby.AppendPixel(&pixel.Data)
 					}
 					for _, otherPlayer := range lobby.Players {
@@ -233,6 +234,24 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 						}
 					}
 				}
+			} else if received.Type == "fill" {
+				//TODO: append pixel data
+    			if lobby.Drawer == player {
+    				var pixel PixelEvent
+    				pixelErr := json.Unmarshal(data, &pixel)
+    				if pixelErr != nil {
+    					log.Printf("Error unmarshalling pixel: %s", pixelErr)
+    				} else {
+                        pixel.Data.Type = "fill";
+    					lobby.AppendPixel(&pixel.Data)
+    				}
+    				for _, otherPlayer := range lobby.Players {
+    					if otherPlayer != player && otherPlayer.State != Disconnected && otherPlayer.ws != nil {
+    						otherPlayer.WriteMessage(websocket.TextMessage, data)
+    					}
+    				}
+                }
+
 			} else if received.Type == "clear-drawing-board" {
 				if lobby.Drawer == player {
 					lobby.ClearDrawing()
