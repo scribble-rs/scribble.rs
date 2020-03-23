@@ -60,7 +60,7 @@ type CreatePageData struct {
 	CustomWords       string
 	CustomWordsChance string
 	ClientsPerIPLimit string
-	EnableVotekick bool
+	EnableVotekick    bool
 }
 
 func createDefaultLobbyCreatePageData() *CreatePageData {
@@ -71,7 +71,7 @@ func createDefaultLobbyCreatePageData() *CreatePageData {
 		MaxPlayers:        "12",
 		CustomWordsChance: "50",
 		ClientsPerIPLimit: "1",
-		EnableVotekick: true,
+		EnableVotekick:    true,
 	}
 }
 
@@ -225,7 +225,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 					if pixelErr != nil {
 						log.Printf("Error unmarshalling pixel: %s", pixelErr)
 					} else {
-                        pixel.Data.Type = "pixel";
+						pixel.Data.Type = "pixel"
 						lobby.AppendPixel(&pixel.Data)
 					}
 					for _, otherPlayer := range lobby.Players {
@@ -235,22 +235,21 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 					}
 				}
 			} else if received.Type == "fill" {
-				//TODO: append pixel data
-    			if lobby.Drawer == player {
-    				var pixel PixelEvent
-    				pixelErr := json.Unmarshal(data, &pixel)
-    				if pixelErr != nil {
-    					log.Printf("Error unmarshalling pixel: %s", pixelErr)
-    				} else {
-                        pixel.Data.Type = "fill";
-    					lobby.AppendPixel(&pixel.Data)
-    				}
-    				for _, otherPlayer := range lobby.Players {
-    					if otherPlayer != player && otherPlayer.State != Disconnected && otherPlayer.ws != nil {
-    						otherPlayer.WriteMessage(websocket.TextMessage, data)
-    					}
-    				}
-                }
+				if lobby.Drawer == player {
+					var pixel PixelEvent
+					pixelErr := json.Unmarshal(data, &pixel)
+					if pixelErr != nil {
+						log.Printf("Error unmarshalling pixel: %s", pixelErr)
+					} else {
+						pixel.Data.Type = "fill"
+						lobby.AppendPixel(&pixel.Data)
+					}
+					for _, otherPlayer := range lobby.Players {
+						if otherPlayer != player && otherPlayer.State != Disconnected && otherPlayer.ws != nil {
+							otherPlayer.WriteMessage(websocket.TextMessage, data)
+						}
+					}
+				}
 
 			} else if received.Type == "clear-drawing-board" {
 				if lobby.Drawer == player {
@@ -293,7 +292,7 @@ func wsListen(lobby *Lobby, player *Player, socket *websocket.Conn) {
 					// Votekicking is disabled in the lobby
 					// We tell the user and do not continue with the event
 					player.WriteAsJSON(JSEvent{Type: "system-message", Data: "Votekick is disabled in this lobby!"})
-				}else{
+				} else {
 					handleKickEvent(lobby, player, toKickID)
 				}
 			}
@@ -773,12 +772,12 @@ func triggerSimpleUpdateEvent(eventType string, lobby *Lobby) {
 // LobbyPageData is the data necessary for initially displaying all data of
 // the lobbies webpage.
 type LobbyPageData struct {
-	Players   []*Player
-	Port      int
-	LobbyID   string
-	WordHints []*WordHint
-	Round     int
-	Rounds    int
+	Players        []*Player
+	Port           int
+	LobbyID        string
+	WordHints      []*WordHint
+	Round          int
+	Rounds         int
 	EnableVotekick bool
 }
 
@@ -874,7 +873,7 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 		CustomWords:       r.Form.Get("custom_words"),
 		CustomWordsChance: r.Form.Get("custom_words_chance"),
 		ClientsPerIPLimit: r.Form.Get("clients_per_ip_limit"),
-		EnableVotekick: r.Form.Get("enable_votekick") == "true",
+		EnableVotekick:    r.Form.Get("enable_votekick") == "true",
 	}
 
 	if passwordInvalid != nil {
@@ -1012,11 +1011,11 @@ func ShowLobby(w http.ResponseWriter, r *http.Request) {
 			recalculateRanks(lobby)
 
 			pageData := &LobbyPageData{
-				Port:    *portHTTP,
-				Players: lobby.Players,
-				LobbyID: lobby.ID,
-				Round:   lobby.Round,
-				Rounds:  lobby.Rounds,
+				Port:           *portHTTP,
+				Players:        lobby.Players,
+				LobbyID:        lobby.ID,
+				Round:          lobby.Round,
+				Rounds:         lobby.Rounds,
 				EnableVotekick: lobby.EnableVotekick,
 			}
 
@@ -1037,11 +1036,11 @@ func ShowLobby(w http.ResponseWriter, r *http.Request) {
 			lobbyPage.ExecuteTemplate(w, "lobby.html", pageData)
 		} else {
 			pageData := &LobbyPageData{
-				Port:    *portHTTP,
-				Players: lobby.Players,
-				LobbyID: lobby.ID,
-				Round:   lobby.Round,
-				Rounds:  lobby.Rounds,
+				Port:           *portHTTP,
+				Players:        lobby.Players,
+				LobbyID:        lobby.ID,
+				Round:          lobby.Round,
+				Rounds:         lobby.Rounds,
 				EnableVotekick: lobby.EnableVotekick,
 			}
 

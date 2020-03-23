@@ -170,24 +170,17 @@
 
 {{template "footer"}}
 
+<script type="text/javascript" src="/resources/floodfill.js"></script>
 <script>
 
     function httpGetAsync(theUrl, callback) {
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", theUrl, true);
-        xhr.onload = function(e) {
-            if (xhr.readyState === 4) {
-                if (xhr.status === 200) {
-                    callback(xhr);
-                } else {
-                    console.error(xhr.statusText);
-                }
+        fetch(theUrl).then(response => {
+            if (response.ok) {
+                response.text().then(body => callback(body))
+            } else {
+                console.error(response.statusText)
             }
-        };
-        xhr.onerror = function(e) {
-            console.error(xhr.statusText);
-        };
-        xhr.send(null);
+        })
     }
 
     console.log("Attempting Connection...");
@@ -201,7 +194,7 @@
     const timeLeft = document.getElementById("time-left");
     const drawingBoard = document.getElementById("drawing-board");
     const context = drawingBoard.getContext("2d");
-    context.lineJoin = "round"
+    context.lineJoin = "round";
     const colorPicker = document.getElementById("color-picker");
     const lineWidthChooser = document.getElementById("line-width");
     const wordDialog = document.getElementById("word-dialog");
@@ -209,10 +202,10 @@
     const wordButtonOne = document.getElementById("word-button-one");
     const wordButtonTwo = document.getElementById("word-button-two");
 
-    const noSoundIcon = "🔇"
-    const soundIcon = "🔊"
+    const noSoundIcon = "🔇";
+    const soundIcon = "🔊";
     const soundToggleLabel = document.getElementById("sound-toggle-label");
-    var sound;
+    let sound;
     if (localStorage.getItem("sound") === "false") {
         sound = false;
         soundToggleLabel.innerText = noSoundIcon;
@@ -223,11 +216,11 @@
 
     function toggleSound() {
         if (sound) {
-            localStorage.setItem("sound", "false")
+            localStorage.setItem("sound", "false");
             sound = false;
             soundToggleLabel.innerText = noSoundIcon;
         } else {
-            localStorage.setItem("sound", "true")
+            localStorage.setItem("sound", "true");
             sound = true;
             soundToggleLabel.innerText = soundIcon;
         }
@@ -245,11 +238,11 @@
     const scaleUpFactor = baseWidth / drawingBoard.width;
     const scaleDownFactor = drawingBoard.width / baseWidth;
 
-    var allowDrawing = false;
-    var localColor = "#000000";
-    var localLineWidth;
-    // 0 = pencil; 1 = rubber;
-    var localTool = 0;
+    let allowDrawing = false;
+    let localColor = "#000000";
+    let localLineWidth;
+    // 0 = pencil; 1 = rubber; 2 = fill
+    let localTool = 0;
     setLineWidth(5);
 
     document.getElementById("size-5-button").style.width = (5 * scaleDownFactor) + "px";
@@ -294,12 +287,12 @@
     }
 
     function updateCursor() {
-        var cursorColor;
-        var borderColor = "white";
+        let cursorColor;
+        let borderColor = "white";
         if (localColor.startsWith("#")) {
             cursorColor = hexToRgb(localColor);
 
-            hsp = Math.sqrt(
+            const hsp = Math.sqrt(
                 0.299 * (cursorColor[0] * cursorColor[0]) +
                 0.587 * (cursorColor[1] * cursorColor[1]) +
                 0.114 * (cursorColor[2] * cursorColor[2])
@@ -334,7 +327,7 @@
 
         // Necessary in order to keep the page from submitting.
         return false;
-    }
+    };
 
     function chooseWord(index) {
         socket.send(JSON.stringify({
@@ -366,29 +359,29 @@
     };
 
     socket.onmessage = event => {
-        var parsed = JSON.parse(event.data);
+        let parsed = JSON.parse(event.data);
         if (parsed.Type === "update-players") {
             httpGetAsync("/lobby/players?id={{.LobbyID}}", response => {
-                playerContainer.innerHTML = response.responseText;
+                playerContainer.innerHTML = response;
             });
         } else if (parsed.Type === "correct-guess") {
             if (sound) {
-                var audio = new Audio('/resources/plop.wav');
+                let audio = new Audio('/resources/plop.wav');
                 audio.type = 'audio/wav';
 
                 audio.play();
             }
 
             httpGetAsync("/lobby/players?id={{.LobbyID}}", response => {
-                playerContainer.innerHTML = response.responseText;
+                playerContainer.innerHTML = response;
             });
         } else if (parsed.Type === "update-wordhint") {
             httpGetAsync("/lobby/wordhint?id={{.LobbyID}}", response => {
-                wordContainer.innerHTML = response.responseText;
+                wordContainer.innerHTML = response;
             });
         } else if (parsed.Type === "update-rounds") {
             httpGetAsync("/lobby/rounds?id={{.LobbyID}}", response => {
-                roundsSpan.innerText = response.responseText;
+                roundsSpan.innerText = response;
             });
         } else if (parsed.Type === "message") {
             if (messageContainer.childElementCount >= 100) {
@@ -421,20 +414,20 @@
         } else if (parsed.Type === "pixel") {
             drawLine(context, parsed.Data.FromX * scaleDownFactor, parsed.Data.FromY * scaleDownFactor, parsed.Data.ToX * scaleDownFactor, parsed.Data.ToY * scaleDownFactor, parsed.Data.Color, parsed.Data.LineWidth * scaleDownFactor);
         } else if (parsed.Type === "pixels") {
-            parsed.Data.forEach(function(pixel) {
+            parsed.Data.forEach(function (pixel) {
                 if (pixel.Type === "fill") {
-                    fill(context, pixel.FromX * scaleDownFactor, pixel.FromY * scaleDownFactor, pixel.Color);
+                    fill(pixel.FromX * scaleDownFactor, pixel.FromY * scaleDownFactor, pixel.Color);
                 } else {
                     drawLine(context, pixel.FromX * scaleDownFactor, pixel.FromY * scaleDownFactor, pixel.ToX * scaleDownFactor, pixel.ToY * scaleDownFactor, pixel.Color, pixel.LineWidth * scaleDownFactor);
                 }
             });
         } else if (parsed.Type === "fill") {
-            +fill(context, parsed.Data.FromX * scaleDownFactor, parsed.Data.FromY * scaleDownFactor, parsed.Data.Color);
+            fill(parsed.Data.FromX * scaleDownFactor, parsed.Data.FromY * scaleDownFactor, parsed.Data.Color);
         } else if (parsed.Type === "clear-drawing-board") {
             context.clearRect(0, 0, drawingBoard.width, drawingBoard.height);
         } else if (parsed.Type === "next-turn") {
             if (sound) {
-                var audio = new Audio('/resources/end-turn.wav');
+                let audio = new Audio('/resources/end-turn.wav');
                 audio.type = 'audio/wav';
 
                 audio.play();
@@ -449,7 +442,7 @@
             timeLeft.innerText = "Time Left: " + parsed.Data;
         } else if (parsed.Type === "prompt-words") {
             if (sound) {
-                var audio = new Audio('/resources/your-turn.wav');
+                let audio = new Audio('/resources/your-turn.wav');
                 audio.type = 'audio/wav';
 
                 audio.play();
@@ -470,16 +463,16 @@
         console.log("Socket Error: ", error);
     };
 
-    var isDrawing = false;
-    var x = 0;
-    var y = 0;
+    let isDrawing = false;
+    let x = 0;
+    let y = 0;
 
-    drawingBoard.onmouseleave = function(e) {
+    drawingBoard.onmouseleave = function (e) {
         isDrawing = false;
-    }
+    };
 
-    drawingBoard.onmousedown = function(e) {
-        if (allowDrawing && e.button === 0) {
+    drawingBoard.onmousedown = function (e) {
+        if (allowDrawing && e.button === 0 && localTool !== 2) {
             x = e.offsetX;
             y = e.offsetY;
             isDrawing = true;
@@ -488,64 +481,75 @@
         return false;
     };
 
-    drawingBoard.onmousemove = function(e) {
-        if (allowDrawing && isDrawing === true) {
+    drawingBoard.onmousemove = function (e) {
+        if (allowDrawing && isDrawing === true && e.button === 0) {
             drawLineAndSendEvent(context, x, y, e.offsetX, e.offsetY, localColor, localLineWidth);
             x = e.offsetX;
             y = e.offsetY;
         }
     };
 
-    drawingBoard.onmouseup = function(e) {
+    drawingBoard.onmouseup = function (e) {
         if (isDrawing === true) {
             isDrawing = false;
         }
     };
 
-    var isMouseDown = false;
-    document.onmousedown = function(e) {
+    let isMouseDown = false;
+    document.onmousedown = function (e) {
         if (e.button === 0) {
             isMouseDown = true;
         }
     };
-    document.onmouseup = function(e) {
+    document.onmouseup = function (e) {
         if (e.button === 0) {
             isMouseDown = false;
         }
     };
 
-    drawingBoard.onmouseenter = function(e) {
-        if (isMouseDown && allowDrawing) {
+    drawingBoard.onmouseenter = function (e) {
+        if (isMouseDown && allowDrawing && localTool !== 2) {
             x = e.offsetX;
             y = e.offsetY;
             isDrawing = true;
         }
     };
 
-    drawingBoard.onclick = function(e) {
+    drawingBoard.onclick = function (e) {
         if (allowDrawing && e.button === 0) {
-            drawLineAndSendEvent(context, e.offsetX, e.offsetY, e.offsetX, e.offsetY, localColor, localLineWidth);
+            if (localTool === 2) {
+                fillAndSendEvent(context, e.offsetX, e.offsetY, localColor)
+            } else {
+                drawLineAndSendEvent(context, e.offsetX, e.offsetY, e.offsetX, e.offsetY, localColor, localLineWidth);
+            }
             isDrawing = false;
         }
     };
 
+    function fill(context, x1, y1, color) {
+        context.fillStyle = color;
+        //There seems to be some bug where setting the tolerance to 0 causes a freeze when painting black on white.
+        context.fillFlood(x1, y1, 1);
+    }
+
+    function fillAndSendEvent(context, x1, y1, color) {
+        fill(context, x1, y1, color);
+        socket.send(JSON.stringify({
+            Type: "fill",
+            Data: {
+                FromX: x1 * scaleUpFactor,
+                FromY: y1 * scaleUpFactor,
+                Color: color
+            },
+        }));
+    }
+
     function drawLineAndSendEvent(context, x1, y1, x2, y2, color, lineWidth) {
         if (localTool === 1) {
             color = "#ffffff";
-        } else if (localTool === 2) {
-            fill(context, x1, y1, color);
-            socket.send(JSON.stringify({
-                Type: "fill",
-                Data: {
-                    FromX: x1 * scaleUpFactor,
-                    FromY: y1 * scaleUpFactor,
-                    Color: color
-                }
-            }));
-            return;
         }
 
-        drawLine(context, x1, y1, x2, y2, color, lineWidth)
+        drawLine(context, x1, y1, x2, y2, color, lineWidth);
         socket.send(JSON.stringify({
             Type: "pixel",
             Data: {
@@ -557,40 +561,6 @@
                 LineWidth: lineWidth * scaleUpFactor,
             }
         }));
-    }
-
-    function fill(ctx, x, y, color) {
-        x = Math.floor(x);
-        y = Math.floor(y);
-        rgbColor = hexToRgb(color);
-        rgbColor[3] = 255; //alpha channel
-
-        // read the pixels in the canvas
-        const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-        // get the color we're filling
-        const targetColor = getPixel(imageData, x, y);
-
-        // check we are actually filling a different color
-        if (!colorsMatch(targetColor, rgbColor)) {
-            const pixelsToCheck = [x, y];
-            while (pixelsToCheck.length > 0) {
-                const y = pixelsToCheck.pop();
-                const x = pixelsToCheck.pop();
-
-                const currentColor = getPixel(imageData, x, y);
-                if (colorsMatch(currentColor, targetColor)) {
-                    setPixel(imageData, x, y, rgbColor);
-                    pixelsToCheck.push(x + 1, y);
-                    pixelsToCheck.push(x - 1, y);
-                    pixelsToCheck.push(x, y + 1);
-                    pixelsToCheck.push(x, y - 1);
-                }
-            }
-
-            // put the data back
-            ctx.putImageData(imageData, 0, 0);
-        }
     }
 
     function drawLine(context, x1, y1, x2, y2, color, lineWidth) {
@@ -605,18 +575,17 @@
         color = hexToRgb(color);
         color[3] = 255; //alpha channel
 
-        circleMap = generateCircleMap(Math.floor(lineWidth / 2));
-
-        offset = Math.floor(circleMap.length / 2);
+        const circleMap = generateCircleMap(Math.floor(lineWidth / 2));
+        const offset = Math.floor(circleMap.length / 2);
         const imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
 
-        for (ix = 0; ix < circleMap.length; ix++) {
-            for (iy = 0; iy < circleMap[ix].length; iy++) {
+        for (let ix = 0; ix < circleMap.length; ix++) {
+            for (let iy = 0; iy < circleMap[ix].length; iy++) {
                 if (circleMap[ix][iy] === 1 || (x1 === x2 && y1 === y2 && circleMap[ix][iy] === 2)) {
-                    var newX1 = x1 + ix - offset;
-                    var newY1 = y1 + iy - offset;
-                    var newX2 = x2 + ix - offset;
-                    var newY2 = y2 + iy - offset;
+                    const newX1 = x1 + ix - offset;
+                    const newY1 = y1 + iy - offset;
+                    const newX2 = x2 + ix - offset;
+                    const newY2 = y2 + iy - offset;
                     drawBresenhamLine(imageData, newX1, newY1, newX2, newY2, color);
                 }
             }
@@ -625,17 +594,17 @@
     }
 
     function drawBresenhamLine(imageData, x0, y0, x1, y1, color) {
-        var dx = Math.abs(x1 - x0);
-        var dy = Math.abs(y1 - y0);
-        var sx = (x0 < x1) ? 1 : -1;
-        var sy = (y0 < y1) ? 1 : -1;
-        var err = dx - dy;
+        const dx = Math.abs(x1 - x0);
+        const dy = Math.abs(y1 - y0);
+        const sx = (x0 < x1) ? 1 : -1;
+        const sy = (y0 < y1) ? 1 : -1;
+        let err = dx - dy;
 
         while (true) {
             setPixel(imageData, x0, y0, color);
 
             if ((x0 === x1) && (y0 === y1)) break;
-            var e2 = 2 * err;
+            const e2 = 2 * err;
             if (e2 > -dy) {
                 err -= dy;
                 x0 += sx;
@@ -648,12 +617,12 @@
     }
 
     function generateCircleMap(radius) {
-        var circleData = [];
+        let circleData = [];
 
         for (x = 0; x < 2 * radius; x++) {
             circleData[x] = [];
             for (y = 0; y < 2 * radius; y++) {
-                distanceToRadius = Math.sqrt(Math.pow(radius - x, 2) + Math.pow(radius - y, 2));
+                const distanceToRadius = Math.sqrt(Math.pow(radius - x, 2) + Math.pow(radius - y, 2));
                 if (distanceToRadius > radius) {
                     circleData[x][y] = 0;
                 } else if (distanceToRadius < radius - 2) {
@@ -668,34 +637,15 @@
         return circleData;
     }
 
-    function getPixel(imageData, x, y) {
-        if (x < 0 || y < 0 || x >= imageData.width || y >= imageData.height) {
-            return [-1, -1, -1, -1]; // impossible color
-        } else {
-            const offset = (y * imageData.width + x) * 4;
-            return imageData.data.slice(offset, offset + 4);
-        }
-    }
-
     function setPixel(imageData, x, y, color) {
         //check if pixel is still inside the canvas
         if (x < 0 || x > imageData.width || y < 0 || y > imageData.height) return;
 
         const offset = (y * imageData.width + x) * 4;
-        imageData.data[offset + 0] = color[0];
+        imageData.data[offset] = color[0];
         imageData.data[offset + 1] = color[1];
         imageData.data[offset + 2] = color[2];
         imageData.data[offset + 3] = color[3];
-    }
-
-    function colorsMatch(a, b) {
-        return a[0] === b[0] && a[1] === b[1] && a[2] === b[2] && a[3] === b[3];
-    }
-
-    function hexToRgb(hex) {
-        return hex.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, (m, r, g, b) => '#' + r + r + g + g + b + b)
-            .substring(1).match(/.{2}/g)
-            .map(x => parseInt(x, 16));
     }
 
 </script>
