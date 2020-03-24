@@ -67,10 +67,6 @@ func Test_parseDrawingTime(t *testing.T) {
 	}{
 		{"empty value", "", 0, true},
 		{"space", " ", 0, true},
-		{"less than minimum", "59", 0, true},
-		{"more than maximum", "301", 0, true},
-		{"maximum", "300", 300, false},
-		{"minimum", "60", 60, false},
 		{"something valid", "150", 150, false},
 	}
 	for _, tt := range tests {
@@ -96,10 +92,6 @@ func Test_parseRounds(t *testing.T) {
 	}{
 		{"empty value", "", 0, true},
 		{"space", " ", 0, true},
-		{"less than minimum", "0", 0, true},
-		{"more than maximum", "21", 0, true},
-		{"maximum", "20", 20, false},
-		{"minimum", "1", 1, false},
 		{"something valid", "15", 15, false},
 	}
 	for _, tt := range tests {
@@ -125,10 +117,6 @@ func Test_parseMaxPlayers(t *testing.T) {
 	}{
 		{"empty value", "", 0, true},
 		{"space", " ", 0, true},
-		{"less than minimum", "1", 0, true},
-		{"more than maximum", "25", 0, true},
-		{"maximum", "24", 24, false},
-		{"minimum", "2", 2, false},
 		{"something valid", "15", 15, false},
 	}
 	for _, tt := range tests {

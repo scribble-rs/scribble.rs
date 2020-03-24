@@ -24,34 +24,10 @@ import (
 var (
 	lobbyCreatePage    *template.Template
 	lobbyPage          *template.Template
-	lobbySettingBounds = &SettingBounds{
-		MinDrawingTime:       60,
-		MaxDrawingTime:       300,
-		MinRounds:            1,
-		MaxRounds:            20,
-		MinMaxPlayers:        2,
-		MaxMaxPlayers:        24,
-		MinClientsPerIPLimit: 1,
-		MaxClientsPerIPLimit: 24,
-	}
 )
-
-// SettingBounds defines the lower and upper bounds for the user-specified
-// lobby creation input.
-type SettingBounds struct {
-	MinDrawingTime       int64
-	MaxDrawingTime       int64
-	MinRounds            int64
-	MaxRounds            int64
-	MinMaxPlayers        int64
-	MaxMaxPlayers        int64
-	MinClientsPerIPLimit int64
-	MaxClientsPerIPLimit int64
-}
 
 // CreatePageData defines all non-static data for the lobby create page.
 type CreatePageData struct {
-	*SettingBounds
 	Errors            []string
 	Password          string
 	DrawingTime       string
@@ -65,7 +41,6 @@ type CreatePageData struct {
 
 func createDefaultLobbyCreatePageData() *CreatePageData {
 	return &CreatePageData{
-		SettingBounds:     lobbySettingBounds,
 		DrawingTime:       "120",
 		Rounds:            "4",
 		MaxPlayers:        "12",
@@ -522,7 +497,7 @@ func commandSetMP(caller *Player, lobby *Lobby, args []string) {
 		newMaxPlayersValue := strings.TrimSpace(args[1])
 		newMaxPlayersValueInt, err := strconv.ParseInt(newMaxPlayersValue, 10, 64)
 		if err == nil {
-			if int(newMaxPlayersValueInt) >= len(lobby.Players) && newMaxPlayersValueInt <= lobbySettingBounds.MaxMaxPlayers && newMaxPlayersValueInt >= lobbySettingBounds.MinMaxPlayers {
+			if int(newMaxPlayersValueInt) >= len(lobby.Players) {
 				lobby.MaxPlayers = int(newMaxPlayersValueInt)
 
 				maxPlayerChangeEvent := &JSEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value has been changed to %d", lobby.MaxPlayers)}
@@ -534,11 +509,7 @@ func commandSetMP(caller *Player, lobby *Lobby, args []string) {
 				}
 
 			} else {
-				if len(lobby.Players) > int(lobbySettingBounds.MinMaxPlayers) {
-					caller.WriteAsJSON(JSEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value should be between %d and %d.", len(lobby.Players), lobbySettingBounds.MaxMaxPlayers)})
-				} else {
-					caller.WriteAsJSON(JSEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value should be between %d and %d.", lobbySettingBounds.MinMaxPlayers, lobbySettingBounds.MaxMaxPlayers)})
-				}
+				caller.WriteAsJSON(JSEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value should be above %d.", len(lobby.Players))})
 			}
 		} else {
 			caller.WriteAsJSON(JSEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value must be numeric.")})
@@ -876,7 +847,6 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 
 	//Prevent resetting the form, since that would be annoying as hell.
 	pageData := CreatePageData{
-		SettingBounds:     lobbySettingBounds,
 		Password:          r.Form.Get("lobby_password"),
 		DrawingTime:       r.Form.Get("drawing_time"),
 		Rounds:            r.Form.Get("rounds"),
@@ -1099,12 +1069,8 @@ func parseDrawingTime(value string) (int, error) {
 		return 0, errors.New("the drawing time must be numeric")
 	}
 
-	if result < lobbySettingBounds.MinDrawingTime {
-		return 0, fmt.Errorf("drawing time must not be smaller than %d", lobbySettingBounds.MinDrawingTime)
-	}
-
-	if result > lobbySettingBounds.MaxDrawingTime {
-		return 0, fmt.Errorf("drawing time must not be greater than %d", lobbySettingBounds.MaxDrawingTime)
+	if result < 1 {
+		return 0, fmt.Errorf("drawing time must not be smaller than 1")
 	}
 
 	return int(result), nil
@@ -1116,12 +1082,8 @@ func parseRounds(value string) (int, error) {
 		return 0, errors.New("the rounds amount must be numeric")
 	}
 
-	if result < lobbySettingBounds.MinRounds {
-		return 0, fmt.Errorf("rounds must not be smaller than %d", lobbySettingBounds.MinRounds)
-	}
-
-	if result > lobbySettingBounds.MaxRounds {
-		return 0, fmt.Errorf("rounds must not be greater than %d", lobbySettingBounds.MaxRounds)
+	if result < 1 {
+		return 0, fmt.Errorf("rounds must not be smaller than 1")
 	}
 
 	return int(result), nil
@@ -1133,12 +1095,8 @@ func parseMaxPlayers(value string) (int, error) {
 		return 0, errors.New("the max players amount must be numeric")
 	}
 
-	if result < lobbySettingBounds.MinMaxPlayers {
-		return 0, fmt.Errorf("maximum players must not be smaller than %d", lobbySettingBounds.MinMaxPlayers)
-	}
-
-	if result > lobbySettingBounds.MaxMaxPlayers {
-		return 0, fmt.Errorf("maximum players must not be greater than %d", lobbySettingBounds.MaxMaxPlayers)
+	if result < 1 {
+		return 0, fmt.Errorf("maximum players must not be smaller than 1")
 	}
 
 	return int(result), nil
@@ -1168,12 +1126,8 @@ func parseClientsPerIPLimit(value string) (int, error) {
 		return 0, errors.New("the clients per IP limit must be numeric")
 	}
 
-	if result < lobbySettingBounds.MinClientsPerIPLimit {
-		return 0, fmt.Errorf("the clients per IP limit must not be lower than %d", lobbySettingBounds.MinClientsPerIPLimit)
-	}
-
-	if result > lobbySettingBounds.MaxClientsPerIPLimit {
-		return 0, fmt.Errorf("the clients per IP limit must not be higher than %d", lobbySettingBounds.MaxClientsPerIPLimit)
+	if result < 1 {
+		return 0, fmt.Errorf("the clients per IP limit must not be lower than 1")
 	}
 
 	return int(result), nil

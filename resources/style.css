@@ -95,7 +95,7 @@ footer {
     grid-row-gap: 10px;
 }
 
-.input-item {
+.input-container input {
     width: inherit;
     min-width: 300px;
 }
