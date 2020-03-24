@@ -21,8 +21,6 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-const supportedLanguages = []string{"English", "Italian"}
-
 var (
 	lobbyCreatePage    *template.Template
 	lobbyPage          *template.Template
@@ -36,6 +34,7 @@ var (
 		MinClientsPerIPLimit: 1,
 		MaxClientsPerIPLimit: 24,
 	}
+	supportedLanguages = []string{"English", "Italian"}
 )
 
 // SettingBounds defines the lower and upper bounds for the user-specified
