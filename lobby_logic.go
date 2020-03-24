@@ -96,6 +96,7 @@ type Lobby struct {
 	scoreEarnedByGuessers int
 	alreadyUsedWords      []string
 	CustomWordsChance     int
+	AllowCustomWords      bool
 	clientsPerIPLimit     int
 	currentDrawing        []*Pixel
 	EnableVotekick        bool
@@ -164,6 +165,7 @@ func createLobby(
 	maxPlayers int,
 	customWords []string,
 	customWordsChance int,
+	allowCustomWords bool,
 	clientsPerIPLimit int,
 	enableVotekick bool) *Lobby {
 
@@ -177,6 +179,7 @@ func createLobby(
 		MaxPlayers:          maxPlayers,
 		CustomWords:         customWords,
 		CustomWordsChance:   customWordsChance,
+		AllowCustomWords:    allowCustomWords,
 		timeLeftTickerReset: make(chan struct{}),
 		clientsPerIPLimit:   clientsPerIPLimit,
 		EnableVotekick:      enableVotekick,

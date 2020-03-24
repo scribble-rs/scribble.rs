@@ -113,11 +113,16 @@ body {
     left: 50%;
     top: 50%;
     width: auto;
-    height: 150px;
     transform: translate(-50%, -50%);
     align-items: center;
     justify-content: center;
     visibility: hidden;
+    padding: 1%;
+    border-radius: 1rem;
+}
+
+#word-dialog > * {
+    margin: 1rem;
 }
 
 .word-dialog-text {

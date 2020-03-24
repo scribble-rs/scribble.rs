@@ -21,6 +21,14 @@
         <button id="word-button-one" class="word-button" onclick="chooseWord(1)">Placeholder</button>
         <button id="word-button-two" class="word-button" onclick="chooseWord(2)">Placeholder</button>
     </div>
+    {{if .AllowCustomWords}}
+        <div class="word-button-container">
+            <form onsubmit="event.preventDefault(); chooseWordCustom(this)">
+                <input name="word" type="text" placeholder="Custom word" required>
+                <button class="word-button" type="submit">Use custom word</button>
+            </form>
+        </div>
+    {{end}}
 </div>
 <div class="content-wrapper">
     <div id="lobby">
@@ -333,6 +341,15 @@
         socket.send(JSON.stringify({
             Type: "choose-word",
             Data: index
+        }));
+        wordDialog.style.visibility = "hidden";
+    }
+
+    function chooseWordCustom(form) {
+        let word = form.elements.word.value;
+        socket.send(JSON.stringify({
+            Type: "choose-word-custom",
+            Data: word
         }));
         wordDialog.style.visibility = "hidden";
     }
