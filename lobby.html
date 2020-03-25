@@ -416,13 +416,13 @@
         } else if (parsed.Type === "pixels") {
             parsed.Data.forEach(function (pixel) {
                 if (pixel.Type === "fill") {
-                    fill(pixel.FromX * scaleDownFactor, pixel.FromY * scaleDownFactor, pixel.Color);
+                    fill(context, pixel.FromX * scaleDownFactor, pixel.FromY * scaleDownFactor, pixel.Color);
                 } else {
                     drawLine(context, pixel.FromX * scaleDownFactor, pixel.FromY * scaleDownFactor, pixel.ToX * scaleDownFactor, pixel.ToY * scaleDownFactor, pixel.Color, pixel.LineWidth * scaleDownFactor);
                 }
             });
         } else if (parsed.Type === "fill") {
-            fill(parsed.Data.FromX * scaleDownFactor, parsed.Data.FromY * scaleDownFactor, parsed.Data.Color);
+            fill(context, parsed.Data.FromX * scaleDownFactor, parsed.Data.FromY * scaleDownFactor, parsed.Data.Color);
         } else if (parsed.Type === "clear-drawing-board") {
             context.clearRect(0, 0, drawingBoard.width, drawingBoard.height);
         } else if (parsed.Type === "next-turn") {
