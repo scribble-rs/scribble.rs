@@ -16,7 +16,7 @@ var (
 )
 
 func main() {
-	portHTTP = flag.Int("portHTTP", 8080, "defines the port to be used for http mode")
+	portHTTP = flag.Int("portHTTP", 8081, "defines the port to be used for http mode")
 
 	flag.Parse()
 
