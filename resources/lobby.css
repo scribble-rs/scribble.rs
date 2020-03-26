@@ -30,7 +30,7 @@ body {
 
 .guess-letter-underline {
     text-transform: uppercase;
-    border-bottom: 0.3rem black solid;
+    border-bottom: 0.3rem #39ff14 solid;
 }
 
 .guess-letter {
