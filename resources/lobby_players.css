@@ -7,7 +7,7 @@
 }
 
 .player {
-    background-color: rgb(245, 245, 245);
+    /*background-color: rgb(245, 245, 245);*/
     padding: 0.2rem;
     display: grid;
     grid-template-columns: fit-content(100%) auto;

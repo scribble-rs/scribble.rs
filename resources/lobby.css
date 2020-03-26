@@ -1,5 +1,5 @@
 body {
-    background-color: antiquewhite;
+    /*background-color: antiquewhite;*/
 }
 
 .noscript {
@@ -70,7 +70,7 @@ body {
     padding: 5px;
     overflow-y: scroll;
     word-break: break-all;
-    background-color: white;
+    /*background-color: white;*/
 }
 
 #word-container {
