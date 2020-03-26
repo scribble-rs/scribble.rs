@@ -53,7 +53,8 @@ const (
 type Lobby struct {
 	// ID uniquely identified the Lobby.
 	ID string
-
+	// Username defines the players username in the lobby
+	Username string
 	// Password defines the password that participants need to enter before
 	// being allowed to join the Lobby.
 	Password string
@@ -158,6 +159,7 @@ func RemoveLobby(id string) {
 }
 
 func createLobby(
+	username string,
 	password string,
 	drawingTime int,
 	rounds int,
@@ -171,6 +173,7 @@ func createLobby(
 
 	lobby := &Lobby{
 		ID:                  uuid.NewV4().String(),
+		Username:            username,
 		Password:            password,
 		DrawingTime:         drawingTime,
 		Rounds:              rounds,

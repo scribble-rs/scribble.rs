@@ -870,6 +870,7 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 		panic(formParseError)
 	}
 
+	username := r.Form.Get("username")
 	password, passwordInvalid := parsePassword(r.Form.Get("lobby_password"))
 	language := r.Form.Get("language")
 	drawingTime, drawingTimeInvalid := parseDrawingTime(r.Form.Get("drawing_time"))
@@ -924,11 +925,13 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	} else {
-		lobby := createLobby(password, drawingTime, rounds, maxPlayers, customWords, customWordChance, clientsPerIPLimit, enableVotekick)
+		lobby := createLobby(username, password, drawingTime, rounds, maxPlayers, customWords, customWordChance, clientsPerIPLimit, enableVotekick)
 		var playerName string
 		usernameCookie, noCookieError := r.Cookie("username")
 		if noCookieError == nil {
 			playerName = usernameCookie.Value
+		} else if username != "" {
+			playerName = username
 		} else {
 			playerName = generatePlayerName()
 		}
