@@ -441,6 +441,7 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 			if lobby.Drawer == playerToKick {
 				endRound(lobby)
 			}
+
 			isPlayerToKickTheLobbyOwner := (lobby.Owner == playerToKick)
 			for _, otherPlayer := range lobby.Players {
 				if otherPlayer.votedForKick[toKickID] == true {
@@ -461,6 +462,17 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 			}
 
 			triggerPlayersUpdate(lobby)
+
+			var someoneStillGuesses bool
+			for _, otherPlayer := range lobby.Players {
+				if otherPlayer.State == Guessing {
+					someoneStillGuesses = true
+					break
+				}
+			}
+			if !someoneStillGuesses {
+				endRound(lobby)
+			}
 		}
 	}
 }
