@@ -15,6 +15,7 @@ func readWordList(chosenLanguage string) {
 	languageMap := map[string]string{
 		"English": "words_en",
 		"Italian": "words_it",
+		"German":  "words_de",
 	}
 	data, err := ioutil.ReadFile(wordPath + languageMap[chosenLanguage])
 	if err != nil {

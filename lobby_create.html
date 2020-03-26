@@ -29,6 +29,9 @@
 
                 {{end}}
                 <form id="lobby-create" class="input-container" action="/lobby/create" method="POST">
+                    <b>Name</b>
+                    <input class="input-item" name="username" placeholder="Enter your username"
+                        type="text" value="{{.Username}}" />
                     <b>Lobby-Password</b>
                     <input class="input-item" name="lobby_password" placeholder="Enter your password or leave empty"
                         type="password" value="{{.Password}}" />

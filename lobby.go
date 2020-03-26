@@ -34,7 +34,7 @@ var (
 		MinClientsPerIPLimit: 1,
 		MaxClientsPerIPLimit: 24,
 	}
-	supportedLanguages = []string{"English", "Italian"}
+	supportedLanguages = []string{"English", "Italian", "German"}
 )
 
 // SettingBounds defines the lower and upper bounds for the user-specified
@@ -54,6 +54,7 @@ type SettingBounds struct {
 type CreatePageData struct {
 	*SettingBounds
 	Errors            []string
+	Username          string
 	Password          string
 	Languages         []string
 	DrawingTime       string
