@@ -14,6 +14,7 @@ var (
 	languageMap   = map[string]string{
 		"English": "words_en",
 		"Italian": "words_it",
+		"German":  "words_de",
 	}
 )
 
