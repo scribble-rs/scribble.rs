@@ -460,6 +460,17 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 			}
 
 			triggerPlayersUpdate(lobby)
+
+			var someoneStillGuesses bool
+			for _, otherPlayer := range lobby.Players {
+				if otherPlayer.State == Guessing {
+					someoneStillGuesses = true
+					break
+				}
+			}
+			if !someoneStillGuesses {
+				endRound(lobby)
+			}
 		}
 	}
 }
