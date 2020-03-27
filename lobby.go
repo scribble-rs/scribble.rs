@@ -341,15 +341,7 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 				sender.WriteAsJSON(JSEvent{Type: "system-message", Data: "You have correctly guessed the word."})
 			}
 
-			var someoneStillGuesses bool
-			for _, otherPlayer := range lobby.Players {
-				if otherPlayer.State == Guessing {
-					someoneStillGuesses = true
-					break
-				}
-			}
-
-			if !someoneStillGuesses {
+			if !lobby.isAnyoneStillGuessing() {
 				endRound(lobby)
 			} else {
 				if sender.State != Disconnected && sender.ws != nil {
@@ -367,6 +359,16 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 
 		sendMessageToAll(trimmed, sender, lobby)
 	}
+}
+
+func (lobby *Lobby) isAnyoneStillGuessing() bool {
+	for _, otherPlayer := range lobby.Players {
+		if otherPlayer.State == Guessing {
+			return true
+		}
+	}
+
+	return false
 }
 
 func sendMessageToAll(message string, sender *Player, lobby *Lobby) {
@@ -394,6 +396,16 @@ func sendMessageToAllNonGuessing(message string, sender *Player, lobby *Lobby) {
 }
 
 func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
+	//Kicking yourself isn't allowed
+	if toKickID == player.ID {
+		return
+	}
+
+	//A player can't vote twice to kick someone
+	if player.votedForKick[toKickID] {
+		return
+	}
+
 	toKick := -1
 	for index, otherPlayer := range lobby.Players {
 		if otherPlayer.ID == toKickID {
@@ -402,18 +414,17 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 		}
 	}
 
-	if toKickID == player.ID {
-		return
-	}
-
+	//If we haven't found the player, we can't kick him/her.
 	if toKick != -1 {
-		if player.votedForKick[toKickID] {
-			return
-		}
-
 		player.votedForKick[toKickID] = true
 		playerToKick := lobby.Players[toKick]
-		playerToKick.voteKickCount++
+
+		var voteKickCount int
+		for _, otherPlayer := range lobby.Players {
+			if otherPlayer.votedForKick[toKickID] == true {
+				voteKickCount++
+			}
+		}
 
 		votesNeeded := 1
 		if len(lobby.Players)%2 == 0 {
@@ -422,31 +433,31 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 			votesNeeded = (len(lobby.Players) / 2) + 1
 		}
 
-		kickMessage := &JSEvent{Type: "system-message", Data: fmt.Sprintf("(%d/%d) players voted to kick %s", playerToKick.voteKickCount, votesNeeded, playerToKick.Name)}
-		for _, otherPlayer := range lobby.Players {
-			if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
-				otherPlayer.WriteAsJSON(kickMessage)
-			}
-		}
+		lobby.WriteGlobalSystemMessage(fmt.Sprintf("(%d/%d) players voted to kick %s", voteKickCount, votesNeeded, playerToKick.Name))
 
-		if playerToKick.voteKickCount >= votesNeeded {
-			playerHasBeenKickedMsg := &JSEvent{Type: "system-message", Data: fmt.Sprintf("%s has been kicked from the lobby", playerToKick.Name)}
-			for _, otherPlayer := range lobby.Players {
-				if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
-					otherPlayer.WriteAsJSON(playerHasBeenKickedMsg)
-				}
-			}
-
-			if lobby.Drawer == playerToKick {
-				endRound(lobby)
-			}
-			isPlayerToKickTheLobbyOwner := (lobby.Owner == playerToKick)
+		if voteKickCount >= votesNeeded {
+			//Since the player is already kicked, we first clean up the kicking information related to that player
 			for _, otherPlayer := range lobby.Players {
 				if otherPlayer.votedForKick[toKickID] == true {
 					delete(player.votedForKick, toKickID)
 					break
 				}
 			}
+
+			lobby.WriteGlobalSystemMessage(fmt.Sprintf("%s has been kicked from the lobby", playerToKick.Name))
+
+			if lobby.Drawer == playerToKick {
+				lobby.WriteGlobalSystemMessage("Since the kicked player has been drawing, none of you will get any points this round.")
+				//Since the drawing person has been kicked, that probably means that he/she was trolling, therefore
+				//we redact everyones last earned score.
+				for _, otherPlayer := range lobby.Players {
+					otherPlayer.Score -= otherPlayer.LastScore
+					otherPlayer.LastScore = 0
+				}
+				lobby.scoreEarnedByGuessers = 0
+				//We must absolutely not set lobby.Drawer to nil, since this would cause the drawing order to be ruined.
+			}
+
 			if playerToKick.ws != nil {
 				playerToKick.State = Disconnected
 				playerToKick.ws.Close()
@@ -455,11 +466,23 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 
 			recalculateRanks(lobby)
 
-			if isPlayerToKickTheLobbyOwner {
-				lobby.Owner = lobby.Players[rand.Intn(len(lobby.Players))]
+			//If the owner is kicked, we choose the next best person as the owner.
+			if lobby.Owner == playerToKick {
+				for _, otherPlayer := range lobby.Players {
+					potentialOwner := otherPlayer
+					if potentialOwner.State != Disconnected && potentialOwner.ws != nil {
+						lobby.Owner = potentialOwner
+						lobby.WriteGlobalSystemMessage(fmt.Sprintf("%s is the new lobby owner.", potentialOwner.Name))
+						break
+					}
+				}
 			}
 
 			triggerPlayersUpdate(lobby)
+
+			if lobby.Drawer == playerToKick || !lobby.isAnyoneStillGuessing() {
+				endRound(lobby)
+			}
 		}
 	}
 }
@@ -529,14 +552,7 @@ func commandSetMP(caller *Player, lobby *Lobby, args []string) {
 			if int(newMaxPlayersValueInt) >= len(lobby.Players) && newMaxPlayersValueInt <= lobbySettingBounds.MaxMaxPlayers && newMaxPlayersValueInt >= lobbySettingBounds.MinMaxPlayers {
 				lobby.MaxPlayers = int(newMaxPlayersValueInt)
 
-				maxPlayerChangeEvent := &JSEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value has been changed to %d", lobby.MaxPlayers)}
-
-				for _, otherPlayer := range lobby.Players {
-					if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
-						otherPlayer.WriteAsJSON(maxPlayerChangeEvent)
-					}
-				}
-
+				lobby.WriteGlobalSystemMessage(fmt.Sprintf("MaxPlayers value has been changed to %d", lobby.MaxPlayers))
 			} else {
 				if len(lobby.Players) > int(lobbySettingBounds.MinMaxPlayers) {
 					caller.WriteAsJSON(JSEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value should be between %d and %d.", len(lobby.Players), lobbySettingBounds.MaxMaxPlayers)})
@@ -553,29 +569,33 @@ func commandSetMP(caller *Player, lobby *Lobby, args []string) {
 }
 
 func endRound(lobby *Lobby) {
-	var overEvent *JSEvent
+	var roundOverMessage string
 	if lobby.CurrentWord == "" {
-		overEvent = &JSEvent{Type: "system-message", Data: "Round over. No word was chosen."}
+		roundOverMessage = "Round over. No word was chosen."
 	} else {
-		overEvent = &JSEvent{Type: "system-message", Data: fmt.Sprintf("Round over. The word was '%s'", lobby.CurrentWord)}
+		roundOverMessage = fmt.Sprintf("Round over. The word was '%s'", lobby.CurrentWord)
 	}
 
-	averageScore := float64(lobby.scoreEarnedByGuessers) / float64(len(lobby.Players)-1)
-	if averageScore > 0 {
-		lobby.Drawer.LastScore = int(averageScore * float64(1.1))
-		lobby.Drawer.Score += lobby.Drawer.LastScore
+	//The drawer can potentially be null if he's kicked, in that case we proceed with the round if anyone has already
+	drawer := lobby.Drawer
+	if drawer != nil && lobby.scoreEarnedByGuessers > 0 {
+		averageScore := float64(lobby.scoreEarnedByGuessers) / float64(len(lobby.Players)-1)
+		if averageScore > 0 {
+			drawer.LastScore = int(averageScore * 1.1)
+			drawer.Score += drawer.LastScore
+		}
 	}
+
 	lobby.scoreEarnedByGuessers = 0
 	lobby.alreadyUsedWords = append(lobby.alreadyUsedWords, lobby.CurrentWord)
 	lobby.CurrentWord = ""
-
 	lobby.WordHints = nil
 
 	for _, otherPlayer := range lobby.Players {
-		if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
-			otherPlayer.WriteAsJSON(overEvent)
-		}
+		otherPlayer.LastScore = 0
 	}
+
+	lobby.WriteGlobalSystemMessage(roundOverMessage)
 
 	advanceLobby(lobby)
 }
@@ -592,7 +612,6 @@ func advanceLobby(lobby *Lobby) {
 	for _, otherPlayer := range lobby.Players {
 		otherPlayer.State = Guessing
 		otherPlayer.Icon = ""
-		otherPlayer.voteKickCount = 0
 		otherPlayer.votedForKick = make(map[string]bool)
 	}
 
@@ -608,16 +627,10 @@ func advanceLobby(lobby *Lobby) {
 				lobby.Drawer = nil
 				lobby.Round = 0
 
-				gameOverEvent := &JSEvent{Type: "system-message", Data: "Game over. Type !start again to start a new round."}
-
 				recalculateRanks(lobby)
 				triggerPlayersUpdate(lobby)
 
-				for _, otherPlayer := range lobby.Players {
-					if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
-						otherPlayer.WriteAsJSON(gameOverEvent)
-					}
-				}
+				lobby.WriteGlobalSystemMessage("Game over. Type !start again to start a new round.")
 
 				return
 			}
@@ -740,10 +753,6 @@ func showAllInWordHints(hints []*WordHint) []*WordHint {
 	}
 
 	return newHints
-}
-
-func triggerClearingDrawingBoards(lobby *Lobby) {
-	triggerSimpleUpdateEvent("clear-drawing-board", lobby)
 }
 
 func triggerNextTurn(lobby *Lobby) {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"html"
 	"math/rand"
 	"sync"
 	"time"
@@ -32,12 +33,11 @@ type Player struct {
 	// Score is the points that the player got in the current Lobby.
 	Score int
 	// Rank is the current ranking of the player in his Lobby
-	LastScore     int
-	Rank          int
-	State         PlayerState
-	Icon          string
-	votedForKick  map[string]bool
-	voteKickCount int
+	LastScore    int
+	Rank         int
+	State        PlayerState
+	Icon         string
+	votedForKick map[string]bool
 }
 
 type PlayerState int
@@ -198,16 +198,15 @@ func createLobby(
 
 func createPlayer(name string) *Player {
 	return &Player{
-		Name:          name,
-		ID:            uuid.NewV4().String(),
-		UserSession:   uuid.NewV4().String(),
-		Score:         0,
-		LastScore:     0,
-		Rank:          1,
-		voteKickCount: 0,
-		votedForKick:  make(map[string]bool),
-		socketMutex:   &sync.Mutex{},
-		State:         Disconnected,
+		Name:         name,
+		ID:           uuid.NewV4().String(),
+		UserSession:  uuid.NewV4().String(),
+		Score:        0,
+		LastScore:    0,
+		Rank:         1,
+		votedForKick: make(map[string]bool),
+		socketMutex:  &sync.Mutex{},
+		State:        Disconnected,
 	}
 }
 
@@ -235,4 +234,13 @@ func (p *Player) WriteMessage(messageType int, data []byte) error {
 	}
 
 	return p.ws.WriteMessage(messageType, data)
+}
+
+func (lobby *Lobby) WriteGlobalSystemMessage(text string) {
+	playerHasBeenKickedMsg := &JSEvent{Type: "system-message", Data: html.EscapeString(text)}
+	for _, otherPlayer := range lobby.Players {
+		if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
+			otherPlayer.WriteAsJSON(playerHasBeenKickedMsg)
+		}
+	}
 }
