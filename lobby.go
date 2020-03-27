@@ -81,12 +81,29 @@ func createDefaultLobbyCreatePageData() *CreatePageData {
 
 func init() {
 	var err error
-	lobbyCreatePage, err = template.New("").ParseFiles("lobby_create.html", "footer.html")
+
+	lobbyCreatePage, err = template.New("lobby_create.html").Parse(readTemplateFile("lobby_create.html"))
+	if err != nil {
+		panic(err)
+	}
+	lobbyCreatePage, err = lobbyCreatePage.New("footer.html").Parse(readTemplateFile("footer.html"))
 	if err != nil {
 		panic(err)
 	}
 
-	lobbyPage, err = template.New("").ParseFiles("lobby.html", "lobby_players.html", "lobby_word.html", "footer.html")
+	lobbyPage, err = template.New("lobby.html").Parse(readTemplateFile("lobby.html"))
+	if err != nil {
+		panic(err)
+	}
+	lobbyPage, err = lobbyPage.New("lobby_players.html").Parse(readTemplateFile("lobby_players.html"))
+	if err != nil {
+		panic(err)
+	}
+	lobbyPage, err = lobbyPage.New("lobby_word.html").Parse(readTemplateFile("lobby_word.html"))
+	if err != nil {
+		panic(err)
+	}
+	lobbyPage, err = lobbyPage.New("footer.html").Parse(readTemplateFile("footer.html"))
 	if err != nil {
 		panic(err)
 	}

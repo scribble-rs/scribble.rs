@@ -5,9 +5,9 @@ import (
 	"math/rand"
 	"strings"
 	"time"
-)
 
-const wordPath string = "resources/words/"
+	"github.com/markbates/pkger"
+)
 
 var wordList []string
 
@@ -16,7 +16,14 @@ func readWordList(chosenLanguage string) {
 		"English": "words_en",
 		"Italian": "words_it",
 	}
-	data, err := ioutil.ReadFile(wordPath + languageMap[chosenLanguage])
+
+	wordListFile, pkgerError := pkger.Open("/resources/words/" + languageMap[chosenLanguage])
+	if pkgerError != nil {
+		panic(pkgerError)
+	}
+	defer wordListFile.Close()
+
+	data, err := ioutil.ReadAll(wordListFile)
 	if err != nil {
 		panic(err)
 	}
