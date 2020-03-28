@@ -47,7 +47,7 @@ body {
     height: 100%;
     padding: 5px;
     display: grid;
-    grid-template-columns: 300px auto 350px;
+    grid-template-columns: 15% auto 15%; /* replaced absolute values by relative ones to keep drawingboard large on HiDPI devices. */
     grid-template-rows: min-content auto auto min-content;
     grid-gap: 5px;
 }
