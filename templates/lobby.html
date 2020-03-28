@@ -424,7 +424,8 @@
         } else if (parsed.Type === "fill") {
             fill(context, parsed.Data.FromX * scaleDownFactor, parsed.Data.FromY * scaleDownFactor, parsed.Data.Color);
         } else if (parsed.Type === "clear-drawing-board") {
-            context.clearRect(0, 0, drawingBoard.width, drawingBoard.height);
+            context.fillStyle = "#FFFFFF";
+            context.fillRect(0, 0, drawingBoard.width, drawingBoard.height);
         } else if (parsed.Type === "next-turn") {
             if (sound) {
                 let audio = new Audio('/resources/end-turn.wav');
