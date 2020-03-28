@@ -193,8 +193,6 @@
     const roundsSpan = document.getElementById("rounds");
     const timeLeft = document.getElementById("time-left");
     const drawingBoard = document.getElementById("drawing-board");
-    const context = drawingBoard.getContext("2d");
-    context.lineJoin = "round";
     const colorPicker = document.getElementById("color-picker");
     const lineWidthChooser = document.getElementById("line-width");
     const wordDialog = document.getElementById("word-dialog");
@@ -226,15 +224,38 @@
         }
     }
 
-    const baseWidth = 1461;
-    const baseHeight = 821;
+    function getWindowScale() {
+        if ('devicePixelRatio' in window) {
+            return window.devicePixelRatio;
+        } else {
+            return 1;
+        }
+    }
+
+    // Drawing board ratio
+    const boardRatio = 16 / 9;
+
+    // Window scale
+    const windowScale = getWindowScale();
+
+    // Reverted for now: Have the drawing board coordinates normalized to 1 unit of width and the ratio based unit of height.
+    const baseWidth = 1461; //1;
+    const baseHeight = 821; //baseWidth / boardRatio;
 
     //FIXME Disgusting trick to fick the layout, css didn't do it for me.
-    document.getElementById("chat").style.maxHeight = (document.getElementById("drawing-board-wrapper").clientWidth) / (16 / 9) + "px";
-    drawingBoard.width = (document.getElementById("drawing-board-wrapper").clientWidth);
-    drawingBoard.height = (document.getElementById("drawing-board-wrapper").clientWidth) / (16 / 9);
-    drawingBoard.style.maxWidth = (drawingBoard.width) + "px";
-    drawingBoard.style.maxHeight = (drawingBoard.height) + "px";
+    document.getElementById("chat").style.maxHeight = (document.getElementById("drawing-board-wrapper").clientWidth) / boardRatio + "px";
+    drawingBoard.style.maxWidth = Math.round(document.getElementById("drawing-board-wrapper").clientWidth) + "px";
+    drawingBoard.style.maxHeight = Math.round((document.getElementById("drawing-board-wrapper").clientWidth) / boardRatio) + "px";
+
+    // Set drawingBoard pixel resolution
+    // Mind the window scale to get sharp drawing on HiDPI devices (Retina Display etc.)
+    drawingBoard.width = Math.round(document.getElementById("drawing-board-wrapper").clientWidth) * windowScale;
+    drawingBoard.height = Math.round(document.getElementById("drawing-board-wrapper").clientWidth) / boardRatio * windowScale;
+
+    // Moving this here to extract the context after resizing
+    const context = drawingBoard.getContext("2d");
+    context.lineJoin = "round";
+
     const scaleUpFactor = baseWidth / drawingBoard.width;
     const scaleDownFactor = drawingBoard.width / baseWidth;
 
@@ -529,7 +550,8 @@
     function fill(context, x1, y1, color) {
         context.fillStyle = color;
         //There seems to be some bug where setting the tolerance to 0 causes a freeze when painting black on white.
-        context.fillFlood(x1, y1, 1);
+        // FIXME quick and dirty fix to apply the window scale to all drawing activities.
+        context.fillFlood(x1 * windowScale, y1 * windowScale, 1);
     }
 
     function fillAndSendEvent(context, x1, y1, color) {
@@ -566,10 +588,11 @@
     function drawLine(context, x1, y1, x2, y2, color, lineWidth) {
         // the coordinates must be whole numbers to improve performance.
         // also, decimals as coordinates is not making sense.
-        x1 = Math.floor(x1);
-        y1 = Math.floor(y1);
-        x2 = Math.floor(x2);
-        y2 = Math.floor(y2);
+        // FIXME quick and dirty fix to apply the window scale to all drawing activities.
+        x1 = Math.floor(x1 * windowScale);
+        y1 = Math.floor(y1 * windowScale);
+        x2 = Math.floor(x2 * windowScale);
+        y2 = Math.floor(y2 * windowScale);
         lineWidth = Math.ceil(lineWidth);
 
         color = hexToRgb(color);
