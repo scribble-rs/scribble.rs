@@ -424,8 +424,7 @@
         } else if (parsed.Type === "fill") {
             fill(context, parsed.Data.FromX * scaleDownFactor, parsed.Data.FromY * scaleDownFactor, parsed.Data.Color);
         } else if (parsed.Type === "clear-drawing-board") {
-            context.fillStyle = "#FFFFFF";
-            context.fillRect(0, 0, drawingBoard.width, drawingBoard.height);
+            clear(context)
         } else if (parsed.Type === "next-turn") {
             if (sound) {
                 let audio = new Audio('/resources/end-turn.wav');
@@ -434,7 +433,7 @@
                 audio.play();
             }
 
-            context.clearRect(0, 0, drawingBoard.width, drawingBoard.height);
+            clear(context)
 
             allowDrawing = false;
         } else if (parsed.Type === "your-turn") {
@@ -526,6 +525,11 @@
             isDrawing = false;
         }
     };
+
+    function clear(context) {
+        context.fillStyle = "#FFFFFF";
+        context.fillRect(0, 0, drawingBoard.width, drawingBoard.height);
+    }
 
     function fill(context, x1, y1, color) {
         context.fillStyle = color;
