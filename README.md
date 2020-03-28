@@ -1,12 +1,20 @@
-# Scribble.rs
+<h1 align="center">Scribble.rs</h1>
 
-[![CircleCI](https://circleci.com/gh/scribble-rs/scribble.rs.svg?style=svg)](https://circleci.com/gh/scribble-rs/scribble.rs)
-[![codecov](https://codecov.io/gh/scribble-rs/scribble.rs/branch/master/graph/badge.svg)](https://codecov.io/gh/scribble-rs/scribble.rs)
+<p align="center">
+  <a href="https://circleci.com/gh/scribble-rs/scribble.rs">
+    <img src="https://circleci.com/gh/scribble-rs/scribble.rs.svg?style=svg">
+  </a>
+  <a href="https://codecov.io/gh/scribble-rs/scribble.rs">
+    <img src="https://codecov.io/gh/scribble-rs/scribble.rs/branch/master/graph/badge.svg">
+  </a>
+  <a href="https://discord.gg/3sntyCv">
+    <img src="https://img.shields.io/discord/693433417395732531.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2">
+  </a>
+</p>
 
 This project is intended to be a clone of the web-based drawing game
-[skribbl.io](https://skribbl.io), since skribbl.io has several usability
-issues. This project will try addressing as many of the usability issues
-as possible.
+[skribbl.io](https://skribbl.io). In my opinion skribbl.io has several
+usability issues, which I'll try addressing in this project.
 
 Even though there is an official instance at
 [scribble.rs](http://scribble.rs), you can still host your own instance.
