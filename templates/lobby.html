@@ -548,14 +548,14 @@
         }
 
         return false;
-    }
+    };
 
     // This is executed even if the mouse is not above the browser anymore.
     window.onmouseup = function (e) {
         if (isDrawing === true) {
             isDrawing = false;
         }
-    }
+    };
 
     // This is executed even if the mouse is not above the browser anymore.
     window.onmousemove = function (e) {    
@@ -570,7 +570,7 @@
             x = offsetX;
             y = offsetY;
         }
-    }
+    };
 
     drawingBoard.onclick = function (e) {
         if (allowDrawing && e.button === 0) {
