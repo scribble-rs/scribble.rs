@@ -905,9 +905,6 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 	clientsPerIPLimit, clientsPerIPLimitInvalid := parseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
 	enableVotekick := r.Form.Get("enable_votekick") == "true"
 
-	// Read wordlist according to the chosen language
-	readWordList(language)
-
 	//Prevent resetting the form, since that would be annoying as hell.
 	pageData := CreatePageData{
 		SettingBounds:     lobbySettingBounds,
@@ -921,6 +918,17 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 		EnableVotekick:    r.Form.Get("enable_votekick") == "true",
 	}
 
+	var languageValid bool
+	for _, supportedLanguage := range supportedLanguages {
+		if language == supportedLanguage {
+			languageValid = true
+			break
+		}
+	}
+
+	if !languageValid {
+		pageData.Errors = append(pageData.Errors, "invalid language was selected")
+	}
 	if passwordInvalid != nil {
 		pageData.Errors = append(pageData.Errors, passwordInvalid.Error())
 	}
@@ -963,6 +971,8 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 		//FIXME Make a dedicated method that uses a mutex?
 		lobby.Players = append(lobby.Players, player)
 		lobby.Owner = player
+		// Read wordlist according to the chosen language
+		lobby.Words = readWordList(language)
 
 		// Use the players generated usersession and pass it as a cookie.
 		http.SetCookie(w, &http.Cookie{

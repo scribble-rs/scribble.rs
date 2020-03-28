@@ -68,6 +68,7 @@ type Lobby struct {
 	// CustomWords are additional words that will be used in addition to the
 	// predefined words.
 	CustomWords []string
+	Words       []string
 
 	// Players references all participants of the Lobby.
 	Players []*Player
