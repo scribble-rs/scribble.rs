@@ -608,8 +608,12 @@ func endRound(lobby *Lobby) {
 	lobby.CurrentWord = ""
 	lobby.WordHints = nil
 
+	//If the round ends and people still have guessing, that means the "Last" value
+	////for the next turn has to be "no score earned".
 	for _, otherPlayer := range lobby.Players {
-		otherPlayer.LastScore = 0
+		if otherPlayer.State == Guessing {
+			otherPlayer.LastScore = 0
+		}
 	}
 
 	lobby.WriteGlobalSystemMessage(roundOverMessage)
