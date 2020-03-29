@@ -183,8 +183,8 @@
         })
     }
 
-    console.log("Attempting Connection...");
-    const socket = new WebSocket("ws://" + location.hostname + ":{{.Port}}/ws?id={{.LobbyID}}");
+    console.log("Attempting Connection on port " + location.port + "...");
+    const socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/ws?id={{.LobbyID}}");
 
     const messageInput = document.getElementById("message-input");
     const playerContainer = document.getElementById("player-container");
@@ -670,7 +670,7 @@
         while (true) {
             //check if pixel is inside the canvas
             if (x0 < 0 || x0 >= imageData.width || y0 < 0 || y0 >= imageData.height) return;
-                setPixel(imageData, x0, y0, color);
+            setPixel(imageData, x0, y0, color);
 
             if ((x0 === x1) && (y0 === y1)) break;
             const e2 = 2 * err;
