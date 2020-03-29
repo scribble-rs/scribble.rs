@@ -28,8 +28,7 @@ Run the following to build the application:
 ```shell
 git clone https://github.com/scribble-rs/scribble.rs.git
 cd scribble.rs
-go get github.com/markbates/pkger/cmd/pkger
-pkger -include /resources -include /templates
+go run github.com/markbates/pkger/cmd/pkger -include /resources -include /templates
 go build -o scribblers .
 ```
 
@@ -44,6 +43,16 @@ It should run on any system that go supports as a compilation target.
 
 This application uses go modules, therefore you need to make sure that you
 have go version `1.13` or higher.
+
+## Docker
+
+Alternatively there's a docker container:
+
+```shell
+docker pull biosmarcel/scribble.rs
+```
+
+It uses port `80`.
 
 ## Contributing
 
