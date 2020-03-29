@@ -38,6 +38,8 @@ func main() {
 
 	flag.Parse()
 
+	log.Println("Starting ...")
+
 	//Setting the seed in order for the petnames to be random.
 	rand.Seed(time.Now().UnixNano())
 
