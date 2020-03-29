@@ -185,7 +185,7 @@
 
     console.log("Attempting Connection on port " + location.port + "...");
     let socket
-    if (location.protocol === 'https') {
+    if (location.protocol === 'https:') {
         socket = new WebSocket("wss://" + location.hostname + ":" + location.port + "/ws?id={{.LobbyID}}");
     } else {
         socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/ws?id={{.LobbyID}}");
