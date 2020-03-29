@@ -184,7 +184,11 @@
     }
 
     console.log("Attempting Connection on port " + location.port + "...");
-    const socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/ws?id={{.LobbyID}}");
+    if (location.protocol === 'https') {
+        const socket = new WebSocket("wss://" + location.hostname + ":" + location.port + "/ws?id={{.LobbyID}}");
+    } else {
+        const socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/ws?id={{.LobbyID}}");
+    }
 
     const messageInput = document.getElementById("message-input");
     const playerContainer = document.getElementById("player-container");
