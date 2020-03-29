@@ -606,7 +606,9 @@
         let err = dx - dy;
 
         while (true) {
-            setPixel(imageData, x0, y0, color);
+            //check if pixel is inside the canvas
+            if (x0 < 0 || x0 >= imageData.width || y0 < 0 || y0 >= imageData.height) return;
+                setPixel(imageData, x0, y0, color);
 
             if ((x0 === x1) && (y0 === y1)) break;
             const e2 = 2 * err;
@@ -643,9 +645,6 @@
     }
 
     function setPixel(imageData, x, y, color) {
-        //check if pixel is still inside the canvas
-        if (x < 0 || x > imageData.width || y < 0 || y > imageData.height) return;
-
         const offset = (y * imageData.width + x) * 4;
         imageData.data[offset] = color[0];
         imageData.data[offset + 1] = color[1];
