@@ -159,23 +159,18 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 			lobby.scoreEarnedByGuessers += sender.LastScore
 			sender.State = Standby
 			sender.Icon = "✔️"
-			if sender.State != Disconnected && sender.Ws != nil {
-				WriteAsJSON(sender, JSEvent{Type: "system-message", Data: "You have correctly guessed the word."})
-			}
+			WriteAsJSON(sender, JSEvent{Type: "system-message", Data: "You have correctly guessed the word."})
 
 			if !lobby.isAnyoneStillGuessing() {
 				endRound(lobby)
 			} else {
-				if sender.State != Disconnected && sender.Ws != nil {
-					WriteAsJSON(sender, JSEvent{Type: "update-wordhint"})
-				}
+				WriteAsJSON(sender, JSEvent{Type: "update-wordhint"})
 				recalculateRanks(lobby)
 				triggerCorrectGuessEvent(lobby)
 			}
 
 			return
-		} else if levenshtein.ComputeDistance(lowerCasedInput, lowerCasedSearched) == 1 &&
-			sender.State != Disconnected && sender.Ws != nil {
+		} else if levenshtein.ComputeDistance(lowerCasedInput, lowerCasedSearched) == 1 {
 			WriteAsJSON(sender, JSEvent{Type: "system-message", Data: fmt.Sprintf("'%s' is very close.", trimmed)})
 		}
 
@@ -196,19 +191,17 @@ func (lobby *Lobby) isAnyoneStillGuessing() bool {
 func sendMessageToAll(message string, sender *Player, lobby *Lobby) {
 	escaped := html.EscapeString(discordemojimap.Replace(message))
 	for _, target := range lobby.Players {
-		if target.State != Disconnected && target.Ws != nil {
-			WriteAsJSON(target, JSEvent{Type: "message", Data: Message{
-				Author:  html.EscapeString(sender.Name),
-				Content: escaped,
-			}})
-		}
+		WriteAsJSON(target, JSEvent{Type: "message", Data: Message{
+			Author:  html.EscapeString(sender.Name),
+			Content: escaped,
+		}})
 	}
 }
 
 func sendMessageToAllNonGuessing(message string, sender *Player, lobby *Lobby) {
 	escaped := html.EscapeString(discordemojimap.Replace(message))
 	for _, target := range lobby.Players {
-		if target.State != Disconnected && target.State != Guessing && target.Ws != nil {
+		if target.State != Guessing {
 			WriteAsJSON(target, JSEvent{Type: "non-guessing-player-message", Data: Message{
 				Author:  html.EscapeString(sender.Name),
 				Content: escaped,
@@ -338,24 +331,18 @@ func commandStart(caller *Player, lobby *Lobby) {
 func commandNick(caller *Player, lobby *Lobby, args []string) {
 	if len(args) == 1 {
 		caller.Name = GeneratePlayerName()
-		if caller.State != Disconnected && caller.Ws != nil {
-			WriteAsJSON(caller, JSEvent{Type: "reset-username"})
-		}
+		WriteAsJSON(caller, JSEvent{Type: "reset-username"})
 		triggerPlayersUpdate(lobby)
 	} else if len(args) == 2 {
 		newName := strings.TrimSpace(args[1])
 		if len(newName) == 0 {
 			caller.Name = GeneratePlayerName()
-			if caller.State != Disconnected && caller.Ws != nil {
-				WriteAsJSON(caller, JSEvent{Type: "reset-username"})
-			}
+			WriteAsJSON(caller, JSEvent{Type: "reset-username"})
 			triggerPlayersUpdate(lobby)
 		} else if len(newName) <= 30 {
 			fmt.Printf("%s is now %s\n", caller.Name, newName)
 			caller.Name = newName
-			if caller.State != Disconnected && caller.Ws != nil {
-				WriteAsJSON(caller, JSEvent{Type: "persist-username", Data: caller.Name})
-			}
+			WriteAsJSON(caller, JSEvent{Type: "persist-username", Data: caller.Name})
 			triggerPlayersUpdate(lobby)
 		}
 	}
@@ -471,9 +458,7 @@ func advanceLobby(lobby *Lobby) {
 	lobby.Drawer.State = Drawing
 	lobby.Drawer.Icon = "✏️"
 	lobby.WordChoice = GetRandomWords(lobby)
-	if lobby.Drawer.State != Disconnected && lobby.Drawer.Ws != nil {
-		WriteAsJSON(lobby.Drawer, JSEvent{Type: "prompt-words", Data: lobby.WordChoice})
-	}
+	WriteAsJSON(lobby.Drawer, JSEvent{Type: "prompt-words", Data: lobby.WordChoice})
 
 	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
 	go func() {
