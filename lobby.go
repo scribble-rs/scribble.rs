@@ -62,7 +62,8 @@ type CreatePageData struct {
 	CustomWords       string
 	CustomWordsChance string
 	ClientsPerIPLimit string
-	EnableVotekick    bool
+	EnableVotekick    string
+	Language          string
 }
 
 func createDefaultLobbyCreatePageData() *CreatePageData {
@@ -75,7 +76,8 @@ func createDefaultLobbyCreatePageData() *CreatePageData {
 		MaxPlayers:        "12",
 		CustomWordsChance: "50",
 		ClientsPerIPLimit: "1",
-		EnableVotekick:    true,
+		EnableVotekick:    "true",
+		Language:          supportedLanguages[0],
 	}
 }
 
@@ -899,7 +901,7 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 	}
 
 	password, passwordInvalid := parsePassword(r.Form.Get("lobby_password"))
-	language := r.Form.Get("language")
+	language, languageInvalid := parseLanguage(r.Form.Get("language"))
 	drawingTime, drawingTimeInvalid := parseDrawingTime(r.Form.Get("drawing_time"))
 	rounds, roundsInvalid := parseRounds(r.Form.Get("rounds"))
 	maxPlayers, maxPlayersInvalid := parseMaxPlayers(r.Form.Get("max_players"))
@@ -911,6 +913,7 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 	//Prevent resetting the form, since that would be annoying as hell.
 	pageData := CreatePageData{
 		SettingBounds:     lobbySettingBounds,
+		Languages:         supportedLanguages,
 		Password:          r.Form.Get("lobby_password"),
 		DrawingTime:       r.Form.Get("drawing_time"),
 		Rounds:            r.Form.Get("rounds"),
@@ -918,19 +921,12 @@ func CreateLobby(w http.ResponseWriter, r *http.Request) {
 		CustomWords:       r.Form.Get("custom_words"),
 		CustomWordsChance: r.Form.Get("custom_words_chance"),
 		ClientsPerIPLimit: r.Form.Get("clients_per_ip_limit"),
-		EnableVotekick:    r.Form.Get("enable_votekick") == "true",
+		EnableVotekick:    r.Form.Get("enable_votekick"),
+		Language:          r.Form.Get("language"),
 	}
 
-	var languageValid bool
-	for _, supportedLanguage := range supportedLanguages {
-		if language == supportedLanguage {
-			languageValid = true
-			break
-		}
-	}
-
-	if !languageValid {
-		pageData.Errors = append(pageData.Errors, "invalid language was selected")
+	if languageInvalid != nil {
+		pageData.Errors = append(pageData.Errors, languageInvalid.Error())
 	}
 	if passwordInvalid != nil {
 		pageData.Errors = append(pageData.Errors, passwordInvalid.Error())
@@ -1136,6 +1132,16 @@ func parsePlayerName(value string) (string, error) {
 
 func parsePassword(value string) (string, error) {
 	return value, nil
+}
+
+func parseLanguage(value string) (string, error) {
+	for _, supportedLanguage := range supportedLanguages {
+		if value == supportedLanguage {
+			return value, nil
+		}
+	}
+
+	return "", errors.New("the given language doesn't match any supported langauge")
 }
 
 func parseDrawingTime(value string) (int, error) {
