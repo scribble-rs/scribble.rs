@@ -339,6 +339,8 @@
     }
 
     function clearCanvas() {
+        //Avoid unnecessary traffoc back to us.
+        clear(context);
         socket.send(JSON.stringify({
             Type: "clear-drawing-board"
         }));

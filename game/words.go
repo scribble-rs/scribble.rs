@@ -1,4 +1,4 @@
-package main
+package game
 
 import (
 	"io/ioutil"
@@ -18,11 +18,11 @@ var (
 	}
 )
 
-func readWordList(chosenLanguage string) []string {
+func readWordList(chosenLanguage string) ([]string, error) {
 	langFileName := languageMap[chosenLanguage]
 	list, available := wordListCache[langFileName]
 	if available {
-		return list
+		return list, nil
 	}
 
 	wordListFile, pkgerError := pkger.Open("/resources/words/" + langFileName)
@@ -33,7 +33,7 @@ func readWordList(chosenLanguage string) []string {
 
 	data, err := ioutil.ReadAll(wordListFile)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	tempWords := strings.Split(string(data), "\n")
@@ -53,7 +53,8 @@ func readWordList(chosenLanguage string) []string {
 	}
 
 	wordListCache[langFileName] = words
-	return words
+
+	return words, nil
 }
 
 // GetRandomWords gets 3 random words for the passed Lobby. The words will be

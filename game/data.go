@@ -1,8 +1,6 @@
-package main
+package game
 
 import (
-	"errors"
-	"html"
 	"math/rand"
 	"sync"
 	"time"
@@ -11,52 +9,11 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-var (
-	createDeleteMutex          = &sync.Mutex{}
-	lobbies           []*Lobby = nil
-)
-
-// Player represents a participant in a Lobby.
-type Player struct {
-	// UserSession uniquely identifies the player.
-	UserSession string
-	ws          *websocket.Conn
-	// Since gorilla websockets shits it self when two calls happen at
-	// the same time, we need a mutex per player, since each player has their
-	// own socket.
-	socketMutex *sync.Mutex
-
-	// ID uniquely identified the Player.
-	ID string
-	// Name is the players displayed name
-	Name string
-	// Score is the points that the player got in the current Lobby.
-	Score int
-	// Rank is the current ranking of the player in his Lobby
-	LastScore    int
-	Rank         int
-	State        PlayerState
-	Icon         string
-	votedForKick map[string]bool
-}
-
-type PlayerState int
-
-const (
-	Guessing     PlayerState = 0
-	Drawing      PlayerState = 1
-	Standby      PlayerState = 2
-	Disconnected PlayerState = 3
-)
-
 // Lobby represents a game session.
 type Lobby struct {
 	// ID uniquely identified the Lobby.
 	ID string
 
-	// Password defines the password that participants need to enter before
-	// being allowed to join the Lobby.
-	Password string
 	// DrawingTime is the amount of seconds that each player has available to
 	// finish their drawing.
 	DrawingTime int
@@ -97,9 +54,18 @@ type Lobby struct {
 	scoreEarnedByGuessers int
 	alreadyUsedWords      []string
 	CustomWordsChance     int
-	clientsPerIPLimit     int
-	currentDrawing        []*Pixel
+	ClientsPerIPLimit     int
+	CurrentDrawing        []*Pixel
 	EnableVotekick        bool
+}
+
+// WordHint describes a character of the word that is to be guessed, whether
+// the character should be shown and whether it should be underlined on the
+// UI.
+type WordHint struct {
+	Character string
+	Show      bool
+	Underline bool
 }
 
 // Pixel is the struct that a client send when drawing
@@ -113,6 +79,40 @@ type Pixel struct {
 	Type      string // either "pixel" or "fill"
 }
 
+// Player represents a participant in a Lobby.
+type Player struct {
+	// UserSession uniquely identifies the player.
+	UserSession string
+	//Ws is a reference to the players websocket connection.
+	Ws *websocket.Conn
+	// Since gorilla websockets shits it self when two calls happen at
+	// the same time, we need a mutex per player, since each player has their
+	// own socket.
+	SocketMutex *sync.Mutex
+
+	// ID uniquely identified the Player.
+	ID string
+	// Name is the players displayed name
+	Name string
+	// Score is the points that the player got in the current Lobby.
+	Score int
+	// Rank is the current ranking of the player in his Lobby
+	LastScore    int
+	Rank         int
+	State        PlayerState
+	Icon         string
+	votedForKick map[string]bool
+}
+
+type PlayerState int
+
+const (
+	Guessing     PlayerState = 0
+	Drawing      PlayerState = 1
+	Standby      PlayerState = 2
+	Disconnected PlayerState = 3
+)
+
 // GetPlayer searches for a player, identifying them by usersession.
 func (lobby *Lobby) GetPlayer(userSession string) *Player {
 	for _, player := range lobby.Players {
@@ -125,11 +125,11 @@ func (lobby *Lobby) GetPlayer(userSession string) *Player {
 }
 
 func (lobby *Lobby) ClearDrawing() {
-	lobby.currentDrawing = []*Pixel{}
+	lobby.CurrentDrawing = []*Pixel{}
 }
 
 func (lobby *Lobby) AppendPixel(pixel *Pixel) {
-	lobby.currentDrawing = append(lobby.currentDrawing, pixel)
+	lobby.CurrentDrawing = append(lobby.CurrentDrawing, pixel)
 }
 
 // GetLobby returns a Lobby that has a matching ID or no Lobby if none could
@@ -158,8 +158,21 @@ func RemoveLobby(id string) {
 	}
 }
 
+func createPlayer(name string) *Player {
+	return &Player{
+		Name:         name,
+		ID:           uuid.NewV4().String(),
+		UserSession:  uuid.NewV4().String(),
+		Score:        0,
+		LastScore:    0,
+		Rank:         1,
+		votedForKick: make(map[string]bool),
+		SocketMutex:  &sync.Mutex{},
+		State:        Disconnected,
+	}
+}
+
 func createLobby(
-	password string,
 	drawingTime int,
 	rounds int,
 	maxPlayers int,
@@ -172,16 +185,15 @@ func createLobby(
 
 	lobby := &Lobby{
 		ID:                  uuid.NewV4().String(),
-		Password:            password,
 		DrawingTime:         drawingTime,
 		Rounds:              rounds,
 		MaxPlayers:          maxPlayers,
 		CustomWords:         customWords,
 		CustomWordsChance:   customWordsChance,
 		timeLeftTickerReset: make(chan struct{}),
-		clientsPerIPLimit:   clientsPerIPLimit,
+		ClientsPerIPLimit:   clientsPerIPLimit,
 		EnableVotekick:      enableVotekick,
-		currentDrawing:      []*Pixel{},
+		CurrentDrawing:      []*Pixel{},
 	}
 
 	if len(customWords) > 1 {
@@ -197,51 +209,18 @@ func createLobby(
 	return lobby
 }
 
-func createPlayer(name string) *Player {
-	return &Player{
-		Name:         name,
-		ID:           uuid.NewV4().String(),
-		UserSession:  uuid.NewV4().String(),
-		Score:        0,
-		LastScore:    0,
-		Rank:         1,
-		votedForKick: make(map[string]bool),
-		socketMutex:  &sync.Mutex{},
-		State:        Disconnected,
-	}
+// JSEvent contains an eventtype and optionally any data.
+type JSEvent struct {
+	Type string
+	Data interface{}
 }
 
-// WriteAsJSON marshals the given input into a JSON string and sends it to the
-// player using the currently established websocket connection.
-func (p *Player) WriteAsJSON(object interface{}) error {
-	p.socketMutex.Lock()
-	defer p.socketMutex.Unlock()
-
-	if p.ws == nil || p.State == Disconnected {
-		return errors.New("player not connected")
-	}
-
-	return p.ws.WriteJSON(object)
-}
-
-// WriteMessage sends the given data to the player using the currently
-// established websocket connection.
-func (p *Player) WriteMessage(messageType int, data []byte) error {
-	p.socketMutex.Lock()
-	defer p.socketMutex.Unlock()
-
-	if p.ws == nil || p.State == Disconnected {
-		return errors.New("player not connected")
-	}
-
-	return p.ws.WriteMessage(messageType, data)
-}
-
-func (lobby *Lobby) WriteGlobalSystemMessage(text string) {
-	playerHasBeenKickedMsg := &JSEvent{Type: "system-message", Data: html.EscapeString(text)}
+func (lobby *Lobby) HasConnectedPlayers() bool {
 	for _, otherPlayer := range lobby.Players {
-		if otherPlayer.State != Disconnected && otherPlayer.ws != nil {
-			otherPlayer.WriteAsJSON(playerHasBeenKickedMsg)
+		if otherPlayer.Ws != nil && otherPlayer.State != Disconnected {
+			return true
 		}
 	}
+
+	return false
 }

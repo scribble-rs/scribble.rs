@@ -29,9 +29,6 @@
 
             {{end}}
             <form id="lobby-create" class="input-container" action="/lobby/create" method="POST">
-                <b>Lobby-Password</b>
-                <input class="input-item" name="lobby_password" placeholder="Enter your password or leave empty"
-                       type="password" value="{{.Password}}"/>
                 <b>Lobby-Language</b>
                 <select class="input-item" name="language" placeholder="Choose your language">
                     {{$language := .Language}}
