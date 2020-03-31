@@ -337,20 +337,24 @@ func commandNick(caller *Player, lobby *Lobby, args []string) {
 		caller.Name = GeneratePlayerName()
 		WriteAsJSON(caller, JSEvent{Type: "reset-username"})
 		triggerPlayersUpdate(lobby)
-	} else if len(args) == 2 {
-		newName := strings.TrimSpace(args[1])
+	} else {
+		//We join all arguments, since people won't sue quotes either way.
+		//The input is trimmed and sanitized.
+		newName := html.EscapeString(strings.TrimSpace(strings.Join(args[1:], " ")))
 		if len(newName) == 0 {
 			caller.Name = GeneratePlayerName()
 			WriteAsJSON(caller, JSEvent{Type: "reset-username"})
-			triggerPlayersUpdate(lobby)
-		} else if len(newName) <= 30 {
+		} else {
 			fmt.Printf("%s is now %s\n", caller.Name, newName)
+			//We don't want super-long names
+			if len(newName) > 30 {
+				newName = newName[:31]
+			}
 			caller.Name = newName
-			WriteAsJSON(caller, JSEvent{Type: "persist-username", Data: caller.Name})
-			triggerPlayersUpdate(lobby)
+			WriteAsJSON(caller, JSEvent{Type: "persist-username", Data: newName})
 		}
+		triggerPlayersUpdate(lobby)
 	}
-	//TODO Else, show error
 }
 
 func commandSetMP(caller *Player, lobby *Lobby, args []string) {
@@ -633,6 +637,9 @@ func CreateLobby(playerName, language string, drawingTime, rounds, maxPlayers, c
 	return player.userSession, lobby, nil
 }
 
+// GeneratePlayerName creates a new playername. A so called petname. It consists
+// of an adverb, an adjective and a animal name. The result can generally be
+// trusted to be sane.
 func GeneratePlayerName() string {
 	adjective := strings.Title(petname.Adjective())
 	adverb := strings.Title(petname.Adverb())

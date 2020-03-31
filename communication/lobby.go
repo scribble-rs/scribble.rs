@@ -3,6 +3,7 @@ package communication
 import (
 	"encoding/json"
 	"errors"
+	"html"
 	"net/http"
 	"strings"
 
@@ -91,7 +92,7 @@ func GetWordHint(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(lobby.GetAvailableWordHints(player))
 	if err != nil {
-		//TODO Handle error
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
@@ -149,7 +150,7 @@ func ShowLobby(w http.ResponseWriter, r *http.Request) {
 			var playerName string
 			usernameCookie, noCookieError := r.Cookie("username")
 			if noCookieError == nil {
-				playerName = usernameCookie.Value
+				playerName = html.EscapeString(usernameCookie.Value)
 			} else {
 				playerName = game.GeneratePlayerName()
 			}
