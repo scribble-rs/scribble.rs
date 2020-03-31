@@ -501,6 +501,7 @@
         // console.log(e.touches.length)
         touchID = e.touches[0].identifier;
 
+
         if (allowDrawing && localTool !== 2) {
             // calculate the offset coordinates based on client touch position and drawing board client origin
             let clientRect = drawingBoard.getBoundingClientRect();
@@ -536,8 +537,6 @@
     }
 
     function onTouchEnd(e) {
-        console.log("onTouchEnd");
-        console.log(drawCounter);
         if (isTouchDrawing === true) {
             // find touch with correct ID
             for (let touch of e.changedTouches) {
