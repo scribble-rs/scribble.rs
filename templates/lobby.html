@@ -32,13 +32,10 @@
                 <span id="sound-toggle-label"></span>
             </label>
         </div>
-        <div id="word-container">
-            {{template "word" .WordHints}}
-        </div>
+        <div id="word-container"></div>
         <span id="time-left">Time Left: ∞</span>
 
         <div id="player-container">
-            {{template "players" .}}
         </div>
 
         <div id="drawing-board-wrapper">
@@ -171,18 +168,7 @@
 {{template "footer"}}
 
 <script type="text/javascript" src="/resources/floodfill.js"></script>
-<script>
-
-    function httpGetAsync(theUrl, callback) {
-        fetch(theUrl).then(response => {
-            if (response.ok) {
-                response.text().then(body => callback(body))
-            } else {
-                console.error(response.statusText)
-            }
-        })
-    }
-
+<script type="text/javascript">
     console.log("Attempting Connection on port " + location.port + "...");
     let socket
     if (location.protocol === 'https:') {
@@ -342,14 +328,14 @@
         //Avoid unnecessary traffoc back to us.
         clear(context);
         socket.send(JSON.stringify({
-            Type: "clear-drawing-board"
+            type: "clear-drawing-board"
         }));
     }
 
     const sendMessage = () => {
         socket.send(JSON.stringify({
-            Type: "message",
-            Data: messageInput.value
+            type: "message",
+            data: messageInput.value
         }));
         messageInput.value = "";
 
@@ -359,16 +345,16 @@
 
     function chooseWord(index) {
         socket.send(JSON.stringify({
-            Type: "choose-word",
-            Data: index
+            type: "choose-word",
+            data: index
         }));
         wordDialog.style.visibility = "hidden";
     }
 
     function onClickKickButton(playerId) {
         socket.send(JSON.stringify({
-            Type: "kick-vote",
-            Data: playerId
+            type: "kick-vote",
+            data: playerId
         }));
     }
 
@@ -388,87 +374,117 @@
 
     socket.onmessage = event => {
         let parsed = JSON.parse(event.data);
-        if (parsed.Type === "update-players") {
-            httpGetAsync("/lobby/players?id={{.LobbyID}}", response => {
-                playerContainer.innerHTML = response;
+        if (parsed.type === "update-players") {
+            playerContainer.innerHTML = "";
+            parsed.data.forEach(function (player) {
+                let stateStyleClass;
+                if (player.state === 2) {
+                    stateStyleClass = 'player-done';
+                } else if (player.state === 3) {
+                    stateStyleClass = 'player-disconnected';
+                } else {
+                    stateStyleClass = '';
+                }
+                let newPlayerElement = '<div class="player ' + stateStyleClass + '">' +
+                    '<span class="rank">' + player.rank + '</span>' +
+                    '<div class="name-and-buttons">' +
+                    '<span class="playername">' + player.name + '</span>' +
+                    '<button class="kick-button" id="kick-button" type="button" title="Vote to kick this player" alt="Vote to kick this player" onclick="onClickKickButton(' + player.id + ')">👋</button>' +
+                    '</div>' +
+                    '<div class="score-and-status">' +
+                    '<div>' +
+                    '<span class="playerscore">' + player.score + '</span>' +
+                    '<span class="last-turn-score">(Last turn: ' + player.lastScore + ')</span>' +
+                    '</div>';
+                if (player.state === 1) {
+                    newPlayerElement += '<span>✏️</span>';
+                } else if (player.state === 2) {
+                    newPlayerElement += '<span>✔️</span>';
+                }
+                newPlayerElement += '</div></div>';
+                playerContainer.innerHTML += newPlayerElement;
             });
-        } else if (parsed.Type === "correct-guess") {
+        } else if (parsed.type === "correct-guess") {
             if (sound) {
                 let audio = new Audio('/resources/plop.wav');
                 audio.type = 'audio/wav';
 
                 audio.play();
             }
-
-            httpGetAsync("/lobby/players?id={{.LobbyID}}", response => {
-                playerContainer.innerHTML = response;
+        } else if (parsed.type === "update-wordhint") {
+            wordContainer.innerHTML = "";
+            //If no hint has been revelaed
+            parsed.data.forEach(function (hint) {
+                if (hint.character === 0) {
+                    wordContainer.innerHTML += '<span class="guess-letter guess-letter-underline">&nbsp;</span>';
+                } else {
+                    let char = String.fromCharCode(hint.character);
+                    if (hint.underline) {
+                        wordContainer.innerHTML += '<span class="guess-letter guess-letter-underline">' + char + '</span>'
+                    } else {
+                        wordContainer.innerHTML += '<span class="guess-letter">' + char + '</span>';
+                    }
+                }
             });
-        } else if (parsed.Type === "update-wordhint") {
-            httpGetAsync("/lobby/wordhint?id={{.LobbyID}}", response => {
-                wordContainer.innerHTML = response;
-            });
-        } else if (parsed.Type === "update-rounds") {
-            httpGetAsync("/lobby/rounds?id={{.LobbyID}}", response => {
-                roundsSpan.innerText = response;
-            });
-        } else if (parsed.Type === "message") {
+        } else if (parsed.type === "update-rounds") {
+            roundsSpan.innerText = 'Round ' + parsed.data.current + ' of ' + parsed.data.max;
+        } else if (parsed.type === "message") {
             if (messageContainer.childElementCount >= 100) {
                 messageContainer.removeChild(messageContainer.firstChild)
             }
 
             messageContainer.innerHTML += `<div class="message">
-                            <span class="chat-name">` + parsed.Data.Author + `</span>
-                            <span class="message-content">` + parsed.Data.Content + `</span>
+                            <span class="chat-name">` + parsed.data.Author + `</span>
+                            <span class="message-content">` + parsed.data.Content + `</span>
                         </div>`;
-        } else if (parsed.Type === "system-message") {
+        } else if (parsed.type === "system-message") {
             if (messageContainer.childElementCount >= 100) {
                 messageContainer.removeChild(messageContainer.firstChild)
             }
 
             messageContainer.innerHTML += `<div class="message system-message">
                             <span class="chat-name">System</span>
-                            <span class="message-content">` + parsed.Data + `</span>
+                            <span class="message-content">` + parsed.data + `</span>
                         </div>`;
-        } else if (parsed.Type === "non-guessing-player-message") {
+        } else if (parsed.type === "non-guessing-player-message") {
             messageContainer.innerHTML += `<div class="non-guessing-player-message">
-                            <span class="chat-name">` + parsed.Data.Author + `</span>
-                            <span class="message-content">` + parsed.Data.Content + `</span>
+                            <span class="chat-name">` + parsed.data.Author + `</span>
+                            <span class="message-content">` + parsed.data.Content + `</span>
                         </div>`;
-        } else if (parsed.Type === "persist-username") {
+        } else if (parsed.type === "persist-username") {
             //TODO GMT date for consistency?
-            document.cookie = "username=" + parsed.Data + ";expires=Tue, 19 Jan 2038 03:14:07 UTC;path=/;samesite=strict";
-        } else if (parsed.Type === "reset-username") {
+            document.cookie = "username=" + parsed.data + ";expires=Tue, 19 Jan 2038 03:14:07 UTC;path=/;samesite=strict";
+        } else if (parsed.type === "reset-username") {
             document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        } else if (parsed.Type === "pixel") {
-            drawLine(context, parsed.Data.FromX * scaleDownFactor, parsed.Data.FromY * scaleDownFactor, parsed.Data.ToX * scaleDownFactor, parsed.Data.ToY * scaleDownFactor, parsed.Data.Color, parsed.Data.LineWidth * scaleDownFactor);
-        } else if (parsed.Type === "pixels") {
-            parsed.Data.forEach(function (pixel) {
-                if (pixel.Type === "fill") {
-                    fill(context, pixel.FromX * scaleDownFactor, pixel.FromY * scaleDownFactor, pixel.Color);
+        } else if (parsed.type === "pixel") {
+            drawLine(context, parsed.data.fromX * scaleDownFactor, parsed.data.fromY * scaleDownFactor, parsed.data.toX * scaleDownFactor, parsed.data.toY * scaleDownFactor, parsed.data.color, parsed.data.lineWidth * scaleDownFactor);
+        } else if (parsed.type === "pixels") {
+            parsed.data.forEach(function (pixel) {
+                if (pixel.type === "fill") {
+                    fill(context, pixel.fromX * scaleDownFactor, pixel.fromY * scaleDownFactor, pixel.color);
                 } else {
-                    drawLine(context, pixel.FromX * scaleDownFactor, pixel.FromY * scaleDownFactor, pixel.ToX * scaleDownFactor, pixel.ToY * scaleDownFactor, pixel.Color, pixel.LineWidth * scaleDownFactor);
+                    drawLine(context, pixel.fromX * scaleDownFactor, pixel.fromY * scaleDownFactor, pixel.toX * scaleDownFactor, pixel.toY * scaleDownFactor, pixel.color, pixel.lineWidth * scaleDownFactor);
                 }
             });
-        } else if (parsed.Type === "fill") {
-            fill(context, parsed.Data.FromX * scaleDownFactor, parsed.Data.FromY * scaleDownFactor, parsed.Data.Color);
-        } else if (parsed.Type === "clear-drawing-board") {
+        } else if (parsed.type === "fill") {
+            fill(context, parsed.data.fromX * scaleDownFactor, parsed.data.fromY * scaleDownFactor, parsed.data.color);
+        } else if (parsed.type === "clear-drawing-board") {
             clear(context)
-        } else if (parsed.Type === "next-turn") {
+        } else if (parsed.type === "next-turn") {
             if (sound) {
                 let audio = new Audio('/resources/end-turn.wav');
                 audio.type = 'audio/wav';
-
                 audio.play();
             }
 
             clear(context)
 
             allowDrawing = false;
-        } else if (parsed.Type === "your-turn") {
+        } else if (parsed.type === "your-turn") {
             allowDrawing = true;
-        } else if (parsed.Type === "update-time") {
-            timeLeft.innerText = "Time Left: " + parsed.Data;
-        } else if (parsed.Type === "prompt-words") {
+        } else if (parsed.type === "update-time") {
+            timeLeft.innerText = "Time Left: " + parsed.data;
+        } else if (parsed.type === "prompt-words") {
             if (sound) {
                 let audio = new Audio('/resources/your-turn.wav');
                 audio.type = 'audio/wav';
@@ -476,9 +492,9 @@
                 audio.play();
             }
 
-            wordButtonZero.textContent = parsed.Data[0];
-            wordButtonOne.textContent = parsed.Data[1];
-            wordButtonTwo.textContent = parsed.Data[2];
+            wordButtonZero.textContent = parsed.data[0];
+            wordButtonOne.textContent = parsed.data[1];
+            wordButtonTwo.textContent = parsed.data[2];
             wordDialog.style.visibility = "visible";
         }
     };
@@ -608,11 +624,11 @@
     function fillAndSendEvent(context, x1, y1, color) {
         fill(context, x1, y1, color);
         socket.send(JSON.stringify({
-            Type: "fill",
-            Data: {
-                FromX: x1 * scaleUpFactor,
-                FromY: y1 * scaleUpFactor,
-                Color: color
+            type: "fill",
+            data: {
+                fromX: x1 * scaleUpFactor,
+                fromY: y1 * scaleUpFactor,
+                color: color
             },
         }));
     }
@@ -624,14 +640,14 @@
 
         drawLine(context, x1, y1, x2, y2, color, lineWidth);
         socket.send(JSON.stringify({
-            Type: "pixel",
-            Data: {
-                FromX: x1 * scaleUpFactor,
-                FromY: y1 * scaleUpFactor,
-                ToX: x2 * scaleUpFactor,
-                ToY: y2 * scaleUpFactor,
-                Color: color,
-                LineWidth: lineWidth * scaleUpFactor,
+            type: "pixel",
+            data: {
+                fromX: x1 * scaleUpFactor,
+                fromY: y1 * scaleUpFactor,
+                toX: x2 * scaleUpFactor,
+                toY: y2 * scaleUpFactor,
+                color: color,
+                lineWidth: lineWidth * scaleUpFactor,
             }
         }));
     }
@@ -720,7 +736,6 @@
         imageData.data[offset + 2] = color[2];
         imageData.data[offset + 3] = color[3];
     }
-
 </script>
 </body>
 

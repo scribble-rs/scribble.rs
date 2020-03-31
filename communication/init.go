@@ -41,14 +41,6 @@ func init() {
 	if parseError != nil {
 		panic(parseError)
 	}
-	lobbyPage, parseError = lobbyPage.New("lobby_players.html").Parse(readTemplateFile("lobby_players.html"))
-	if parseError != nil {
-		panic(parseError)
-	}
-	lobbyPage, parseError = lobbyPage.New("lobby_word.html").Parse(readTemplateFile("lobby_word.html"))
-	if parseError != nil {
-		panic(parseError)
-	}
 	lobbyPage, parseError = lobbyPage.New("footer.html").Parse(readTemplateFile("footer.html"))
 	if parseError != nil {
 		panic(parseError)

@@ -1,6 +1,7 @@
 package game
 
 import (
+	"encoding/json"
 	"fmt"
 	"html"
 	"log"
@@ -53,11 +54,11 @@ type SettingBounds struct {
 // We use this for reparsing as soon as we know that the type is right. It's
 // a bit unperformant, but will do for now.
 type PixelEvent struct {
-	Type string
-	Data Pixel
+	Type string `json:"type"`
+	Data Pixel  `json:"data"`
 }
 
-func HandleEvent(received *JSEvent, lobby *Lobby, player *Player) error {
+func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) error {
 	if received.Type == "message" {
 		dataAsString, isString := (received.Data).(string)
 		if !isString {
@@ -71,24 +72,26 @@ func HandleEvent(received *JSEvent, lobby *Lobby, player *Player) error {
 		}
 	} else if received.Type == "pixel" {
 		if lobby.Drawer == player {
-			pixel, ok := received.Data.(Pixel)
-			if !ok {
-				return fmt.Errorf("event type '%s' with data type '%t'", received.Type, received.Data)
+			pixel := PixelEvent{}
+			jsonError := json.Unmarshal(raw, &pixel)
+			if jsonError != nil {
+				return fmt.Errorf("error decoding data: %s", jsonError)
 			}
 			pixel.Type = "pixel"
-			lobby.AppendPixel(&pixel)
+			lobby.AppendPixel(&pixel.Data)
 
 			//We directly forward the event, as it seems to be valid.
 			SendDataToConnectedPlayers(player, lobby, received)
 		}
 	} else if received.Type == "fill" {
 		if lobby.Drawer == player {
-			pixel, ok := received.Data.(Pixel)
-			if !ok {
-				return fmt.Errorf("event type '%s' with data type '%t'", received.Type, received.Data)
+			pixel := &PixelEvent{}
+			jsonError := json.Unmarshal(raw, &pixel)
+			if jsonError != nil {
+				return fmt.Errorf("error decoding data: %s", jsonError)
 			}
 			pixel.Type = "fill"
-			lobby.AppendPixel(&pixel)
+			lobby.AppendPixel(&pixel.Data)
 
 			//We directly forward the event, as it seems to be valid.
 			SendDataToConnectedPlayers(player, lobby, received)
@@ -114,8 +117,8 @@ func HandleEvent(received *JSEvent, lobby *Lobby, player *Player) error {
 		if player == drawer && len(lobby.WordChoice) > 0 && chosenIndex >= 0 && chosenIndex <= 2 {
 			lobby.CurrentWord = lobby.WordChoice[chosenIndex]
 			lobby.WordChoice = nil
-			lobby.WordHints = createWordHintFor(lobby.CurrentWord)
-			lobby.WordHintsShown = showAllInWordHints(lobby.WordHints)
+			lobby.WordHints = createWordHintFor(lobby.CurrentWord, false)
+			lobby.WordHintsShown = createWordHintFor(lobby.CurrentWord, true)
 			triggerWordHintUpdate(lobby)
 			WriteAsJSON(lobby.Drawer, JSEvent{Type: "your-turn"})
 		}
@@ -158,15 +161,16 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 			sender.Score += sender.LastScore
 			lobby.scoreEarnedByGuessers += sender.LastScore
 			sender.State = Standby
-			sender.Icon = "✔️"
 			WriteAsJSON(sender, JSEvent{Type: "system-message", Data: "You have correctly guessed the word."})
 
 			if !lobby.isAnyoneStillGuessing() {
 				endRound(lobby)
 			} else {
-				WriteAsJSON(sender, JSEvent{Type: "update-wordhint"})
+				//Since the word has been guessed correctly, we reveal it.
+				WriteAsJSON(sender, JSEvent{Type: "update-wordhint", Data: lobby.WordHintsShown})
 				recalculateRanks(lobby)
 				triggerCorrectGuessEvent(lobby)
+				triggerPlayersUpdate(lobby)
 			}
 
 			return
@@ -273,9 +277,9 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 				//We must absolutely not set lobby.Drawer to nil, since this would cause the drawing order to be ruined.
 			}
 
-			if playerToKick.Ws != nil {
+			if playerToKick.ws != nil {
 				playerToKick.State = Disconnected
-				playerToKick.Ws.Close()
+				playerToKick.ws.Close()
 			}
 			lobby.Players = append(lobby.Players[:toKick], lobby.Players[toKick+1:]...)
 
@@ -285,7 +289,7 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 			if lobby.Owner == playerToKick {
 				for _, otherPlayer := range lobby.Players {
 					potentialOwner := otherPlayer
-					if potentialOwner.State != Disconnected && potentialOwner.Ws != nil {
+					if potentialOwner.State != Disconnected && potentialOwner.ws != nil {
 						lobby.Owner = potentialOwner
 						WritePublicSystemMessage(lobby, fmt.Sprintf("%s is the new lobby owner.", potentialOwner.Name))
 						break
@@ -424,7 +428,6 @@ func advanceLobby(lobby *Lobby) {
 
 	for _, otherPlayer := range lobby.Players {
 		otherPlayer.State = Guessing
-		otherPlayer.Icon = ""
 		otherPlayer.votedForKick = make(map[string]bool)
 	}
 
@@ -456,7 +459,6 @@ func advanceLobby(lobby *Lobby) {
 	}
 
 	lobby.Drawer.State = Drawing
-	lobby.Drawer.Icon = "✏️"
 	lobby.WordChoice = GetRandomWords(lobby)
 	WriteAsJSON(lobby.Drawer, JSEvent{Type: "prompt-words", Data: lobby.WordChoice})
 
@@ -479,8 +481,8 @@ func advanceLobby(lobby *Lobby) {
 						if lobby.WordHints != nil {
 							for {
 								randomIndex := rand.Int() % len(lobby.WordHints)
-								if !lobby.WordHints[randomIndex].Show {
-									lobby.WordHints[randomIndex].Show = true
+								if lobby.WordHints[randomIndex].Character == 0 {
+									lobby.WordHints[randomIndex].Character = []rune(lobby.CurrentWord)[randomIndex]
 									triggerWordHintUpdate(lobby)
 									break
 								}
@@ -538,34 +540,27 @@ func selectNextDrawer(lobby *Lobby) {
 	}
 }
 
-func createWordHintFor(word string) []*WordHint {
+func createWordHintFor(word string, showAll bool) []*WordHint {
 	wordHints := make([]*WordHint, 0, len(word))
 	for _, char := range word {
 		irrelevantChar := char == ' ' || char == '_' || char == '-'
-		wordHints = append(wordHints, &WordHint{
-			Character: string(char),
-			Show:      irrelevantChar,
-			Underline: !irrelevantChar,
-		})
+		if showAll {
+			wordHints = append(wordHints, &WordHint{
+				Character: char,
+				Underline: !irrelevantChar,
+			})
+		} else {
+			wordHints = append(wordHints, &WordHint{
+				Underline: !irrelevantChar,
+			})
+		}
 	}
 
 	return wordHints
 }
 
-func showAllInWordHints(hints []*WordHint) []*WordHint {
-	newHints := make([]*WordHint, len(hints), len(hints))
-	for index, hint := range hints {
-		newHints[index] = &WordHint{
-			Character: hint.Character,
-			Show:      true,
-			Underline: hint.Underline,
-		}
-	}
-
-	return newHints
-}
-
 var TriggerSimpleUpdateEvent func(eventType string, lobby *Lobby)
+var TriggerComplexUpdatePerPlayerEvent func(eventType string, data func(*Player) interface{}, lobby *Lobby)
 var TriggerComplexUpdateEvent func(eventType string, data interface{}, lobby *Lobby)
 var SendDataToConnectedPlayers func(sender *Player, lobby *Lobby, data interface{})
 var WriteAsJSON func(player *Player, object interface{}) error
@@ -576,7 +571,7 @@ func triggerNextTurn(lobby *Lobby) {
 }
 
 func triggerPlayersUpdate(lobby *Lobby) {
-	TriggerSimpleUpdateEvent("update-players", lobby)
+	TriggerComplexUpdateEvent("update-players", lobby.Players, lobby)
 }
 
 func triggerCorrectGuessEvent(lobby *Lobby) {
@@ -584,11 +579,22 @@ func triggerCorrectGuessEvent(lobby *Lobby) {
 }
 
 func triggerWordHintUpdate(lobby *Lobby) {
-	TriggerSimpleUpdateEvent("update-wordhint", lobby)
+	if lobby.CurrentWord == "" {
+		return
+	}
+
+	TriggerComplexUpdatePerPlayerEvent("update-wordhint", func(player *Player) interface{} {
+		return lobby.GetAvailableWordHints(player)
+	}, lobby)
+}
+
+type Rounds struct {
+	Current int `json:"current"`
+	Max     int `json:"max"`
 }
 
 func triggerRoundsUpdate(lobby *Lobby) {
-	TriggerSimpleUpdateEvent("update-rounds", lobby)
+	TriggerComplexUpdateEvent("update-rounds", Rounds{lobby.Round, lobby.Rounds}, lobby)
 }
 
 func triggerTimeLeftUpdate(lobby *Lobby) {
@@ -624,7 +630,7 @@ func CreateLobby(playerName, language string, drawingTime, rounds, maxPlayers, c
 
 	lobby.Words = words
 
-	return player.UserSession, lobby, nil
+	return player.userSession, lobby, nil
 }
 
 func GeneratePlayerName() string {
@@ -659,12 +665,12 @@ func OnConnected(lobby *Lobby, player *Player) {
 
 func OnDisconnected(lobby *Lobby, player *Player) {
 	//We want to avoid calling the handler twice.
-	if player.Ws == nil {
+	if player.ws == nil {
 		return
 	}
 
 	player.State = Disconnected
-	player.Ws = nil
+	player.ws = nil
 
 	if !lobby.HasConnectedPlayers() {
 		RemoveLobby(lobby.ID)
@@ -693,5 +699,5 @@ func (lobby *Lobby) JoinPlayer(playerName string) string {
 	recalculateRanks(lobby)
 	triggerPlayersUpdate(lobby)
 
-	return player.UserSession
+	return player.userSession
 }

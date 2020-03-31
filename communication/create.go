@@ -127,7 +127,7 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 		pageData.Errors = append(pageData.Errors, createError.Error())
 		templateError := lobbyCreatePage.ExecuteTemplate(w, "lobbsy_create.html", pageData)
 		if templateError != nil {
-			returnError(w, templateError.Error())
+			userFacingError(w, templateError.Error())
 		}
 
 		return

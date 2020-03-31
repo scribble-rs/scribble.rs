@@ -26,19 +26,19 @@ func init() {
 	game.SendDataToConnectedPlayers = SendDataToConnectedPlayers
 	game.WriteAsJSON = WriteAsJSON
 	game.WritePublicSystemMessage = WritePublicSystemMessage
+	game.TriggerComplexUpdatePerPlayerEvent = TriggerComplexUpdatePerPlayerEvent
 }
 
 func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	lobbyID := r.URL.Query().Get("id")
 	if lobbyID == "" {
-		returnError(w, "The entered URL is incorrect.")
+		http.Error(w, "the requested lobby doesn't exist", http.StatusNotFound)
 		return
 	}
 
 	lobby := game.GetLobby(lobbyID)
-
 	if lobby == nil {
-		returnError(w, "The lobby does not exist.")
+		http.Error(w, "the requested lobby doesn't exist", http.StatusNotFound)
 		return
 	}
 
@@ -46,13 +46,13 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	//This issue can happen if you illegally request a websocket connection without ever having had
 	//a usersession or your client having deleted the usersession cookie.
 	if noCookieError != nil {
-		returnError(w, "You are not a player of this lobby.")
+		http.Error(w, "the requested lobby doesn't exist", http.StatusUnauthorized)
 		return
 	}
 
 	player := lobby.GetPlayer(sessionCookie.Value)
 	if player == nil {
-		returnError(w, "You are not a player of this lobby.")
+		http.Error(w, "the requested lobby doesn't exist", http.StatusUnauthorized)
 		return
 	}
 
@@ -64,7 +64,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 
 	log.Println(player.Name + " has connected")
 
-	player.Ws = ws
+	player.SetWebsocket(ws)
 	game.OnConnected(lobby, player)
 
 	ws.SetCloseHandler(func(code int, text string) error {
@@ -101,7 +101,10 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 				continue
 			}
 
-			game.HandleEvent(received, lobby, player)
+			handleError := game.HandleEvent(data, received, lobby, player)
+			if handleError != nil {
+				log.Printf("Error handling event: %s\n", handleError)
+			}
 		}
 	}
 }
@@ -131,17 +134,24 @@ func TriggerComplexUpdateEvent(eventType string, data interface{}, lobby *game.L
 	}
 }
 
+func TriggerComplexUpdatePerPlayerEvent(eventType string, data func(*game.Player) interface{}, lobby *game.Lobby) {
+	for _, otherPlayer := range lobby.Players {
+		WriteAsJSON(otherPlayer, &game.JSEvent{Type: eventType, Data: data(otherPlayer)})
+	}
+}
+
 // WriteAsJSON marshals the given input into a JSON string and sends it to the
 // player using the currently established websocket connection.
 func WriteAsJSON(player *game.Player, object interface{}) error {
-	player.SocketMutex.Lock()
-	defer player.SocketMutex.Unlock()
+	player.GetWebsocketMutex().Lock()
+	defer player.GetWebsocketMutex().Unlock()
 
-	if player.Ws == nil || player.State == game.Disconnected {
+	socket := player.GetWebsocket()
+	if socket == nil || player.State == game.Disconnected {
 		return errors.New("player not connected")
 	}
 
-	return player.Ws.WriteJSON(object)
+	return socket.WriteJSON(object)
 }
 
 func WritePublicSystemMessage(lobby *game.Lobby, text string) {

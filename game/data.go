@@ -63,45 +63,61 @@ type Lobby struct {
 // the character should be shown and whether it should be underlined on the
 // UI.
 type WordHint struct {
-	Character string
-	Show      bool
-	Underline bool
+	Character rune `json:"character"`
+	Underline bool `json:"underline"`
 }
 
 // Pixel is the struct that a client send when drawing
 type Pixel struct {
-	FromX     float32
-	FromY     float32
-	ToX       float32
-	ToY       float32
-	Color     string
-	LineWidth float32
-	Type      string // either "pixel" or "fill"
+	FromX     float32 `json:"fromX"`
+	FromY     float32 `json:"fromY"`
+	ToX       float32 `json:"toX"`
+	ToY       float32 `json:"toY"`
+	Color     string  `json:"color"`
+	LineWidth float32 `json:"lineWidth"`
+	Type      string  `json:"type"` // either "pixel" or "fill"
 }
 
 // Player represents a participant in a Lobby.
 type Player struct {
-	// UserSession uniquely identifies the player.
-	UserSession string
-	//Ws is a reference to the players websocket connection.
-	Ws *websocket.Conn
-	// Since gorilla websockets shits it self when two calls happen at
-	// the same time, we need a mutex per player, since each player has their
-	// own socket.
-	SocketMutex *sync.Mutex
+	// userSession uniquely identifies the player.
+	userSession string
+	ws          *websocket.Conn
+	socketMutex *sync.Mutex
+
+	votedForKick map[string]bool
 
 	// ID uniquely identified the Player.
-	ID string
+	ID string `json:"id"`
 	// Name is the players displayed name
-	Name string
+	Name string `json:"name"`
 	// Score is the points that the player got in the current Lobby.
-	Score int
+	Score int `json:"score"`
 	// Rank is the current ranking of the player in his Lobby
-	LastScore    int
-	Rank         int
-	State        PlayerState
-	Icon         string
-	votedForKick map[string]bool
+	LastScore int         `json:"lastScore"`
+	Rank      int         `json:"rank"`
+	State     PlayerState `json:"state"`
+}
+
+// GetWebsocket simply returns the players websocket connection. This method
+// exists to encapsulate the websocket field and prevent accidental sending
+// the websocket data via the network.
+func (player *Player) GetWebsocket() *websocket.Conn {
+	return player.ws
+}
+
+// SetWebsocket sets the given connection as the players websocket connection.
+func (player *Player) SetWebsocket(socket *websocket.Conn) {
+	player.ws = socket
+}
+
+// GetWebsocketMutex returns a mutex for locking the websocket connection.
+// Since gorilla websockets shits it self when two calls happen at
+// the same time, we need a mutex per player, since each player has their
+// own socket. This getter extends to prevent accidentally sending the mutex
+// via the network.
+func (player *Player) GetWebsocketMutex() *sync.Mutex {
+	return player.socketMutex
 }
 
 type PlayerState int
@@ -116,7 +132,7 @@ const (
 // GetPlayer searches for a player, identifying them by usersession.
 func (lobby *Lobby) GetPlayer(userSession string) *Player {
 	for _, player := range lobby.Players {
-		if player.UserSession == userSession {
+		if player.userSession == userSession {
 			return player
 		}
 	}
@@ -162,12 +178,12 @@ func createPlayer(name string) *Player {
 	return &Player{
 		Name:         name,
 		ID:           uuid.NewV4().String(),
-		UserSession:  uuid.NewV4().String(),
+		userSession:  uuid.NewV4().String(),
 		Score:        0,
 		LastScore:    0,
 		Rank:         1,
 		votedForKick: make(map[string]bool),
-		SocketMutex:  &sync.Mutex{},
+		socketMutex:  &sync.Mutex{},
 		State:        Disconnected,
 	}
 }
@@ -211,13 +227,13 @@ func createLobby(
 
 // JSEvent contains an eventtype and optionally any data.
 type JSEvent struct {
-	Type string
-	Data interface{}
+	Type string      `json:"type"`
+	Data interface{} `json:"data"`
 }
 
 func (lobby *Lobby) HasConnectedPlayers() bool {
 	for _, otherPlayer := range lobby.Players {
-		if otherPlayer.Ws != nil && otherPlayer.State != Disconnected {
+		if otherPlayer.ws != nil && otherPlayer.State != Disconnected {
 			return true
 		}
 	}
