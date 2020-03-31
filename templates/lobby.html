@@ -654,8 +654,8 @@
         // calculate bounding box
         let left = Math.max(0, Math.min(x1, x2) - lineWidth);
         let top = Math.max(0, Math.min(y1, y2) - lineWidth);
-        let right = Math.min(context.canvas.width, Math.max(x1, x2) + lineWidth);
-        let bottom = Math.min(context.canvas.height, Math.max(y1, y2) + lineWidth);
+        let right = Math.max(0, Math.min(context.canvas.width, Math.max(x1, x2) + lineWidth));
+        let bottom = Math.max(0, Math.min(context.canvas.height, Math.max(y1, y2) + lineWidth));
 
         const imageData = context.getImageData(left, top, right - left, bottom - top);
 
