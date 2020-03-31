@@ -3,6 +3,7 @@ package communication
 import (
 	"errors"
 	"fmt"
+	"html"
 	"net/http"
 	"strconv"
 	"strings"
@@ -117,12 +118,12 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 	//If a customly chosen username seems to be cached, we use that instead.
 	var playerName string
 	if noCookieError == nil {
-		playerName = usernameCookie.Value
+		playerName = html.EscapeString(usernameCookie.Value)
 	} else {
 		playerName = game.GeneratePlayerName()
 	}
 
-	session, lobby, createError := game.CreateLobby(playerName, language,  drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
+	session, lobby, createError := game.CreateLobby(playerName, language, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
 	if createError != nil {
 		pageData.Errors = append(pageData.Errors, createError.Error())
 		templateError := lobbyCreatePage.ExecuteTemplate(w, "lobbsy_create.html", pageData)
