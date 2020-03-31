@@ -486,67 +486,72 @@
     socket.onclose = event => console.log("Socket Closed Connection: ", event);
     socket.onerror = error => console.log("Socket Error: ", error);
 
-    let isDrawing = false;
+    let isMouseDrawing = false;
     let x = 0;
     let y = 0;
 
+    let isTouchDrawing = false;
+    let touchX = 0;
+    let touchY = 0;
     // Touch input
     let touchID = 0;
 
-    drawingBoard.ontouchstart = function (e) {
-        if (!isDrawing) {
-            console.log(e.touches.length)
-            touchID = e.touches[0].identifier;
 
-            if (allowDrawing && localTool !== 2) {
-                // calculate the offset coordinates based on client touch position and drawing board client origin
-                let clientRect = drawingBoard.getBoundingClientRect();
-                x = (e.touches[0].clientX - clientRect.left);
-                y = (e.touches[0].clientY - clientRect.top);
+    function onTouchStart(e) {
+        // console.log(e.touches.length)
+        touchID = e.touches[0].identifier;
 
-                isDrawing = true;
-            }
+        if (allowDrawing && localTool !== 2) {
+            // calculate the offset coordinates based on client touch position and drawing board client origin
+            let clientRect = drawingBoard.getBoundingClientRect();
+            let clientX = Math.round(e.touches[0].clientX);
+            let clientY = Math.round(e.touches[0].clientY);
+            touchX = (clientX - clientRect.left);
+            touchY = (clientY - clientRect.top);
+
+            isTouchDrawing = true;
         }
-    };
+    }
 
-    drawingBoard.ontouchmove = function (e) {
+    function onTouchMove(e) {
         //FIXME Explanation? Does this prevent moving the page?
-        e.preventDefault();
+        // e.preventDefault();
 
         // find touch with correct ID
-        for (let i = e.changedTouches.length - 1; i >= 0; i--) {
-            if (e.changedTouches[i].identifier === touchID) {
-                let touch = e.changedTouches[i];
-
+        for (let touch of e.changedTouches) {
+            if (allowDrawing && isTouchDrawing && touch.identifier === touchID) {
                 // calculate the offset coordinates based on client touch position and drawing board client origin
                 let clientRect = drawingBoard.getBoundingClientRect();
-                let offsetX = (touch.clientX - clientRect.left);
-                let offsetY = (touch.clientY - clientRect.top);
+                let clientX = touch.clientX;
+                let clientY = touch.clientY;
+                let offsetX = Math.round((clientX - clientRect.left));
+                let offsetY = Math.round((clientY - clientRect.top));
 
                 // drawing functions must check for context boundaries
-                drawLineAndSendEvent(context, x, y, offsetX, offsetY, localColor, localLineWidth);
-                x = offsetX;
-                y = offsetY;
-
-                return;
+                drawLineAndSendEvent(context, touchX, touchY, offsetX, offsetY, localColor, localLineWidth);
+                touchX = offsetX;
+                touchY = offsetY;
             }
         }
-    };
+    }
 
     function onTouchEnd(e) {
-        if (isDrawing === true) {
+        console.log("onTouchEnd");
+        console.log(drawCounter);
+        if (isTouchDrawing === true) {
             // find touch with correct ID
-            for (let i = e.changedTouches.length - 1; i >= 0; i--) {
-                if (e.changedTouches[i].identifier === touchID) {
-                    isDrawing = false;
-                    return;
+            for (let touch of e.changedTouches) {
+                if (touch.identifier === touchID) {
+                    isTouchDrawing = false;
                 }
             }
         }
     }
 
-    drawingBoard.ontouchend = onTouchEnd;
-    drawingBoard.ontouchcancel = onTouchEnd;
+    drawingBoard.addEventListener('touchstart', onTouchStart, false);
+    drawingBoard.addEventListener('touchmove', onTouchMove, false);
+    drawingBoard.addEventListener('touchend', onTouchEnd, false);
+    drawingBoard.addEventListener('touchcancel', onTouchEnd, false);
 
     // Mouse input
     drawingBoard.onmousedown = function (e) {
@@ -554,7 +559,7 @@
             x = e.offsetX;
             y = e.offsetY;
 
-            isDrawing = true;
+            isMouseDrawing = true;
         }
 
         return false;
@@ -562,14 +567,14 @@
 
     // This is executed even if the mouse is not above the browser anymore.
     window.onmouseup = function (e) {
-        if (isDrawing === true) {
-            isDrawing = false;
+        if (isMouseDrawing === true) {
+            isMouseDrawing = false;
         }
     };
 
     // This is executed even if the mouse is not above the browser anymore.
     window.onmousemove = function (e) {
-        if (allowDrawing && isDrawing === true && e.button === 0) {
+        if (allowDrawing && isMouseDrawing === true && e.button === 0) {
             // calculate the offset coordinates based on client mouse position and drawing board client origin
             let clientRect = drawingBoard.getBoundingClientRect();
             let offsetX = (e.clientX - clientRect.left);
@@ -589,7 +594,7 @@
             } else {
                 drawLineAndSendEvent(context, e.offsetX, e.offsetY, e.offsetX, e.offsetY, localColor, localLineWidth);
             }
-            isDrawing = false;
+            isMouseDrawing = false;
         }
     };
 

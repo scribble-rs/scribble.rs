@@ -54,6 +54,7 @@ body {
 
 #drawing-board {
     background-color: white;
+    touch-action: none;
 }
 
 #chat {
