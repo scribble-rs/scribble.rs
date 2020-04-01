@@ -463,12 +463,13 @@
         } else if (parsed.type === "set-canvas") {
             clear(context);
             parsed.data.forEach(function (drawElement) {
+                let drawData = drawElement.data;
                 if (drawElement.type === "fill") {
-                    fill(context, drawElement.x * scaleDownFactor, drawElement.y * scaleDownFactor, drawElement.color);
-                } else if (drawElement.type = "line") {
-                    drawLine(context, drawElement.fromX * scaleDownFactor, drawElement.fromY * scaleDownFactor, drawElement.toX * scaleDownFactor, drawElement.toY * scaleDownFactor, drawElement.color, drawElement.lineWidth * scaleDownFactor);
+                    fill(context, drawData.x * scaleDownFactor, drawData.y * scaleDownFactor, drawData.color);
+                } else if (drawElement.type === "line") {
+                    drawLine(context, drawData.fromX * scaleDownFactor, drawData.fromY * scaleDownFactor, drawData.toX * scaleDownFactor, drawData.toY * scaleDownFactor, drawData.color, drawData.lineWidth * scaleDownFactor);
                 } else {
-                    console.log("Unknown draw element type: " + drawElement.type)
+                    console.log("Unknown draw element type: " + drawData.type)
                 }
             });
         } else if (parsed.type === "clear-drawing-board") {

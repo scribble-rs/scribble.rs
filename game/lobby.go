@@ -85,7 +85,7 @@ func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) er
 			if jsonError != nil {
 				return fmt.Errorf("error decoding data: %s", jsonError)
 			}
-			lobby.AppendLine(line.Data)
+			lobby.AppendLine(line)
 
 			//We directly forward the event, as it seems to be valid.
 			SendDataToConnectedPlayers(player, lobby, received)
@@ -97,7 +97,7 @@ func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) er
 			if jsonError != nil {
 				return fmt.Errorf("error decoding data: %s", jsonError)
 			}
-			lobby.AppendFill(fill.Data)
+			lobby.AppendFill(fill)
 
 			//We directly forward the event, as it seems to be valid.
 			SendDataToConnectedPlayers(player, lobby, received)

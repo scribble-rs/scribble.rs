@@ -86,7 +86,6 @@ type Fill struct {
 	X         float32 `json:"x"`
 	Y         float32 `json:"y"`
 	Color     string  `json:"color"`
-	LineWidth float32 `json:"lineWidth"`
 }
 
 // Player represents a participant in a Lobby.
@@ -158,14 +157,14 @@ func (lobby *Lobby) ClearDrawing() {
 // AppendLine adds a line direction to the current drawing. This exists in order
 // to prevent adding arbitrary elements to the drawing, as the backing array is
 // an empty interface type.
-func (lobby *Lobby) AppendLine(line *Line) {
+func (lobby *Lobby) AppendLine(line *LineEvent) {
 	lobby.CurrentDrawing = append(lobby.CurrentDrawing, line)
 }
 
 // AppendFill adds a fill direction to the current drawing. This exists in order
 // to prevent adding arbitrary elements to the drawing, as the backing array is
 // an empty interface type.
-func (lobby *Lobby) AppendFill(fill *Fill) {
+func (lobby *Lobby) AppendFill(fill *FillEvent) {
 	lobby.CurrentDrawing = append(lobby.CurrentDrawing, fill)
 }
 
