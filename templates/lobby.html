@@ -708,25 +708,36 @@
         y2 = Math.floor(y2 * windowScale);
         lineWidth = Math.ceil(lineWidth);
 
+        // calculate bounding box
+        let left = Math.max(0, Math.min(context.canvas.width, Math.min(x1, x2) - lineWidth));
+        let top = Math.max(0, Math.min(context.canvas.height, Math.min(y1, y2) - lineWidth));
+        let right = Math.max(0, Math.min(context.canvas.width, Math.max(x1, x2) + lineWidth));
+        let bottom = Math.max(0, Math.min(context.canvas.height, Math.max(y1, y2) + lineWidth));
+
+        // off canvas, so don't draw anything
+        if (right - left === 0 || bottom - top === 0) {
+            return;
+        }
+
         color = hexToRgb(color);
         color[3] = 255; //alpha channel
 
         const circleMap = generateCircleMap(Math.floor(lineWidth / 2));
         const offset = Math.floor(circleMap.length / 2);
-        const imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
+        const imageData = context.getImageData(left, top, right - left, bottom - top);
 
         for (let ix = 0; ix < circleMap.length; ix++) {
             for (let iy = 0; iy < circleMap[ix].length; iy++) {
                 if (circleMap[ix][iy] === 1 || (x1 === x2 && y1 === y2 && circleMap[ix][iy] === 2)) {
-                    const newX1 = x1 + ix - offset;
-                    const newY1 = y1 + iy - offset;
-                    const newX2 = x2 + ix - offset;
-                    const newY2 = y2 + iy - offset;
+                    const newX1 = x1 + ix - offset - left;
+                    const newY1 = y1 + iy - offset - top;
+                    const newX2 = x2 + ix - offset - left;
+                    const newY2 = y2 + iy - offset - top;
                     drawBresenhamLine(imageData, newX1, newY1, newX2, newY2, color);
                 }
             }
         }
-        context.putImageData(imageData, 0, 0);
+        context.putImageData(imageData, left, top);
     }
 
     function drawBresenhamLine(imageData, x0, y0, x1, y1, color) {
