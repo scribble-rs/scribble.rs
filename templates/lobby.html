@@ -325,7 +325,7 @@
     }
 
     function clearCanvasAndSendEvent() {
-        //Avoid unnecessary traffoc back to us.
+        //Avoid unnecessary traffic back to us.
         clear(context);
         socket.send(JSON.stringify({
             type: "clear-drawing-board"
@@ -377,11 +377,13 @@
         if (parsed.type === "update-players") {
             playerContainer.innerHTML = "";
             parsed.data.forEach(function (player) {
+                if (!player.connected) {
+                    return;
+                }
+
                 let stateStyleClass;
                 if (player.state === 2) {
                     stateStyleClass = 'player-done';
-                } else if (player.state === 3) {
-                    stateStyleClass = 'player-disconnected';
                 } else {
                     stateStyleClass = '';
                 }

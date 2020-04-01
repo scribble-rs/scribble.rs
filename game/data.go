@@ -59,8 +59,8 @@ type Lobby struct {
 	// consist of LineEvent and FillEvent. Please do not modify the contents
 	// of this array an only move AppendLine and AppendFill on the respective
 	// lobby object.
-	CurrentDrawing        []interface{}
-	EnableVotekick        bool
+	CurrentDrawing []interface{}
+	EnableVotekick bool
 }
 
 // WordHint describes a character of the word that is to be guessed, whether
@@ -83,9 +83,9 @@ type Line struct {
 
 // Fill represents the usage of the fill bucket.
 type Fill struct {
-	X         float32 `json:"x"`
-	Y         float32 `json:"y"`
-	Color     string  `json:"color"`
+	X     float32 `json:"x"`
+	Y     float32 `json:"y"`
+	Color string  `json:"color"`
 }
 
 // Player represents a participant in a Lobby.
@@ -103,6 +103,12 @@ type Player struct {
 	Name string `json:"name"`
 	// Score is the points that the player got in the current Lobby.
 	Score int `json:"score"`
+	// Connected defines whether the players websocket connection is currently
+	// established. This has previously been in state but has been moved out
+	// in order to avoid losing the state on refreshing the page.
+	// While checking the websocket against nil would be enough, we still need
+	// this field for sending it via the APIs.
+	Connected bool `json:"connected"`
 	// Rank is the current ranking of the player in his Lobby
 	LastScore int         `json:"lastScore"`
 	Rank      int         `json:"rank"`
@@ -133,10 +139,9 @@ func (player *Player) GetWebsocketMutex() *sync.Mutex {
 type PlayerState int
 
 const (
-	Guessing     PlayerState = 0
-	Drawing      PlayerState = 1
-	Standby      PlayerState = 2
-	Disconnected PlayerState = 3
+	Guessing PlayerState = 0
+	Drawing  PlayerState = 1
+	Standby  PlayerState = 2
 )
 
 // GetPlayer searches for a player, identifying them by usersession.
@@ -204,7 +209,7 @@ func createPlayer(name string) *Player {
 		Rank:         1,
 		votedForKick: make(map[string]bool),
 		socketMutex:  &sync.Mutex{},
-		State:        Disconnected,
+		State:        Guessing,
 	}
 }
 
@@ -253,7 +258,7 @@ type JSEvent struct {
 
 func (lobby *Lobby) HasConnectedPlayers() bool {
 	for _, otherPlayer := range lobby.Players {
-		if otherPlayer.ws != nil && otherPlayer.State != Disconnected {
+		if otherPlayer.Connected {
 			return true
 		}
 	}

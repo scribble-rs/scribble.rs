@@ -284,7 +284,6 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 			}
 
 			if playerToKick.ws != nil {
-				playerToKick.State = Disconnected
 				playerToKick.ws.Close()
 			}
 			lobby.Players = append(lobby.Players[:toKick], lobby.Players[toKick+1:]...)
@@ -295,7 +294,7 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 			if lobby.Owner == playerToKick {
 				for _, otherPlayer := range lobby.Players {
 					potentialOwner := otherPlayer
-					if potentialOwner.State != Disconnected && potentialOwner.ws != nil {
+					if potentialOwner.Connected {
 						lobby.Owner = potentialOwner
 						WritePublicSystemMessage(lobby, fmt.Sprintf("%s is the new lobby owner.", potentialOwner.Name))
 						break
@@ -542,7 +541,7 @@ func selectNextDrawer(lobby *Lobby) {
 			return
 		}
 
-		if otherPlayer.State == Disconnected {
+		if !otherPlayer.Connected {
 			continue
 		}
 
@@ -662,7 +661,7 @@ type Message struct {
 }
 
 func OnConnected(lobby *Lobby, player *Player) {
-	player.State = Guessing
+	player.Connected = true
 	triggerPlayersUpdate(lobby)
 	if len(lobby.CurrentDrawing) > 0 {
 		sendError := WriteAsJSON(player, &JSEvent{
@@ -674,6 +673,14 @@ func OnConnected(lobby *Lobby, player *Player) {
 		}
 	}
 
+	if lobby.CurrentWord != "" {
+		WriteAsJSON(player, JSEvent{Type: "update-wordhint", Data: lobby.GetAvailableWordHints(player)})
+	}
+
+	//Since the player can hit refresh, we need to tell him that he's still allowed to draw.
+	if player == lobby.Drawer {
+		WriteAsJSON(player, JSEvent{Type: "your-turn"})
+	}
 }
 
 func OnDisconnected(lobby *Lobby, player *Player) {
@@ -682,7 +689,7 @@ func OnDisconnected(lobby *Lobby, player *Player) {
 		return
 	}
 
-	player.State = Disconnected
+	player.Connected = false
 	player.ws = nil
 
 	if !lobby.HasConnectedPlayers() {

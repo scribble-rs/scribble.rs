@@ -147,7 +147,7 @@ func WriteAsJSON(player *game.Player, object interface{}) error {
 	defer player.GetWebsocketMutex().Unlock()
 
 	socket := player.GetWebsocket()
-	if socket == nil || player.State == game.Disconnected {
+	if socket == nil || !player.Connected {
 		return errors.New("player not connected")
 	}
 
