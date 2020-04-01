@@ -372,40 +372,27 @@
         console.log("Successfully Connected");
     };
 
+    let ownID
     socket.onmessage = event => {
         let parsed = JSON.parse(event.data);
-        if (parsed.type === "update-players") {
-            playerContainer.innerHTML = "";
-            parsed.data.forEach(function (player) {
-                if (!player.connected) {
-                    return;
-                }
+        if (parsed.type === "ready") {
+            let ready = parsed.data;
+            allowDrawing = ready.drawing;
+            ownID = ready.id;
+            applyRounds(ready.round, ready.maxRounds);
 
-                let stateStyleClass;
-                if (player.state === 2) {
-                    stateStyleClass = 'player-done';
-                } else {
-                    stateStyleClass = '';
-                }
-                let newPlayerElement = '<div class="player ' + stateStyleClass + '">' +
-                    '<span class="rank">' + player.rank + '</span>' +
-                    '<div class="name-and-buttons">' +
-                    '<span class="playername">' + player.name + '</span>' +
-                    '<button class="kick-button" id="kick-button" type="button" title="Vote to kick this player" alt="Vote to kick this player" onclick="onClickKickButton(' + player.id + ')">👋</button>' +
-                    '</div>' +
-                    '<div class="score-and-status">' +
-                    '<div>' +
-                    '<span class="playerscore">' + player.score + '</span>' +
-                    '<span class="last-turn-score">(Last turn: ' + player.lastScore + ')</span>' +
-                    '</div>';
-                if (player.state === 1) {
-                    newPlayerElement += '<span>✏️</span>';
-                } else if (player.state === 2) {
-                    newPlayerElement += '<span>✔️</span>';
-                }
-                newPlayerElement += '</div></div>';
-                playerContainer.innerHTML += newPlayerElement;
-            });
+            if (ready.players && ready.players.length) {
+                applyPlayers(ready.players)
+            }
+            if (ready.currentDrawing && ready.currentDrawing.length) {
+                applyDrawData(ready.currentDrawing)
+            }
+            if (ready.wordHints && ready.wordHints.length) {
+                applyWordHints(ready.wordHints)
+            }
+        }
+        if (parsed.type === "update-players") {
+            applyPlayers(parsed.data)
         } else if (parsed.type === "correct-guess") {
             if (sound) {
                 let audio = new Audio('/resources/plop.wav');
@@ -414,22 +401,9 @@
                 audio.play();
             }
         } else if (parsed.type === "update-wordhint") {
-            wordContainer.innerHTML = "";
-            //If no hint has been revelaed
-            parsed.data.forEach(function (hint) {
-                if (hint.character === 0) {
-                    wordContainer.innerHTML += '<span class="guess-letter guess-letter-underline">&nbsp;</span>';
-                } else {
-                    let char = String.fromCharCode(hint.character);
-                    if (hint.underline) {
-                        wordContainer.innerHTML += '<span class="guess-letter guess-letter-underline">' + char + '</span>'
-                    } else {
-                        wordContainer.innerHTML += '<span class="guess-letter">' + char + '</span>';
-                    }
-                }
-            });
+            applyWordHints(parsed.data);
         } else if (parsed.type === "update-rounds") {
-            roundsSpan.innerText = 'Round ' + parsed.data.current + ' of ' + parsed.data.max;
+            applyRounds(parsed.data.round, parsed.data.maxRounds)
         } else if (parsed.type === "message") {
             if (messageContainer.childElementCount >= 100) {
                 messageContainer.removeChild(messageContainer.firstChild)
@@ -463,17 +437,7 @@
         } else if (parsed.type === "fill") {
             fill(context, parsed.data.x * scaleDownFactor, parsed.data.y * scaleDownFactor, parsed.data.color);
         } else if (parsed.type === "set-canvas") {
-            clear(context);
-            parsed.data.forEach(function (drawElement) {
-                let drawData = drawElement.data;
-                if (drawElement.type === "fill") {
-                    fill(context, drawData.x * scaleDownFactor, drawData.y * scaleDownFactor, drawData.color);
-                } else if (drawElement.type === "line") {
-                    drawLine(context, drawData.fromX * scaleDownFactor, drawData.fromY * scaleDownFactor, drawData.toX * scaleDownFactor, drawData.toY * scaleDownFactor, drawData.color, drawData.lineWidth * scaleDownFactor);
-                } else {
-                    console.log("Unknown draw element type: " + drawData.type)
-                }
-            });
+            applyDrawData(parsed.data)
         } else if (parsed.type === "clear-drawing-board") {
             clear(context)
         } else if (parsed.type === "next-turn") {
@@ -507,6 +471,75 @@
 
     socket.onclose = event => console.log("Socket Closed Connection: ", event);
     socket.onerror = error => console.log("Socket Error: ", error);
+
+    function applyPlayers(players) {
+        playerContainer.innerHTML = "";
+        players.forEach(function (player) {
+            if (!player.connected) {
+                return;
+            }
+
+            let stateStyleClass;
+            if (player.state === 2) {
+                stateStyleClass = 'player-done';
+            } else {
+                stateStyleClass = '';
+            }
+            let newPlayerElement = '<div class="player ' + stateStyleClass + '">' +
+                '<span class="rank">' + player.rank + '</span>' +
+                '<div class="name-and-buttons">' +
+                '<span class="playername">' + player.name + '</span>' +
+                '<button class="kick-button" id="kick-button" type="button" title="Vote to kick this player" alt="Vote to kick this player" onclick="onClickKickButton(' + player.id + ')">👋</button>' +
+                '</div>' +
+                '<div class="score-and-status">' +
+                '<div>' +
+                '<span class="playerscore">' + player.score + '</span>' +
+                '<span class="last-turn-score">(Last turn: ' + player.lastScore + ')</span>' +
+                '</div>';
+            if (player.state === 1) {
+                newPlayerElement += '<span>✏️</span>';
+            } else if (player.state === 2) {
+                newPlayerElement += '<span>✔️</span>';
+            }
+            newPlayerElement += '</div></div>';
+            playerContainer.innerHTML += newPlayerElement;
+        });
+    }
+
+    function applyRounds(round, maxRound) {
+        roundsSpan.innerText = 'Round ' + round + ' of ' + maxRound;
+    }
+
+    function applyWordHints(wordHints) {
+        wordContainer.innerHTML = "";
+        //If no hint has been revelaed
+        wordHints.forEach(function (hint) {
+            if (hint.character === 0) {
+                wordContainer.innerHTML += '<span class="guess-letter guess-letter-underline">&nbsp;</span>';
+            } else {
+                let char = String.fromCharCode(hint.character);
+                if (hint.underline) {
+                    wordContainer.innerHTML += '<span class="guess-letter guess-letter-underline">' + char + '</span>'
+                } else {
+                    wordContainer.innerHTML += '<span class="guess-letter">' + char + '</span>';
+                }
+            }
+        });
+    }
+
+    function applyDrawData(drawElements) {
+        clear(context);
+        drawElements.forEach(function (drawElement) {
+            let drawData = drawElement.data;
+            if (drawElement.type === "fill") {
+                fill(context, drawData.x * scaleDownFactor, drawData.y * scaleDownFactor, drawData.color);
+            } else if (drawElement.type === "line") {
+                drawLine(context, drawData.fromX * scaleDownFactor, drawData.fromY * scaleDownFactor, drawData.toX * scaleDownFactor, drawData.toY * scaleDownFactor, drawData.color, drawData.lineWidth * scaleDownFactor);
+            } else {
+                console.log("Unknown draw element type: " + drawData.type)
+            }
+        });
+    }
 
     let isDrawing = false;
     let x = 0;

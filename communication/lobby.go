@@ -69,7 +69,7 @@ func GetRounds(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(game.Rounds{Current: lobby.Round, Max: lobby.Rounds})
+	err = json.NewEncoder(w).Encode(game.Rounds{Round: lobby.Round, MaxRounds: lobby.MaxRounds})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -122,7 +122,7 @@ func ShowLobby(w http.ResponseWriter, r *http.Request) {
 			Players:        lobby.Players,
 			LobbyID:        lobby.ID,
 			Round:          lobby.Round,
-			Rounds:         lobby.Rounds,
+			Rounds:         lobby.MaxRounds,
 			EnableVotekick: lobby.EnableVotekick,
 		}
 

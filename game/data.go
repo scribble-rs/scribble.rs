@@ -17,9 +17,9 @@ type Lobby struct {
 	// DrawingTime is the amount of seconds that each player has available to
 	// finish their drawing.
 	DrawingTime int
-	// Rounds defines how many iterations a lobby does before the game ends.
+	// MaxRounds defines how many iterations a lobby does before the game ends.
 	// One iteration means every participant does one drawing.
-	Rounds int
+	MaxRounds int
 	// MaxPlayers defines the maximum amount of players in a single lobby.
 	MaxPlayers int
 	// CustomWords are additional words that will be used in addition to the
@@ -42,7 +42,7 @@ type Lobby struct {
 	// WordHintsShown are the same as WordHints with characters visible.
 	WordHintsShown []*WordHint
 	// Round is the round that the Lobby is currently in. This is a number
-	// between 0 and Rounds. 0 indicates that it hasn't started yet.
+	// between 0 and MaxRounds. 0 indicates that it hasn't started yet.
 	Round int
 	// WordChoice represents the current choice of words.
 	WordChoice []string
@@ -227,7 +227,7 @@ func createLobby(
 	lobby := &Lobby{
 		ID:                  uuid.NewV4().String(),
 		DrawingTime:         drawingTime,
-		Rounds:              rounds,
+		MaxRounds:           rounds,
 		MaxPlayers:          maxPlayers,
 		CustomWords:         customWords,
 		CustomWordsChance:   customWordsChance,

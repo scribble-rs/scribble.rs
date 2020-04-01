@@ -448,7 +448,7 @@ func advanceLobby(lobby *Lobby) {
 	} else {
 		//If everyone has drawn once (e.g. a round has passed)
 		if lobby.Drawer == lobby.Players[len(lobby.Players)-1] {
-			if lobby.Round == lobby.Rounds {
+			if lobby.Round == lobby.MaxRounds {
 				lobby.Drawer = nil
 				lobby.Round = 0
 
@@ -598,12 +598,12 @@ func triggerWordHintUpdate(lobby *Lobby) {
 }
 
 type Rounds struct {
-	Current int `json:"current"`
-	Max     int `json:"max"`
+	Round     int `json:"round"`
+	MaxRounds int `json:"maxRounds"`
 }
 
 func triggerRoundsUpdate(lobby *Lobby) {
-	TriggerComplexUpdateEvent("update-rounds", Rounds{lobby.Round, lobby.Rounds}, lobby)
+	TriggerComplexUpdateEvent("update-rounds", Rounds{lobby.Round, lobby.MaxRounds}, lobby)
 }
 
 func triggerTimeLeftUpdate(lobby *Lobby) {
@@ -660,27 +660,35 @@ type Message struct {
 	Content string
 }
 
+// Ready represents the initial state that a user needs upon connection.
+// This includes all the necessary things for properly running a client
+// without receiving any more data.
+type Ready struct {
+	ID      string `json:"id"`
+	Drawing bool   `json:"drawing"`
+
+	Round          int           `json:"round"`
+	MaxRound       int           `json:"maxRounds"`
+	WordHints      []*WordHint   `json:"wordHints"`
+	Players        []*Player     `json:"players"`
+	CurrentDrawing []interface{} `json:"currentDrawing"`
+}
+
 func OnConnected(lobby *Lobby, player *Player) {
 	player.Connected = true
+	WriteAsJSON(player, JSEvent{Type: "ready", Data: &Ready{
+		ID:      player.ID,
+		Drawing: player.State == Drawing,
+
+		Round:          lobby.Round,
+		MaxRound:       lobby.MaxRounds,
+		WordHints:      lobby.GetAvailableWordHints(player),
+		Players:        lobby.Players,
+		CurrentDrawing: lobby.CurrentDrawing,
+	}})
+
+	//TODO Only send to everyone except for the new player, since it's part of the ready event.
 	triggerPlayersUpdate(lobby)
-	if len(lobby.CurrentDrawing) > 0 {
-		sendError := WriteAsJSON(player, &JSEvent{
-			Type: "set-canvas",
-			Data: lobby.CurrentDrawing,
-		})
-		if sendError != nil {
-			log.Printf("Error sending drawing to player: %s", sendError)
-		}
-	}
-
-	if lobby.CurrentWord != "" {
-		WriteAsJSON(player, JSEvent{Type: "update-wordhint", Data: lobby.GetAvailableWordHints(player)})
-	}
-
-	//Since the player can hit refresh, we need to tell him that he's still allowed to draw.
-	if player == lobby.Drawer {
-		WriteAsJSON(player, JSEvent{Type: "your-turn"})
-	}
 }
 
 func OnDisconnected(lobby *Lobby, player *Player) {
