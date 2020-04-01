@@ -510,7 +510,7 @@
     let touchID = 0;
 
     drawingBoard.ontouchstart = function (e) {
-        if (!isDrawing) {
+        if (!isDrawing && allowDrawing) {
             console.log(e.touches.length)
             touchID = e.touches[0].identifier;
 
@@ -529,28 +529,30 @@
         //FIXME Explanation? Does this prevent moving the page?
         e.preventDefault();
 
-        // find touch with correct ID
-        for (let i = e.changedTouches.length - 1; i >= 0; i--) {
-            if (e.changedTouches[i].identifier === touchID) {
-                let touch = e.changedTouches[i];
+        if (isDrawing) {
+            // find touch with correct ID
+            for (let i = e.changedTouches.length - 1; i >= 0; i--) {
+                if (e.changedTouches[i].identifier === touchID) {
+                    let touch = e.changedTouches[i];
 
-                // calculate the offset coordinates based on client touch position and drawing board client origin
-                let clientRect = drawingBoard.getBoundingClientRect();
-                let offsetX = (touch.clientX - clientRect.left);
-                let offsetY = (touch.clientY - clientRect.top);
+                    // calculate the offset coordinates based on client touch position and drawing board client origin
+                    let clientRect = drawingBoard.getBoundingClientRect();
+                    let offsetX = (touch.clientX - clientRect.left);
+                    let offsetY = (touch.clientY - clientRect.top);
 
-                // drawing functions must check for context boundaries
-                drawLineAndSendEvent(context, x, y, offsetX, offsetY, localColor, localLineWidth);
-                x = offsetX;
-                y = offsetY;
+                    // drawing functions must check for context boundaries
+                    drawLineAndSendEvent(context, x, y, offsetX, offsetY, localColor, localLineWidth);
+                    x = offsetX;
+                    y = offsetY;
 
-                return;
+                    return;
+                }
             }
         }
     };
 
     function onTouchEnd(e) {
-        if (isDrawing === true) {
+        if (isDrawing) {
             // find touch with correct ID
             for (let i = e.changedTouches.length - 1; i >= 0; i--) {
                 if (e.changedTouches[i].identifier === touchID) {
