@@ -233,7 +233,7 @@
     const baseWidth = 1461; //1;
     const baseHeight = 821; //baseWidth / boardRatio;
 
-    //FIXME Disgusting trick to fick the layout, css didn't do it for me.
+    //FIXME Disgusting trick to fix the layout, css didn't do it for me.
     document.getElementById("chat").style.maxHeight = (document.getElementById("drawing-board-wrapper").clientWidth) / boardRatio + "px";
     drawingBoard.style.maxWidth = Math.round(document.getElementById("drawing-board-wrapper").clientWidth) + "px";
     drawingBoard.style.maxHeight = Math.round((document.getElementById("drawing-board-wrapper").clientWidth) / boardRatio) + "px";
