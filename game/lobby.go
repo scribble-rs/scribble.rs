@@ -50,12 +50,20 @@ type SettingBounds struct {
 	MaxClientsPerIPLimit int64
 }
 
-// PixelEvent is basically the same as JSEvent, but with a specific Data type.
+// LineEvent is basically the same as JSEvent, but with a specific Data type.
 // We use this for reparsing as soon as we know that the type is right. It's
 // a bit unperformant, but will do for now.
-type PixelEvent struct {
+type LineEvent struct {
 	Type string `json:"type"`
-	Data Pixel  `json:"data"`
+	Data *Line  `json:"data"`
+}
+
+// LineEvent is basically the same as JSEvent, but with a specific Data type.
+// We use this for reparsing as soon as we know that the type is right. It's
+// a bit unperformant, but will do for now.
+type FillEvent struct {
+	Type string `json:"type"`
+	Data *Fill  `json:"data"`
 }
 
 func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) error {
@@ -70,28 +78,26 @@ func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) er
 		} else {
 			handleMessage(dataAsString, player, lobby)
 		}
-	} else if received.Type == "pixel" {
+	} else if received.Type == "line" {
 		if lobby.Drawer == player {
-			pixel := PixelEvent{}
-			jsonError := json.Unmarshal(raw, &pixel)
+			line := &LineEvent{}
+			jsonError := json.Unmarshal(raw, line)
 			if jsonError != nil {
 				return fmt.Errorf("error decoding data: %s", jsonError)
 			}
-			pixel.Type = "pixel"
-			lobby.AppendPixel(&pixel.Data)
+			lobby.AppendLine(line.Data)
 
 			//We directly forward the event, as it seems to be valid.
 			SendDataToConnectedPlayers(player, lobby, received)
 		}
 	} else if received.Type == "fill" {
 		if lobby.Drawer == player {
-			pixel := &PixelEvent{}
-			jsonError := json.Unmarshal(raw, &pixel)
+			fill := &FillEvent{}
+			jsonError := json.Unmarshal(raw, fill)
 			if jsonError != nil {
 				return fmt.Errorf("error decoding data: %s", jsonError)
 			}
-			pixel.Type = "fill"
-			lobby.AppendPixel(&pixel.Data)
+			lobby.AppendFill(fill.Data)
 
 			//We directly forward the event, as it seems to be valid.
 			SendDataToConnectedPlayers(player, lobby, received)
@@ -660,7 +666,7 @@ func OnConnected(lobby *Lobby, player *Player) {
 	triggerPlayersUpdate(lobby)
 	if len(lobby.CurrentDrawing) > 0 {
 		sendError := WriteAsJSON(player, &JSEvent{
-			Type: "pixels",
+			Type: "set-canvas",
 			Data: lobby.CurrentDrawing,
 		})
 		if sendError != nil {

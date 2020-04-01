@@ -55,7 +55,11 @@ type Lobby struct {
 	alreadyUsedWords      []string
 	CustomWordsChance     int
 	ClientsPerIPLimit     int
-	CurrentDrawing        []*Pixel
+	// CurrentDrawing represents the state of the current canvas. The elements
+	// consist of LineEvent and FillEvent. Please do not modify the contents
+	// of this array an only move AppendLine and AppendFill on the respective
+	// lobby object.
+	CurrentDrawing        []interface{}
 	EnableVotekick        bool
 }
 
@@ -67,15 +71,22 @@ type WordHint struct {
 	Underline bool `json:"underline"`
 }
 
-// Pixel is the struct that a client send when drawing
-type Pixel struct {
+// Line is the struct that a client send when drawing
+type Line struct {
 	FromX     float32 `json:"fromX"`
 	FromY     float32 `json:"fromY"`
 	ToX       float32 `json:"toX"`
 	ToY       float32 `json:"toY"`
 	Color     string  `json:"color"`
 	LineWidth float32 `json:"lineWidth"`
-	Type      string  `json:"type"` // either "pixel" or "fill"
+}
+
+// Fill represents the usage of the fill bucket.
+type Fill struct {
+	X         float32 `json:"x"`
+	Y         float32 `json:"y"`
+	Color     string  `json:"color"`
+	LineWidth float32 `json:"lineWidth"`
 }
 
 // Player represents a participant in a Lobby.
@@ -141,11 +152,21 @@ func (lobby *Lobby) GetPlayer(userSession string) *Player {
 }
 
 func (lobby *Lobby) ClearDrawing() {
-	lobby.CurrentDrawing = []*Pixel{}
+	lobby.CurrentDrawing = make([]interface{}, 0, 0)
 }
 
-func (lobby *Lobby) AppendPixel(pixel *Pixel) {
-	lobby.CurrentDrawing = append(lobby.CurrentDrawing, pixel)
+// AppendLine adds a line direction to the current drawing. This exists in order
+// to prevent adding arbitrary elements to the drawing, as the backing array is
+// an empty interface type.
+func (lobby *Lobby) AppendLine(line *Line) {
+	lobby.CurrentDrawing = append(lobby.CurrentDrawing, line)
+}
+
+// AppendFill adds a fill direction to the current drawing. This exists in order
+// to prevent adding arbitrary elements to the drawing, as the backing array is
+// an empty interface type.
+func (lobby *Lobby) AppendFill(fill *Fill) {
+	lobby.CurrentDrawing = append(lobby.CurrentDrawing, fill)
 }
 
 // GetLobby returns a Lobby that has a matching ID or no Lobby if none could
@@ -209,7 +230,7 @@ func createLobby(
 		timeLeftTickerReset: make(chan struct{}),
 		ClientsPerIPLimit:   clientsPerIPLimit,
 		EnableVotekick:      enableVotekick,
-		CurrentDrawing:      []*Pixel{},
+		CurrentDrawing:      make([]interface{}, 0, 0),
 	}
 
 	if len(customWords) > 1 {
