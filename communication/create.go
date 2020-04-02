@@ -126,7 +126,7 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 	session, lobby, createError := game.CreateLobby(playerName, language, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
 	if createError != nil {
 		pageData.Errors = append(pageData.Errors, createError.Error())
-		templateError := lobbyCreatePage.ExecuteTemplate(w, "lobbsy_create.html", pageData)
+		templateError := lobbyCreatePage.ExecuteTemplate(w, "lobby_create.html", pageData)
 		if templateError != nil {
 			userFacingError(w, templateError.Error())
 		}
