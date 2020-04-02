@@ -163,7 +163,8 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 		lowerCasedInput := strings.ToLower(trimmed)
 		lowerCasedSearched := strings.ToLower(lobby.CurrentWord)
 		if lowerCasedSearched == lowerCasedInput {
-			sender.LastScore = int(math.Ceil(math.Pow(math.Max(float64(lobby.TimeLeft), 1), 1.3) * 2))
+			secondsLeft := lobby.RoundEndTime/1000 - time.Now().UTC().UnixNano()/1000000000
+			sender.LastScore = int(math.Ceil(math.Pow(math.Max(float64(secondsLeft), 1), 1.3) * 2))
 			sender.Score += sender.LastScore
 			lobby.scoreEarnedByGuessers += sender.LastScore
 			sender.State = Standby
@@ -331,6 +332,7 @@ func commandStart(caller *Player, lobby *Lobby) {
 	if lobby.Round == 0 && caller == lobby.Owner {
 		for _, otherPlayer := range lobby.Players {
 			otherPlayer.Score = 0
+			otherPlayer.LastScore = 0
 		}
 
 		advanceLobby(lobby)
@@ -433,8 +435,6 @@ func advanceLobby(lobby *Lobby) {
 		lobby.timeLeftTickerReset <- struct{}{}
 	}
 
-	lobby.TimeLeft = lobby.DrawingTime
-
 	for _, otherPlayer := range lobby.Players {
 		otherPlayer.State = Guessing
 		otherPlayer.votedForKick = make(map[string]bool)
@@ -471,6 +471,8 @@ func advanceLobby(lobby *Lobby) {
 	lobby.WordChoice = GetRandomWords(lobby)
 	WriteAsJSON(lobby.Drawer, JSEvent{Type: "prompt-words", Data: lobby.WordChoice})
 
+	//We use milliseconds for higher accuracy
+	lobby.RoundEndTime = time.Now().UTC().UnixNano()/1000000 + int64(lobby.DrawingTime)*1000
 	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
 	go func() {
 		showNextHintInSeconds := lobby.DrawingTime / 3
@@ -479,14 +481,12 @@ func advanceLobby(lobby *Lobby) {
 		for {
 			select {
 			case <-lobby.timeLeftTicker.C:
-				lobby.TimeLeft--
-				triggerTimeLeftUpdate(lobby)
 				if hintsLeft > 0 {
 					showNextHintInSeconds--
 					if showNextHintInSeconds == 0 {
 						showNextHintInSeconds = lobby.DrawingTime / 3
 						hintsLeft--
-						//FIXME If a word is chosen lates, less hints will come overall.
+						//FIXME If a word is chosen too late, less hints will come overall.
 						if lobby.WordHints != nil {
 							for {
 								randomIndex := rand.Int() % len(lobby.WordHints)
@@ -499,7 +499,7 @@ func advanceLobby(lobby *Lobby) {
 						}
 					}
 				}
-				if lobby.TimeLeft == 0 {
+				if lobby.RoundEndTime == 0 {
 					go endRound(lobby)
 				}
 			case <-lobby.timeLeftTickerReset:
@@ -509,10 +509,21 @@ func advanceLobby(lobby *Lobby) {
 	}()
 
 	recalculateRanks(lobby)
-	triggerNextTurn(lobby)
-	triggerPlayersUpdate(lobby)
-	triggerRoundsUpdate(lobby)
-	triggerWordHintUpdate(lobby)
+
+	TriggerComplexUpdateEvent("next-turn", &NextTurn{
+		Round:        lobby.Round,
+		Players:      lobby.Players,
+		RoundEndTime: lobby.RoundEndTime,
+	}, lobby)
+}
+
+// NextTurn represents the data necessary for displaying the lobby state right
+// after a new turn started. Meaning that no word has been chosen yet and
+// therefore there are no wordhints and no current drawing instructions.
+type NextTurn struct {
+	Round        int       `json:"round"`
+	Players      []*Player `json:"players"`
+	RoundEndTime int64     `json:"roundEndTime"`
 }
 
 func recalculateRanks(lobby *Lobby) {
@@ -575,10 +586,6 @@ var SendDataToConnectedPlayers func(sender *Player, lobby *Lobby, data interface
 var WriteAsJSON func(player *Player, object interface{}) error
 var WritePublicSystemMessage func(lobby *Lobby, text string)
 
-func triggerNextTurn(lobby *Lobby) {
-	TriggerSimpleUpdateEvent("next-turn", lobby)
-}
-
 func triggerPlayersUpdate(lobby *Lobby) {
 	TriggerComplexUpdateEvent("update-players", lobby.Players, lobby)
 }
@@ -600,14 +607,6 @@ func triggerWordHintUpdate(lobby *Lobby) {
 type Rounds struct {
 	Round     int `json:"round"`
 	MaxRounds int `json:"maxRounds"`
-}
-
-func triggerRoundsUpdate(lobby *Lobby) {
-	TriggerComplexUpdateEvent("update-rounds", Rounds{lobby.Round, lobby.MaxRounds}, lobby)
-}
-
-func triggerTimeLeftUpdate(lobby *Lobby) {
-	TriggerComplexUpdateEvent("update-time", lobby.TimeLeft, lobby)
 }
 
 // LobbyPageData is the data necessary for initially displaying all data of
@@ -664,11 +663,12 @@ type Message struct {
 // This includes all the necessary things for properly running a client
 // without receiving any more data.
 type Ready struct {
-	ID      string `json:"id"`
-	Drawing bool   `json:"drawing"`
+	PlayerID string `json:"playerId"`
+	Drawing  bool   `json:"drawing"`
 
 	Round          int           `json:"round"`
 	MaxRound       int           `json:"maxRounds"`
+	RoundEndTime   int64         `json:"roundEndTime"`
 	WordHints      []*WordHint   `json:"wordHints"`
 	Players        []*Player     `json:"players"`
 	CurrentDrawing []interface{} `json:"currentDrawing"`
@@ -677,11 +677,12 @@ type Ready struct {
 func OnConnected(lobby *Lobby, player *Player) {
 	player.Connected = true
 	WriteAsJSON(player, JSEvent{Type: "ready", Data: &Ready{
-		ID:      player.ID,
-		Drawing: player.State == Drawing,
+		PlayerID: player.ID,
+		Drawing:  player.State == Drawing,
 
 		Round:          lobby.Round,
 		MaxRound:       lobby.MaxRounds,
+		RoundEndTime:   lobby.RoundEndTime,
 		WordHints:      lobby.GetAvailableWordHints(player),
 		Players:        lobby.Players,
 		CurrentDrawing: lobby.CurrentDrawing,

@@ -170,7 +170,7 @@
 <script type="text/javascript" src="/resources/floodfill.js"></script>
 <script type="text/javascript">
     console.log("Attempting Connection on port " + location.port + "...");
-    let socket
+    let socket;
     if (location.protocol === 'https:') {
         socket = new WebSocket("wss://" + location.hostname + ":" + location.port + "/ws?id={{.LobbyID}}");
     } else {
@@ -372,13 +372,17 @@
         console.log("Successfully Connected");
     };
 
-    let ownID
+    let ownID;
+    let maxRounds = 0;
+    let roundEndTime = 0;
     socket.onmessage = event => {
         let parsed = JSON.parse(event.data);
         if (parsed.type === "ready") {
             let ready = parsed.data;
             allowDrawing = ready.drawing;
-            ownID = ready.id;
+            ownID = ready.playerId;
+            maxRounds = ready.maxRounds;
+            roundEndTime = ready.roundEndTime;
             applyRounds(ready.round, ready.maxRounds);
 
             if (ready.players && ready.players.length) {
@@ -402,8 +406,6 @@
             }
         } else if (parsed.type === "update-wordhint") {
             applyWordHints(parsed.data);
-        } else if (parsed.type === "update-rounds") {
-            applyRounds(parsed.data.round, parsed.data.maxRounds)
         } else if (parsed.type === "message") {
             if (messageContainer.childElementCount >= 100) {
                 messageContainer.removeChild(messageContainer.firstChild)
@@ -447,13 +449,18 @@
                 audio.play();
             }
 
-            clear(context)
+            clear(context);
+
+            roundEndTime = parsed.data.roundEndTime;
+            applyRounds(parsed.data.round, maxRounds);
+            applyPlayers(parsed.data.players);
+
+            //We clear this, since there's no word chosen right now.
+            wordContainer.innerHTML = "";
 
             allowDrawing = false;
         } else if (parsed.type === "your-turn") {
             allowDrawing = true;
-        } else if (parsed.type === "update-time") {
-            timeLeft.innerText = "Time Left: " + parsed.data;
         } else if (parsed.type === "prompt-words") {
             if (sound) {
                 let audio = new Audio('/resources/your-turn.wav');
@@ -472,9 +479,19 @@
     socket.onclose = event => console.log("Socket Closed Connection: ", event);
     socket.onerror = error => console.log("Socket Error: ", error);
 
+    window.setInterval(function () {
+        let secondsLeft = Math.floor((roundEndTime - new Date().getTime()) / 1000);
+        if (secondsLeft >= 0) {
+            timeLeft.innerText = "Time Left: " + secondsLeft;
+        } else {
+            timeLeft.innerText = "Time Left: ∞";
+        }
+    }, 500);
+
     function applyPlayers(players) {
         playerContainer.innerHTML = "";
         players.forEach(function (player) {
+            //We don't wanna show the disconnected players.
             if (!player.connected) {
                 return;
             }
@@ -512,7 +529,7 @@
 
     function applyWordHints(wordHints) {
         wordContainer.innerHTML = "";
-        //If no hint has been revelaed
+        //If no hint has been revealed
         wordHints.forEach(function (hint) {
             if (hint.character === 0) {
                 wordContainer.innerHTML += '<span class="guess-letter guess-letter-underline">&nbsp;</span>';
@@ -550,7 +567,6 @@
 
     drawingBoard.ontouchstart = function (e) {
         if (!isDrawing && allowDrawing) {
-            console.log(e.touches.length)
             touchID = e.touches[0].identifier;
 
             if (allowDrawing && localTool !== 2) {

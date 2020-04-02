@@ -46,8 +46,9 @@ type Lobby struct {
 	Round int
 	// WordChoice represents the current choice of words.
 	WordChoice []string
-	// TimeLeft is the current TimeLeft during a turn.
-	TimeLeft int
+	// RoundEndTime represents the time at which the current round will end.
+	// This is a UTC unix-timestamp in milliseconds.
+	RoundEndTime int64
 
 	timeLeftTicker        *time.Ticker
 	timeLeftTickerReset   chan struct{}
