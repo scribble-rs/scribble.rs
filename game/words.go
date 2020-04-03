@@ -12,9 +12,9 @@ import (
 var (
 	wordListCache = make(map[string][]string)
 	languageMap   = map[string]string{
-		"English": "words_en",
-		"Italian": "words_it",
-		"German":  "words_de",
+		"english": "words_en",
+		"italian": "words_it",
+		"german":  "words_de",
 	}
 )
 

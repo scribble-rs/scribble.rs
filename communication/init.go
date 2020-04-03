@@ -50,15 +50,19 @@ func init() {
 }
 
 func setupRoutes() {
+	//Endpoints for official webclient
 	http.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(pkger.Dir("/resources"))))
-
 	http.HandleFunc("/", homePage)
-	http.HandleFunc("/lobby", ShowLobby)
-	http.HandleFunc("/lobby/create", createLobby)
-	http.HandleFunc("/lobby/players", GetPlayers)
-	http.HandleFunc("/lobby/wordhint", GetWordHint)
-	http.HandleFunc("/lobby/rounds", GetRounds)
-	http.HandleFunc("/ws", wsEndpoint)
+	http.HandleFunc("/ssrEnterLobby", ssrEnterLobby)
+	http.HandleFunc("/ssrCreateLobby", ssrCreateLobby)
+
+	//The websocket is shared between the public API and the official client
+	http.HandleFunc("/v1/ws", wsEndpoint)
+
+	//These exist only for the public API. We version them in order to ensure
+	//backwards compatibility as far as possible.
+	http.HandleFunc("/v1/lobby", createLobby)
+	http.HandleFunc("/v1/lobby/player", enterLobby)
 }
 
 func readTemplateFile(name string) string {

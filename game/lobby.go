@@ -34,7 +34,11 @@ var (
 		MinClientsPerIPLimit: 1,
 		MaxClientsPerIPLimit: 24,
 	}
-	SupportedLanguages = []string{"English", "Italian", "German"}
+	SupportedLanguages = map[string]string{
+		"english": "English",
+		"italian": "Italian",
+		"german":  "German",
+	}
 )
 
 // SettingBounds defines the lower and upper bounds for the user-specified
@@ -607,17 +611,6 @@ func triggerWordHintUpdate(lobby *Lobby) {
 type Rounds struct {
 	Round     int `json:"round"`
 	MaxRounds int `json:"maxRounds"`
-}
-
-// LobbyPageData is the data necessary for initially displaying all data of
-// the lobbies webpage.
-type LobbyPageData struct {
-	Players        []*Player
-	LobbyID        string
-	WordHints      []*WordHint
-	Round          int
-	Rounds         int
-	EnableVotekick bool
 }
 
 // CreateLobby allows creating a lobby, optionally returning errors that

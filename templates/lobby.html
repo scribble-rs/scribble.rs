@@ -25,7 +25,7 @@
 <div class="content-wrapper">
     <div id="lobby">
         <div id="top-left-cell">
-            <span id="rounds">Round {{.Round}} of {{.Rounds}}</span>
+            <span id="rounds"></span>
             <label for="sound-toggle">
                 <input class="custom-check-or-radio sound-toggle-input" type="checkbox" name="sound-toggle"
                        onchange="toggleSound()"/>
@@ -172,9 +172,9 @@
     console.log("Attempting Connection on port " + location.port + "...");
     let socket;
     if (location.protocol === 'https:') {
-        socket = new WebSocket("wss://" + location.hostname + ":" + location.port + "/ws?id={{.LobbyID}}");
+        socket = new WebSocket("wss://" + location.hostname + ":" + location.port + "/v1/ws?lobby_id={{.LobbyID}}");
     } else {
-        socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/ws?id={{.LobbyID}}");
+        socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/v1/ws?lobby_id={{.LobbyID}}");
     }
 
     const messageInput = document.getElementById("message-input");
@@ -223,15 +223,16 @@
         }
     }
 
-    // Drawing board ratio
-    const boardRatio = 16 / 9;
 
     // Window scale
     const windowScale = getWindowScale();
 
-    // Reverted for now: Have the drawing board coordinates normalized to 1 unit of width and the ratio based unit of height.
-    const baseWidth = 1461; //1;
-    const baseHeight = 821; //baseWidth / boardRatio;
+    //The drawing board has a base size. This base size results in a certain ratio
+    //that the actual canvas has to be resized accordingly too. This is needed
+    //since not every client has the same screensize.
+    let baseWidth = {{.DrawingBoardBaseWidth}};
+    let baseHeight = {{.DrawingBoardBaseHeight}};
+    let boardRatio = baseWidth / baseHeight;
 
     //FIXME Disgusting trick to fix the layout, css didn't do it for me.
     document.getElementById("chat").style.maxHeight = (document.getElementById("drawing-board-wrapper").clientWidth) / boardRatio + "px";

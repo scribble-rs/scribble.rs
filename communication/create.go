@@ -3,7 +3,6 @@ package communication
 import (
 	"errors"
 	"fmt"
-	"html"
 	"net/http"
 	"strconv"
 	"strings"
@@ -11,7 +10,7 @@ import (
 	"github.com/scribble-rs/scribble.rs/game"
 )
 
-var ()
+//This file contains the API for the official web client.
 
 // homePage servers the default page for scribble.rs, which is the page to
 // create a new lobby.
@@ -33,7 +32,7 @@ func createDefaultLobbyCreatePageData() *CreatePageData {
 		CustomWordsChance: "50",
 		ClientsPerIPLimit: "1",
 		EnableVotekick:    "true",
-		Language:          game.SupportedLanguages[0],
+		Language:          "english",
 	}
 }
 
@@ -41,7 +40,7 @@ func createDefaultLobbyCreatePageData() *CreatePageData {
 type CreatePageData struct {
 	*game.SettingBounds
 	Errors            []string
-	Languages         []string
+	Languages         map[string]string
 	DrawingTime       string
 	Rounds            string
 	MaxPlayers        string
@@ -52,12 +51,13 @@ type CreatePageData struct {
 	Language          string
 }
 
-// createLobby allows creating a lobby, optionally returning errors that
-// occured during creation.
-func createLobby(w http.ResponseWriter, r *http.Request) {
+// ssrCreateLobby allows creating a lobby, optionally returning errors that
+// occurred during creation.
+func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 	formParseError := r.ParseForm()
 	if formParseError != nil {
-		panic(formParseError)
+		http.Error(w, formParseError.Error(), http.StatusBadRequest)
+		return
 	}
 
 	language, languageInvalid := parseLanguage(r.Form.Get("language"))
@@ -113,15 +113,7 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usernameCookie, noCookieError := r.Cookie("username")
-
-	//If a customly chosen username seems to be cached, we use that instead.
-	var playerName string
-	if noCookieError == nil {
-		playerName = html.EscapeString(usernameCookie.Value)
-	} else {
-		playerName = game.GeneratePlayerName()
-	}
+	var playerName = getPlayername(r)
 
 	session, lobby, createError := game.CreateLobby(playerName, language, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
 	if createError != nil {
@@ -133,6 +125,7 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
 	// Use the players generated usersession and pass it as a cookie.
 	http.SetCookie(w, &http.Cookie{
 		Name:     "usersession",
@@ -141,7 +134,7 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteStrictMode,
 	})
 
-	http.Redirect(w, r, "/lobby?id="+lobby.ID, http.StatusFound)
+	http.Redirect(w, r, "/ssrEnterLobby?lobby_id="+lobby.ID, http.StatusFound)
 }
 
 func parsePlayerName(value string) (string, error) {
@@ -158,9 +151,10 @@ func parsePassword(value string) (string, error) {
 }
 
 func parseLanguage(value string) (string, error) {
-	for _, supportedLanguage := range game.SupportedLanguages {
-		if value == supportedLanguage {
-			return value, nil
+	toLower := strings.ToLower(strings.TrimSpace(value))
+	for languageKey := range game.SupportedLanguages {
+		if toLower == languageKey {
+			return languageKey, nil
 		}
 	}
 

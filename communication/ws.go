@@ -30,29 +30,23 @@ func init() {
 }
 
 func wsEndpoint(w http.ResponseWriter, r *http.Request) {
-	lobbyID := r.URL.Query().Get("id")
-	if lobbyID == "" {
-		http.Error(w, "the requested lobby doesn't exist", http.StatusNotFound)
+	lobby, lobbyError := getLobby(r)
+	if lobbyError != nil {
+		http.Error(w, lobbyError.Error(), http.StatusNotFound)
 		return
 	}
 
-	lobby := game.GetLobby(lobbyID)
-	if lobby == nil {
-		http.Error(w, "the requested lobby doesn't exist", http.StatusNotFound)
-		return
-	}
-
-	sessionCookie, noCookieError := r.Cookie("usersession")
 	//This issue can happen if you illegally request a websocket connection without ever having had
 	//a usersession or your client having deleted the usersession cookie.
-	if noCookieError != nil {
-		http.Error(w, "the requested lobby doesn't exist", http.StatusUnauthorized)
+	sessionCookie := getUserSession(r)
+	if sessionCookie == "" {
+		http.Error(w, "you don't have access to this lobby;usersession not set", http.StatusUnauthorized)
 		return
 	}
 
-	player := lobby.GetPlayer(sessionCookie.Value)
+	player := lobby.GetPlayer(sessionCookie)
 	if player == nil {
-		http.Error(w, "the requested lobby doesn't exist", http.StatusUnauthorized)
+		http.Error(w, "you don't have access to this lobby;usersession invalid", http.StatusUnauthorized)
 		return
 	}
 

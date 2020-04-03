@@ -28,12 +28,12 @@
                 </div>
 
             {{end}}
-            <form id="lobby-create" class="input-container" action="/lobby/create" method="POST">
+            <form id="lobby-create" class="input-container" action="/ssrCreateLobby" method="POST">
                 <b>Lobby-Language</b>
                 <select class="input-item" name="language" placeholder="Choose your language">
                     {{$language := .Language}}
-                    {{range .Languages}}
-                        <option value="{{.}}" {{if eq $language .}}selected="selected"{{end}}>{{.}}</option>
+                    {{range $k, $v := .Languages}}
+                        <option value="{{$k}}" {{if eq $language .}}selected="selected"{{end}}>{{$v}}</option>
                     {{end}}
                 </select>
                 <b>Drawing Time</b>
