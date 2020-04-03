@@ -439,8 +439,6 @@
             drawLine(context, parsed.data.fromX * scaleDownFactor, parsed.data.fromY * scaleDownFactor, parsed.data.toX * scaleDownFactor, parsed.data.toY * scaleDownFactor, parsed.data.color, parsed.data.lineWidth * scaleDownFactor);
         } else if (parsed.type === "fill") {
             fill(context, parsed.data.x * scaleDownFactor, parsed.data.y * scaleDownFactor, parsed.data.color);
-        } else if (parsed.type === "set-canvas") {
-            applyDrawData(parsed.data)
         } else if (parsed.type === "clear-drawing-board") {
             clear(context)
         } else if (parsed.type === "next-turn") {
