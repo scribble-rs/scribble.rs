@@ -397,6 +397,12 @@ func commandSetMP(caller *Player, lobby *Lobby, args []string) {
 }
 
 func endRound(lobby *Lobby) {
+	if lobby.timeLeftTicker != nil {
+		lobby.timeLeftTicker.Stop()
+		lobby.timeLeftTicker = nil
+		lobby.timeLeftTickerReset <- struct{}{}
+	}
+
 	var roundOverMessage string
 	if lobby.CurrentWord == "" {
 		roundOverMessage = "Round over. No word was chosen."
@@ -433,12 +439,6 @@ func endRound(lobby *Lobby) {
 }
 
 func advanceLobby(lobby *Lobby) {
-	if lobby.timeLeftTicker != nil {
-		lobby.timeLeftTicker.Stop()
-		lobby.timeLeftTicker = nil
-		lobby.timeLeftTickerReset <- struct{}{}
-	}
-
 	for _, otherPlayer := range lobby.Players {
 		otherPlayer.State = Guessing
 		otherPlayer.votedForKick = make(map[string]bool)
@@ -503,7 +503,7 @@ func advanceLobby(lobby *Lobby) {
 						}
 					}
 				}
-				if lobby.RoundEndTime == 0 {
+				if time.Now().UTC().UnixNano()/1000000 >= lobby.RoundEndTime {
 					go endRound(lobby)
 				}
 			case <-lobby.timeLeftTickerReset:
