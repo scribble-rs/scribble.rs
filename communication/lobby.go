@@ -48,7 +48,7 @@ func getPlayername(r *http.Request) string {
 	if noCookieError == nil {
 		username := html.EscapeString(strings.TrimSpace(usernameCookie.Value))
 		if username != "" {
-			return username
+			return trimDownTo(username, 30)
 		}
 	}
 
@@ -56,11 +56,19 @@ func getPlayername(r *http.Request) string {
 	if parseError == nil {
 		username := r.Form.Get("username")
 		if username != "" {
-			return username
+			return trimDownTo(username, 30)
 		}
 	}
 
 	return game.GeneratePlayerName()
+}
+
+func trimDownTo(text string, size int) string {
+	if len(text) <= size {
+		return text
+	}
+
+	return text[:size]
 }
 
 // GetPlayers returns divs for all players in the lobby to the calling client.
