@@ -479,32 +479,31 @@ func advanceLobby(lobby *Lobby) {
 	lobby.RoundEndTime = time.Now().UTC().UnixNano()/1000000 + int64(lobby.DrawingTime)*1000
 	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
 	go func() {
-		showNextHintInSeconds := lobby.DrawingTime / 3
 		hintsLeft := 2
+		revealHintAtMillisecondsLeft := lobby.DrawingTime*1000 / 3
 
 		for {
 			select {
 			case <-lobby.timeLeftTicker.C:
-				if hintsLeft > 0 {
-					showNextHintInSeconds--
-					if showNextHintInSeconds == 0 {
-						showNextHintInSeconds = lobby.DrawingTime / 3
+				currentTime := time.Now().UTC().UnixNano() / 1000000
+				if currentTime >= lobby.RoundEndTime {
+					go endRound(lobby)
+				}
+
+				if hintsLeft > 0 && lobby.WordHints != nil {
+					timeLeft := lobby.RoundEndTime - currentTime
+					if timeLeft <= int64(revealHintAtMillisecondsLeft*hintsLeft) {
 						hintsLeft--
-						//FIXME If a word is chosen too late, less hints will come overall.
-						if lobby.WordHints != nil {
-							for {
-								randomIndex := rand.Int() % len(lobby.WordHints)
-								if lobby.WordHints[randomIndex].Character == 0 {
-									lobby.WordHints[randomIndex].Character = []rune(lobby.CurrentWord)[randomIndex]
-									triggerWordHintUpdate(lobby)
-									break
-								}
+
+						for {
+							randomIndex := rand.Int() % len(lobby.WordHints)
+							if lobby.WordHints[randomIndex].Character == 0 {
+								lobby.WordHints[randomIndex].Character = []rune(lobby.CurrentWord)[randomIndex]
+								triggerWordHintUpdate(lobby)
+								break
 							}
 						}
 					}
-				}
-				if time.Now().UTC().UnixNano()/1000000 >= lobby.RoundEndTime {
-					go endRound(lobby)
 				}
 			case <-lobby.timeLeftTickerReset:
 				return
