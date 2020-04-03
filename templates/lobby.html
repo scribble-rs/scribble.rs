@@ -408,28 +408,11 @@
         } else if (parsed.type === "update-wordhint") {
             applyWordHints(parsed.data);
         } else if (parsed.type === "message") {
-            if (messageContainer.childElementCount >= 100) {
-                messageContainer.removeChild(messageContainer.firstChild)
-            }
-
-            messageContainer.innerHTML += `<div class="message">
-                            <span class="chat-name">` + parsed.data.Author + `</span>
-                            <span class="message-content">` + parsed.data.Content + `</span>
-                        </div>`;
+            applyMessage("", parsed.data.author, parsed.data.content);
         } else if (parsed.type === "system-message") {
-            if (messageContainer.childElementCount >= 100) {
-                messageContainer.removeChild(messageContainer.firstChild)
-            }
-
-            messageContainer.innerHTML += `<div class="message system-message">
-                            <span class="chat-name">System</span>
-                            <span class="message-content">` + parsed.data + `</span>
-                        </div>`;
+            applyMessage("system-message", "System", parsed.data);
         } else if (parsed.type === "non-guessing-player-message") {
-            messageContainer.innerHTML += `<div class="non-guessing-player-message">
-                            <span class="chat-name">` + parsed.data.Author + `</span>
-                            <span class="message-content">` + parsed.data.Content + `</span>
-                        </div>`;
+            applyMessage("non-guessing-player-message", parsed.data.author, parsed.data.content);
         } else if (parsed.type === "persist-username") {
             //TODO GMT date for consistency?
             document.cookie = "username=" + parsed.data + ";expires=Tue, 19 Jan 2038 03:14:07 UTC;path=/;samesite=strict";
@@ -486,6 +469,17 @@
             timeLeft.innerText = "Time Left: ∞";
         }
     }, 500);
+
+    function applyMessage(styleClass, author, message) {
+        if (messageContainer.childElementCount >= 100) {
+            messageContainer.removeChild(messageContainer.firstChild)
+        }
+
+        messageContainer.innerHTML += `<div class="message ` + styleClass + `">
+                            <span class="chat-name">` + author + `</span>
+                            <span class="message-content">` + message + `</span>
+                        </div>`;
+    }
 
     function applyPlayers(players) {
         playerContainer.innerHTML = "";

@@ -480,7 +480,7 @@ func advanceLobby(lobby *Lobby) {
 	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
 	go func() {
 		hintsLeft := 2
-		revealHintAtMillisecondsLeft := lobby.DrawingTime*1000 / 3
+		revealHintAtMillisecondsLeft := lobby.DrawingTime * 1000 / 3
 
 		for {
 			select {
@@ -646,9 +646,9 @@ func GeneratePlayerName() string {
 // Message represents a message in the chatroom.
 type Message struct {
 	// Author is the player / thing that wrote the message
-	Author string
+	Author string `json:"author"`
 	// Content is the actual message text.
-	Content string
+	Content string `json:"content"`
 }
 
 // Ready represents the initial state that a user needs upon connection.
