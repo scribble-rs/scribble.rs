@@ -1,8 +1,8 @@
 <h1 align="center">Scribble.rs</h1>
 
 <p align="center">
-  <a href="https://circleci.com/gh/scribble-rs/scribble.rs">
-    <img src="https://circleci.com/gh/scribble-rs/scribble.rs.svg?style=svg">
+  <a href="https://github.com/scribble-rs/scribble.rs/actions">
+    <img src="https://github.com/scribble-rs/scribble.rs/workflows/scribble-rs/badge.svg">
   </a>
   <a href="https://codecov.io/gh/scribble-rs/scribble.rs">
     <img src="https://codecov.io/gh/scribble-rs/scribble.rs/branch/master/graph/badge.svg">
