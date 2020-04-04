@@ -8,7 +8,7 @@
     <img src="https://codecov.io/gh/scribble-rs/scribble.rs/branch/master/graph/badge.svg">
   </a>
   <a href="https://discord.gg/3sntyCv">
-    <img src="https://img.shields.io/discord/693433417395732531.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2">
+    <img src="https://img.shields.io/discord/693433417395732531.svg?logo=discord">
   </a>
 </p>
 
