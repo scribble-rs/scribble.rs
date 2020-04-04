@@ -415,8 +415,7 @@
         } else if (parsed.type === "non-guessing-player-message") {
             applyMessage("non-guessing-player-message", parsed.data.author, parsed.data.content);
         } else if (parsed.type === "persist-username") {
-            //TODO GMT date for consistency?
-            document.cookie = "username=" + parsed.data + ";expires=Tue, 19 Jan 2038 03:14:07 UTC;path=/;samesite=strict";
+            document.cookie = "username=" + parsed.data + ";expires=Tue, 19 Jan 2038 00:00:00 UTC;path=/;samesite=strict";
         } else if (parsed.type === "reset-username") {
             document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
         } else if (parsed.type === "line") {
