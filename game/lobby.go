@@ -83,7 +83,7 @@ func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) er
 			handleMessage(dataAsString, player, lobby)
 		}
 	} else if received.Type == "line" {
-		if lobby.Drawer == player {
+		if lobby.canDraw(player) {
 			line := &LineEvent{}
 			jsonError := json.Unmarshal(raw, line)
 			if jsonError != nil {
@@ -95,7 +95,7 @@ func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) er
 			SendDataToConnectedPlayers(player, lobby, received)
 		}
 	} else if received.Type == "fill" {
-		if lobby.Drawer == player {
+		if lobby.canDraw(player) {
 			fill := &FillEvent{}
 			jsonError := json.Unmarshal(raw, fill)
 			if jsonError != nil {
@@ -107,7 +107,7 @@ func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) er
 			SendDataToConnectedPlayers(player, lobby, received)
 		}
 	} else if received.Type == "clear-drawing-board" {
-		if lobby.Drawer == player {
+		if lobby.canDraw(player) {
 			lobby.ClearDrawing()
 			SendDataToConnectedPlayers(player, lobby, received)
 		}
@@ -130,7 +130,6 @@ func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) er
 			lobby.WordHints = createWordHintFor(lobby.CurrentWord, false)
 			lobby.WordHintsShown = createWordHintFor(lobby.CurrentWord, true)
 			triggerWordHintUpdate(lobby)
-			WriteAsJSON(lobby.Drawer, JSEvent{Type: "your-turn"})
 		}
 	} else if received.Type == "kick-vote" {
 		toKickID, isString := (received.Data).(string)
@@ -473,7 +472,16 @@ func advanceLobby(lobby *Lobby) {
 
 	lobby.Drawer.State = Drawing
 	lobby.WordChoice = GetRandomWords(lobby)
-	WriteAsJSON(lobby.Drawer, JSEvent{Type: "prompt-words", Data: lobby.WordChoice})
+
+	recalculateRanks(lobby)
+
+	TriggerComplexUpdateEvent("next-turn", &NextTurn{
+		Round:        lobby.Round,
+		Players:      lobby.Players,
+		RoundEndTime: lobby.RoundEndTime,
+	}, lobby)
+
+	WriteAsJSON(lobby.Drawer, &JSEvent{Type: "your-turn", Data: lobby.WordChoice})
 
 	//We use milliseconds for higher accuracy
 	lobby.RoundEndTime = time.Now().UTC().UnixNano()/1000000 + int64(lobby.DrawingTime)*1000
@@ -510,14 +518,6 @@ func advanceLobby(lobby *Lobby) {
 			}
 		}
 	}()
-
-	recalculateRanks(lobby)
-
-	TriggerComplexUpdateEvent("next-turn", &NextTurn{
-		Round:        lobby.Round,
-		Players:      lobby.Players,
-		RoundEndTime: lobby.RoundEndTime,
-	}, lobby)
 }
 
 // NextTurn represents the data necessary for displaying the lobby state right
@@ -721,4 +721,8 @@ func (lobby *Lobby) JoinPlayer(playerName string) string {
 	triggerPlayersUpdate(lobby)
 
 	return player.userSession
+}
+
+func (lobby *Lobby) canDraw(player *Player) bool {
+	return lobby.Drawer == player && lobby.CurrentWord != ""
 }

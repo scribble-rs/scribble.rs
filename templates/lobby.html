@@ -349,6 +349,7 @@
             type: "choose-word",
             data: index
         }));
+        allowDrawing = true;
         wordDialog.style.visibility = "hidden";
     }
 
@@ -442,8 +443,6 @@
 
             allowDrawing = false;
         } else if (parsed.type === "your-turn") {
-            allowDrawing = true;
-        } else if (parsed.type === "prompt-words") {
             if (sound) {
                 let audio = new Audio('/resources/your-turn.wav');
                 audio.type = 'audio/wav';
