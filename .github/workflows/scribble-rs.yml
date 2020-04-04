@@ -1,4 +1,4 @@
-name: Run scribble-rs tests
+name: scribble-rs
 
 on: [push, pull_request]
 
