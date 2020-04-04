@@ -35,8 +35,7 @@
         <div id="word-container"></div>
         <span id="time-left">Time Left: ∞</span>
 
-        <div id="player-container">
-        </div>
+        <div id="player-container"></div>
 
         <div id="drawing-board-wrapper">
             <canvas id="drawing-board"></canvas>
@@ -106,14 +105,14 @@
             <div class="pencil-sizes-container toolbox-group">
                 <label for="tool-type-pencil">
                     <input id="tool-type-pencil" class="custom-check-or-radio line-width-button"
-                           onchange="chooseTool(0)" type="radio" name="tool-type" checked>
+                           onchange="chooseTool(pen)" type="radio" name="tool-type" checked>
                     <div class="line-width-button-content">
                         <span id="tool-type-pencil-button" style="font-size: 2rem;">✏️</span>
                     </div>
                 </label>
                 <label for="tool-type-fill">
                     <input id="tool-type-fill" class="custom-check-or-radio line-width-button"
-                           onchange="chooseTool(2)" type="radio" name="tool-type">
+                           onchange="chooseTool(fillBucket)" type="radio" name="tool-type">
                     <div class="line-width-button-content">
                         <img alt="Fill" title="Fill tool" src="/resources/fill.svg" width="40px"
                              height="40px"/>
@@ -121,7 +120,7 @@
                 </label>
                 <label for="tool-type-rubber">
                     <input id="tool-type-rubber" class="custom-check-or-radio line-width-button"
-                           onchange="chooseTool(1)" type="radio" name="tool-type">
+                           onchange="chooseTool(rubber)" type="radio" name="tool-type">
                     <div class="line-width-button-content">
                         <img alt="Rubber" title="Rubber tool" src="/resources/rubber.svg" width="40px"
                              height="40px"/>
@@ -251,11 +250,14 @@
     const scaleUpFactor = baseWidth / drawingBoard.width;
     const scaleDownFactor = drawingBoard.width / baseWidth;
 
+    const pen = 0;
+    const rubber = 1;
+    const fillBucket = 2;
+
     let allowDrawing = false;
     let localColor = "#000000";
     let localLineWidth;
-    // 0 = pencil; 1 = rubber; 2 = fill
-    let localTool = 0;
+    let localTool = pen;
     setLineWidth(5);
 
     document.getElementById("size-8-button").style.width = (8 * scaleDownFactor) + "px";
@@ -283,13 +285,11 @@
     }
 
     function chooseTool(value) {
-        if (value === 1) {
-            localTool = 1;
-        } else if (value === 2) {
-            localTool = 2;
+        if (value === pen || value === rubber || value === fillBucket) {
+            localTool = value;
         } else {
-            //Everything not Rubber or Fill Bucket is a pencil.
-            localTool = 0;
+            //If this ends up with an invalid value, we use the pencil.
+            localTool = pen;
         }
     }
 
@@ -360,19 +360,15 @@
         }));
     }
 
-    new MutationObserver(
-        () => {
-            messageContainer.scrollTop = messageContainer.scrollHeight;
-        }
-    ).observe(messageContainer, {
-        attributes: false,
-        childList: true,
-        subtree: false
-    });
+    //This automatically scrolls down the chat on arrivals of new messages
+    new MutationObserver(() => messageContainer.scrollTop = messageContainer.scrollHeight)
+        .observe(messageContainer, {
+            attributes: false,
+            childList: true,
+            subtree: false
+        });
 
-    socket.onopen = () => {
-        console.log("Successfully Connected");
-    };
+    socket.onopen = () => console.log("Successfully Connected");
 
     let ownID;
     let maxRounds = 0;

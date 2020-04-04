@@ -133,7 +133,7 @@ func GetWordHint(w http.ResponseWriter, r *http.Request) {
 }
 
 const (
-	DrawingBoardBaseWidth  = 1600
+	DrawingBoardBaseWidth  = 1400
 	DrawingBoardBaseHeight = 900
 )
 
