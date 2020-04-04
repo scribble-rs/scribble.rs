@@ -400,12 +400,7 @@
         if (parsed.type === "update-players") {
             applyPlayers(parsed.data)
         } else if (parsed.type === "correct-guess") {
-            if (sound) {
-                let audio = new Audio('/resources/plop.wav');
-                audio.type = 'audio/wav';
-
-                audio.play();
-            }
+            playWav('/resources/plop.wav')
         } else if (parsed.type === "update-wordhint") {
             applyWordHints(parsed.data);
         } else if (parsed.type === "message") {
@@ -425,11 +420,7 @@
         } else if (parsed.type === "clear-drawing-board") {
             clear(context)
         } else if (parsed.type === "next-turn") {
-            if (sound) {
-                let audio = new Audio('/resources/end-turn.wav');
-                audio.type = 'audio/wav';
-                audio.play();
-            }
+            playWav('/resources/end-turn.wav')
 
             clear(context);
 
@@ -442,12 +433,7 @@
 
             allowDrawing = false;
         } else if (parsed.type === "your-turn") {
-            if (sound) {
-                let audio = new Audio('/resources/your-turn.wav');
-                audio.type = 'audio/wav';
-
-                audio.play();
-            }
+            playWav('/resources/your-turn.wav');
 
             wordButtonZero.textContent = parsed.data[0];
             wordButtonOne.textContent = parsed.data[1];
@@ -458,6 +444,14 @@
 
     socket.onclose = event => console.log("Socket Closed Connection: ", event);
     socket.onerror = error => console.log("Socket Error: ", error);
+
+    function playWav(file) {
+        if (sound) {
+            let audio = new Audio(file);
+            audio.type = 'audio/wav';
+            audio.play();
+        }
+    }
 
     window.setInterval(function () {
         let secondsLeft = Math.floor((roundEndTime - new Date().getTime()) / 1000);
