@@ -475,6 +475,11 @@ func advanceLobby(lobby *Lobby) {
 
 	recalculateRanks(lobby)
 
+	//We use milliseconds for higher accuracy
+	lobby.RoundEndTime = time.Now().UTC().UnixNano()/1000000 + int64(lobby.DrawingTime)*1000
+	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
+	go roundTimerTicker(lobby)
+
 	TriggerComplexUpdateEvent("next-turn", &NextTurn{
 		Round:        lobby.Round,
 		Players:      lobby.Players,
@@ -482,42 +487,39 @@ func advanceLobby(lobby *Lobby) {
 	}, lobby)
 
 	WriteAsJSON(lobby.Drawer, &JSEvent{Type: "your-turn", Data: lobby.WordChoice})
+}
 
-	//We use milliseconds for higher accuracy
-	lobby.RoundEndTime = time.Now().UTC().UnixNano()/1000000 + int64(lobby.DrawingTime)*1000
-	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
-	go func() {
-		hintsLeft := 2
-		revealHintAtMillisecondsLeft := lobby.DrawingTime * 1000 / 3
+func roundTimerTicker(lobby *Lobby) {
+	hintsLeft := 2
+	revealHintAtMillisecondsLeft := lobby.DrawingTime * 1000 / 3
 
-		for {
-			select {
-			case <-lobby.timeLeftTicker.C:
-				currentTime := time.Now().UTC().UnixNano() / 1000000
-				if currentTime >= lobby.RoundEndTime {
-					go endRound(lobby)
-				}
+	for {
+		select {
+		case <-lobby.timeLeftTicker.C:
+			currentTime := time.Now().UTC().UnixNano() / 1000000
+			if currentTime >= lobby.RoundEndTime {
+				go endRound(lobby)
+			}
 
-				if hintsLeft > 0 && lobby.WordHints != nil {
-					timeLeft := lobby.RoundEndTime - currentTime
-					if timeLeft <= int64(revealHintAtMillisecondsLeft*hintsLeft) {
-						hintsLeft--
+			if hintsLeft > 0 && lobby.WordHints != nil {
+				timeLeft := lobby.RoundEndTime - currentTime
+				if timeLeft <= int64(revealHintAtMillisecondsLeft*hintsLeft) {
+					hintsLeft--
 
-						for {
-							randomIndex := rand.Int() % len(lobby.WordHints)
-							if lobby.WordHints[randomIndex].Character == 0 {
-								lobby.WordHints[randomIndex].Character = []rune(lobby.CurrentWord)[randomIndex]
-								triggerWordHintUpdate(lobby)
-								break
-							}
+					for {
+						randomIndex := rand.Int() % len(lobby.WordHints)
+						if lobby.WordHints[randomIndex].Character == 0 {
+							lobby.WordHints[randomIndex].Character = []rune(lobby.CurrentWord)[randomIndex]
+							triggerWordHintUpdate(lobby)
+							break
 						}
 					}
 				}
-			case <-lobby.timeLeftTickerReset:
-				return
 			}
+		case <-lobby.timeLeftTickerReset:
+			return
 		}
-	}()
+	}
 }
 
 // NextTurn represents the data necessary for displaying the lobby state right
