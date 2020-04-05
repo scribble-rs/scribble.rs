@@ -15,6 +15,7 @@ var (
 		"english": "en",
 		"italian": "it",
 		"german":  "de",
+		"french":  "fr",
 	}
 )
 
