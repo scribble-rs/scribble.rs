@@ -682,6 +682,11 @@ func OnConnected(lobby *Lobby, player *Player) {
 		CurrentDrawing: lobby.CurrentDrawing,
 	}})
 
+	//This state is reached when the player refreshes before having chosen a word.
+	if lobby.Drawer == player && lobby.CurrentWord == "" {
+		WriteAsJSON(lobby.Drawer, &JSEvent{Type: "your-turn", Data: lobby.WordChoice})
+	}
+
 	//TODO Only send to everyone except for the new player, since it's part of the ready event.
 	triggerPlayersUpdate(lobby)
 }
