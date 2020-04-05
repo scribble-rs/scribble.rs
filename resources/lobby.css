@@ -16,12 +16,12 @@ body {
 }
 
 #rounds {
-    font-size: 2rem;
+    font-size: 1.7rem;
     flex: 1;
 }
 
 #time-left {
-    font-size: 2rem;
+    font-size: 1.5rem;
 }
 
 #word-container {
@@ -156,12 +156,12 @@ body {
 }
 
 #sound-toggle-label {
-    font-size: 2rem;
+    font-size: 1.7rem;
 }
 
 .sound-toggle-input {
-    height: 2rem;
-    width: 2rem;
+    height: 1.7rem;
+    width: 1.7rem;
 }
 
 .custom-check-or-radio {
