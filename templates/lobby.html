@@ -184,7 +184,6 @@
     const timeLeft = document.getElementById("time-left");
     const drawingBoard = document.getElementById("drawing-board");
     const colorPicker = document.getElementById("color-picker");
-    const lineWidthChooser = document.getElementById("line-width");
     const wordDialog = document.getElementById("word-dialog");
     const wordButtonZero = document.getElementById("word-button-zero");
     const wordButtonOne = document.getElementById("word-button-one");
@@ -193,38 +192,22 @@
     const noSoundIcon = "🔇";
     const soundIcon = "🔊";
     const soundToggleLabel = document.getElementById("sound-toggle-label");
-    let sound;
-    if (localStorage.getItem("sound") === "false") {
-        sound = false;
-        soundToggleLabel.innerText = noSoundIcon;
-    } else {
-        sound = true;
-        soundToggleLabel.innerText = soundIcon;
-    }
+    let sound = localStorage.getItem("sound") === "true";
+    updateSoundIcon();
 
     function toggleSound() {
+        sound = !sound;
+        localStorage.setItem("sound", sound.toString());
+        updateSoundIcon();
+    }
+
+    function updateSoundIcon() {
         if (sound) {
-            localStorage.setItem("sound", "false");
-            sound = false;
-            soundToggleLabel.innerText = noSoundIcon;
-        } else {
-            localStorage.setItem("sound", "true");
-            sound = true;
             soundToggleLabel.innerText = soundIcon;
-        }
-    }
-
-    function getWindowScale() {
-        if ('devicePixelRatio' in window) {
-            return window.devicePixelRatio;
         } else {
-            return 1;
+            soundToggleLabel.innerText = noSoundIcon;
         }
     }
-
-
-    // Window scale
-    const windowScale = getWindowScale();
 
     //The drawing board has a base size. This base size results in a certain ratio
     //that the actual canvas has to be resized accordingly too. This is needed
@@ -239,9 +222,8 @@
     drawingBoard.style.maxHeight = Math.round((document.getElementById("drawing-board-wrapper").clientWidth) / boardRatio) + "px";
 
     // Set drawingBoard pixel resolution
-    // Mind the window scale to get sharp drawing on HiDPI devices (Retina Display etc.)
-    drawingBoard.width = Math.round(document.getElementById("drawing-board-wrapper").clientWidth) * windowScale;
-    drawingBoard.height = Math.round(document.getElementById("drawing-board-wrapper").clientWidth) / boardRatio * windowScale;
+    drawingBoard.width = Math.round(document.getElementById("drawing-board-wrapper").clientWidth);
+    drawingBoard.height = Math.round(document.getElementById("drawing-board-wrapper").clientWidth) / boardRatio;
 
     // Moving this here to extract the context after resizing
     const context = drawingBoard.getContext("2d");
@@ -260,14 +242,15 @@
     let localTool = pen;
     setLineWidth(5);
 
-    document.getElementById("size-8-button").style.width = (8 * scaleDownFactor) + "px";
-    document.getElementById("size-8-button").style.height = (8 * scaleDownFactor) + "px";
-    document.getElementById("size-15-button").style.width = (15 * scaleDownFactor) + "px";
-    document.getElementById("size-15-button").style.height = (15 * scaleDownFactor) + "px";
-    document.getElementById("size-30-button").style.width = (30 * scaleDownFactor) + "px";
-    document.getElementById("size-30-button").style.height = (30 * scaleDownFactor) + "px";
-    document.getElementById("size-40-button").style.width = (40 * scaleDownFactor) + "px";
-    document.getElementById("size-40-button").style.height = (40 * scaleDownFactor) + "px";
+    //Those are not scaled for now, as the whole toolbar would then have to incorrectly size up and down.
+    document.getElementById("size-8-button").style.width = 8 + "px";
+    document.getElementById("size-8-button").style.height = 8 + "px";
+    document.getElementById("size-15-button").style.width = 15 + "px";
+    document.getElementById("size-15-button").style.height = 15 + "px";
+    document.getElementById("size-30-button").style.width = 30 + "px";
+    document.getElementById("size-30-button").style.height = 30 + "px";
+    document.getElementById("size-40-button").style.width = 40 + "px";
+    document.getElementById("size-40-button").style.height = 40 + "px";
 
     function setColor(value) {
         if (value === undefined) {
@@ -322,7 +305,8 @@
             cursorColor = localColor;
         }
 
-        drawingBoard.style.cursor = "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"" + (localLineWidth + 2) + "\" height=\"" + (localLineWidth + 2) + "\"><circle cx=\"" + (localLineWidth / 2) + "\" cy=\"" + (localLineWidth / 2) + "\" r=\"" + (localLineWidth / 2) + "\" style=\"fill: " + cursorColor + "; stroke: " + borderColor + ";\"/></svg>') " + (localLineWidth / 2) + " " + (localLineWidth / 2) + ", auto";
+        let circleSize = localLineWidth * scaleUpFactor;
+        drawingBoard.style.cursor = "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"" + (circleSize + 2) + "\" height=\"" + (circleSize + 2) + "\"><circle cx=\"" + (circleSize / 2) + "\" cy=\"" + (circleSize / 2) + "\" r=\"" + (circleSize / 2) + "\" style=\"fill: " + cursorColor + "; stroke: " + borderColor + ";\"/></svg>') " + (circleSize / 2) + " " + (circleSize / 2) + ", auto";
     }
 
     function clearCanvasAndSendEvent() {
@@ -394,9 +378,9 @@
             }
         }
         if (parsed.type === "update-players") {
-            applyPlayers(parsed.data)
+            applyPlayers(parsed.data);
         } else if (parsed.type === "correct-guess") {
-            playWav('/resources/plop.wav')
+            playWav('/resources/plop.wav');
         } else if (parsed.type === "update-wordhint") {
             applyWordHints(parsed.data);
         } else if (parsed.type === "message") {
@@ -416,7 +400,7 @@
         } else if (parsed.type === "clear-drawing-board") {
             clear(context)
         } else if (parsed.type === "next-turn") {
-            playWav('/resources/end-turn.wav')
+            playWav('/resources/end-turn.wav');
 
             clear(context);
 
@@ -661,7 +645,7 @@
         context.fillStyle = color;
         //There seems to be some bug where setting the tolerance to 0 causes a freeze when painting black on white.
         // FIXME quick and dirty fix to apply the window scale to all drawing activities.
-        context.fillFlood(x1 * windowScale, y1 * windowScale, 1);
+        context.fillFlood(x1, y1, 1);
     }
 
     function fillAndSendEvent(context, x1, y1, color) {
@@ -699,10 +683,10 @@
         // the coordinates must be whole numbers to improve performance.
         // also, decimals as coordinates is not making sense.
         // FIXME quick and dirty fix to apply the window scale to all drawing activities.
-        x1 = Math.floor(x1 * windowScale);
-        y1 = Math.floor(y1 * windowScale);
-        x2 = Math.floor(x2 * windowScale);
-        y2 = Math.floor(y2 * windowScale);
+        x1 = Math.floor(x1);
+        y1 = Math.floor(y1);
+        x2 = Math.floor(x2);
+        y2 = Math.floor(y2);
         lineWidth = Math.ceil(lineWidth);
 
         color = hexToRgb(color);
