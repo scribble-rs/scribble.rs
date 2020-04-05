@@ -22,145 +22,145 @@
         <button id="word-button-two" class="word-button" onclick="chooseWord(2)">Placeholder</button>
     </div>
 </div>
-<div class="content-wrapper">
-    <div id="lobby">
-        <div id="top-left-cell">
-            <span id="rounds"></span>
-            <label for="sound-toggle">
-                <input class="custom-check-or-radio sound-toggle-input" type="checkbox" name="sound-toggle"
-                       onchange="toggleSound()"/>
-                <span id="sound-toggle-label"></span>
-            </label>
-        </div>
-        <div id="word-container"></div>
-        <span id="time-left">Time Left: ∞</span>
+<div id="lobby">
+    <div id="top-left-cell">
+        <span id="rounds"></span>
+        <label for="sound-toggle">
+            <input class="custom-check-or-radio sound-toggle-input" type="checkbox" name="sound-toggle"
+                   onchange="toggleSound()"/>
+            <span id="sound-toggle-label"></span>
+        </label>
+    </div>
+    <div id="word-container"></div>
+    <span id="time-left">Time Left: ∞</span>
 
-        <div id="player-container"></div>
+    <div id="player-container"></div>
 
-        <div id="drawing-board-wrapper">
+    <div id="drawing-board-wrapper">
+        <div id="drawing-board-inner-wrapper">
             <canvas id="drawing-board"></canvas>
         </div>
+    </div>
 
-        <div id="chat">
-            <div id="message-container">
-                <b>Type !start to begin the round or change your name with !nick.</b>
-            </div>
-            <form class="message-input-form" onsubmit="return sendMessage()">
-                <input id="message-input" type="text" autocomplete="off" placeholder="Type your message"/>
-            </form>
+    <div id="chat">
+        <div id="message-container">
+            <b>Type !start to begin the round or change your name with !nick.</b>
         </div>
-        <div id="toolbox">
-            <input class="toolbox-group" type="color" id="color-picker" onchange="setColor()" value="#000000"
-                   alt="Current color (Click to change)" title="Current color (Click to change)">
-            <div class="color-button-container toolbox-group">
-                <div class="color-button-row">
-                    <button class="color-button" style="background-color: #ffffff"
-                            onclick="setColor('#ffffff')"></button>
-                    <button class="color-button" style="background-color: #c1c1c1"
-                            onclick="setColor('#c1c1c1')"></button>
-                    <button class="color-button" style="background-color: #ef130b"
-                            onclick="setColor('#ef130b')"></button>
-                    <button class="color-button" style="background-color: #ff7100"
-                            onclick="setColor('#ff7100')"></button>
-                    <button class="color-button" style="background-color: #ffe400"
-                            onclick="setColor('#ffe400')"></button>
-                    <button class="color-button" style="background-color: #00cc00"
-                            onclick="setColor('#00cc00')"></button>
-                    <button class="color-button" style="background-color: #00b2ff"
-                            onclick="setColor('#00b2ff')"></button>
-                    <button class="color-button" style="background-color: #231fd3"
-                            onclick="setColor('#231fd3')"></button>
-                    <button class="color-button" style="background-color: #a300ba"
-                            onclick="setColor('#a300ba')"></button>
-                    <button class="color-button" style="background-color: #d37caa"
-                            onclick="setColor('#d37caa')"></button>
-                    <button class="color-button" style="background-color: #a0522d"
-                            onclick="setColor('#a0522d')"></button>
-                </div>
-                <div class="color-button-row">
-                    <button class="color-button" style="background-color: #000000"
-                            onclick="setColor('#000000')"></button>
-                    <button class="color-button" style="background-color: #4c4c4c"
-                            onclick="setColor('#4c4c4c')"></button>
-                    <button class="color-button" style="background-color: #740b07"
-                            onclick="setColor('#740b07')"></button>
-                    <button class="color-button" style="background-color: #c23800"
-                            onclick="setColor('#c23800')"></button>
-                    <button class="color-button" style="background-color: #e8a200"
-                            onclick="setColor('#e8a200')"></button>
-                    <button class="color-button" style="background-color: #005510"
-                            onclick="setColor('#005510')"></button>
-                    <button class="color-button" style="background-color: #00569e"
-                            onclick="setColor('#00569e')"></button>
-                    <button class="color-button" style="background-color: #0e0865"
-                            onclick="setColor('#0e0865')"></button>
-                    <button class="color-button" style="background-color: #550069"
-                            onclick="setColor('#550069')"></button>
-                    <button class="color-button" style="background-color: #a75574"
-                            onclick="setColor('#a75574')"></button>
-                    <button class="color-button" style="background-color: #63300d"
-                            onclick="setColor('#63300d')"></button>
-                </div>
+        <form class="message-input-form" onsubmit="return sendMessage()">
+            <input id="message-input" type="text" autocomplete="off" placeholder="Type your message"/>
+        </form>
+    </div>
+    <div id="toolbox">
+        <input class="toolbox-group" type="color" id="color-picker" onchange="setColor()" value="#000000"
+               alt="Current color (Click to change)" title="Current color (Click to change)">
+        <div class="color-button-container toolbox-group">
+            <div class="color-button-row">
+                <button class="color-button" style="background-color: #ffffff"
+                        onclick="setColor('#ffffff')"></button>
+                <button class="color-button" style="background-color: #c1c1c1"
+                        onclick="setColor('#c1c1c1')"></button>
+                <button class="color-button" style="background-color: #ef130b"
+                        onclick="setColor('#ef130b')"></button>
+                <button class="color-button" style="background-color: #ff7100"
+                        onclick="setColor('#ff7100')"></button>
+                <button class="color-button" style="background-color: #ffe400"
+                        onclick="setColor('#ffe400')"></button>
+                <button class="color-button" style="background-color: #00cc00"
+                        onclick="setColor('#00cc00')"></button>
+                <button class="color-button" style="background-color: #00b2ff"
+                        onclick="setColor('#00b2ff')"></button>
+                <button class="color-button" style="background-color: #231fd3"
+                        onclick="setColor('#231fd3')"></button>
+                <button class="color-button" style="background-color: #a300ba"
+                        onclick="setColor('#a300ba')"></button>
+                <button class="color-button" style="background-color: #d37caa"
+                        onclick="setColor('#d37caa')"></button>
+                <button class="color-button" style="background-color: #a0522d"
+                        onclick="setColor('#a0522d')"></button>
             </div>
-            <div class="pencil-sizes-container toolbox-group">
-                <label for="tool-type-pencil">
-                    <input id="tool-type-pencil" class="custom-check-or-radio line-width-button"
-                           onchange="chooseTool(pen)" type="radio" name="tool-type" checked>
-                    <div class="line-width-button-content">
-                        <span id="tool-type-pencil-button" style="font-size: 2rem;">✏️</span>
-                    </div>
-                </label>
-                <label for="tool-type-fill">
-                    <input id="tool-type-fill" class="custom-check-or-radio line-width-button"
-                           onchange="chooseTool(fillBucket)" type="radio" name="tool-type">
-                    <div class="line-width-button-content">
-                        <img alt="Fill" title="Fill tool" src="/resources/fill.svg" width="40px"
-                             height="40px"/>
-                    </div>
-                </label>
-                <label for="tool-type-rubber">
-                    <input id="tool-type-rubber" class="custom-check-or-radio line-width-button"
-                           onchange="chooseTool(rubber)" type="radio" name="tool-type">
-                    <div class="line-width-button-content">
-                        <img alt="Rubber" title="Rubber tool" src="/resources/rubber.svg" width="40px"
-                             height="40px"/>
-                    </div>
-                </label>
+            <div class="color-button-row">
+                <button class="color-button" style="background-color: #000000"
+                        onclick="setColor('#000000')"></button>
+                <button class="color-button" style="background-color: #4c4c4c"
+                        onclick="setColor('#4c4c4c')"></button>
+                <button class="color-button" style="background-color: #740b07"
+                        onclick="setColor('#740b07')"></button>
+                <button class="color-button" style="background-color: #c23800"
+                        onclick="setColor('#c23800')"></button>
+                <button class="color-button" style="background-color: #e8a200"
+                        onclick="setColor('#e8a200')"></button>
+                <button class="color-button" style="background-color: #005510"
+                        onclick="setColor('#005510')"></button>
+                <button class="color-button" style="background-color: #00569e"
+                        onclick="setColor('#00569e')"></button>
+                <button class="color-button" style="background-color: #0e0865"
+                        onclick="setColor('#0e0865')"></button>
+                <button class="color-button" style="background-color: #550069"
+                        onclick="setColor('#550069')"></button>
+                <button class="color-button" style="background-color: #a75574"
+                        onclick="setColor('#a75574')"></button>
+                <button class="color-button" style="background-color: #63300d"
+                        onclick="setColor('#63300d')"></button>
             </div>
-            <div class="pencil-sizes-container toolbox-group">
-                <label for="size8">
-                    <input id="size8" class="custom-check-or-radio line-width-button" onchange="setLineWidth(8)"
-                           type="radio" name="line-width" checked>
-                    <div class="line-width-button-content">
-                        <div id="size-8-button" class="dot"></div>
-                    </div>
-                </label>
-                <label for="size15">
-                    <input id="size15" class="custom-check-or-radio line-width-button" onchange="setLineWidth(15)"
-                           type="radio" name="line-width">
-                    <div class="line-width-button-content">
-                        <div id="size-15-button" class="dot"></div>
-                    </div>
-                </label>
-                <label for="size30">
-                    <input id="size30" class="custom-check-or-radio line-width-button" onchange="setLineWidth(30)"
-                           type="radio" name="line-width">
-                    <div class="line-width-button-content">
-                        <div id="size-30-button" class="dot"></div>
-                    </div>
-                </label>
-                <label for="size40">
-                    <input id="size40" class="custom-check-or-radio line-width-button" onchange="setLineWidth(40)"
-                           type="radio" name="line-width">
-                    <div class="line-width-button-content">
-                        <div id="size-40-button" class="dot"></div>
-                    </div>
-                </label>
-            </div>
-            <button class="canvas-button toolbox-group" style="font-size: 2rem;" onclick="clearCanvasAndSendEvent()"
-                    alt="Clear the canvas" title="Clear the canvas">🗑
-            </button>
         </div>
+        <div class="pencil-sizes-container toolbox-group">
+            <label for="tool-type-pencil">
+                <input id="tool-type-pencil" class="custom-check-or-radio line-width-button"
+                       onchange="chooseTool(pen)" type="radio" name="tool-type" checked>
+                <div class="line-width-button-content">
+                    <span id="tool-type-pencil-button" style="font-size: 2rem;">✏️</span>
+                </div>
+            </label>
+            <label for="tool-type-fill">
+                <input id="tool-type-fill" class="custom-check-or-radio line-width-button"
+                       onchange="chooseTool(fillBucket)" type="radio" name="tool-type">
+                <div class="line-width-button-content">
+                    <img alt="Fill" title="Fill tool" src="/resources/fill.svg" width="40px"
+                         height="40px"/>
+                </div>
+            </label>
+            <label for="tool-type-rubber">
+                <input id="tool-type-rubber" class="custom-check-or-radio line-width-button"
+                       onchange="chooseTool(rubber)" type="radio" name="tool-type">
+                <div class="line-width-button-content">
+                    <img alt="Rubber" title="Rubber tool" src="/resources/rubber.svg" width="40px"
+                         height="40px"/>
+                </div>
+            </label>
+        </div>
+        <div class="pencil-sizes-container toolbox-group">
+            <label for="size8">
+                <input id="size8" class="custom-check-or-radio line-width-button" onchange="setLineWidth(8)"
+                       type="radio" name="line-width" checked>
+                <div class="line-width-button-content">
+                    <div id="size-8-button" class="dot"></div>
+                </div>
+            </label>
+            <label for="size15">
+                <input id="size15" class="custom-check-or-radio line-width-button" onchange="setLineWidth(15)"
+                       type="radio" name="line-width">
+                <div class="line-width-button-content">
+                    <div id="size-15-button" class="dot"></div>
+                </div>
+            </label>
+            <label for="size30">
+                <input id="size30" class="custom-check-or-radio line-width-button" onchange="setLineWidth(30)"
+                       type="radio" name="line-width">
+                <div class="line-width-button-content">
+                    <div id="size-30-button" class="dot"></div>
+                </div>
+            </label>
+            <label for="size40">
+                <input id="size40" class="custom-check-or-radio line-width-button" onchange="setLineWidth(40)"
+                       type="radio" name="line-width">
+                <div class="line-width-button-content">
+                    <div id="size-40-button" class="dot"></div>
+                </div>
+            </label>
+        </div>
+        <button class="canvas-button toolbox-group" style="font-size: 2rem;" onclick="clearCanvasAndSendEvent()"
+                alt="Clear the canvas" title="Clear the canvas">🗑
+        </button>
     </div>
 </div>
 
@@ -183,6 +183,7 @@
     const roundsSpan = document.getElementById("rounds");
     const timeLeft = document.getElementById("time-left");
     const drawingBoard = document.getElementById("drawing-board");
+    const chat = document.getElementById("chat");
     const colorPicker = document.getElementById("color-picker");
     const wordDialog = document.getElementById("word-dialog");
     const wordButtonZero = document.getElementById("word-button-zero");
@@ -216,21 +217,23 @@
     let baseHeight = {{.DrawingBoardBaseHeight}};
     let boardRatio = baseWidth / baseHeight;
 
-    //FIXME Disgusting trick to fix the layout, css didn't do it for me.
-    document.getElementById("chat").style.maxHeight = (document.getElementById("drawing-board-wrapper").clientWidth) / boardRatio + "px";
-    drawingBoard.style.maxWidth = Math.round(document.getElementById("drawing-board-wrapper").clientWidth) + "px";
-    drawingBoard.style.maxHeight = Math.round((document.getElementById("drawing-board-wrapper").clientWidth) / boardRatio) + "px";
-
-    // Set drawingBoard pixel resolution
-    drawingBoard.width = Math.round(document.getElementById("drawing-board-wrapper").clientWidth);
-    drawingBoard.height = Math.round(document.getElementById("drawing-board-wrapper").clientWidth) / boardRatio;
+    function handleCanvasResize() {
+        drawingBoard.width = drawingBoard.clientWidth;
+        drawingBoard.height = drawingBoard.clientHeight;
+        setLineWidth(localLineWidthUnscaled);
+        chat.style.maxHeight = drawingBoard.height + "px";
+    }
 
     // Moving this here to extract the context after resizing
     const context = drawingBoard.getContext("2d");
-    context.lineJoin = "round";
 
-    const scaleUpFactor = baseWidth / drawingBoard.width;
-    const scaleDownFactor = drawingBoard.width / baseWidth;
+    function scaleUpFactor() {
+        return baseWidth / drawingBoard.clientWidth;
+    }
+
+    function scaleDownFactor() {
+        return drawingBoard.clientWidth / baseWidth;
+    }
 
     const pen = 0;
     const rubber = 1;
@@ -239,6 +242,7 @@
     let allowDrawing = false;
     let localColor = "#000000";
     let localLineWidth;
+    let localLineWidthUnscaled;
     let localTool = pen;
     setLineWidth(5);
 
@@ -263,7 +267,8 @@
     }
 
     function setLineWidth(value) {
-        localLineWidth = value * scaleDownFactor;
+        localLineWidthUnscaled = value;
+        localLineWidth = value * scaleDownFactor();
         updateCursor();
     }
 
@@ -305,7 +310,7 @@
             cursorColor = localColor;
         }
 
-        let circleSize = localLineWidth * scaleUpFactor;
+        let circleSize = localLineWidth * scaleUpFactor();
         drawingBoard.style.cursor = "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"" + (circleSize + 2) + "\" height=\"" + (circleSize + 2) + "\"><circle cx=\"" + (circleSize / 2) + "\" cy=\"" + (circleSize / 2) + "\" r=\"" + (circleSize / 2) + "\" style=\"fill: " + cursorColor + "; stroke: " + borderColor + ";\"/></svg>') " + (circleSize / 2) + " " + (circleSize / 2) + ", auto";
     }
 
@@ -394,12 +399,14 @@
         } else if (parsed.type === "reset-username") {
             document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
         } else if (parsed.type === "line") {
-            drawLine(context, parsed.data.fromX * scaleDownFactor, parsed.data.fromY * scaleDownFactor, parsed.data.toX * scaleDownFactor, parsed.data.toY * scaleDownFactor, parsed.data.color, parsed.data.lineWidth * scaleDownFactor);
+            drawLine(context, parsed.data.fromX * scaleDownFactor(), parsed.data.fromY * scaleDownFactor(), parsed.data.toX * scaleDownFactor(), parsed.data.toY * scaleDownFactor(), parsed.data.color, parsed.data.lineWidth * scaleDownFactor());
         } else if (parsed.type === "fill") {
-            fill(context, parsed.data.x * scaleDownFactor, parsed.data.y * scaleDownFactor, parsed.data.color);
+            fill(context, parsed.data.x * scaleDownFactor(), parsed.data.y * scaleDownFactor(), parsed.data.color);
         } else if (parsed.type === "clear-drawing-board") {
             clear(context)
         } else if (parsed.type === "next-turn") {
+            //If a player doesn't choose, the dialog will still be up.
+            wordDialog.style.visibility = "hidden";
             playWav('/resources/end-turn.wav');
 
             clear(context);
@@ -514,9 +521,9 @@
         drawElements.forEach(function (drawElement) {
             let drawData = drawElement.data;
             if (drawElement.type === "fill") {
-                fill(context, drawData.x * scaleDownFactor, drawData.y * scaleDownFactor, drawData.color);
+                fill(context, drawData.x * scaleDownFactor(), drawData.y * scaleDownFactor(), drawData.color);
             } else if (drawElement.type === "line") {
-                drawLine(context, drawData.fromX * scaleDownFactor, drawData.fromY * scaleDownFactor, drawData.toX * scaleDownFactor, drawData.toY * scaleDownFactor, drawData.color, drawData.lineWidth * scaleDownFactor);
+                drawLine(context, drawData.fromX * scaleDownFactor(), drawData.fromY * scaleDownFactor(), drawData.toX * scaleDownFactor(), drawData.toY * scaleDownFactor(), drawData.color, drawData.lineWidth * scaleDownFactor());
             } else {
                 console.log("Unknown draw element type: " + drawData.type)
             }
@@ -644,20 +651,20 @@
     function fill(context, x1, y1, color) {
         context.fillStyle = color;
         //There seems to be some bug where setting the tolerance to 0 causes a freeze when painting black on white.
-        // FIXME quick and dirty fix to apply the window scale to all drawing activities.
         context.fillFlood(x1, y1, 1);
     }
 
     function fillAndSendEvent(context, x1, y1, color) {
         fill(context, x1, y1, color);
-        socket.send(JSON.stringify({
+        let fillInstruction = {
             type: "fill",
             data: {
-                x: x1 * scaleUpFactor,
-                y: y1 * scaleUpFactor,
+                x: x1 * scaleUpFactor(),
+                y: y1 * scaleUpFactor(),
                 color: color
             },
-        }));
+        };
+        socket.send(JSON.stringify(fillInstruction));
     }
 
     function drawLineAndSendEvent(context, x1, y1, x2, y2, color, lineWidth) {
@@ -666,17 +673,19 @@
         }
 
         drawLine(context, x1, y1, x2, y2, color, lineWidth);
-        socket.send(JSON.stringify({
+
+        let drawInstruction = {
             type: "line",
             data: {
-                fromX: x1 * scaleUpFactor,
-                fromY: y1 * scaleUpFactor,
-                toX: x2 * scaleUpFactor,
-                toY: y2 * scaleUpFactor,
+                fromX: x1 * scaleUpFactor(),
+                fromY: y1 * scaleUpFactor(),
+                toX: x2 * scaleUpFactor(),
+                toY: y2 * scaleUpFactor(),
                 color: color,
-                lineWidth: lineWidth * scaleUpFactor,
+                lineWidth: lineWidth * scaleUpFactor(),
             }
-        }));
+        }
+        socket.send(JSON.stringify(drawInstruction));
     }
 
     function drawLine(context, x1, y1, x2, y2, color, lineWidth) {
@@ -694,7 +703,7 @@
 
         const circleMap = generateCircleMap(Math.floor(lineWidth / 2));
         const offset = Math.floor(circleMap.length / 2);
-        const imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
+        const imageData = context.getImageData(0, 0, context.canvas.clientWidth, context.canvas.clientHeight);
 
         for (let ix = 0; ix < circleMap.length; ix++) {
             for (let iy = 0; iy < circleMap[ix].length; iy++) {
@@ -763,6 +772,10 @@
         imageData.data[offset + 2] = color[2];
         imageData.data[offset + 3] = color[3];
     }
+
+    //Call intially to correct initial state
+    handleCanvasResize();
+    window.addEventListener("resize", handleCanvasResize, false);
 </script>
 </body>
 
