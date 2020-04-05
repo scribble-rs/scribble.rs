@@ -28,7 +28,7 @@ func enterLobby(w http.ResponseWriter, r *http.Request) {
 
 	if player == nil {
 		if len(lobby.Players) >= lobby.MaxPlayers {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			http.Error(w, "lobby already full", http.StatusUnauthorized)
 			return
 		}
 
@@ -41,7 +41,7 @@ func enterLobby(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if matches >= lobby.ClientsPerIPLimit {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			http.Error(w, "maximum amount of player per IP reached", http.StatusUnauthorized)
 			return
 		}
 
