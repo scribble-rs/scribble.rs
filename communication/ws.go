@@ -75,7 +75,7 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 		err := recover()
 		if err != nil {
 			game.OnDisconnected(lobby, player)
-			log.Println("Error occured in wsListen: ", err)
+			log.Println("Error occurred in wsListen: ", err)
 		}
 	}()
 	for {
