@@ -14,14 +14,6 @@
 <noscript><span class="noscript">Hey, seems like you've disabled JavaScript.
             I get it ... but you are trying to play an interactive drawing game
             here, so you have to turn on JavaScript.</span></noscript>
-<div id="word-dialog">
-    <span class="word-dialog-text">Choose a word</span>
-    <div class="word-button-container">
-        <button id="word-button-zero" class="word-button" onclick="chooseWord(0)">Placeholder</button>
-        <button id="word-button-one" class="word-button" onclick="chooseWord(1)">Placeholder</button>
-        <button id="word-button-two" class="word-button" onclick="chooseWord(2)">Placeholder</button>
-    </div>
-</div>
 <div id="lobby">
     <div id="top-left-cell">
         <span id="rounds"></span>
@@ -39,12 +31,26 @@
     <div id="drawing-board-wrapper">
         <div id="drawing-board-inner-wrapper">
             <canvas id="drawing-board"></canvas>
+            <div id="center-dialog">
+                <div id="word-dialog" class="center-dialog-content">
+                    <span class="dialog-title">Choose a word</span>
+                    <div class="word-button-container">
+                        <button id="word-button-zero" class="dialog-button" onclick="chooseWord(0)">Placeholder</button>
+                        <button id="word-button-one" class="dialog-button" onclick="chooseWord(1)">Placeholder</button>
+                        <button id="word-button-two" class="dialog-button" onclick="chooseWord(2)">Placeholder</button>
+                    </div>
+                </div>
+                <div id="start-dialog" class="center-dialog-content">
+                    <span class="dialog-title">Start the game</span>
+                    <button class="dialog-button" onclick="startGame()">Start</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <div id="chat">
         <div id="message-container">
-            <b>Type !start to begin the round or change your name with !nick.</b>
+            <b>Type !nick "Name" to change your name.</b>
         </div>
         <form class="message-input-form" onsubmit="return sendMessage()">
             <input id="message-input" type="text" autocomplete="off" placeholder="Type your message"/>
@@ -185,6 +191,9 @@
     const drawingBoard = document.getElementById("drawing-board");
     const chat = document.getElementById("chat");
     const colorPicker = document.getElementById("color-picker");
+    const centerDialog = document.getElementById("center-dialog");
+
+    const startDialog = document.getElementById("start-dialog");
     const wordDialog = document.getElementById("word-dialog");
     const wordButtonZero = document.getElementById("word-button-zero");
     const wordButtonOne = document.getElementById("word-button-one");
@@ -255,6 +264,13 @@
     document.getElementById("size-30-button").style.height = 30 + "px";
     document.getElementById("size-40-button").style.width = 40 + "px";
     document.getElementById("size-40-button").style.height = 40 + "px";
+
+    function startGame() {
+        socket.send(JSON.stringify({
+            type: "start",
+        }))
+        startDialog.style.visibility = "hidden";
+    }
 
     function setColor(value) {
         if (value === undefined) {
@@ -359,18 +375,23 @@
 
     socket.onopen = () => console.log("Successfully Connected");
 
-    let ownID;
+    let ownID, ownerID;
     let maxRounds = 0;
     let roundEndTime = 0;
     socket.onmessage = event => {
         let parsed = JSON.parse(event.data);
         if (parsed.type === "ready") {
             let ready = parsed.data;
+            ownerID = ready.ownerId;
             allowDrawing = ready.drawing;
             ownID = ready.playerId;
             maxRounds = ready.maxRounds;
             roundEndTime = ready.roundEndTime;
             applyRounds(ready.round, ready.maxRounds);
+
+            if (ready.round === 0 && ownerID === ownID) {
+                startDialog.style.visibility = "visible";
+            }
 
             if (ready.players && ready.players.length) {
                 applyPlayers(ready.players)
@@ -422,15 +443,19 @@
         } else if (parsed.type === "your-turn") {
             playWav('/resources/your-turn.wav');
 
-            wordButtonZero.textContent = parsed.data[0];
-            wordButtonOne.textContent = parsed.data[1];
-            wordButtonTwo.textContent = parsed.data[2];
-            wordDialog.style.visibility = "visible";
+            promptWords(parsed.data[0], parsed.data[1], parsed.data[2]);
         }
     };
 
     socket.onclose = event => console.log("Socket Closed Connection: ", event);
     socket.onerror = error => console.log("Socket Error: ", error);
+
+    function promptWords(wordOne, wordTwo, wordThree) {
+        wordButtonZero.textContent = wordOne;
+        wordButtonOne.textContent = wordTwo;
+        wordButtonTwo.textContent = wordThree;
+        wordDialog.style.visibility = "visible";
+    }
 
     function playWav(file) {
         if (sound) {
@@ -684,7 +709,7 @@
                 color: color,
                 lineWidth: lineWidth * scaleUpFactor(),
             }
-        }
+        };
         socket.send(JSON.stringify(drawInstruction));
     }
 

@@ -73,9 +73,32 @@ body {
 }
 
 #drawing-board {
+    position: absolute;
     background-color: white;
     width: 100%;
     height: 100%;
+}
+
+#center-dialog {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 20;
+}
+
+.center-dialog-content {
+    background-color: rgb(225, 221, 221);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    visibility: hidden;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
 }
 
 #chat {
@@ -127,23 +150,7 @@ body {
     background-color: rgb(250, 232, 235);
 }
 
-#word-dialog {
-    background-color: rgb(236, 232, 232);
-    display: flex;
-    flex-direction: column;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: auto;
-    height: 150px;
-    transform: translate(-50%, -50%);
-    align-items: center;
-    justify-content: center;
-    visibility: hidden;
-    z-index: 10;
-}
-
-.word-dialog-text {
+.dialog-title {
     margin-bottom: 15px;
     font-size: 3rem;
     font-weight: bold;
@@ -159,23 +166,23 @@ body {
     margin-right: 20px;
 }
 
-.word-button {
+.dialog-button {
     border: 0;
     border-radius: 0;
     background-color: white;
     padding: 10px;
 }
 
-.word-button:hover {
+.dialog-button:hover {
     background-color: rgb(244, 183, 247);
 }
 
-.word-button:active {
+.dialog-button:active {
     background-color: rgb(243, 132, 247);
 }
 
-.word-button + .word-button {
-    margin-left: 10px;
+.dialog-button + .dialog-button {
+    margin-left: 1rem;
 }
 
 #sound-toggle-label {

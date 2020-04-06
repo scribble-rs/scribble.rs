@@ -144,6 +144,15 @@ func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) er
 		} else {
 			handleKickEvent(lobby, player, toKickID)
 		}
+	} else if received.Type == "start" {
+		if lobby.Round == 0 && player == lobby.Owner {
+			for _, otherPlayer := range lobby.Players {
+				otherPlayer.Score = 0
+				otherPlayer.LastScore = 0
+			}
+
+			advanceLobby(lobby)
+		}
 	}
 
 	return nil
@@ -319,8 +328,6 @@ func handleCommand(commandString string, caller *Player, lobby *Lobby) {
 	command := commands.ParseCommand(commandString)
 	if len(command) >= 1 {
 		switch strings.ToLower(command[0]) {
-		case "start":
-			commandStart(caller, lobby)
 		case "setmp":
 			commandSetMP(caller, lobby, command)
 		case "help":
@@ -328,17 +335,6 @@ func handleCommand(commandString string, caller *Player, lobby *Lobby) {
 		case "nick", "name", "username", "nickname", "playername", "alias":
 			commandNick(caller, lobby, command)
 		}
-	}
-}
-
-func commandStart(caller *Player, lobby *Lobby) {
-	if lobby.Round == 0 && caller == lobby.Owner {
-		for _, otherPlayer := range lobby.Players {
-			otherPlayer.Score = 0
-			otherPlayer.LastScore = 0
-		}
-
-		advanceLobby(lobby)
 	}
 }
 
@@ -660,6 +656,7 @@ type Ready struct {
 	PlayerID string `json:"playerId"`
 	Drawing  bool   `json:"drawing"`
 
+	OwnerID        string        `json:"ownerId"`
 	Round          int           `json:"round"`
 	MaxRound       int           `json:"maxRounds"`
 	RoundEndTime   int64         `json:"roundEndTime"`
@@ -674,6 +671,7 @@ func OnConnected(lobby *Lobby, player *Player) {
 		PlayerID: player.ID,
 		Drawing:  player.State == Drawing,
 
+		OwnerID:        lobby.Owner.ID,
 		Round:          lobby.Round,
 		MaxRound:       lobby.MaxRounds,
 		RoundEndTime:   lobby.RoundEndTime,
