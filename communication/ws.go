@@ -70,6 +70,14 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 }
 
 func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
+	//Workaround to prevent crash
+	defer func() {
+		err := recover()
+		if err != nil {
+			game.OnDisconnected(lobby, player)
+			log.Println("Error occured in wsListen: ", err)
+		}
+	}()
 	for {
 		messageType, data, err := socket.ReadMessage()
 		if err != nil {
@@ -77,7 +85,7 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 				//This happens when the server closes the connection. It will cause 1000 retries followed by a panic.
 				strings.Contains(err.Error(), "use of closed network connection") {
 				//Make sure that the sockethandler is called
-				socket.CloseHandler()
+				game.OnDisconnected(lobby, player)
 				log.Println(player.Name + " disconnected.")
 				return
 			} else {
