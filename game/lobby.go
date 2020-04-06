@@ -151,6 +151,8 @@ func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) er
 				otherPlayer.LastScore = 0
 			}
 
+			lobby.Round = 1
+
 			advanceLobby(lobby)
 		}
 	}
@@ -441,30 +443,23 @@ func advanceLobby(lobby *Lobby) {
 
 	lobby.ClearDrawing()
 
-	if lobby.Drawer == nil {
-		lobby.Drawer = lobby.Players[0]
-		lobby.Round++
-	} else {
-		//If everyone has drawn once (e.g. a round has passed)
-		if lobby.Drawer == lobby.Players[len(lobby.Players)-1] {
-			if lobby.Round == lobby.MaxRounds {
-				lobby.Drawer = nil
-				lobby.Round = 0
+	//If everyone has drawn once (e.g. a round has passed)
+	if lobby.Drawer == lobby.Players[len(lobby.Players)-1] {
+		if lobby.Round == lobby.MaxRounds {
+			lobby.Drawer = nil
+			lobby.Round = 0
 
-				recalculateRanks(lobby)
-				triggerPlayersUpdate(lobby)
+			recalculateRanks(lobby)
+			triggerPlayersUpdate(lobby)
 
-				WritePublicSystemMessage(lobby, "Game over. Type !start again to start a new round.")
+			WritePublicSystemMessage(lobby, "Game over. Type !start again to start a new round.")
 
-				return
-			}
-
-			lobby.Round++
-			lobby.Drawer = lobby.Players[0]
-		} else {
-			selectNextDrawer(lobby)
+			return
 		}
+
+		lobby.Round++
 	}
+	selectNextDrawer(lobby)
 
 	lobby.Drawer.State = Drawing
 	lobby.WordChoice = GetRandomWords(lobby)
@@ -483,6 +478,25 @@ func advanceLobby(lobby *Lobby) {
 	}, lobby)
 
 	WriteAsJSON(lobby.Drawer, &JSEvent{Type: "your-turn", Data: lobby.WordChoice})
+}
+
+func selectNextDrawer(lobby *Lobby) {
+	for index, otherPlayer := range lobby.Players {
+		if otherPlayer == lobby.Drawer {
+			//If we have someone that's drawing, take the next one
+			for i := index + 1; i < len(lobby.Players); i++ {
+				player := lobby.Players[i]
+				if player.Connected {
+					log.Println("Choosing player", player.Name)
+					lobby.Drawer = player
+					return
+				}
+			}
+			return
+		}
+	}
+
+	lobby.Drawer = lobby.Players[0]
 }
 
 func roundTimerTicker(lobby *Lobby) {
@@ -529,35 +543,20 @@ type NextTurn struct {
 
 func recalculateRanks(lobby *Lobby) {
 	for _, a := range lobby.Players {
+		if !a.Connected {
+			continue
+		}
 		playersThatAreHigher := 0
 		for _, b := range lobby.Players {
+			if !b.Connected {
+				continue
+			}
 			if b.Score > a.Score {
 				playersThatAreHigher++
 			}
 		}
 
 		a.Rank = playersThatAreHigher + 1
-	}
-}
-
-func selectNextDrawer(lobby *Lobby) {
-	for playerIndex, otherPlayer := range lobby.Players {
-		if otherPlayer == lobby.Drawer {
-			lobby.Drawer = lobby.Players[playerIndex+1]
-			return
-		}
-	}
-
-	for _, otherPlayer := range lobby.Players {
-		if otherPlayer == lobby.Drawer {
-			return
-		}
-
-		if !otherPlayer.Connected {
-			continue
-		}
-
-		lobby.Drawer = otherPlayer
 	}
 }
 
