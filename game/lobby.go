@@ -487,12 +487,10 @@ func selectNextDrawer(lobby *Lobby) {
 			for i := index + 1; i < len(lobby.Players); i++ {
 				player := lobby.Players[i]
 				if player.Connected {
-					log.Println("Choosing player", player.Name)
 					lobby.Drawer = player
 					return
 				}
 			}
-			return
 		}
 	}
 
