@@ -47,20 +47,15 @@
 }
 
 .name-and-buttons {
-    flex-direction: row;
     display: flex;
+    flex-direction: row;
     overflow: hidden;
-    justify-content: space-between;
 }
 
 .score-and-status {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-}
-
-.playerscore {
-    flex: 1;
 }
 
 .last-turn-score {
@@ -72,8 +67,9 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+    flex: 1;
 }
 
-.playername, .playerscore {
-    font-size: 1rem;
+.playername-self {
+    font-weight: bold;
 }

@@ -1,4 +1,4 @@
-FROM golang:1.12.5-stretch
+FROM golang:latest
 RUN mkdir /app
 ADD . /app/
 WORKDIR /app

@@ -502,8 +502,16 @@
             let newPlayerElement = '<div class="player ' + stateStyleClass + '">' +
                 '<span class="rank">' + player.rank + '</span>' +
                 '<div class="name-and-buttons">' +
-                '<span class="playername">' + player.name + '</span>' +
-                '<button class="kick-button" id="kick-button" type="button" title="Vote to kick this player" alt="Vote to kick this player" onclick="onClickKickButton(' + player.id + ')">👋</button>' +
+                '<span class="playername';
+            if (player.id === ownID) {
+                newPlayerElement += ' playername-self';
+            }
+            newPlayerElement += '">' + player.name + '</span>';
+            if (player.id !== ownID) {
+                newPlayerElement +=
+                    '<button class="kick-button" id="kick-button" type="button" title="Vote to kick this player" alt="Vote to kick this player" onclick="onClickKickButton(' + player.id + ')">👋</button>';
+            }
+            newPlayerElement +=
                 '</div>' +
                 '<div class="score-and-status">' +
                 '<div>' +
