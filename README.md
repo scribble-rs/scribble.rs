@@ -28,8 +28,7 @@ Run the following to build the application:
 ```shell
 git clone https://github.com/scribble-rs/scribble.rs.git
 cd scribble.rs
-go run github.com/markbates/pkger/cmd/pkger -include /resources -include /templates
-go build -o scribblers .
+make build
 ```
 
 This will produce a portable binary called `scribblers`. The binary doesn't
