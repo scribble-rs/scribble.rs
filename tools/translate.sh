@@ -19,20 +19,27 @@ if [ -f ${DESTINATION_FILE} ]; then
     rm -f ${DESTINATION_FILE}
 fi;
 
-
 touch ${DESTINATION_FILE}
 
 while read sourceWord; do
   cleanWord=$(echo "$sourceWord" | sed -En "s/(.*)\#.*/\1/p")
   tag=$(echo "$sourceWord" | sed -En "s/.*\#(.*)/\1/p")
 
-  echo "Translating '${cleanWord}'..."
+  echo -n "Translating '${cleanWord}'... "
+
+  # Wanne exclude some words based on a tag?
+  # Just un-comment and edit the following lines
+  if [[ ${tag} == "i" ]]; then
+    echo "❌ Skipping due to tag setting."
+    continue;
+  fi
 
   # non-optimized AWS call
   # Must use a translation-job here
   translation=$(aws translate translate-text --text "${cleanWord}" --source-language-code "${FROM}" --target-language-code "${TO}" | jq -r .TranslatedText)
 
   echo "${translation}" >> ${DESTINATION_FILE}
+  echo "✅"
 done <${SOURCE_FILE}
 
 echo "Done!"
