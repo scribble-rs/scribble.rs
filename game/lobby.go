@@ -38,6 +38,7 @@ var (
 		"english": "English",
 		"italian": "Italian",
 		"german":  "German",
+		"french":  "French",
 	}
 )
 
