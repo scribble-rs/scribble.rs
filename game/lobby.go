@@ -615,7 +615,7 @@ type Rounds struct {
 }
 
 // CreateLobby allows creating a lobby, optionally returning errors that
-// occured during creation.
+// occurred during creation.
 func CreateLobby(playerName, language string, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit int, customWords []string, enableVotekick bool) (string, *Lobby, error) {
 	lobby := createLobby(drawingTime, rounds, maxPlayers, customWords, customWordChance, clientsPerIPLimit, enableVotekick)
 	player := createPlayer(playerName)

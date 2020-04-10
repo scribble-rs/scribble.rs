@@ -158,7 +158,7 @@ func parseLanguage(value string) (string, error) {
 		}
 	}
 
-	return "", errors.New("the given language doesn't match any supported langauge")
+	return "", errors.New("the given language doesn't match any supported language")
 }
 
 func parseDrawingTime(value string) (int, error) {
