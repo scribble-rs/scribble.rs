@@ -481,7 +481,7 @@ func advanceLobby(lobby *Lobby) {
 	TriggerComplexUpdateEvent("next-turn", &NextTurn{
 		Round:        lobby.Round,
 		Players:      lobby.Players,
-		RoundEndTime: lobby.RoundEndTime,
+		RoundEndTime: int(lobby.RoundEndTime - getTimeAsMillis()),
 	}, lobby)
 
 	WriteAsJSON(lobby.Drawer, &JSEvent{Type: "your-turn", Data: lobby.WordChoice})
@@ -511,7 +511,7 @@ func roundTimerTicker(lobby *Lobby) {
 	for {
 		select {
 		case <-lobby.timeLeftTicker.C:
-			currentTime := time.Now().UTC().UnixNano() / 1000000
+			currentTime := getTimeAsMillis()
 			if currentTime >= lobby.RoundEndTime {
 				go endRound(lobby)
 			}
@@ -537,13 +537,17 @@ func roundTimerTicker(lobby *Lobby) {
 	}
 }
 
+func getTimeAsMillis() int64 {
+	return time.Now().UTC().UnixNano() / 1000000
+}
+
 // NextTurn represents the data necessary for displaying the lobby state right
 // after a new turn started. Meaning that no word has been chosen yet and
 // therefore there are no wordhints and no current drawing instructions.
 type NextTurn struct {
 	Round        int       `json:"round"`
 	Players      []*Player `json:"players"`
-	RoundEndTime int64     `json:"roundEndTime"`
+	RoundEndTime int       `json:"roundEndTime"`
 }
 
 func recalculateRanks(lobby *Lobby) {
@@ -663,7 +667,7 @@ type Ready struct {
 	OwnerID        string        `json:"ownerId"`
 	Round          int           `json:"round"`
 	MaxRound       int           `json:"maxRounds"`
-	RoundEndTime   int64         `json:"roundEndTime"`
+	RoundEndTime   int           `json:"roundEndTime"`
 	WordHints      []*WordHint   `json:"wordHints"`
 	Players        []*Player     `json:"players"`
 	CurrentDrawing []interface{} `json:"currentDrawing"`
@@ -678,7 +682,7 @@ func OnConnected(lobby *Lobby, player *Player) {
 		OwnerID:        lobby.Owner.ID,
 		Round:          lobby.Round,
 		MaxRound:       lobby.MaxRounds,
-		RoundEndTime:   lobby.RoundEndTime,
+		RoundEndTime:   int(lobby.RoundEndTime - getTimeAsMillis()),
 		WordHints:      lobby.GetAvailableWordHints(player),
 		Players:        lobby.Players,
 		CurrentDrawing: lobby.CurrentDrawing,

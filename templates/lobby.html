@@ -466,9 +466,9 @@
     }
 
     window.setInterval(function () {
-        let secondsLeft = Math.floor((roundEndTime - new Date().getTime()) / 1000);
-        if (secondsLeft >= 0) {
-            timeLeft.innerText = "Time Left: " + secondsLeft;
+        if (roundEndTime >= 0) {
+            timeLeft.innerText = "Time Left: " + Math.floor(roundEndTime / 1000);
+            roundEndTime -= 500
         } else {
             timeLeft.innerText = "Time Left: ∞";
         }
