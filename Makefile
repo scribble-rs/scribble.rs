@@ -11,5 +11,5 @@ is-go-installed:
 
 build: is-go-installed ## Build binary file
 	go run github.com/markbates/pkger/cmd/pkger -include /resources -include /templates
-	go build -o scribblers .
+	CGO_ENABLED=0 go build -ldflags="-w -s" -o scribblers .
 	printf "\033[32mBuild done!\033[0m\n"
