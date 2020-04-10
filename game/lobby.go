@@ -267,12 +267,7 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 			}
 		}
 
-		votesNeeded := 1
-		if len(lobby.Players)%2 == 0 {
-			votesNeeded = len(lobby.Players) / 2
-		} else {
-			votesNeeded = (len(lobby.Players) / 2) + 1
-		}
+		votesNeeded := calculateVotesNeededToKick(len(lobby.Players))
 
 		WritePublicSystemMessage(lobby, fmt.Sprintf("(%d/%d) players voted to kick %s", voteKickCount, votesNeeded, playerToKick.Name))
 
@@ -325,6 +320,17 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 			}
 		}
 	}
+}
+
+func calculateVotesNeededToKick(amountOfPlayers int) int {
+	//If the amount of players equals an even number, such as 6, we will always
+	//need half of that. If the amount is uneven, we'll get a floored result.
+	//therefore we always add one to the amount.
+	//examples:
+	//    (6+1)/2 = 3
+	//    (5+1)/2 = 3
+	//Therefore it'll never be possible for a minority to kick a player.
+	return (amountOfPlayers + 1) / 2
 }
 
 func handleCommand(commandString string, caller *Player, lobby *Lobby) {
