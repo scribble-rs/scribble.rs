@@ -658,8 +658,8 @@
     // necessary for mousemove to not use the previous exit coordinates.
     window.onmousemove = function (e) {
         let clientRect = drawingBoard.getBoundingClientRect();
-        x = e.clientX - clientRect.left;
-        y = e.clientY - clientRect.top;
+        x = Math.min(clientRect.width, Math.max(0, e.clientX - clientRect.left));
+        y = Math.min(clientRect.height, Math.max(0, e.clientY - clientRect.top));
     };
 
     drawingBoard.onclick = function (e) {
