@@ -6,7 +6,8 @@ WORKDIR /app
 
 RUN make build
 
-# certificates
+# certificates are required in case the Go binary do HTTPS calls
+# to read more about it: https://www.docker.com/blog/docker-golang/ "The special case of SSL certificates"
 FROM alpine:latest as certs
 RUN apk --no-cache add ca-certificates
 
