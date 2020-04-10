@@ -619,7 +619,7 @@
     drawingBoard.ontouchcancel = onTouchEnd;
 
     // Mouse input
-    window.onmousedown = function (e) {
+    drawingBoard.onmousedown = function (e) {
         if (allowDrawing && e.button === 0 && localTool !== 2) {
             let clientRect = drawingBoard.getBoundingClientRect();
             x = e.clientX - clientRect.left;
@@ -638,7 +638,7 @@
         }
     };
 
-    window.onmousemove = function (e) {
+    function mouseUpdate(e) {
         if (allowDrawing && isDrawing === true && e.button === 0) {
             // calculate the offset coordinates based on client mouse position and drawing board client origin
             let clientRect = drawingBoard.getBoundingClientRect();
@@ -650,12 +650,16 @@
             x = offsetX;
             y = offsetY;
         }
-    };
+    }
+
+    drawingBoard.onmousemove = mouseUpdate;
+    drawingBoard.onmouseleave = mouseUpdate;
 
     // necessary for mousemove to not use the previous exit coordinates.
-    window.onmouseenter = function (e) {
-        x = e.offsetX;
-        y = e.offsetY;
+    window.onmousemove = function (e) {
+        let clientRect = drawingBoard.getBoundingClientRect();
+        x = e.clientX - clientRect.left;
+        y = e.clientY - clientRect.top;
     };
 
     drawingBoard.onclick = function (e) {
