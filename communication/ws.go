@@ -88,9 +88,9 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 				game.OnDisconnected(lobby, player)
 				log.Println(player.Name + " disconnected.")
 				return
-			} else {
-				log.Printf("Error reading from socket: %s\n", err)
 			}
+
+			log.Printf("Error reading from socket: %s\n", err)
 		} else if messageType == websocket.TextMessage {
 			received := &game.JSEvent{}
 			err := json.Unmarshal(data, received)
