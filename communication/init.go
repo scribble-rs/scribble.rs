@@ -51,7 +51,7 @@ func init() {
 
 func setupRoutes() {
 	//Endpoints for official webclient
-	http.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(pkger.Dir("/resources"))))
+	http.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(pkger.Dir("/resources/frontend"))))
 	http.HandleFunc("/", homePage)
 	http.HandleFunc("/ssrEnterLobby", ssrEnterLobby)
 	http.HandleFunc("/ssrCreateLobby", ssrCreateLobby)
