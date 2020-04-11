@@ -2,7 +2,6 @@ package communication
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -19,12 +18,6 @@ func enterLobby(w http.ResponseWriter, r *http.Request) {
 	}
 
 	player := getPlayer(lobby, r)
-
-	lobbyData := &LobbyData{
-		LobbyID:                lobby.ID,
-		DrawingBoardBaseWidth:  DrawingBoardBaseWidth,
-		DrawingBoardBaseHeight: DrawingBoardBaseHeight,
-	}
 
 	if player == nil {
 		if len(lobby.Players) >= lobby.MaxPlayers {
@@ -55,6 +48,12 @@ func enterLobby(w http.ResponseWriter, r *http.Request) {
 			Path:     "/",
 			SameSite: http.SameSiteStrictMode,
 		})
+	}
+
+	lobbyData := &LobbyData{
+		LobbyID:                lobby.ID,
+		DrawingBoardBaseWidth:  DrawingBoardBaseWidth,
+		DrawingBoardBaseHeight: DrawingBoardBaseHeight,
 	}
 
 	encodingError := json.NewEncoder(w).Encode(lobbyData)
@@ -135,7 +134,13 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteStrictMode,
 	})
 
-	_, encodingError := fmt.Fprint(w, lobby.ID)
+	lobbyData := &LobbyData{
+		LobbyID:                lobby.ID,
+		DrawingBoardBaseWidth:  DrawingBoardBaseWidth,
+		DrawingBoardBaseHeight: DrawingBoardBaseHeight,
+	}
+
+	encodingError := json.NewEncoder(w).Encode(lobbyData)
 	if encodingError != nil {
 		http.Error(w, encodingError.Error(), http.StatusInternalServerError)
 	}
