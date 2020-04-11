@@ -13,7 +13,13 @@ import (
 func enterLobby(w http.ResponseWriter, r *http.Request) {
 	lobby, err := getLobby(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		if err == noLobbyIdSuppliedError {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		} else if err == lobbyNotExistentError {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
 

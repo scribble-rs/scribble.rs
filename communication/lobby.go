@@ -10,16 +10,21 @@ import (
 	"github.com/scribble-rs/scribble.rs/game"
 )
 
+var (
+	noLobbyIdSuppliedError = errors.New("please supply a lobby id via the 'lobby_id' query parameter")
+	lobbyNotExistentError = errors.New("the requested lobby doesn't exist")
+)
+
 func getLobby(r *http.Request) (*game.Lobby, error) {
 	lobbyID := r.URL.Query().Get("lobby_id")
 	if lobbyID == "" {
-		return nil, errors.New("the requested lobby doesn't exist")
+		return nil, noLobbyIdSuppliedError
 	}
 
 	lobby := game.GetLobby(lobbyID)
 
 	if lobby == nil {
-		return nil, errors.New("the requested lobby doesn't exist")
+		return nil, lobbyNotExistentError
 	}
 
 	return lobby, nil
