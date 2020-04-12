@@ -119,8 +119,7 @@ func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) er
 			if isFloat32 && asFloat < 4 {
 				chosenIndex = int(asFloat)
 			} else {
-				fmt.Println("Invalid data")
-				return nil
+				return fmt.Errorf("invalid data in choose-word event: %v", received.Data)
 			}
 		}
 
@@ -135,8 +134,7 @@ func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) er
 	} else if received.Type == "kick-vote" {
 		toKickID, isString := (received.Data).(string)
 		if !isString {
-			fmt.Println("Invalid data")
-			return nil
+			return fmt.Errorf("invalid data in kick-vote event: %v", received.Data)
 		}
 		if !lobby.EnableVotekick {
 			// Votekicking is disabled in the lobby
@@ -156,6 +154,12 @@ func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) er
 
 			advanceLobby(lobby)
 		}
+	} else if received.Type == "name-change" {
+		newName, isString := (received.Data).(string)
+		if !isString {
+			return fmt.Errorf("invalid data in name-change event: %v", received.Data)
+		}
+		commandNick(player, lobby, newName)
 	}
 
 	return nil
@@ -341,35 +345,27 @@ func handleCommand(commandString string, caller *Player, lobby *Lobby) {
 			commandSetMP(caller, lobby, command)
 		case "help":
 			//TODO
-		case "nick", "name", "username", "nickname", "playername", "alias":
-			commandNick(caller, lobby, command)
 		}
 	}
 }
 
-func commandNick(caller *Player, lobby *Lobby, args []string) {
-	if len(args) == 1 {
-		caller.Name = GeneratePlayerName()
-		WriteAsJSON(caller, JSEvent{Type: "reset-username"})
-		triggerPlayersUpdate(lobby)
-	} else {
-		//We join all arguments, since people won't sue quotes either way.
-		//The input is trimmed and sanitized.
-		newName := html.EscapeString(strings.TrimSpace(strings.Join(args[1:], " ")))
-		if len(newName) == 0 {
-			caller.Name = GeneratePlayerName()
-			WriteAsJSON(caller, JSEvent{Type: "reset-username"})
-		} else {
-			fmt.Printf("%s is now %s\n", caller.Name, newName)
-			//We don't want super-long names
-			if len(newName) > 30 {
-				newName = newName[:31]
-			}
-			caller.Name = newName
-			WriteAsJSON(caller, JSEvent{Type: "persist-username", Data: newName})
-		}
-		triggerPlayersUpdate(lobby)
+func commandNick(caller *Player, lobby *Lobby, name string) {
+	newName := html.EscapeString(strings.TrimSpace(name))
+
+	//We don't want super-long names
+	if len(newName) > 30 {
+		newName = newName[:31]
 	}
+
+	if newName == "" {
+		caller.Name = GeneratePlayerName()
+	} else {
+		caller.Name = newName
+	}
+
+	fmt.Printf("%s is now %s\n", caller.Name, newName)
+
+	triggerPlayersUpdate(lobby)
 }
 
 func commandSetMP(caller *Player, lobby *Lobby, args []string) {
@@ -661,8 +657,9 @@ type Message struct {
 // This includes all the necessary things for properly running a client
 // without receiving any more data.
 type Ready struct {
-	PlayerID string `json:"playerId"`
-	Drawing  bool   `json:"drawing"`
+	PlayerID   string `json:"playerId"`
+	PlayerName string `json:"playerName"`
+	Drawing    bool   `json:"drawing"`
 
 	OwnerID        string        `json:"ownerId"`
 	Round          int           `json:"round"`
@@ -676,8 +673,9 @@ type Ready struct {
 func OnConnected(lobby *Lobby, player *Player) {
 	player.Connected = true
 	WriteAsJSON(player, JSEvent{Type: "ready", Data: &Ready{
-		PlayerID: player.ID,
-		Drawing:  player.State == Drawing,
+		PlayerID:   player.ID,
+		Drawing:    player.State == Drawing,
+		PlayerName: player.Name,
 
 		OwnerID:        lobby.Owner.ID,
 		Round:          lobby.Round,

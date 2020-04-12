@@ -15,15 +15,31 @@
             I get it ... but you are trying to play an interactive drawing game
             here, so you have to turn on JavaScript.</span></noscript>
 <div id="lobby">
-    <div id="top-left-cell">
-        <span id="rounds"></span>
-        <label for="sound-toggle">
-            <input class="custom-check-or-radio sound-toggle-input" type="checkbox" name="sound-toggle"
-                   onchange="toggleSound()"/>
-            <span id="sound-toggle-label"></span>
-        </label>
+    <span id="rounds"></span>
+
+    <div style="position: relative">
+        <div style="position: absolute">
+            <!-- this button is basically behaving like a checkbox, but in order to
+            have a uniform look with the other buttons in the header, we are not using
+            a checkbox anymore. -->
+            <button onclick="toggleSound()" class="dialog-button header-button"
+                    alt="Toggle soundeffects" title="Toggle soundeffects">
+                <img id="sound-toggle-label" class="header-button-image"/>
+            </button>
+
+            <button onclick="showKickDialog()" class="dialog-button header-button"
+                    alt="Votekick a player" title="Votekick a player">
+                <img src="/resources/kick.png" class="header-button-image"/>
+            </button>
+
+            <button onclick="showNameChangeDialog()" class="dialog-button header-button"
+                    alt="Change your name" title="Change your name">
+                <img src="/resources/user.svg" class="header-button-image"/>
+            </button>
+        </div>
+        <div id="word-container" style="position:absolute;left: 50%; transform: translate(-50%, 0);"></div>
     </div>
-    <div id="word-container"></div>
+
     <span id="time-left">Time Left: ∞</span>
 
     <div id="player-container"></div>
@@ -40,18 +56,23 @@
                         <button id="word-button-two" class="dialog-button" onclick="chooseWord(2)">Placeholder</button>
                     </div>
                 </div>
+
                 <div id="start-dialog" class="center-dialog-content">
                     <span class="dialog-title">Start the game</span>
                     <button class="dialog-button" onclick="startGame()">Start</button>
+                </div>
+
+                <div id="kick-dialog" class="center-dialog-content">
+                    <span class="dialog-title">Vote to kick a player</span>
+                    <div id="kick-dialog-players"></div>
+                    <button onclick="hideKickDialog()" class="dialog-button dialog-close-button">Close</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="chat">
-        <div id="message-container">
-            <b>Type !nick "Name" to change your name.</b>
-        </div>
+        <div id="message-container"></div>
         <form class="message-input-form" onsubmit="return sendMessage()">
             <input id="message-input" type="text" autocomplete="off" placeholder="Type your message"/>
         </form>
@@ -60,52 +81,54 @@
         <input class="toolbox-group" type="color" id="color-picker" onchange="setColor()" value="#000000"
                alt="Current color (Click to change)" title="Current color (Click to change)">
         <div class="color-button-container toolbox-group">
+            <!-- These buttons use !important for their color in order
+            to prevent hover and active colors to appear. -->
             <div class="color-button-row">
-                <button class="color-button" style="background-color: #ffffff"
+                <button class="color-button" style="background-color: #ffffff !Important"
                         onclick="setColor('#ffffff')"></button>
-                <button class="color-button" style="background-color: #c1c1c1"
+                <button class="color-button" style="background-color: #c1c1c1 !Important"
                         onclick="setColor('#c1c1c1')"></button>
-                <button class="color-button" style="background-color: #ef130b"
+                <button class="color-button" style="background-color: #ef130b !Important"
                         onclick="setColor('#ef130b')"></button>
-                <button class="color-button" style="background-color: #ff7100"
+                <button class="color-button" style="background-color: #ff7100 !Important"
                         onclick="setColor('#ff7100')"></button>
-                <button class="color-button" style="background-color: #ffe400"
+                <button class="color-button" style="background-color: #ffe400 !Important"
                         onclick="setColor('#ffe400')"></button>
-                <button class="color-button" style="background-color: #00cc00"
+                <button class="color-button" style="background-color: #00cc00 !Important"
                         onclick="setColor('#00cc00')"></button>
-                <button class="color-button" style="background-color: #00b2ff"
+                <button class="color-button" style="background-color: #00b2ff !Important"
                         onclick="setColor('#00b2ff')"></button>
-                <button class="color-button" style="background-color: #231fd3"
+                <button class="color-button" style="background-color: #231fd3 !Important"
                         onclick="setColor('#231fd3')"></button>
-                <button class="color-button" style="background-color: #a300ba"
+                <button class="color-button" style="background-color: #a300ba !Important"
                         onclick="setColor('#a300ba')"></button>
-                <button class="color-button" style="background-color: #d37caa"
+                <button class="color-button" style="background-color: #d37caa !Important"
                         onclick="setColor('#d37caa')"></button>
-                <button class="color-button" style="background-color: #a0522d"
+                <button class="color-button" style="background-color: #a0522d !Important"
                         onclick="setColor('#a0522d')"></button>
             </div>
             <div class="color-button-row">
-                <button class="color-button" style="background-color: #000000"
+                <button class="color-button" style="background-color: #000000 !Important"
                         onclick="setColor('#000000')"></button>
-                <button class="color-button" style="background-color: #4c4c4c"
+                <button class="color-button" style="background-color: #4c4c4c !Important"
                         onclick="setColor('#4c4c4c')"></button>
-                <button class="color-button" style="background-color: #740b07"
+                <button class="color-button" style="background-color: #740b07 !Important"
                         onclick="setColor('#740b07')"></button>
-                <button class="color-button" style="background-color: #c23800"
+                <button class="color-button" style="background-color: #c23800 !Important"
                         onclick="setColor('#c23800')"></button>
-                <button class="color-button" style="background-color: #e8a200"
+                <button class="color-button" style="background-color: #e8a200 !Important"
                         onclick="setColor('#e8a200')"></button>
-                <button class="color-button" style="background-color: #005510"
+                <button class="color-button" style="background-color: #005510 !Important"
                         onclick="setColor('#005510')"></button>
-                <button class="color-button" style="background-color: #00569e"
+                <button class="color-button" style="background-color: #00569e !Important"
                         onclick="setColor('#00569e')"></button>
-                <button class="color-button" style="background-color: #0e0865"
+                <button class="color-button" style="background-color: #0e0865 !Important"
                         onclick="setColor('#0e0865')"></button>
-                <button class="color-button" style="background-color: #550069"
+                <button class="color-button" style="background-color: #550069 !Important"
                         onclick="setColor('#550069')"></button>
-                <button class="color-button" style="background-color: #a75574"
+                <button class="color-button" style="background-color: #a75574 !Important"
                         onclick="setColor('#a75574')"></button>
-                <button class="color-button" style="background-color: #63300d"
+                <button class="color-button" style="background-color: #63300d !Important"
                         onclick="setColor('#63300d')"></button>
             </div>
         </div>
@@ -199,11 +222,55 @@
     const wordButtonOne = document.getElementById("word-button-one");
     const wordButtonTwo = document.getElementById("word-button-two");
 
-    const noSoundIcon = "🔇";
-    const soundIcon = "🔊";
+    const kickDialog = document.getElementById("kick-dialog");
+    const kickDialogPlayers = document.getElementById("kick-dialog-players");
+
     const soundToggleLabel = document.getElementById("sound-toggle-label");
     let sound = localStorage.getItem("sound") === "true";
     updateSoundIcon();
+
+    function showKickDialog() {
+        if (cachedPlayers && cachedPlayers) {
+            kickDialogPlayers.innerHTML = "";
+
+            cachedPlayers.forEach(player => {
+                //Don't wanna allow kicking ourselves.
+                if (player.id !== ownID) {
+                    kickDialogPlayers.innerHTML += '<button class="kick-player-button" onclick="onVotekickPlayer(' + player.id + ')">' + player.name + '</button>';
+                }
+            });
+
+            kickDialog.style.visibility = "visible";
+        }
+    }
+
+    function hideKickDialog() {
+        kickDialog.style.visibility = "hidden";
+    }
+
+    function showNameChangeDialog() {
+        let choice = prompt("Please choose your new name. Clearing the name will assign you a new random name.", ownName);
+        //Hitting cancel results in null.
+        //Since we pre fill the dialog with the current name, empty means that
+        //it has been cleared on purpose.
+        if (choice == null) {
+            return;
+        }
+
+        // Username should be cleared.
+        if (choice === "") {
+            document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        } else {
+            //We already persist our new username here. If the backend doesn't like it, it will reset it either way.
+            //Therefore it shouldn't matter.
+            document.cookie = "username=" + choice + ";expires=Tue, 19 Jan 2038 00:00:00 UTC;path=/;samesite=strict";
+        }
+
+        socket.send(JSON.stringify({
+            type: "name-change",
+            data: choice,
+        }));
+    }
 
     function toggleSound() {
         sound = !sound;
@@ -213,9 +280,9 @@
 
     function updateSoundIcon() {
         if (sound) {
-            soundToggleLabel.innerText = soundIcon;
+            soundToggleLabel.src = "/resources/sound.svg";
         } else {
-            soundToggleLabel.innerText = noSoundIcon;
+            soundToggleLabel.src = "/resources/no-sound.svg";
         }
     }
 
@@ -358,11 +425,12 @@
         wordDialog.style.visibility = "hidden";
     }
 
-    function onClickKickButton(playerId) {
+    function onVotekickPlayer(playerId) {
         socket.send(JSON.stringify({
             type: "kick-vote",
             data: playerId
         }));
+        hideKickDialog();
     }
 
     //This automatically scrolls down the chat on arrivals of new messages
@@ -375,7 +443,7 @@
 
     socket.onopen = () => console.log("Successfully Connected");
 
-    let ownID, ownerID;
+    let ownID, ownerID, ownName;
     let maxRounds = 0;
     let roundEndTime = 0;
     socket.onmessage = event => {
@@ -383,6 +451,7 @@
         if (parsed.type === "ready") {
             let ready = parsed.data;
             ownerID = ready.ownerId;
+            ownName = ready.playerName;
             allowDrawing = ready.drawing;
             ownID = ready.playerId;
             maxRounds = ready.maxRounds;
@@ -415,10 +484,6 @@
             applyMessage("system-message", "System", parsed.data);
         } else if (parsed.type === "non-guessing-player-message") {
             applyMessage("non-guessing-player-message", parsed.data.author, parsed.data.content);
-        } else if (parsed.type === "persist-username") {
-            document.cookie = "username=" + parsed.data + ";expires=Tue, 19 Jan 2038 00:00:00 UTC;path=/;samesite=strict";
-        } else if (parsed.type === "reset-username") {
-            document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
         } else if (parsed.type === "line") {
             drawLine(context, parsed.data.fromX * scaleDownFactor(), parsed.data.fromY * scaleDownFactor(), parsed.data.toX * scaleDownFactor(), parsed.data.toY * scaleDownFactor(), parsed.data.color, parsed.data.lineWidth * scaleDownFactor());
         } else if (parsed.type === "fill") {
@@ -468,7 +533,7 @@
     window.setInterval(function () {
         if (roundEndTime >= 0) {
             timeLeft.innerText = "Time Left: " + Math.floor(roundEndTime / 1000);
-            roundEndTime -= 500
+            roundEndTime -= 500;
         } else {
             timeLeft.innerText = "Time Left: ∞";
         }
@@ -485,12 +550,19 @@
                         </div>`;
     }
 
+    let cachedPlayers;
+
     function applyPlayers(players) {
         playerContainer.innerHTML = "";
+        cachedPlayers = players;
         players.forEach(function (player) {
             //We don't wanna show the disconnected players.
             if (!player.connected) {
                 return;
+            }
+
+            if (player.id === ownID) {
+                ownName = player.name;
             }
 
             let stateStyleClass;
@@ -507,10 +579,6 @@
                 newPlayerElement += ' playername-self';
             }
             newPlayerElement += '">' + player.name + '</span>';
-            if (player.id !== ownID) {
-                newPlayerElement +=
-                    '<button class="kick-button" id="kick-button" type="button" title="Vote to kick this player" alt="Vote to kick this player" onclick="onClickKickButton(' + player.id + ')">👋</button>';
-            }
             newPlayerElement +=
                 '</div>' +
                 '<div class="score-and-status">' +

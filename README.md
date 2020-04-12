@@ -82,6 +82,15 @@ There are many ways you can contribute:
 
 ## Credits
 
+These resources are by people unrelated to the project, whilst not every of these
+resources requires attribution as per license, we'll do it either way ;)
+
+If you happen to find a mistake here, please make a PR. If you are one of the
+authors and feel like we've wronged you, please reach out.
+
 * Favicon - [Fredy Sujono](https://www.iconfinder.com/freud)
 * Rubber Icon - Made by [Pixel Buddha](https://www.flaticon.com/authors/pixel-buddha) from [flaticon.com](https://flaticon.com)
 * Fill Bucket Icon - Made by [inipagistudio](https://www.flaticon.com/authors/inipagistudio) from [flaticon.com](https://flaticon.com)
+* Kicking Icon - [Kicking Icon #309402](https://icon-library.net/icon/kicking-icon-4.html)
+* Sound / No sound Icon - Made by Viktor Erikson (If you this is you or you know who this is, send me a link to that persons Homepage)
+* Profile Icon - Made by [kumakamu](https://www.iconfinder.com/kumakamu)

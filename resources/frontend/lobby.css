@@ -11,10 +11,6 @@ body {
     padding: 10px;
 }
 
-#top-left-cell {
-    display: flex;
-}
-
 #rounds {
     font-size: 1.7rem;
     flex: 1;
@@ -103,6 +99,9 @@ body {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+    /* A dialog should never fully hide the canvas. */
+    max-width: 80%;
+    max-height: 80%;
 }
 
 #chat {
@@ -171,31 +170,38 @@ body {
 }
 
 .dialog-button {
-    border: 0;
-    border-radius: 0;
+    border: none;
     background-color: white;
-    padding: 10px;
-}
-
-.dialog-button:hover {
-    background-color: rgb(244, 183, 247);
-}
-
-.dialog-button:active {
-    background-color: rgb(243, 132, 247);
+    padding: 0.5rem 1rem 0.5rem 1rem;
 }
 
 .dialog-button + .dialog-button {
-    margin-left: 1rem;
+    margin-left: 0.25rem;
 }
 
-#sound-toggle-label {
-    font-size: 1.7rem;
+button:hover,
+input[type="button"]:hover,
+.line-width-button-content:hover,
+#color-picker:hover {
+    /** Important insures it won't be prevented by a 'transparent' main color*/
+    background-color: rgb(244, 183, 247) !important;
 }
 
-.sound-toggle-input {
-    height: 1.7rem;
+button:active,
+input[type="button"]:active,
+#color-picker:active {
+    /** Important insures it won't be prevented by a 'transparent' main color*/
+    background-color: rgb(243, 132, 247) !important;
+}
+
+.header-button {
+    padding: 0.2rem;
+    background-color: transparent;
+}
+
+.header-button-image {
     width: 1.7rem;
+    height: 1.7rem;
 }
 
 .custom-check-or-radio {
@@ -221,10 +227,6 @@ body {
     background-color: rgb(218, 218, 218);
 }
 
-.line-width-button-content:hover {
-    background-color: rgb(244, 183, 247);
-}
-
 .line-width-button:checked + .line-width-button-content {
     background-color: rgb(243, 132, 247);
 }
@@ -243,27 +245,11 @@ body {
     }
 }
 
-#color-picker:hover {
-    background-color: rgb(244, 183, 247);
-}
-
-#color-picker:active {
-    background-color: rgb(243, 132, 247);
-}
-
 .canvas-button {
     height: 50px;
     width: 50px;
     border: 0;
     background-color: rgb(218, 218, 218);
-}
-
-.canvas-button:hover {
-    background-color: rgb(244, 183, 247);
-}
-
-.canvas-button:active {
-    background-color: rgb(243, 132, 247);
 }
 
 .canvas-button::-moz-focus-inner {
@@ -314,4 +300,26 @@ body {
 
 .pencil-sizes-container {
     display: flex;
+}
+
+#kick-dialog-players {
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.kick-player-button {
+    width: 70%;
+    border: none;
+    margin-left: 15%;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.kick-player-button + .kick-player-button {
+    margin-top: 0.5rem;
+}
+
+.dialog-close-button {
+    margin-top: 1rem;
 }
