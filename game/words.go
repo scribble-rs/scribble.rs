@@ -1,125 +1,135 @@
 package game
 
 import (
-	"io/ioutil"
-	"math/rand"
-	"strings"
-	"time"
+    "io/ioutil"
+    "math/rand"
+    "strings"
+    "time"
 
-	"github.com/markbates/pkger"
+    "github.com/markbates/pkger"
+
+    pkger_workaround "github.com/scribble-rs/scribble.rs/pkger-workaround"
 )
 
 var (
-	wordListCache = make(map[string][]string)
-	languageMap   = map[string]string{
-		"english": "en",
-		"italian": "it",
-		"german":  "de",
-		"french":  "fr",
-		"dutch":   "nl",
-	}
+    wordListCache = make(map[string][]string)
+    languageMap   = map[string]string{
+        "english": "en",
+        "italian": "it",
+        "german":  "de",
+        "french":  "fr",
+        "dutch":   "nl",
+    }
 )
 
 func readWordList(chosenLanguage string) ([]string, error) {
-	langFileName := languageMap[chosenLanguage]
-	list, available := wordListCache[langFileName]
-	if available {
-		return list, nil
-	}
+    langFileName := languageMap[chosenLanguage]
+    list, available := wordListCache[langFileName]
+    if available {
+        return list, nil
+    }
 
-	wordListFile, pkgerError := pkger.Open("/resources/words/" + langFileName)
-	if pkgerError != nil {
-		panic(pkgerError)
-	}
-	defer wordListFile.Close()
+    wordListFile, pkgerError := pkger.Open(pkger_workaround.Path("/resources/words/" + langFileName))
+    if pkgerError != nil {
+        panic(pkgerError)
+    }
+    defer wordListFile.Close()
 
-	data, err := ioutil.ReadAll(wordListFile)
-	if err != nil {
-		return nil, err
-	}
+    data, err := ioutil.ReadAll(wordListFile)
+    if err != nil {
+        return nil, err
+    }
 
-	tempWords := strings.Split(string(data), "\n")
-	var words []string
-	for _, word := range tempWords {
-		word = strings.TrimSpace(word)
-		if strings.HasSuffix(word, "#i") {
-			continue
-		}
+    tempWords := strings.Split(string(data), "\n")
+    var words []string
+    for _, word := range tempWords {
+        word = strings.TrimSpace(word)
 
-		lastIndexNumberSign := strings.LastIndex(word, "#")
-		if lastIndexNumberSign == -1 {
-			words = append(words, word)
-		} else {
-			words = append(words, word[:lastIndexNumberSign])
-		}
-	}
+        //Newlines will just be empty strings
+        if word == "" {
+            continue
+        }
 
-	wordListCache[langFileName] = words
+        //The "i" was "impossible", as in "impossible to draw", tag initially supplied.
+        if strings.HasSuffix(word, "#i") {
+            continue
+        }
 
-	return words, nil
+        //Since not all words use the tag system, we can just instantly return for words that don't use it.
+        lastIndexNumberSign := strings.LastIndex(word, "#")
+        if lastIndexNumberSign == -1 {
+            words = append(words, word)
+        } else {
+            words = append(words, word[:lastIndexNumberSign])
+        }
+    }
+
+    wordListCache[langFileName] = words
+
+    return words, nil
 }
 
 // GetRandomWords gets 3 random words for the passed Lobby. The words will be
 // chosen from the custom words and the default dictionary, depending on the
 // settings specified by the Lobby-Owner.
 func GetRandomWords(lobby *Lobby) []string {
-	rand.Seed(time.Now().Unix())
-	wordsNotToPick := lobby.alreadyUsedWords
-	wordOne := getRandomWordWithCustomWordChance(lobby, wordsNotToPick, lobby.CustomWords, lobby.CustomWordsChance)
-	wordsNotToPick = append(wordsNotToPick, wordOne)
-	wordTwo := getRandomWordWithCustomWordChance(lobby, wordsNotToPick, lobby.CustomWords, lobby.CustomWordsChance)
-	wordsNotToPick = append(wordsNotToPick, wordTwo)
-	wordThree := getRandomWordWithCustomWordChance(lobby, wordsNotToPick, lobby.CustomWords, lobby.CustomWordsChance)
+    rand.Seed(time.Now().Unix())
+    wordsNotToPick := lobby.alreadyUsedWords
+    wordOne := getRandomWordWithCustomWordChance(lobby, wordsNotToPick, lobby.CustomWords, lobby.CustomWordsChance)
+    wordsNotToPick = append(wordsNotToPick, wordOne)
+    wordTwo := getRandomWordWithCustomWordChance(lobby, wordsNotToPick, lobby.CustomWords, lobby.CustomWordsChance)
+    wordsNotToPick = append(wordsNotToPick, wordTwo)
+    wordThree := getRandomWordWithCustomWordChance(lobby, wordsNotToPick, lobby.CustomWords, lobby.CustomWordsChance)
 
-	return []string{
-		wordOne,
-		wordTwo,
-		wordThree,
-	}
+    return []string{
+        wordOne,
+        wordTwo,
+        wordThree,
+    }
 }
 
 func getRandomWordWithCustomWordChance(lobby *Lobby, wordsAlreadyUsed []string, customWords []string, customWordChance int) string {
-	if rand.Intn(100)+1 <= customWordChance {
-		return getUnusedCustomWord(lobby, wordsAlreadyUsed, customWords)
-	}
+    if rand.Intn(100)+1 <= customWordChance {
+        return getUnusedCustomWord(lobby, wordsAlreadyUsed, customWords)
+    }
 
-	return getUnusedRandomWord(lobby, wordsAlreadyUsed)
+    return getUnusedRandomWord(lobby, wordsAlreadyUsed)
 }
 
 func getUnusedCustomWord(lobby *Lobby, wordsAlreadyUsed []string, customWords []string) string {
 OUTER_LOOP:
-	for _, word := range customWords {
-		for _, usedWord := range wordsAlreadyUsed {
-			if usedWord == word {
-				continue OUTER_LOOP
-			}
-		}
+    for _, word := range customWords {
+        for _, usedWord := range wordsAlreadyUsed {
+            if usedWord == word {
+                continue OUTER_LOOP
+            }
+        }
 
-		return word
-	}
+        return word
+    }
 
-	return getUnusedRandomWord(lobby, wordsAlreadyUsed)
+    return getUnusedRandomWord(lobby, wordsAlreadyUsed)
 }
 
 func getUnusedRandomWord(lobby *Lobby, wordsAlreadyUsed []string) string {
-	//We attempt to find a random word for a hundred times, afterwards we just use any.
-	randomnessAttempts := 0
-	var word string
+    //We attempt to find a random word for a hundred times, afterwards we just use any.
+    randomnessAttempts := 0
+    var word string
 OUTER_LOOP:
-	for {
-		word = lobby.Words[rand.Int()%len(lobby.Words)]
-		for _, usedWord := range wordsAlreadyUsed {
-			if usedWord == word {
-				if randomnessAttempts == 100 {
-					break OUTER_LOOP
-				}
+    for {
+        word = lobby.Words[rand.Int()%len(lobby.Words)]
+        for _, usedWord := range wordsAlreadyUsed {
+            if usedWord == word {
+                if randomnessAttempts == 100 {
+                    break OUTER_LOOP
+                }
 
-				randomnessAttempts++
-				continue OUTER_LOOP
-			}
-		}
-		break
-	}
+                randomnessAttempts++
+                continue OUTER_LOOP
+            }
+        }
+        break
+    }
 
-	return word
+    return word
 }
