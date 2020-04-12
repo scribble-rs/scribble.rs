@@ -28,6 +28,16 @@ Run the following to build the application:
 ```shell
 git clone https://github.com/scribble-rs/scribble.rs.git
 cd scribble.rs
+```
+
+For -nix systems:
+```shell
+# run `make` to see all availables commands
+make build
+```
+
+For Windows:
+```shell
 go run github.com/markbates/pkger/cmd/pkger -include /resources -include /templates
 go build -o scribblers .
 ```
@@ -52,7 +62,12 @@ Alternatively there's a docker container:
 docker pull biosmarcel/scribble.rs
 ```
 
-It uses port `80`.
+### Changing default port
+
+Default port is set to `8080`. To override it, run it as follow:
+```shell
+docker run -p <port-number>:<port-number> biosmarcel/scribble.rs --portHTTP=<port-number>
+```
 
 ## Contributing
 
