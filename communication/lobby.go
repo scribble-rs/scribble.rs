@@ -12,7 +12,7 @@ import (
 
 var (
 	noLobbyIdSuppliedError = errors.New("please supply a lobby id via the 'lobby_id' query parameter")
-	lobbyNotExistentError = errors.New("the requested lobby doesn't exist")
+	lobbyNotExistentError  = errors.New("the requested lobby doesn't exist")
 )
 
 func getLobby(r *http.Request) (*game.Lobby, error) {
