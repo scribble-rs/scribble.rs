@@ -47,6 +47,13 @@
     <div id="drawing-board-wrapper">
         <div id="drawing-board-inner-wrapper">
             <canvas id="drawing-board"></canvas>
+
+            <!-- The so called "center dialogs" are divs that float above the canvas.
+            They are centered are always a fraction of the canvas size but never bigger.
+            The "center-dialog" is basically like a "window" if you will and the
+            "center-dialog-content" is the window content. Depending on which dialog
+            we want to show, we show a different content. Technically there could be more
+            than one dialog visible at a time, but they'll be layered. -->
             <div id="center-dialog">
                 <div id="word-dialog" class="center-dialog-content">
                     <span class="dialog-title">Choose a word</span>
