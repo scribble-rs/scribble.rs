@@ -33,7 +33,7 @@
                 <select class="input-item" name="language" placeholder="Choose your language">
                     {{$language := .Language}}
                     {{range $k, $v := .Languages}}
-                        <option value="{{$k}}" {{if eq $language .}}selected="selected"{{end}}>{{$v}}</option>
+                        <option value="{{$k}}" {{if eq $k $language}}selected="selected"{{end}}>{{$v}}</option>
                     {{end}}
                 </select>
                 <b>Drawing Time</b>
