@@ -38,7 +38,7 @@ make build
 
 For Windows:
 ```shell
-go run github.com/markbates/pkger/cmd/pkger -include /resources -include /templates
+go run github.com/gobuffalo/packr/v2/packr2
 go build -o scribblers .
 ```
 

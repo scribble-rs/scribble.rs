@@ -15,9 +15,7 @@ RUN apk --no-cache add ca-certificates
 FROM scratch
 #WORKDIR /app
 
+# For future implementation of SSL certificate support
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-# Workaround, cf: https://github.com/markbates/pkger/issues/86
-COPY --from=builder /app/scribblers /scribblers
-COPY --from=builder /app/templates /templates/
 
 ENTRYPOINT ["/scribblers"]

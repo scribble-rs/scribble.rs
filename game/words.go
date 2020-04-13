@@ -1,14 +1,11 @@
 package game
 
 import (
-	"io/ioutil"
 	"math/rand"
 	"strings"
 	"time"
 
-	"github.com/markbates/pkger"
-
-	pkger_workaround "github.com/scribble-rs/scribble.rs/pkger-workaround"
+	"github.com/gobuffalo/packr/v2"
 )
 
 var (
@@ -20,6 +17,7 @@ var (
 		"french":  "fr",
 		"dutch":   "nl",
 	}
+	wordBox = packr.New("words", "../resources/words")
 )
 
 func readWordList(chosenLanguage string) ([]string, error) {
@@ -29,18 +27,12 @@ func readWordList(chosenLanguage string) ([]string, error) {
 		return list, nil
 	}
 
-	wordListFile, pkgerError := pkger.Open(pkger_workaround.Path("/resources/words/" + langFileName))
+	wordListFile, pkgerError := wordBox.FindString(langFileName)
 	if pkgerError != nil {
 		panic(pkgerError)
 	}
-	defer wordListFile.Close()
 
-	data, err := ioutil.ReadAll(wordListFile)
-	if err != nil {
-		return nil, err
-	}
-
-	tempWords := strings.Split(string(data), "\n")
+	tempWords := strings.Split(wordListFile, "\n")
 	var words []string
 	for _, word := range tempWords {
 		word = strings.TrimSpace(word)
