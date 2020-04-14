@@ -153,6 +153,9 @@ func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) er
 			for _, otherPlayer := range lobby.Players {
 				otherPlayer.Score = 0
 				otherPlayer.LastScore = 0
+				//Since nobody has any points in the beginning, everyone has practically
+				//the same rank, therefore y'll winners for now.
+				otherPlayer.Rank = 1
 			}
 
 			lobby.Round = 1
