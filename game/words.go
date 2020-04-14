@@ -81,7 +81,7 @@ func GetRandomWords(lobby *Lobby) []string {
 }
 
 func getRandomWordWithCustomWordChance(lobby *Lobby, wordsAlreadyUsed []string, customWords []string, customWordChance int) string {
-	if rand.Intn(100)+1 <= customWordChance {
+	if len(lobby.CustomWords) > 0 && customWordChance > 0 && rand.Intn(100)+1 <= customWordChance {
 		return getUnusedCustomWord(lobby, wordsAlreadyUsed, customWords)
 	}
 
