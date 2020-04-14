@@ -568,6 +568,7 @@
                 return;
             }
 
+            //We simply abuse the player events to get our latest name, since there's no separate event for this.
             if (player.id === ownID) {
                 ownName = player.name;
             }
@@ -585,8 +586,8 @@
             if (player.id === ownID) {
                 newPlayerElement += ' playername-self';
             }
-            newPlayerElement += '">' + player.name + '</span>';
             newPlayerElement +=
+                '">' + player.name + '</span>' +
                 '</div>' +
                 '<div class="score-and-status">' +
                 '<div>' +
@@ -741,8 +742,8 @@
     // necessary for mousemove to not use the previous exit coordinates.
     window.onmousemove = function (e) {
         let clientRect = drawingBoard.getBoundingClientRect();
-        x = Math.min(clientRect.width-1, Math.max(0, e.clientX - clientRect.left));
-        y = Math.min(clientRect.height-1, Math.max(0, e.clientY - clientRect.top));
+        x = Math.min(clientRect.width - 1, Math.max(0, e.clientX - clientRect.left));
+        y = Math.min(clientRect.height - 1, Math.max(0, e.clientY - clientRect.top));
     };
 
     drawingBoard.onclick = function (e) {
@@ -804,7 +805,6 @@
     function drawLine(context, x1, y1, x2, y2, color, lineWidth) {
         // the coordinates must be whole numbers to improve performance.
         // also, decimals as coordinates is not making sense.
-        // FIXME quick and dirty fix to apply the window scale to all drawing activities.
         x1 = Math.floor(x1);
         y1 = Math.floor(y1);
         x2 = Math.floor(x2);
