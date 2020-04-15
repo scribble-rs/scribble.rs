@@ -187,10 +187,10 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		matches := 0
+		var matches int
 		for _, otherPlayer := range lobby.Players {
 			socket := otherPlayer.GetWebsocket()
-			if socket != nil && remoteAddressToSimpleIP(socket.RemoteAddr().String()) == remoteAddressToSimpleIP(r.RemoteAddr) {
+			if socket != nil && remoteAddressToSimpleIP(socket.RemoteAddr().String()) == getIPAddressFromRequest(r) {
 				matches++
 			}
 		}
@@ -221,4 +221,37 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 	if templateError != nil {
 		panic(templateError)
 	}
+}
+
+func getIPAddressFromRequest(r *http.Request) string {
+	//See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
+	//See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded
+
+	//The following logic has been implemented according to the spec, therefore please
+	//refer to the spec if you have a question.
+
+	forwardedAddress := r.Header.Get("X-Forwarded-For")
+	if forwardedAddress != "" {
+		//Since the field may contain multiple addresses separated by commas, we use the first
+		//one, which according to the docs is supposed to be the client address.
+		clientAddress := strings.TrimSpace(strings.Split(forwardedAddress, ",")[0])
+		return remoteAddressToSimpleIP(clientAddress)
+	}
+
+	standardForwardedHeader := r.Header.Get("Forwarded")
+	if standardForwardedHeader != "" {
+		targetPrefix := "for="
+		//Since forwarded can contain more than one field, we search for one specific field.
+		for _, part := range strings.Split(standardForwardedHeader, ";") {
+			trimmed := strings.TrimSpace(part)
+			if strings.HasPrefix(trimmed, targetPrefix) {
+				//FIXME Maybe checking for a valid IP-Address would make sense here, not sure tho.
+				address := remoteAddressToSimpleIP(strings.TrimPrefix(trimmed, targetPrefix))
+				//Since the documentation doesn't mention which quotes are used, I just remove all ;)
+				return strings.NewReplacer("`", "", "'", "", "\"", "", "[", "", "]", "").Replace(address)
+			}
+		}
+	}
+
+	return remoteAddressToSimpleIP(r.RemoteAddr)
 }
