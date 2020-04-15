@@ -714,7 +714,7 @@ func OnDisconnected(lobby *Lobby, player *Player) {
 
 	if !lobby.HasConnectedPlayers() {
 		RemoveLobby(lobby.ID)
-		log.Printf("There are currently %d open lobbies.\n", len(lobbies))
+		log.Printf("Closing lobby %s. There are currently %d open lobbies left.\n", lobby.ID, len(lobbies))
 	} else {
 		triggerPlayersUpdate(lobby)
 	}

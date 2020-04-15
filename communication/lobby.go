@@ -210,6 +210,11 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 			Path:     "/",
 			SameSite: http.SameSiteStrictMode,
 		})
+	} else {
+		if player.Connected && player.GetWebsocket() != nil {
+			userFacingError(w, "It appears you already have an open tab for this lobby.")
+			return
+		}
 	}
 
 	templateError = lobbyPage.ExecuteTemplate(w, "lobby.html", pageData)
