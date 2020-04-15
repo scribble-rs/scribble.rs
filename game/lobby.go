@@ -624,7 +624,7 @@ type Rounds struct {
 
 // CreateLobby allows creating a lobby, optionally returning errors that
 // occurred during creation.
-func CreateLobby(playerName, language string, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit int, customWords []string, enableVotekick bool) (string, *Lobby, error) {
+func CreateLobby(playerName, language string, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit int, customWords []string, enableVotekick bool) (*Player, *Lobby, error) {
 	lobby := createLobby(drawingTime, rounds, maxPlayers, customWords, customWordChance, clientsPerIPLimit, enableVotekick)
 	player := createPlayer(playerName)
 
@@ -635,12 +635,12 @@ func CreateLobby(playerName, language string, drawingTime, rounds, maxPlayers, c
 	words, err := readWordList(language)
 	if err != nil {
 		//TODO Remove lobby, since we errored.
-		return "", nil, err
+		return nil, nil, err
 	}
 
 	lobby.Words = words
 
-	return player.userSession, lobby, nil
+	return player, lobby, nil
 }
 
 // GeneratePlayerName creates a new playername. A so called petname. It consists
@@ -731,7 +731,7 @@ func (lobby *Lobby) GetAvailableWordHints(player *Player) []*WordHint {
 	}
 }
 
-func (lobby *Lobby) JoinPlayer(playerName string) string {
+func (lobby *Lobby) JoinPlayer(playerName string) *Player {
 	player := createPlayer(playerName)
 
 	//FIXME Make a dedicated method that uses a mutex?
@@ -739,7 +739,7 @@ func (lobby *Lobby) JoinPlayer(playerName string) string {
 	recalculateRanks(lobby)
 	triggerPlayersUpdate(lobby)
 
-	return player.userSession
+	return player
 }
 
 func (lobby *Lobby) canDraw(player *Player) bool {

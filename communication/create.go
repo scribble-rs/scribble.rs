@@ -115,7 +115,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 
 	var playerName = getPlayername(r)
 
-	session, lobby, createError := game.CreateLobby(playerName, language, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
+	player, lobby, createError := game.CreateLobby(playerName, language, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
 	if createError != nil {
 		pageData.Errors = append(pageData.Errors, createError.Error())
 		templateError := lobbyCreatePage.ExecuteTemplate(w, "lobby_create.html", pageData)
@@ -126,10 +126,12 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	player.SetLastKnownAddress(getIPAddressFromRequest(r))
+
 	// Use the players generated usersession and pass it as a cookie.
 	http.SetCookie(w, &http.Cookie{
 		Name:     "usersession",
-		Value:    session,
+		Value:    player.GetUserSession(),
 		Path:     "/",
 		SameSite: http.SameSiteStrictMode,
 	})

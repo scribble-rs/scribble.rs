@@ -31,29 +31,30 @@ func enterLobby(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		matches := 0
+		var clientsWithSameIP int
+		requestAddress := getIPAddressFromRequest(r)
 		for _, otherPlayer := range lobby.Players {
-			socket := otherPlayer.GetWebsocket()
-			if socket != nil && remoteAddressToSimpleIP(socket.RemoteAddr().String()) == remoteAddressToSimpleIP(r.RemoteAddr) {
-				matches++
+			if otherPlayer.GetLastKnownAddress() == requestAddress {
+				clientsWithSameIP++
+				if clientsWithSameIP >= lobby.ClientsPerIPLimit {
+					http.Error(w, "maximum amount of newPlayer per IP reached", http.StatusUnauthorized)
+					return
+				}
 			}
 		}
 
-		if matches >= lobby.ClientsPerIPLimit {
-			http.Error(w, "maximum amount of player per IP reached", http.StatusUnauthorized)
-			return
-		}
-
-		var playerName = getPlayername(r)
-		userSession := lobby.JoinPlayer(playerName)
+		newPlayer := lobby.JoinPlayer(getPlayername(r))
+		newPlayer.SetLastKnownAddress(getIPAddressFromRequest(r))
 
 		// Use the players generated usersession and pass it as a cookie.
 		http.SetCookie(w, &http.Cookie{
 			Name:     "usersession",
-			Value:    userSession,
+			Value:    newPlayer.GetUserSession(),
 			Path:     "/",
 			SameSite: http.SameSiteStrictMode,
 		})
+	} else {
+		player.SetLastKnownAddress(getIPAddressFromRequest(r))
 	}
 
 	lobbyData := &LobbyData{
@@ -126,16 +127,18 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var playerName = getPlayername(r)
-	session, lobby, createError := game.CreateLobby(playerName, language, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
+	player, lobby, createError := game.CreateLobby(playerName, language, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
 	if createError != nil {
 		http.Error(w, createError.Error(), http.StatusBadRequest)
 		return
 	}
 
+	player.SetLastKnownAddress(getIPAddressFromRequest(r))
+
 	// Use the players generated usersession and pass it as a cookie.
 	http.SetCookie(w, &http.Cookie{
 		Name:     "usersession",
-		Value:    session,
+		Value:    player.GetUserSession(),
 		Path:     "/",
 		SameSite: http.SameSiteStrictMode,
 	})

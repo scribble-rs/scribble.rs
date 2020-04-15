@@ -187,26 +187,24 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		var matches int
+		var clientsWithSameIP int
+		requestAddress := getIPAddressFromRequest(r)
 		for _, otherPlayer := range lobby.Players {
-			socket := otherPlayer.GetWebsocket()
-			if socket != nil && remoteAddressToSimpleIP(socket.RemoteAddr().String()) == getIPAddressFromRequest(r) {
-				matches++
+			if otherPlayer.GetLastKnownAddress() == requestAddress {
+				clientsWithSameIP++
+				if clientsWithSameIP >= lobby.ClientsPerIPLimit {
+					userFacingError(w, "Sorry, but you have exceeded the maximum number of clients per IP.")
+					return
+				}
 			}
 		}
 
-		if matches >= lobby.ClientsPerIPLimit {
-			userFacingError(w, "Sorry, but you have exceeded the maximum number of clients per IP.")
-			return
-		}
-
-		var playerName = getPlayername(r)
-		userSession := lobby.JoinPlayer(playerName)
+		newPlayer := lobby.JoinPlayer(getPlayername(r))
 
 		// Use the players generated usersession and pass it as a cookie.
 		http.SetCookie(w, &http.Cookie{
 			Name:     "usersession",
-			Value:    userSession,
+			Value:    newPlayer.GetUserSession(),
 			Path:     "/",
 			SameSite: http.SameSiteStrictMode,
 		})
@@ -215,6 +213,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 			userFacingError(w, "It appears you already have an open tab for this lobby.")
 			return
 		}
+		player.SetLastKnownAddress(getIPAddressFromRequest(r))
 	}
 
 	templateError = lobbyPage.ExecuteTemplate(w, "lobby.html", pageData)

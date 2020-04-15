@@ -92,9 +92,10 @@ type Fill struct {
 // Player represents a participant in a Lobby.
 type Player struct {
 	// userSession uniquely identifies the player.
-	userSession string
-	ws          *websocket.Conn
-	socketMutex *sync.Mutex
+	userSession      string
+	ws               *websocket.Conn
+	socketMutex      *sync.Mutex
+	lastKnownAddress string
 
 	votedForKick map[string]bool
 
@@ -116,6 +117,17 @@ type Player struct {
 	State     PlayerState `json:"state"`
 }
 
+// GetLastKnownAddress returns the last known IP-Address used for an HTTP request.
+func (player *Player) GetLastKnownAddress() string {
+	return player.lastKnownAddress
+}
+
+// SetLastKnownAddress sets the last known IP-Address used for an HTTP request.
+// Can be retrieved via GetLastKnownAddress().
+func (player *Player) SetLastKnownAddress(address string) {
+	player.lastKnownAddress = address
+}
+
 // GetWebsocket simply returns the players websocket connection. This method
 // exists to encapsulate the websocket field and prevent accidental sending
 // the websocket data via the network.
@@ -135,6 +147,11 @@ func (player *Player) SetWebsocket(socket *websocket.Conn) {
 // via the network.
 func (player *Player) GetWebsocketMutex() *sync.Mutex {
 	return player.socketMutex
+}
+
+// GetUserSession returns the players current user session.
+func (player *Player) GetUserSession() string {
+	return player.userSession
 }
 
 type PlayerState int
