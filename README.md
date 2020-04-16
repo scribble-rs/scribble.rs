@@ -10,6 +10,9 @@
   <a href="https://discord.gg/3sntyCv">
     <img src="https://img.shields.io/discord/693433417395732531.svg?logo=discord">
   </a>
+  <a href="https://heroku.com/deploy?template=https://github.com/scribble-rs/scribble.rs/tree/master">
+    <img src="https://www.herokucdn.com/deploy/button.png">
+  </a>
 </p>
 
 This project is intended to be a clone of the web-based drawing game
@@ -61,6 +64,16 @@ Alternatively there's a docker container:
 ```shell
 docker pull biosmarcel/scribble.rs
 ```
+
+### Hosting your own instance for free
+
+By using heroku, you can deploy a temporary container that runs scribble.rs.
+The container will not have any cost and automatically suspend as soon as it
+stops receiving traffic for a while.
+
+Simply create an account at https://id.heroku.com/login and then click this link:
+
+https://heroku.com/deploy?template=https://github.com/scribble-rs/scribble.rs/tree/master
 
 ### Changing default port
 
