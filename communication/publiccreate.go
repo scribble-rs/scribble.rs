@@ -151,6 +151,9 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 
 	encodingError := json.NewEncoder(w).Encode(lobbyData)
 	if encodingError != nil {
+		//If the encoding / transmitting fails, the creator will never know the
+		//ID, therefore we can directly kill the lobby.
+		game.RemoveLobby(lobby.ID)
 		http.Error(w, encodingError.Error(), http.StatusInternalServerError)
 	}
 }

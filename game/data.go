@@ -209,6 +209,7 @@ func RemoveLobby(id string) {
 	for index, l := range lobbies {
 		if l.ID == id {
 			indexToDelete = index
+			break
 		}
 	}
 
@@ -228,6 +229,7 @@ func createPlayer(name string) *Player {
 		votedForKick: make(map[string]bool),
 		socketMutex:  &sync.Mutex{},
 		State:        Guessing,
+		Connected:    false,
 	}
 }
 

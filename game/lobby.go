@@ -634,7 +634,7 @@ func CreateLobby(playerName, language string, drawingTime, rounds, maxPlayers, c
 	// Read wordlist according to the chosen language
 	words, err := readWordList(language)
 	if err != nil {
-		//TODO Remove lobby, since we errored.
+		RemoveLobby(lobby.ID)
 		return nil, nil, err
 	}
 
