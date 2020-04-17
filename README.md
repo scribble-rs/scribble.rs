@@ -24,6 +24,12 @@ Even though there is an official instance at
 
 The site will not display any ads or share any data with third parties.
 
+## Official Instances
+
+http://scribble.rs (No HTTPS)
+
+https://scribblers-official.herokuapp.com/ (Might not respond right-away, just wait some seconds)
+
 ## Building / Running
 
 Run the following to build the application:
