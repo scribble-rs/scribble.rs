@@ -158,8 +158,6 @@ func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) er
 				otherPlayer.Rank = 1
 			}
 
-			lobby.Round = 1
-
 			advanceLobby(lobby)
 		}
 	} else if received.Type == "name-change" {
@@ -198,7 +196,7 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 			WriteAsJSON(sender, JSEvent{Type: "system-message", Data: "You have correctly guessed the word."})
 
 			if !lobby.isAnyoneStillGuessing() {
-				endRound(lobby)
+				endTurn(lobby)
 			} else {
 				//Since the word has been guessed correctly, we reveal it.
 				WriteAsJSON(sender, JSEvent{Type: "update-wordhint", Data: lobby.WordHintsShown})
@@ -328,7 +326,7 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 			triggerPlayersUpdate(lobby)
 
 			if lobby.Drawer == playerToKick || !lobby.isAnyoneStillGuessing() {
-				endRound(lobby)
+				endTurn(lobby)
 			}
 		}
 	}
@@ -404,7 +402,7 @@ func commandSetMP(caller *Player, lobby *Lobby, args []string) {
 	}
 }
 
-func endRound(lobby *Lobby) {
+func endTurn(lobby *Lobby) {
 	if lobby.timeLeftTicker != nil {
 		lobby.timeLeftTicker.Stop()
 		lobby.timeLeftTicker = nil
@@ -446,6 +444,7 @@ func endRound(lobby *Lobby) {
 	advanceLobby(lobby)
 }
 
+// advanceLobby will either start the game or jump over to the next turn.
 func advanceLobby(lobby *Lobby) {
 	for _, otherPlayer := range lobby.Players {
 		otherPlayer.State = Guessing
@@ -454,24 +453,17 @@ func advanceLobby(lobby *Lobby) {
 
 	lobby.ClearDrawing()
 
-	//If everyone has drawn once (e.g. a round has passed)
-	if lobby.Drawer == lobby.Players[len(lobby.Players)-1] {
+	newDrawer, roundOver := selectNextDrawer(lobby)
+	if roundOver {
 		if lobby.Round == lobby.MaxRounds {
-			lobby.Drawer = nil
-			lobby.Round = 0
-
-			recalculateRanks(lobby)
-			triggerPlayersUpdate(lobby)
-
-			WritePublicSystemMessage(lobby, "Game over. Type !start again to start a new round.")
-
+			endGame(lobby)
 			return
 		}
 
 		lobby.Round++
 	}
-	selectNextDrawer(lobby)
 
+	lobby.Drawer = newDrawer
 	lobby.Drawer.State = Drawing
 	lobby.WordChoice = GetRandomWords(lobby)
 
@@ -491,21 +483,33 @@ func advanceLobby(lobby *Lobby) {
 	WriteAsJSON(lobby.Drawer, &JSEvent{Type: "your-turn", Data: lobby.WordChoice})
 }
 
-func selectNextDrawer(lobby *Lobby) {
+func endGame(lobby *Lobby) {
+	lobby.Drawer = nil
+	lobby.Round = 0
+
+	recalculateRanks(lobby)
+	triggerPlayersUpdate(lobby)
+
+	WritePublicSystemMessage(lobby, "Game over. Type !start again to start a new round.")
+}
+
+// selectNextDrawer returns the next person that's supposed to be drawing, but
+// doesn't tell the lobby yet. The boolean signals whether the current round is
+// over.
+func selectNextDrawer(lobby *Lobby) (*Player, bool) {
 	for index, otherPlayer := range lobby.Players {
 		if otherPlayer == lobby.Drawer {
 			//If we have someone that's drawing, take the next one
 			for i := index + 1; i < len(lobby.Players); i++ {
 				player := lobby.Players[i]
 				if player.Connected {
-					lobby.Drawer = player
-					return
+					return player, false
 				}
 			}
 		}
 	}
 
-	lobby.Drawer = lobby.Players[0]
+	return lobby.Players[0], true
 }
 
 func roundTimerTicker(lobby *Lobby) {
@@ -517,7 +521,7 @@ func roundTimerTicker(lobby *Lobby) {
 		case <-lobby.timeLeftTicker.C:
 			currentTime := getTimeAsMillis()
 			if currentTime >= lobby.RoundEndTime {
-				go endRound(lobby)
+				go endTurn(lobby)
 			}
 
 			if hintsLeft > 0 && lobby.WordHints != nil {
@@ -554,6 +558,8 @@ type NextTurn struct {
 	RoundEndTime int       `json:"roundEndTime"`
 }
 
+// recalculateRanks will assign each player his respective rank in the lobby
+// according to everyones current score. This will not trigger any events.
 func recalculateRanks(lobby *Lobby) {
 	for _, a := range lobby.Players {
 		if !a.Connected {
