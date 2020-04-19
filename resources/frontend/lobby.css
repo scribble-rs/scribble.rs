@@ -1,16 +1,3 @@
-body {
-    background-color: antiquewhite;
-}
-
-.noscript {
-    display: flex;
-    font-size: 2.5rem;
-    font-weight: bold;
-    justify-content: center;
-    border-bottom: 1rem solid black;
-    padding: 10px;
-}
-
 #rounds {
     font-size: 1.7rem;
     flex: 1;
@@ -38,6 +25,10 @@ body {
 .guess-letter + .guess-letter {
     margin-left: 0.5rem;
 }
+
+/*
+
+*/
 
 #lobby {
     padding: 5px;
@@ -179,6 +170,10 @@ body {
     margin-left: 0.25rem;
 }
 
+.dialog-close-button {
+    margin-top: 1rem;
+}
+
 button:hover,
 input[type="button"]:hover,
 .line-width-button-content:hover,
@@ -302,6 +297,62 @@ input[type="button"]:active,
     display: flex;
 }
 
+#player-container {
+    display: flex;
+    flex-direction: column;
+    grid-column: 1;
+    grid-row-start: 2;
+    grid-row-end: 4;
+}
+
+.player {
+    background-color: rgb(245, 245, 245);
+    padding: 0.2rem;
+    display: grid;
+    grid-template-columns: fit-content(100%) auto;
+    grid-template-rows: 1fr 1fr;
+}
+
+.player + .player {
+    margin-top: 5px;
+}
+
+.playername {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    flex: 1;
+}
+
+.playername-self {
+    font-weight: bold;
+}
+
+.player-done {
+    background-color: rgb(141, 224, 15);
+}
+
+.rank {
+    display: flex;
+    grid-row-start: 1;
+    grid-row-end: 3;
+    justify-content: center;
+    align-items: center;
+    width: 2.5rem;
+    font-size: 1.5rem;
+}
+
+.score-and-status {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.last-turn-score {
+    font-size: 0.8rem;
+    color: lightslategray;
+}
+
 #kick-dialog-players {
     width: 100%;
     overflow-x: hidden;
@@ -318,8 +369,4 @@ input[type="button"]:active,
 
 .kick-player-button + .kick-player-button {
     margin-top: 0.5rem;
-}
-
-.dialog-close-button {
-    margin-top: 1rem;
 }

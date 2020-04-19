@@ -4,9 +4,8 @@
 <head>
     <title>Scribble.rs - Game</title>
     <meta charset="UTF-8"/>
-    <link rel="stylesheet" type="text/css" href="/resources/style.css"/>
+    <link rel="stylesheet" type="text/css" href="/resources/base.css"/>
     <link rel="stylesheet" type="text/css" href="/resources/lobby.css"/>
-    <link rel="stylesheet" type="text/css" href="/resources/lobby_players.css"/>
     <link rel="icon" type="image/png" href="/resources/favicon.png"/>
 </head>
 
@@ -581,14 +580,12 @@
             }
             let newPlayerElement = '<div class="player ' + stateStyleClass + '">' +
                 '<span class="rank">' + player.rank + '</span>' +
-                '<div class="name-and-buttons">' +
                 '<span class="playername';
             if (player.id === ownID) {
                 newPlayerElement += ' playername-self';
             }
             newPlayerElement +=
                 '">' + player.name + '</span>' +
-                '</div>' +
                 '<div class="score-and-status">' +
                 '<div>' +
                 '<span class="playerscore">' + player.score + '</span>' +
