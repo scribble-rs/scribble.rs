@@ -1,16 +1,12 @@
-body {
-    background-color: white !important;
-}
-
-h1, h2 {
+.error-title, .error-message {
     display: block;
 }
 
-h1 {
+.error-title {
     font-size: 13rem;
 }
 
-h2 {
+.error-message {
     font-size: 4rem;
     margin: 2vw;
 }

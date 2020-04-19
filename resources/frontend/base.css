@@ -10,30 +10,27 @@
     src: local('Monserrat Bold'), url(/resources/Montserrat-Bold.otf) format("opentype");
 }
 
-a:link, a:visited {
-    color: inherit;
+html {
+    font-family: 'Montserrat';
+}
+
+body {
+    background-color: antiquewhite;
+    margin: 0;
+    position: relative;
+    min-height: 100vh;
 }
 
 a {
     text-decoration: none;
 }
 
+a:link, a:visited {
+    color: inherit;
+}
+
 a:hover {
     text-decoration: underline;
-}
-
-html {
-    font-family: 'Montserrat';
-}
-
-body {
-    margin: 0;
-    position: relative;
-    min-height: 100vh;
-}
-
-.content-wrapper {
-    padding-bottom: 2rem;
 }
 
 h1, h2 {
@@ -66,47 +63,15 @@ footer {
     color: white;
 }
 
-.footer-item+.footer-item {
+.footer-item + .footer-item {
     margin-left: 1rem;
 }
 
-.center-container {
+.noscript {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-
-.content-container {
-    display: block;
-    background-color: rgb(250, 192, 202);
-    border-radius: 15px;
-    padding: 20px;
-}
-
-.input-container {
-    justify-content: center;
-    align-items: center;
-    display: inline-grid;
-    grid-template-columns: auto auto;
-    grid-column-gap: 20px;
-    grid-row-gap: 10px;
-}
-
-.input-item {
-    width: inherit;
-    min-width: 300px;
-}
-
-.error-list {
-    background-color: rgb(236, 93, 93);
-    padding: 10px;
-    border-radius: 15px;
-    color: white;
+    font-size: 2.5rem;
     font-weight: bold;
-    margin-bottom: 20px;
-    grid-column-start: 1;
-    grid-column-end: 3;
+    justify-content: center;
+    border-bottom: 1rem solid black;
+    padding: 10px;
 }
