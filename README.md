@@ -15,20 +15,29 @@
   </a>
 </p>
 
-This project is intended to be a clone of the web-based drawing game
-[skribbl.io](https://skribbl.io). In my opinion skribbl.io has several
-usability issues, which I'll try addressing in this project.
-
-Even though there is an official instance at
-[scribble.rs](http://scribble.rs), you can still host your own instance.
+Scribble.rs is a clone of the web-based drawing game skribbl.io. In my opinion
+skribbl.io has several usability issues, which I'll address in this project.
 
 The site will not display any ads or share any data with third parties.
 
-## Official Instances
+## Play now
 
-http://scribble.rs (No HTTPS)
+Feel free to play on any of these instances:
 
-https://scribblers-official.herokuapp.com/ (Might not respond right-away, just wait some seconds)
+* https://scribblers-official.herokuapp.com/
+  > Might not respond right-away, just wait some seconds
+* http://scribble.rs
+  > No HTTPS!
+
+### Hosting your own instance for free
+
+By using Heroku, you can deploy a temporary container that runs scribble.rs.
+The container will not have any cost and automatically suspend as soon as it
+stops receiving traffic for a while.
+
+Simply create an account at https://id.heroku.com/login and then click this link:
+
+https://heroku.com/deploy?template=https://github.com/scribble-rs/scribble.rs/tree/master
 
 ## Building / Running
 
@@ -71,19 +80,9 @@ Alternatively there's a docker container:
 docker pull biosmarcel/scribble.rs
 ```
 
-### Hosting your own instance for free
-
-By using heroku, you can deploy a temporary container that runs scribble.rs.
-The container will not have any cost and automatically suspend as soon as it
-stops receiving traffic for a while.
-
-Simply create an account at https://id.heroku.com/login and then click this link:
-
-https://heroku.com/deploy?template=https://github.com/scribble-rs/scribble.rs/tree/master
-
 ### Changing default port
 
-Default port is set to `8080`. To override it, run it as follow:
+The default port is `8080`. To override it, run:
 ```shell
 docker run -p <port-number>:<port-number> biosmarcel/scribble.rs --portHTTP=<port-number>
 ```
@@ -94,7 +93,7 @@ There are many ways you can contribute:
 
 * Update / Add documentation in the wiki of the GitHub repository
 * Extend this README
-* Create issues
+* Create feature requests and bug reports
 * Solve issues by creating Pull Requests
 * Tell your friends about the project
 * Curating the word lists
@@ -111,5 +110,5 @@ authors and feel like we've wronged you, please reach out.
 * Rubber Icon - Made by [Pixel Buddha](https://www.flaticon.com/authors/pixel-buddha) from [flaticon.com](https://flaticon.com)
 * Fill Bucket Icon - Made by [inipagistudio](https://www.flaticon.com/authors/inipagistudio) from [flaticon.com](https://flaticon.com)
 * Kicking Icon - [Kicking Icon #309402](https://icon-library.net/icon/kicking-icon-4.html)
-* Sound / No sound Icon - Made by Viktor Erikson (If you this is you or you know who this is, send me a link to that persons Homepage)
+* Sound / No sound Icon - Made by Viktor Erikson (If this is you or you know who this is, send me a link to that persons Homepage)
 * Profile Icon - Made by [kumakamu](https://www.iconfinder.com/kumakamu)
