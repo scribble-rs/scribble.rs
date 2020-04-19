@@ -63,7 +63,7 @@ func readWordList(chosenLanguage string) ([]string, error) {
 
 // GetRandomWords gets 3 random words for the passed Lobby. The words will be
 // chosen from the custom words and the default dictionary, depending on the
-// settings specified by the Lobby-Owner.
+// settings specified by the Lobby-owner.
 func GetRandomWords(lobby *Lobby) []string {
 	rand.Seed(time.Now().Unix())
 	wordsNotToPick := lobby.alreadyUsedWords
@@ -109,7 +109,7 @@ func getUnusedRandomWord(lobby *Lobby, wordsAlreadyUsed []string) string {
 	var word string
 OUTER_LOOP:
 	for {
-		word = lobby.Words[rand.Int()%len(lobby.Words)]
+		word = lobby.words[rand.Int()%len(lobby.words)]
 		for _, usedWord := range wordsAlreadyUsed {
 			if usedWord == word {
 				if randomnessAttempts == 100 {

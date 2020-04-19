@@ -22,10 +22,10 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 }
 
 func createDefaultLobbyCreatePageData() *CreatePageData {
-
 	return &CreatePageData{
 		SettingBounds:     game.LobbySettingBounds,
 		Languages:         game.SupportedLanguages,
+		Public:            "false",
 		DrawingTime:       "120",
 		Rounds:            "4",
 		MaxPlayers:        "12",
@@ -41,6 +41,7 @@ type CreatePageData struct {
 	*game.SettingBounds
 	Errors            []string
 	Languages         map[string]string
+	Public            string
 	DrawingTime       string
 	Rounds            string
 	MaxPlayers        string
@@ -68,11 +69,13 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 	customWordChance, customWordChanceInvalid := parseCustomWordsChance(r.Form.Get("custom_words_chance"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := parseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
 	enableVotekick := r.Form.Get("enable_votekick") == "true"
+	publicLobby := r.Form.Get("public") == "true"
 
 	//Prevent resetting the form, since that would be annoying as hell.
 	pageData := CreatePageData{
 		SettingBounds:     game.LobbySettingBounds,
 		Languages:         game.SupportedLanguages,
+		Public:            r.Form.Get("public"),
 		DrawingTime:       r.Form.Get("drawing_time"),
 		Rounds:            r.Form.Get("rounds"),
 		MaxPlayers:        r.Form.Get("max_players"),
@@ -115,7 +118,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 
 	var playerName = getPlayername(r)
 
-	player, lobby, createError := game.CreateLobby(playerName, language, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
+	player, lobby, createError := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
 	if createError != nil {
 		pageData.Errors = append(pageData.Errors, createError.Error())
 		templateError := lobbyCreatePage.ExecuteTemplate(w, "lobby_create.html", pageData)

@@ -90,7 +90,7 @@ func GetPlayers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(lobby.Players)
+	err = json.NewEncoder(w).Encode(lobby.GetPlayers())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -182,14 +182,14 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 	var templateError error
 
 	if player == nil {
-		if len(lobby.Players) >= lobby.MaxPlayers {
+		if len(lobby.GetPlayers()) >= lobby.MaxPlayers {
 			userFacingError(w, "Sorry, but the lobby is full.")
 			return
 		}
 
 		var clientsWithSameIP int
 		requestAddress := getIPAddressFromRequest(r)
-		for _, otherPlayer := range lobby.Players {
+		for _, otherPlayer := range lobby.GetPlayers() {
 			if otherPlayer.GetLastKnownAddress() == requestAddress {
 				clientsWithSameIP++
 				if clientsWithSameIP >= lobby.ClientsPerIPLimit {
