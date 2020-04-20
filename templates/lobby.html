@@ -74,6 +74,10 @@
                     <div id="kick-dialog-players"></div>
                     <button onclick="hideKickDialog()" class="dialog-button dialog-close-button">Close</button>
                 </div>
+                
+                <div id="turn-dialog" class="center-dialog-content">
+                    <span class="dialog-title"><span id="next-player">Someone</span> is choosing a word</span>
+                </div>
             </div>
         </div>
     </div>
@@ -231,6 +235,8 @@
 
     const kickDialog = document.getElementById("kick-dialog");
     const kickDialogPlayers = document.getElementById("kick-dialog-players");
+
+    const turnDialog = document.getElementById("turn-dialog");
 
     const soundToggleLabel = document.getElementById("sound-toggle-label");
     let sound = localStorage.getItem("sound") === "true";
@@ -485,6 +491,7 @@
             playWav('/resources/plop.wav');
         } else if (parsed.type === "update-wordhint") {
             applyWordHints(parsed.data);
+            turnDialog.style.visibility = "hidden";
         } else if (parsed.type === "message") {
             applyMessage("", parsed.data.author, parsed.data.content);
         } else if (parsed.type === "system-message") {
@@ -507,6 +514,21 @@
             roundEndTime = parsed.data.roundEndTime;
             applyRounds(parsed.data.round, maxRounds);
             applyPlayers(parsed.data.players);
+
+            drawer = "";
+            cached = parsed.data.players;
+            cached.forEach(function (player) {
+                if (player.state === 1 && player.id != ownID)
+                {
+                    drawer = player.name;
+                }
+            });
+
+            if (drawer != "")
+            {
+                document.getElementById('next-player').innerHTML = drawer;
+                turnDialog.style.visibility = "visible";
+            }
 
             //We clear this, since there's no word chosen right now.
             wordContainer.innerHTML = "";
