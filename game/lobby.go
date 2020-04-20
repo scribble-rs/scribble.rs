@@ -11,6 +11,11 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode"
+
+	"golang.org/x/text/runes"
+    "golang.org/x/text/transform"
+    "golang.org/x/text/unicode/norm"
 
 	commands "github.com/Bios-Marcel/cmdp"
 	"github.com/Bios-Marcel/discordemojimap"
@@ -70,6 +75,12 @@ type LineEvent struct {
 type FillEvent struct {
 	Type string `json:"type"`
 	Data *Fill  `json:"data"`
+}
+
+func removeAccents(s string) string {
+	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
+	r, _, _ := transform.String(t, s)
+	return r
 }
 
 func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) error {
@@ -187,7 +198,11 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 	} else if sender.State == Guessing {
 		lowerCasedInput := strings.ToLower(trimmed)
 		lowerCasedSearched := strings.ToLower(lobby.CurrentWord)
-		if lowerCasedSearched == lowerCasedInput {
+
+		normInput := removeAccents(lowerCasedInput)
+		normSearched := removeAccents(lowerCasedSearched)
+
+		if normSearched == normInput {
 			secondsLeft := lobby.RoundEndTime/1000 - time.Now().UTC().UnixNano()/1000000000
 			sender.LastScore = int(math.Ceil(math.Pow(math.Max(float64(secondsLeft), 1), 1.3) * 2))
 			sender.Score += sender.LastScore

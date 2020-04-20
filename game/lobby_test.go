@@ -28,3 +28,22 @@ func Test_CalculateVotesNeededToKick(t *testing.T) {
 		}
 	})
 }
+
+func Test_RemoveAccents(t *testing.T) {
+	t.Run("Check removing accented characters", func(test *testing.T) {
+		var expectedResults = map[string]string{
+			"é":  "e",
+			"à":  "a",
+			"ç":  "c",
+			"ö":  "o",
+			"œ":  "oe",
+		}
+	
+		for k, v := range expectedResults {
+			result := removeAccents(k)
+			if result != v {
+				t.Errorf("Error. Char was %s, but should've been %s", result, v)
+			}
+		}
+	})
+}
