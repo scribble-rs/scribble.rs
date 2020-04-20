@@ -11,12 +11,8 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"unicode"
 
-	"golang.org/x/text/runes"
-    "golang.org/x/text/transform"
-    "golang.org/x/text/unicode/norm"
-
+	"github.com/kennygrant/sanitize"
 	commands "github.com/Bios-Marcel/cmdp"
 	"github.com/Bios-Marcel/discordemojimap"
 	"github.com/agnivade/levenshtein"
@@ -769,7 +765,5 @@ func (lobby *Lobby) canDraw(player *Player) bool {
 }
 
 func removeAccents(s string) string {
-	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
-	r, _, _ := transform.String(t, s)
-	return r
+	return sanitize.Accents(s)
 }

@@ -33,10 +33,21 @@ func Test_RemoveAccents(t *testing.T) {
 	t.Run("Check removing accented characters", func(test *testing.T) {
 		var expectedResults = map[string]string{
 			"é":  "e",
+			"É":  "E",
 			"à":  "a",
+			"À":  "A",
 			"ç":  "c",
-			"ö":  "o",
+			"Ç":  "C",
+			"ö":  "oe",
+			"Ö":  "OE",
 			"œ":  "oe",
+			"\n":  "\n",
+			"\t":  "\t",
+			"\r":  "\r",
+			"":  "",
+			"  ":  "  ",
+			" · ":  " · ",
+			"?:!":  "?:!",
 		}
 	
 		for k, v := range expectedResults {
