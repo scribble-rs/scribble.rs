@@ -215,7 +215,7 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 			}
 
 			return
-		} else if levenshtein.ComputeDistance(lowerCasedInput, lowerCasedSearched) == 1 {
+		} else if levenshtein.ComputeDistance(normInput, normSearched) == 1 {
 			WriteAsJSON(sender, JSEvent{Type: "system-message", Data: fmt.Sprintf("'%s' is very close.", trimmed)})
 		}
 
