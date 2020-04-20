@@ -589,9 +589,16 @@ func createWordHintFor(word string, showAll bool) []*WordHint {
 				Underline: !irrelevantChar,
 			})
 		} else {
-			wordHints = append(wordHints, &WordHint{
-				Underline: !irrelevantChar,
-			})
+			if irrelevantChar {
+				wordHints = append(wordHints, &WordHint{
+					Character: char,
+					Underline: !irrelevantChar,
+				})
+			} else {
+				wordHints = append(wordHints, &WordHint{
+					Underline: !irrelevantChar,
+				})
+			}
 		}
 	}
 
