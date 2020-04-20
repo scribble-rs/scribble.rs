@@ -77,12 +77,6 @@ type FillEvent struct {
 	Data *Fill  `json:"data"`
 }
 
-func removeAccents(s string) string {
-	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
-	r, _, _ := transform.String(t, s)
-	return r
-}
-
 func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) error {
 	if received.Type == "message" {
 		dataAsString, isString := (received.Data).(string)
@@ -772,4 +766,10 @@ func (lobby *Lobby) JoinPlayer(playerName string) *Player {
 
 func (lobby *Lobby) canDraw(player *Player) bool {
 	return lobby.Drawer == player && lobby.CurrentWord != ""
+}
+
+func removeAccents(s string) string {
+	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
+	r, _, _ := transform.String(t, s)
+	return r
 }
