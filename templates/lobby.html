@@ -739,156 +739,85 @@
     drawingBoard.onmousemove = mouseUpdate;
     drawingBoard.onmouseleave = mouseUpdate;
 
-
     let sizeSlot = 0;
-    function wheelSize(e) {
-        event.preventDefault();
+        let toolSlot = 0;
+        let colorSlot = 0;
+        let colorBox = document.getElementsByClassName('color-button');
+        var keyMap = {};
+        document.body.addEventListener('keydown', function(e) {
+            keyMap[e.key] = true;
+        });
+        document.body.addEventListener('keyup', function(e) {
+            keyMap[e.key] = false;
+        });
+        
+        drawingBoard.onwheel = function wheelUpdate(e) {
+            event.preventDefault();
 
-        sizeSlot += Math.min(Math.max(-1, e.deltaY), 1);
-        if (sizeSlot < 0) {
-            sizeSlot = 0;
-        } else if (sizeSlot > 3) {
-            sizeSlot = 3;
-        }
+            if (keyMap['g']) {
+                sizeSlot += Math.min(Math.max(-1, e.deltaY), 1);
+                if (sizeSlot < 0) {
+                    sizeSlot = 0;
+                } else if (sizeSlot > 3) {
+                    sizeSlot = 3;
+                }
 
-        switch (sizeSlot) {
-            case 0:
-                n = 8;
-                break;
-            case 1:
-                n = 15;
-                break;
-            case 2:
-                n = 30;
-                break;
-            case 3:
-                n = 40;
-                break;
-            default:
-                console.log('No existing slot?');
-                break;
-        }
+                switch (sizeSlot) {
+                    case 0:
+                        n = 8;
+                        break;
+                    case 1:
+                        n = 15;
+                        break;
+                    case 2:
+                        n = 30;
+                        break;
+                    case 3:
+                        n = 40;
+                        break;
+                    default:
+                        console.log('No existing slot?');
+                        break;
+                }
+                document.getElementById('size' + n).checked = true;
+                setLineWidth(n);
+        
+            } else if (keyMap['f']) {
+                toolSlot += Math.min(Math.max(-1, e.deltaY), 1);
+                if (toolSlot < 0) {
+                    toolSlot = 0;
+                } else if (toolSlot > 2) {
+                    toolSlot = 2;
+                }
 
-        document.getElementById('size' + n).checked = true;
-        setLineWidth(n);
-    }
-    drawingBoard.onwheel = wheelSize;
+                switch (toolSlot) {
+                    case 0:
+                        n = 'pencil';
+                        break;
+                    case 1:
+                        n = 'fill';
+                        break;
+                    case 2:
+                        n = 'rubber';
+                        break;
+                    default:
+                        console.log('No existing slot?');
+                        break;
+                }
+                tool = document.getElementById('tool-type-' + n);
+                tool.checked = true;
+                tool.onchange();
+            } else if (keyMap['d']) {
 
-    let toolSlot = 0;
-    function wheelTool(e) {
-        event.preventDefault();
-
-        toolSlot += Math.min(Math.max(-1, e.deltaY), 1);
-        if (toolSlot < 0) {
-            toolSlot = 0;
-        } else if (toolSlot > 2) {
-            toolSlot = 2;
-        }
-
-        switch (toolSlot) {
-            case 0:
-                n = 'pencil';
-                break;
-            case 1:
-                n = 'fill';
-                break;
-            case 2:
-                n = 'rubber';
-                break;
-            default:
-                console.log('No existing slot?');
-                break;
-        }
-
-        document.getElementById('tool-type-' + n).checked = true;
-        chooseTool(n);
-    }
-    document.getElementsByClassName('pencil-sizes-container')[0].onwheel = wheelTool;
-
-    let colorSlot = 0;
-    function wheelColor(e) {
-        event.preventDefault();
-
-        colorSlot += Math.min(Math.max(-1, e.deltaY), 1);
-        if (colorSlot < 0) {
-            colorSlot = 0;
-        } else if (colorSlot > 21) {
-            colorSlot = 21;
-        }
-
-        switch (colorSlot) {
-            case 0:
-                setColor('#ffffff');
-                break;
-            case 1:
-                setColor('#c1c1c1');
-                break;
-            case 2:
-                setColor('#ef130b');
-                break;
-            case 3:
-                setColor('#ff7100');
-                break;
-            case 4:
-                setColor('#ffe400');
-                break;
-            case 5:
-                setColor('#00cc00');
-                break;
-            case 6:
-                setColor('#00b2ff');
-                break;
-            case 7:
-                setColor('#231fd3');
-                break;
-            case 8:
-                setColor('#a300ba');
-                break;
-            case 9:
-                setColor('#d37caa');
-                break;
-            case 10:
-                setColor('#a0522d');
-                break;
-            case 11:
-                setColor('#000000');
-                break;
-            case 12:
-                setColor('#4c4c4c');
-                break;
-            case 13:
-                setColor('#740b07');
-                break;
-            case 14:
-                setColor('#c23800');
-                break;
-            case 15:
-                setColor('#e8a200');
-                break;
-            case 16:
-                setColor('#005510');
-                break;
-            case 17:
-                setColor('#00569e');
-                break;
-            case 18:
-                setColor('#0e0865');
-                break;
-            case 19:
-                setColor('#550069');
-                break;
-            case 20:
-                setColor('#a75574');
-                break;
-            case 21:
-                setColor('#63300d');
-                break;
-            default:
-                console.log('No existing slot?');
-                break;
-        }
-    }
-    document.getElementsByClassName('color-button-container')[0].onwheel = wheelColor;
+                colorSlot += Math.min(Math.max(-1, e.deltaY), 1);
+                if (colorSlot < 0) {
+                    colorSlot = 0;
+                } else if (colorSlot > colorBox.length) {
+                    colorSlot = colorBox.length;
+                }
+                colorBox[colorSlot].onclick();
+            }
+        };
 
     // necessary for mousemove to not use the previous exit coordinates.
     window.onmousemove = function (e) {
