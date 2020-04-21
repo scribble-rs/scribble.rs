@@ -490,7 +490,20 @@ func endGame(lobby *Lobby) {
 	recalculateRanks(lobby)
 	triggerPlayersUpdate(lobby)
 
-	WritePublicSystemMessage(lobby, "Game over. Type !start again to start a new round.")
+	WritePublicSystemMessage(lobby, "Game over. The owner can restart the game.")
+	WriteAsJSON(lobby.Owner, JSEvent{Type: "ready", Data: &Ready{
+		PlayerID:   lobby.Owner.ID,
+		Drawing:    lobby.Owner.State == Drawing,
+		PlayerName: lobby.Owner.Name,
+
+		OwnerID:        lobby.Owner.ID,
+		Round:          lobby.Round,
+		MaxRound:       lobby.MaxRounds,
+		RoundEndTime:   int(lobby.RoundEndTime - getTimeAsMillis()),
+		WordHints:      lobby.GetAvailableWordHints(lobby.Owner),
+		Players:        lobby.Players,
+		CurrentDrawing: lobby.CurrentDrawing,
+	}})
 }
 
 // selectNextDrawer returns the next person that's supposed to be drawing, but
