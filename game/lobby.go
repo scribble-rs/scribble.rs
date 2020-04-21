@@ -765,5 +765,9 @@ func (lobby *Lobby) canDraw(player *Player) bool {
 }
 
 func removeAccents(s string) string {
-	return sanitize.Accents(s)
+	r := sanitize.Accents(s)
+	r = strings.ReplaceAll(r, " ", "")
+	r = strings.ReplaceAll(r, "-", "")
+	r = strings.ReplaceAll(r, "_", "")
+	return r
 }
