@@ -471,6 +471,7 @@
             roundEndTime = ready.roundEndTime;
             applyRounds(ready.round, ready.maxRounds);
 
+
             if (ready.round === 0 && ownerID === ownID) {
                 startDialog.style.visibility = "visible";
             }
@@ -483,6 +484,8 @@
             }
             if (ready.wordHints && ready.wordHints.length) {
                 applyWordHints(ready.wordHints)
+            } else {
+                displayPlayerChoosingWord(parsed.data.players);
             }
         }
         if (parsed.type === "update-players") {
@@ -491,6 +494,9 @@
             playWav('/resources/plop.wav');
         } else if (parsed.type === "update-wordhint") {
             applyWordHints(parsed.data);
+            // As update-wordhint is triggered when the word is chosen,
+            // this allows us to disable "x is choosing word" screen
+            // But a more appropriated/specific event would be better
             turnDialog.style.visibility = "hidden";
         } else if (parsed.type === "message") {
             applyMessage("", parsed.data.author, parsed.data.content);
@@ -515,20 +521,7 @@
             applyRounds(parsed.data.round, maxRounds);
             applyPlayers(parsed.data.players);
 
-            drawer = "";
-            cached = parsed.data.players;
-            cached.forEach(function (player) {
-                if (player.state === 1 && player.id != ownID)
-                {
-                    drawer = player.name;
-                }
-            });
-
-            if (drawer != "")
-            {
-                document.getElementById('next-player').innerHTML = drawer;
-                turnDialog.style.visibility = "visible";
-            }
+            displayPlayerChoosingWord(parsed.data.players);
 
             //We clear this, since there's no word chosen right now.
             wordContainer.innerHTML = "";
@@ -540,6 +533,17 @@
             promptWords(parsed.data[0], parsed.data[1], parsed.data[2]);
         }
     };
+
+    function displayPlayerChoosingWord(players) {
+        for (i = 0; i < players.length ; i++){
+            if (players[i].state === 1 && players[i].id != ownID)
+            {
+                document.getElementById('next-player').innerHTML = players[i].name;
+                turnDialog.style.visibility = "visible";
+                break;
+            }
+        }
+    }
 
     socket.onclose = event => console.log("Socket Closed Connection: ", event);
     socket.onerror = error => console.log("Socket Error: ", error);
