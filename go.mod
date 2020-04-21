@@ -11,6 +11,7 @@ require (
 	github.com/gobuffalo/packr/v2 v2.8.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/karrick/godirwalk v1.15.6 // indirect
+	github.com/kennygrant/sanitize v1.2.4
 	github.com/kr/text v0.2.0 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/satori/go.uuid v1.2.0
