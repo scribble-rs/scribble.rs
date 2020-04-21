@@ -45,9 +45,10 @@ func Test_RemoveAccents(t *testing.T) {
 			"\t":  "\t",
 			"\r":  "\r",
 			"":  "",
-			"  ":  "  ",
-			" · ":  " · ",
+			"·":  "·",
 			"?:!":  "?:!",
+			"ac-ab":  "acab",
+			"ac - _ab-- ":  "acab",
 		}
 	
 		for k, v := range expectedResults {
