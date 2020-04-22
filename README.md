@@ -41,6 +41,8 @@ https://heroku.com/deploy?template=https://github.com/scribble-rs/scribble.rs/tr
 
 ## Building / Running
 
+##### Warning: At the moment, there are some issues with building. Please see issue [#114](https://github.com/scribble-rs/scribble.rs/issues/114)
+
 Run the following to build the application:
 
 ```shell
