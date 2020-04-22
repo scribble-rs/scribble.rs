@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style type="text/css">
+    .video-grid{
+        width: 1000px;
+        height: 1000px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    .local_stream{
+        margin: 5px;
+        width: 200px;
+        height: 200px;
+    }
+    .video-placeholder{
+        margin: 5px;
+        width: 200px;
+        height: 200px;
+    }
+
+</style>
+<form id="form">
+    <div class="input-field">
+        <label for="cameraId" class="active">CAMERA</label>
+        <select name="cameraId" id="cameraId"></select>
+    </div>
+    <div class="input-field">
+        <label for="microphoneId" class="active">MICROPHONE</label>
+        <select name="microphoneId" id="microphoneId"></select>
+    </div>
+    <div class="input-field">
+        <label for="cameraResolution" class="active">CAMERA RESOLUTION</label>
+        <select name="cameraResolution" id="cameraResolution"></select>
+    </div>
+</form>
+<div id="button">
+    <button class="button" id="join">JOIN</button>
+    <button class="button" id="leave">LEAVE</button>
+    <button class="button" id="publish">PUBLISH</button>
+    <button class="button" id="unpublish">UNPUBLISH</button>
+</div>
+<div class="video-grid" id="video">
+    <div class="video-view">
+        <div id="local_stream" class="video-placeholder"></div>
+    </div>
+</div>
+<body>
+<script src="jquery.min.js"></script>
+<script src="materialize.min.js"></script>
+<script src="AgoraRTCSDK-3.0.2.js"></script>
+<script src="agora.js"></script>
+<script>
+    const video=new Video(
+        {
+            appID:"a1e7f7e62ce3401397d2c7cba836979b",
+            token:"0065f05c8ce1679426aac75f20b14e83bfcIABXK+lj323VF+1BXK5j8bQqib3clo3YTuNo1My1Lj47j/fI+dsAAAAAEAALV6bz4ZmgXgEAAQDEmaBe",
+            channel:"1111",
+            //'720p','480p','1080p','default'
+            //'live','rtc'
+            mode:"live",
+            //''
+            codec:"h264"
+        }
+    );
+    document.querySelector('#join').addEventListener('click',()=>{video.joinVideo()});
+    document.querySelector('#leave').addEventListener('click',()=>{video.leaveVideo()});
+    document.querySelector('#publish').addEventListener('click',()=>{video.publishVideo()});
+    document.querySelector('#unpublish').addEventListener('click',()=>{video.unpublishVideo()});
+</script>
+</body>
+</html>
