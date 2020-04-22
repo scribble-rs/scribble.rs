@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/kennygrant/sanitize"
 	commands "github.com/Bios-Marcel/cmdp"
 	"github.com/Bios-Marcel/discordemojimap"
 	"github.com/agnivade/levenshtein"
@@ -187,7 +188,11 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 	} else if sender.State == Guessing {
 		lowerCasedInput := strings.ToLower(trimmed)
 		lowerCasedSearched := strings.ToLower(lobby.CurrentWord)
-		if lowerCasedSearched == lowerCasedInput {
+
+		normInput := removeAccents(lowerCasedInput)
+		normSearched := removeAccents(lowerCasedSearched)
+
+		if normSearched == normInput {
 			secondsLeft := lobby.RoundEndTime/1000 - time.Now().UTC().UnixNano()/1000000000
 			sender.LastScore = int(math.Ceil(math.Pow(math.Max(float64(secondsLeft), 1), 1.3) * 2))
 			sender.Score += sender.LastScore
@@ -206,7 +211,7 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 			}
 
 			return
-		} else if levenshtein.ComputeDistance(lowerCasedInput, lowerCasedSearched) == 1 {
+		} else if levenshtein.ComputeDistance(normInput, normSearched) == 1 {
 			WriteAsJSON(sender, JSEvent{Type: "system-message", Data: fmt.Sprintf("'%s' is very close.", trimmed)})
 		}
 
@@ -757,4 +762,12 @@ func (lobby *Lobby) JoinPlayer(playerName string) *Player {
 
 func (lobby *Lobby) canDraw(player *Player) bool {
 	return lobby.Drawer == player && lobby.CurrentWord != ""
+}
+
+func removeAccents(s string) string {
+	r := sanitize.Accents(s)
+	r = strings.ReplaceAll(r, " ", "")
+	r = strings.ReplaceAll(r, "-", "")
+	r = strings.ReplaceAll(r, "_", "")
+	return r
 }
