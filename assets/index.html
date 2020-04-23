@@ -15,7 +15,7 @@
         overflow: hidden;
         position:absolute;
         flex-flow: wrap;
-        right: 100px;
+        right: 200px;
         justify-content: space-between;
     }
     /*local style*/
@@ -65,23 +65,6 @@
 <script src="materialize.min.js"></script>
 <script src="AgoraRTCSDK-3.0.2.js"></script>
 <script src="agora.js"></script>
-<script>
-    /*
-    *
-    *new Video(videoValue) get a instance  of Video
-    * */
-    const videoValue=  {
-        appID:"a1e7f7e62ce3401397d2c7cba836979b",
-        token:"0065f05c8ce1679426aac75f20b14e83bfcIABXK+lj323VF+1BXK5j8bQqib3clo3YTuNo1My1Lj47j/fI+dsAAAAAEAALV6bz4ZmgXgEAAQDEmaBe",
-        channel:"1111",
-        mode:"live",
-        codec:"h264"
-    };
-    const video=new Video(videoValue);
-    document.querySelector('#join').addEventListener('click',()=>{video.joinVideo()});
-    document.querySelector('#leave').addEventListener('click',()=>{video.leaveVideo()});
-    document.querySelector('#publish').addEventListener('click',()=>{video.publishVideo()});
-    document.querySelector('#unpublish').addEventListener('click',()=>{video.unpublishVideo()});
-</script>
+<script src="agoraInstance.js"></script>
 </body>
 </html>

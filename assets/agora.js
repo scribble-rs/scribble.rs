@@ -1,6 +1,6 @@
 class Video{
     constructor(options = {}){
-        let {appID,token,channel,codec,mode} = options;
+        let {ad:appID,tn:token,cl:channel,cc:codec,me:mode} = options;
         ['appID', 'token', 'channel','mode','codec'].forEach(item => {
             this[item] = eval(item)
         });
@@ -53,55 +53,55 @@ class Video{
         this.fields=['appID', 'channel'];
         this.init(this.fields);
     }
-      init(){
-              this.getDevices((devices)=>{
-                  devices.audios.forEach(function (audio) {
-                      $('<option/>', {
-                          value: audio.value,
-                          text: audio.name,
-                      }).appendTo("#microphoneId");
-                  })
-                  devices.videos.forEach(function (video) {
-                      $('<option/>', {
-                          value: video.value,
-                          text: video.name,
-                      }).appendTo("#cameraId");
-                  })
-                  this.resolutions.forEach(function (resolution) {
-                      $('<option/>', {
-                          value: resolution.value,
-                          text: resolution.name
-                      }).appendTo("#cameraResolution");
-                  })
-                  //M.AutoInit();
-              })
-     /*         var fields = this.fields;
-              $("#publish").on("click", (e)=>{
-                  console.log("publish");
-                  e.preventDefault();
-                  var params = this.serializeformData();
-                  if (this.validator(params, fields)) {
-                      this.publish(this.rtc);
-                  }
-              });
-              $("#unpublish").on("click",(e)=>{
-                  console.log("unpublish")
-                  e.preventDefault();
-                  var params = this.serializeformData();
-                  if (this.validator(params, fields)) {
-                      this.unpublish(this.rtc);
-                  }
-              });
-              $("#leave").on("click",(e)=>{
-                  console.log("leave")
-                  e.preventDefault();
-                  var params = this.serializeformData();
-                  if (this.validator(params, fields)) {
-                      this.leave(this.rtc);
-                  }
-              })
-*/
-      }
+    init(){
+        this.getDevices((devices)=>{
+            devices.audios.forEach(function (audio) {
+                $('<option/>', {
+                    value: audio.value,
+                    text: audio.name,
+                }).appendTo("#microphoneId");
+            })
+            devices.videos.forEach(function (video) {
+                $('<option/>', {
+                    value: video.value,
+                    text: video.name,
+                }).appendTo("#cameraId");
+            })
+            this.resolutions.forEach(function (resolution) {
+                $('<option/>', {
+                    value: resolution.value,
+                    text: resolution.name
+                }).appendTo("#cameraResolution");
+            })
+            //M.AutoInit();
+        })
+        /*         var fields = this.fields;
+                 $("#publish").on("click", (e)=>{
+                     console.log("publish");
+                     e.preventDefault();
+                     var params = this.serializeformData();
+                     if (this.validator(params, fields)) {
+                         this.publish(this.rtc);
+                     }
+                 });
+                 $("#unpublish").on("click",(e)=>{
+                     console.log("unpublish")
+                     e.preventDefault();
+                     var params = this.serializeformData();
+                     if (this.validator(params, fields)) {
+                         this.unpublish(this.rtc);
+                     }
+                 });
+                 $("#leave").on("click",(e)=>{
+                     console.log("leave")
+                     e.preventDefault();
+                     var params = this.serializeformData();
+                     if (this.validator(params, fields)) {
+                         this.leave(this.rtc);
+                     }
+                 })
+   */
+    }
 
     Toastify (options) {
 
@@ -109,7 +109,7 @@ class Video{
     }
 
 
-     validator(formData, fields) {
+    validator(formData, fields) {
         var keys = Object.keys(formData);
         for (let key of keys) {
             if (fields.indexOf(key) != -1) {
@@ -122,7 +122,7 @@ class Video{
         return true;
     }
 
-     serializeformData() {
+    serializeformData() {
         let formData = $("#form").serializeArray();
         let obj = {};
         for (let item of formData) {
@@ -130,15 +130,15 @@ class Video{
             let val = item.value;
             obj[key] = val;
         }
-         obj.appID=this.appID;
-         obj.token=this.token;
-         obj.channel=this.channel;
-         obj.mode=this.mode;
-         obj.codec=this.codec;
+        obj.appID=this.appID;
+        obj.token=this.token;
+        obj.channel=this.channel;
+        obj.mode=this.mode;
+        obj.codec=this.codec;
         return obj;
     }
 
-     addView (id, show) {
+    addView (id, show) {
         if (!$("#" + id)[0]) {
             $("<div/>", {
                 id: "remote_video_panel_" + id,
@@ -161,12 +161,12 @@ class Video{
             }).appendTo("#remote_video_panel_" + id);
         }
     }
-     removeView (id) {
+    removeView (id) {
         if ($("#remote_video_panel_" + id)[0]) {
             $("#remote_video_panel_"+id).remove();
         }
     }
-     getDevices (next) {
+    getDevices (next) {
         AgoraRTC.getDevices(function (items) {
             items.filter(function (item) {
                 return ['audioinput', 'videoinput'].indexOf(item.kind) !== -1
@@ -210,7 +210,7 @@ class Video{
             next({videos: videos, audios: audios});
         });
     }
-     handleEvents (rtc) {
+    handleEvents (rtc) {
         // Occurs when an error message is reported and requires error handling.
         rtc.client.on("error", (err) => {
             console.log(err)
@@ -278,7 +278,7 @@ class Video{
         })
     }
 
-     join (rtc, option) {
+    join (rtc, option) {
 
         if (rtc.joined) {
             this.Toast.error("Your already joined");
@@ -362,7 +362,7 @@ class Video{
         });
     }
 
-     publish (rtc) {
+    publish (rtc) {
         if (!rtc.client) {
             this.Toast.error("Please Join Room First");
             return;
@@ -382,11 +382,11 @@ class Video{
         })
         this.Toast.info("publish")
         rtc.published = true
-         console.log(rtc.published);
-     }
+        console.log(rtc.published);
+    }
 
-     unpublish (rtc) {
-    if (!rtc.client) {
+    unpublish (rtc) {
+        if (!rtc.client) {
 
             return;
         }
@@ -395,9 +395,9 @@ class Video{
             return;
         }
 
-         let oldState = rtc.published;
-         console.log(oldState);
-         rtc.client.unpublish(rtc.localStream,(err)=>{
+        let oldState = rtc.published;
+        console.log(oldState);
+        rtc.client.unpublish(rtc.localStream,(err)=>{
             rtc.published = oldState;
             console.log("unpublish failed");
             console.error(err);
@@ -406,7 +406,7 @@ class Video{
         rtc.published = false;
     }
 
-     leave (rtc) {
+    leave (rtc) {
         if (!rtc.client) {
             this.Toast.error("Please Join First!");
             return;
@@ -445,17 +445,17 @@ class Video{
     }
     joinVideo(){
         console.log(this);
-      /*  e.preventDefault();*/
-            var params = this.serializeformData();
-            if (this.validator(params, this.fields)) {
-                this.join(this.rtc, params);
-            }
+        /*  e.preventDefault();*/
+        var params = this.serializeformData();
+        if (this.validator(params, this.fields)) {
+            this.join(this.rtc, params);
         }
+    }
     unpublishVideo(){
-            var params = this.serializeformData();
-            if (this.validator(params, this.fields)) {
-                this.unpublish(this.rtc);
-            }
+        var params = this.serializeformData();
+        if (this.validator(params, this.fields)) {
+            this.unpublish(this.rtc);
+        }
     };
     publishVideo(){
         var params = this.serializeformData();
@@ -464,10 +464,10 @@ class Video{
         }
     };
     leaveVideo(){
-       /*     e.preventDefault();*/
-            var params = this.serializeformData();
-            if (this.validator(params, this.fields)) {
-                this.leave(this.rtc);
-            }
+        /*     e.preventDefault();*/
+        var params = this.serializeformData();
+        if (this.validator(params, this.fields)) {
+            this.leave(this.rtc);
+        }
     }
 }
