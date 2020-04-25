@@ -16,6 +16,18 @@ type rocketChatPayload struct {
 	Text  string `json:"text"`
 }
 
+// Go doesn't set timeouts by default
+var netTransport = &http.Transport{
+	Dial: (&net.Dialer{
+		Timeout: 5 * time.Second,
+	}).Dial,
+	TLSHandshakeTimeout: 5 * time.Second,
+}
+var netClient = &http.Client{
+	Timeout:   time.Second * 10,
+	Transport: netTransport,
+}
+
 func updateRocketChat(lobby *Lobby, player *Player) {
 	state := "connected"
 	count := 0
@@ -40,16 +52,6 @@ func updateRocketChat(lobby *Lobby, player *Player) {
 	sendRocketChatMessage(fmt.Sprintf("%v has %v. There are %v players in the game. Join [here](%v/ssrEnterLobby?lobby_id=%v)", player.Name, state, count, scribbleURL, lobby.ID))
 }
 func sendRocketChatMessage(msg string) {
-	var netTransport = &http.Transport{
-		Dial: (&net.Dialer{
-			Timeout: 5 * time.Second,
-		}).Dial,
-		TLSHandshakeTimeout: 5 * time.Second,
-	}
-	var netClient = &http.Client{
-		Timeout:   time.Second * 10,
-		Transport: netTransport,
-	}
 	rocketchatWebhook, exists := os.LookupEnv("ROCKETCHAT_WEBHOOK")
 	if !exists {
 		log.Printf("WARNING: ROCKETCHAT_WEBHOOK not set. Unable to send RocketChat messages")
