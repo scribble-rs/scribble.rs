@@ -12,11 +12,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kennygrant/sanitize"
 	commands "github.com/Bios-Marcel/cmdp"
 	"github.com/Bios-Marcel/discordemojimap"
 	"github.com/agnivade/levenshtein"
 	petname "github.com/dustinkirkland/golang-petname"
+	"github.com/kennygrant/sanitize"
 )
 
 var (
@@ -769,9 +769,7 @@ func (lobby *Lobby) canDraw(player *Player) bool {
 }
 
 func removeAccents(s string) string {
-	r := sanitize.Accents(s)
-	r = strings.ReplaceAll(r, " ", "")
-	r = strings.ReplaceAll(r, "-", "")
-	r = strings.ReplaceAll(r, "_", "")
-	return r
+	return strings.
+		NewReplacer(" ", "", "-", "", "_", "").
+		Replace(sanitize.Accents(s))
 }
