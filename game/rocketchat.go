@@ -16,47 +16,57 @@ type rocketChatPayload struct {
 	Text  string `json:"text"`
 }
 
-// Go doesn't set timeouts by default
-var netTransport = &http.Transport{
-	Dial: (&net.Dialer{
-		Timeout: 5 * time.Second,
-	}).Dial,
-	TLSHandshakeTimeout: 5 * time.Second,
-}
-var netClient = &http.Client{
-	Timeout:   time.Second * 10,
-	Transport: netTransport,
+var (
+	// Go doesn't set timeouts by default
+	netTransport = &http.Transport{
+		Dial: (&net.Dialer{
+			Timeout: 5 * time.Second,
+		}).Dial,
+		TLSHandshakeTimeout: 5 * time.Second,
+	}
+
+	netClient = &http.Client{
+		Timeout:   time.Second * 10,
+		Transport: netTransport,
+	}
+
+	rocketchatWebhook string
+	scribbleURL       string
+)
+
+func init() {
+	rocketchatWebhook, _ = os.LookupEnv("ROCKETCHAT_WEBHOOK")
+	scribbleURL, _ = os.LookupEnv("SCRIBBLE_URL")
 }
 
 func updateRocketChat(lobby *Lobby, player *Player) {
-	state := "connected"
-	count := 0
+	//This means scribble wasn't set up correctly for use with rocket chat.
+	if rocketchatWebhook == "" || scribbleURL == "" {
+		return
+	}
+
+	var count int
 	// Only count connected players
 	for _, p := range lobby.Players {
 		if p.Connected {
 			count++
 		}
 	}
+
+	var action string
 	if !player.Connected {
-		state = "disconnected"
+		action = "disconnected"
+	} else {
+		action = "connected"
 	}
+
 	if count == 0 {
-		sendRocketChatMessage(fmt.Sprintf("%v has %v. The game has ended.", player.Name, state))
-		return
+		sendRocketChatMessage(fmt.Sprintf("%v has %v. The game has ended.", player.Name, action))
+	} else {
+		sendRocketChatMessage(fmt.Sprintf("%v has %v. There are %v players in the game. Join [here](%v/ssrEnterLobby?lobby_id=%v)", player.Name, action, count, scribbleURL, lobby.ID))
 	}
-	scribbleURL, exists := os.LookupEnv("SCRIBBLE_URL")
-	if !exists {
-		log.Printf("WARNING: SCRIBBLE_URL not set. Unable to send RocketChat messages")
-		return
-	}
-	sendRocketChatMessage(fmt.Sprintf("%v has %v. There are %v players in the game. Join [here](%v/ssrEnterLobby?lobby_id=%v)", player.Name, state, count, scribbleURL, lobby.ID))
 }
 func sendRocketChatMessage(msg string) {
-	rocketchatWebhook, exists := os.LookupEnv("ROCKETCHAT_WEBHOOK")
-	if !exists {
-		log.Printf("WARNING: ROCKETCHAT_WEBHOOK not set. Unable to send RocketChat messages")
-		return
-	}
 	payload := rocketChatPayload{
 		Alias: "Scribble Bot",
 		Text:  msg,
@@ -64,7 +74,6 @@ func sendRocketChatMessage(msg string) {
 	payloadByte, err := json.Marshal(payload)
 	_, err = netClient.Post(rocketchatWebhook, "application/json", bytes.NewReader(payloadByte))
 	if err != nil {
-		log.Printf("%v", err)
-		return
+		log.Println(err)
 	}
 }
