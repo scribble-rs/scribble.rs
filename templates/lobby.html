@@ -613,6 +613,8 @@
                 wordContainer.innerHTML += '<span class="guess-letter guess-letter-underline">&nbsp;</span>';
             } else {
                 let char = String.fromCharCode(hint.character);
+                if(char == "ß")
+                    char = "ẞ";
                 if (hint.underline) {
                     wordContainer.innerHTML += '<span class="guess-letter guess-letter-underline">' + char + '</span>'
                 } else {
