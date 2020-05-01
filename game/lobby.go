@@ -198,7 +198,9 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 			sender.Score += sender.LastScore
 			lobby.scoreEarnedByGuessers += sender.LastScore
 			sender.State = Standby
-			WriteAsJSON(sender, JSEvent{Type: "system-message", Data: "You have correctly guessed the word."})
+
+			// Inform all lobby players that someone found the word
+			triggerCorrectGuessEvent(lobby, sender)
 
 			if !lobby.isAnyoneStillGuessing() {
 				endTurn(lobby)
@@ -206,7 +208,6 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 				//Since the word has been guessed correctly, we reveal it.
 				WriteAsJSON(sender, JSEvent{Type: "update-wordhint", Data: lobby.WordHintsShown})
 				recalculateRanks(lobby)
-				triggerCorrectGuessEvent(lobby)
 				triggerPlayersUpdate(lobby)
 			}
 
@@ -621,8 +622,13 @@ func triggerPlayersUpdate(lobby *Lobby) {
 	TriggerComplexUpdateEvent("update-players", lobby.Players, lobby)
 }
 
-func triggerCorrectGuessEvent(lobby *Lobby) {
-	TriggerSimpleUpdateEvent("correct-guess", lobby)
+// Broadcast `word-guessed-message` event to all `lobby` players about `player` success
+func triggerCorrectGuessEvent(lobby *Lobby, player *Player) {
+	SendDataToConnectedPlayers(
+		&Player{},
+		lobby,
+		JSEvent{Type: "word-guessed-message", Data: fmt.Sprintf("%s guessed the word!", player.Name)},
+	)
 }
 
 func triggerWordHintUpdate(lobby *Lobby) {

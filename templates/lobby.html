@@ -488,6 +488,8 @@
             applyMessage("", parsed.data.author, parsed.data.content);
         } else if (parsed.type === "system-message") {
             applyMessage("system-message", "System", parsed.data);
+        } else if (parsed.type === "word-guessed-message") {
+            applyMessage("word-guessed-message", "ScribbleBot", parsed.data);
         } else if (parsed.type === "non-guessing-player-message") {
             applyMessage("non-guessing-player-message", parsed.data.author, parsed.data.content);
         } else if (parsed.type === "line") {

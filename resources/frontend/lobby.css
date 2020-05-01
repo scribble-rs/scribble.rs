@@ -276,6 +276,10 @@ input[type="button"]:active,
     color: red;
 }
 
+.word-guessed-message {
+    color: green;
+}
+
 #toolbox {
     grid-column-start: 2;
     grid-column-end: 3;

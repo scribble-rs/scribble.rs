@@ -112,9 +112,9 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 }
 
 func SendDataToConnectedPlayers(sender *game.Player, lobby *game.Lobby, data interface{}) {
-	for _, otherPlayer := range lobby.Players {
-		if otherPlayer != sender {
-			WriteAsJSON(otherPlayer, data)
+	for _, allPlayers := range lobby.Players {
+		if allPlayers != sender {
+			WriteAsJSON(allPlayers, data)
 		}
 	}
 }
