@@ -112,7 +112,7 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 }
 
 func SendDataToConnectedPlayers(sender *game.Player, lobby *game.Lobby, data interface{}) {
-	for _, otherPlayer := range lobby.Players {
+	for _, otherPlayer := range lobby.GetPlayers() {
 		if otherPlayer != sender {
 			WriteAsJSON(otherPlayer, data)
 		}
@@ -121,7 +121,7 @@ func SendDataToConnectedPlayers(sender *game.Player, lobby *game.Lobby, data int
 
 func TriggerSimpleUpdateEvent(eventType string, lobby *game.Lobby) {
 	event := &game.JSEvent{Type: eventType}
-	for _, otherPlayer := range lobby.Players {
+	for _, otherPlayer := range lobby.GetPlayers() {
 		//FIXME Why did i use a goroutine here but not anywhere else?
 		go func(player *game.Player) {
 			WriteAsJSON(player, event)
@@ -131,13 +131,13 @@ func TriggerSimpleUpdateEvent(eventType string, lobby *game.Lobby) {
 
 func TriggerComplexUpdateEvent(eventType string, data interface{}, lobby *game.Lobby) {
 	event := &game.JSEvent{Type: eventType, Data: data}
-	for _, otherPlayer := range lobby.Players {
+	for _, otherPlayer := range lobby.GetPlayers() {
 		WriteAsJSON(otherPlayer, event)
 	}
 }
 
 func TriggerComplexUpdatePerPlayerEvent(eventType string, data func(*game.Player) interface{}, lobby *game.Lobby) {
-	for _, otherPlayer := range lobby.Players {
+	for _, otherPlayer := range lobby.GetPlayers() {
 		WriteAsJSON(otherPlayer, &game.JSEvent{Type: eventType, Data: data(otherPlayer)})
 	}
 }
@@ -158,7 +158,7 @@ func WriteAsJSON(player *game.Player, object interface{}) error {
 
 func WritePublicSystemMessage(lobby *game.Lobby, text string) {
 	playerHasBeenKickedMsg := &game.JSEvent{Type: "system-message", Data: html.EscapeString(text)}
-	for _, otherPlayer := range lobby.Players {
+	for _, otherPlayer := range lobby.GetPlayers() {
 		//In simple message events we ignore write failures.
 		WriteAsJSON(otherPlayer, playerHasBeenKickedMsg)
 	}

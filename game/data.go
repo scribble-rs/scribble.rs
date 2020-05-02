@@ -10,6 +10,7 @@ import (
 )
 
 // Lobby represents a game session.
+// FIXME Field visibilities should be changed in case we ever serialize this.
 type Lobby struct {
 	// ID uniquely identified the Lobby.
 	ID string
@@ -25,27 +26,29 @@ type Lobby struct {
 	// CustomWords are additional words that will be used in addition to the
 	// predefined words.
 	CustomWords []string
-	Words       []string
+	words       []string
+	public      bool
 
-	// Players references all participants of the Lobby.
-	Players []*Player
+	// players references all participants of the Lobby.
+	players []*Player
 
-	// Drawer references the Player that is currently drawing.
-	Drawer *Player
-	// Owner references the Player that created the lobby.
-	Owner *Player
+	// drawer references the Player that is currently drawing.
+	drawer *Player
+	// owner references the Player that created the lobby.
+	owner *Player
 	// CurrentWord represents the word that was last selected. If no word has
 	// been selected yet or the round is already over, this should be empty.
 	CurrentWord string
-	// WordHints for the current word.
-	WordHints []*WordHint
-	// WordHintsShown are the same as WordHints with characters visible.
-	WordHintsShown []*WordHint
+	// wordHints for the current word.
+	wordHints []*WordHint
+	// wordHintsShown are the same as wordHints with characters visible.
+	wordHintsShown []*WordHint
 	// Round is the round that the Lobby is currently in. This is a number
 	// between 0 and MaxRounds. 0 indicates that it hasn't started yet.
 	Round int
-	// WordChoice represents the current choice of words.
-	WordChoice []string
+	// wordChoice represents the current choice of words.
+	wordChoice []string
+	Wordpack   string
 	// RoundEndTime represents the time at which the current round will end.
 	// This is a UTC unix-timestamp in milliseconds.
 	RoundEndTime int64
@@ -56,11 +59,11 @@ type Lobby struct {
 	alreadyUsedWords      []string
 	CustomWordsChance     int
 	ClientsPerIPLimit     int
-	// CurrentDrawing represents the state of the current canvas. The elements
+	// currentDrawing represents the state of the current canvas. The elements
 	// consist of LineEvent and FillEvent. Please do not modify the contents
 	// of this array an only move AppendLine and AppendFill on the respective
 	// lobby object.
-	CurrentDrawing []interface{}
+	currentDrawing []interface{}
 	EnableVotekick bool
 }
 
@@ -164,7 +167,7 @@ const (
 
 // GetPlayer searches for a player, identifying them by usersession.
 func (lobby *Lobby) GetPlayer(userSession string) *Player {
-	for _, player := range lobby.Players {
+	for _, player := range lobby.players {
 		if player.userSession == userSession {
 			return player
 		}
@@ -174,21 +177,21 @@ func (lobby *Lobby) GetPlayer(userSession string) *Player {
 }
 
 func (lobby *Lobby) ClearDrawing() {
-	lobby.CurrentDrawing = make([]interface{}, 0, 0)
+	lobby.currentDrawing = make([]interface{}, 0, 0)
 }
 
 // AppendLine adds a line direction to the current drawing. This exists in order
 // to prevent adding arbitrary elements to the drawing, as the backing array is
 // an empty interface type.
 func (lobby *Lobby) AppendLine(line *LineEvent) {
-	lobby.CurrentDrawing = append(lobby.CurrentDrawing, line)
+	lobby.currentDrawing = append(lobby.currentDrawing, line)
 }
 
 // AppendFill adds a fill direction to the current drawing. This exists in order
 // to prevent adding arbitrary elements to the drawing, as the backing array is
 // an empty interface type.
 func (lobby *Lobby) AppendFill(fill *FillEvent) {
-	lobby.CurrentDrawing = append(lobby.CurrentDrawing, fill)
+	lobby.currentDrawing = append(lobby.currentDrawing, fill)
 }
 
 // GetLobby returns a Lobby that has a matching ID or no Lobby if none could
@@ -254,7 +257,7 @@ func createLobby(
 		timeLeftTickerReset: make(chan struct{}),
 		ClientsPerIPLimit:   clientsPerIPLimit,
 		EnableVotekick:      enableVotekick,
-		CurrentDrawing:      make([]interface{}, 0, 0),
+		currentDrawing:      make([]interface{}, 0, 0),
 	}
 
 	if len(customWords) > 1 {
@@ -277,11 +280,30 @@ type JSEvent struct {
 }
 
 func (lobby *Lobby) HasConnectedPlayers() bool {
-	for _, otherPlayer := range lobby.Players {
+	for _, otherPlayer := range lobby.players {
 		if otherPlayer.Connected {
 			return true
 		}
 	}
 
 	return false
+}
+
+func (lobby *Lobby) IsPublic() bool {
+	return lobby.public
+}
+
+func (lobby *Lobby) GetPlayers() []*Player {
+	return lobby.players
+}
+
+func GetPublicLobbies() []*Lobby {
+	var publicLobbies []*Lobby
+	for _, lobby := range lobbies {
+		if lobby.IsPublic() {
+			publicLobbies = append(publicLobbies, lobby)
+		}
+	}
+
+	return publicLobbies
 }

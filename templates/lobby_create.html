@@ -12,60 +12,180 @@
 <body>
 <div class="content-wrapper">
     <h1>Scribble.rs</h1>
-    <h2>Create a lobby</h2>
 
-    <div class="center-container">
-        <div class="content-container">
-            {{if .Errors}}
-                <div class="error-list">
-                    Your input contains invalid data:
-                    <ul>
-                        {{range .Errors}}
-                            <li>{{.}}</li>
+    <div class="tab-header">
+        <label for="create-lobby-tab-button">
+            <input id="create-lobby-tab-button" class="custom-check-or-radio tab-button"
+                   type="radio" onclick="openTab('create-lobby')" name="tab" checked>
+            <div class="tab-label">Create Lobby</div>
+        </label>
+        <label for="join-lobby-tab-button">
+            <input id="join-lobby-tab-button" class="custom-check-or-radio tab-button"
+                   type="radio" onclick="openTab('join-lobby')" name="tab">
+            <div class="tab-label">Join Lobby</div>
+        </label>
+    </div>
+
+    <div id="create-lobby" class="tab-content">
+        <div class="center-container">
+            <div class="content-container">
+                {{if .Errors}}
+                    <div class="error-list">
+                        Your input contains invalid data:
+                        <ul>
+                            {{range .Errors}}
+                                <li>{{.}}</li>
+                            {{end}}
+                        </ul>
+                        <br/>
+                        Fix the input and try again.
+                    </div>
+
+                {{end}}
+                <form id="lobby-create" class="input-container" action="/ssrCreateLobby" method="POST">
+                    <b>Lobby-Language</b>
+                    <select class="input-item" name="language" placeholder="Choose your language">
+                        {{$language := .Language}}
+                        {{range $k, $v := .Languages}}
+                            <option value="{{$k}}" {{if eq $k $language}}selected="selected"{{end}}>{{$v}}</option>
                         {{end}}
-                    </ul>
-                    <br/>
-                    Fix the input and try again.
-                </div>
-
-            {{end}}
-            <form id="lobby-create" class="input-container" action="/ssrCreateLobby" method="POST">
-                <b>Lobby-Language</b>
-                <select class="input-item" name="language" placeholder="Choose your language">
-                    {{$language := .Language}}
-                    {{range $k, $v := .Languages}}
-                        <option value="{{$k}}" {{if eq $k $language}}selected="selected"{{end}}>{{$v}}</option>
-                    {{end}}
-                </select>
-                <b>Drawing Time</b>
-                <input class="input-item" type="number" name="drawing_time" min="{{.MinDrawingTime}}"
-                       max="{{.MaxDrawingTime}}" value="{{.DrawingTime}}"/>
-                <b>Rounds</b>
-                <input class="input-item" type="number" name="rounds" min="{{.MinRounds}}" max="{{.MaxRounds}}"
-                       value="{{.Rounds}}"/>
-                <b>Maximum Players</b>
-                <input class="input-item" type="number" name="max_players" min="{{.MinMaxPlayers}}"
-                       max="{{.MaxMaxPlayers}}" value="{{.MaxPlayers}}"/>
-                <b>Custom Words</b>
-                <textarea class="input-item" name="custom_words"
-                          placeholder="Enter your additional words, seperating them by commas">{{.CustomWords}}</textarea>
-                <b>Custom Words Chance</b>
-                <input type="range" name="custom_words_chance" min="1" max="100" value="{{.CustomWordsChance}}">
-                <b>Clients per IP Limit</b>
-                <input class="input-item" type="number" name="clients_per_ip_limit" min="{{.MinClientsPerIPLimit}}"
-                       max="{{.MaxClientsPerIPLimit}}" value="{{.ClientsPerIPLimit}}"/>
-                <b>Enable Votekick</b>
-                <input class="input-item" type="checkbox" name="enable_votekick" value="true"
-                       checked="{{.EnableVotekick}}"/>
-                <button type="submit" form="lobby-create" style="grid-column-start: 1; grid-column-end: 3;">Open
-                    Lobby
-                </button>
-            </form>
+                    </select>
+                    <b>Public Lobby</b>
+                    <input class="input-item" type="checkbox" name="public" value="true"
+                           {{if eq .Public "true"}}checked{{end}}/>
+                    <b>Drawing Time</b>
+                    <input class="input-item" type="number" name="drawing_time" min="{{.MinDrawingTime}}"
+                           max="{{.MaxDrawingTime}}" value="{{.DrawingTime}}"/>
+                    <b>Rounds</b>
+                    <input class="input-item" type="number" name="rounds" min="{{.MinRounds}}" max="{{.MaxRounds}}"
+                           value="{{.Rounds}}"/>
+                    <b>Maximum Players</b>
+                    <input class="input-item" type="number" name="max_players" min="{{.MinMaxPlayers}}"
+                           max="{{.MaxMaxPlayers}}" value="{{.MaxPlayers}}"/>
+                    <b>Custom Words</b>
+                    <textarea class="input-item" name="custom_words"
+                              placeholder="Enter your additional words, separating them by commas">{{.CustomWords}}</textarea>
+                    <b>Custom Words Chance</b>
+                    <input type="range" name="custom_words_chance" min="1" max="100" value="{{.CustomWordsChance}}">
+                    <b>Clients per IP Limit</b>
+                    <input class="input-item" type="number" name="clients_per_ip_limit" min="{{.MinClientsPerIPLimit}}"
+                           max="{{.MaxClientsPerIPLimit}}" value="{{.ClientsPerIPLimit}}"/>
+                    <b>Enable Votekick</b>
+                    <input class="input-item" type="checkbox" name="enable_votekick" value="true"
+                           {{if eq .EnableVotekick "true"}}checked{{end}}/>
+                    <button type="submit" form="lobby-create" style="grid-column-start: 1; grid-column-end: 3;">
+                        Create Lobby
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
+
+    <div id="join-lobby" class="tab-content">
+        <div class="table-wrapper">
+            <table id="lobby-table">
+                <thead>
+                <tr>
+                    <th>Wordpack</th>
+                    <th>Rounds</th>
+                    <th>Players</th>
+                    <th>Drawing Time</th>
+                    <th>Custom Words</th>
+                    <th>Votekicking</th>
+                    <th>Clients per IP</th>
+                </tr>
+                </thead>
+                <tbody id="lobby-table-body">
+                </tbody>
+            </table>
+        </div>
+        <div class="join-button-bar">
+            <button onclick="loadLobbyTable()">Refresh</button>
+            <button id="join-button" class="join-button" onclick="onJoin()" disabled>Join</button>
+        </div>
+    </div>
+
+    {{template "footer"}}
 </div>
 
-{{template "footer"}}
+<script type="text/javascript">
+    let lobbyTableLoaded = false;
+    let lobbyTableBody = document.getElementById("lobby-table-body");
+    let selectedLobby;
+
+    let joinButton = document.getElementById("join-button");
+
+    function onJoin() {
+        window.open("/ssrEnterLobby?lobby_id=" + selectedLobby, "_self");
+    }
+
+    function loadLobbyTable() {
+        lobbyTableLoaded = true;
+
+        lobbyTableBody.childNodes.forEach(node => {
+            lobbyTableBody.removeChild(node);
+        })
+
+        fetch("/v1/lobby")
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                data.forEach(lobby => {
+                    const wordpackCell = document.createElement("td");
+                    wordpackCell.innerText = lobby.wordpack;
+                    const roundsCell = document.createElement("td");
+                    roundsCell.innerText = lobby.round + "/" + lobby.maxRounds;
+                    const playersCell = document.createElement("td");
+                    playersCell.innerText = lobby.playerCount + "/" + lobby.maxPlayers;
+                    const drawingTimeCell = document.createElement("td");
+                    drawingTimeCell.innerText = lobby.drawingTime.toString();
+                    const customWordsCell = document.createElement("td");
+                    customWordsCell.innerText = lobby.customWords ? "Yes" : "No";
+                    const votekickCell = document.createElement("td");
+                    votekickCell.innerText = lobby.enableVotekick ? "Yes" : "No";
+                    const clientsPerIPCell = document.createElement("td");
+                    clientsPerIPCell.innerText = lobby.maxClientsPerIp.toString();
+
+                    const newRow = document.createElement("tr");
+                    newRow.appendChild(wordpackCell);
+                    newRow.appendChild(roundsCell);
+                    newRow.appendChild(playersCell);
+                    newRow.appendChild(drawingTimeCell);
+                    newRow.appendChild(customWordsCell);
+                    newRow.appendChild(votekickCell);
+                    newRow.appendChild(clientsPerIPCell);
+
+                    lobbyTableBody.appendChild(newRow);
+
+                    let clickHandler = function () {
+                        lobbyTableBody.childNodes.forEach(row => {
+                            row.setAttribute("selected", "false");
+                        })
+                        newRow.setAttribute("selected", "true");
+                        selectedLobby = lobby.id;
+                        joinButton.removeAttribute("disabled");
+                    };
+                    newRow.childNodes.forEach(td => td.addEventListener("click", clickHandler, false));
+                })
+            });
+    }
+
+    function openTab(tabId) {
+        if (tabId === "join-lobby") {
+            loadLobbyTable();
+        }
+
+        //Initially hide all tabs except for our target tab
+        const tabs = document.getElementsByClassName("tab-content");
+        for (let i = 0; i < tabs.length; i++) {
+            tabs[i].style.display = "none";
+        }
+
+        //Show the newly selected tab.
+        document.getElementById(tabId).style.display = "block";
+    }
+</script>
 </body>
 
 </html>

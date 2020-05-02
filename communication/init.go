@@ -72,6 +72,6 @@ func setupRoutes() {
 
 	//These exist only for the public API. We version them in order to ensure
 	//backwards compatibility as far as possible.
-	http.HandleFunc("/v1/lobby", createLobby)
+	http.HandleFunc("/v1/lobby", lobbyEndpoint)
 	http.HandleFunc("/v1/lobby/player", enterLobby)
 }

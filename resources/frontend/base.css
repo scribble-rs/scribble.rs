@@ -10,15 +10,34 @@
     src: local('Monserrat Bold'), url(/resources/Montserrat-Bold.otf) format("opentype");
 }
 
-html {
-    font-family: 'Montserrat';
+html, body {
+    height: 100vh;
 }
 
 body {
+    font-family: 'Montserrat';
     background-color: antiquewhite;
     margin: 0;
-    position: relative;
-    min-height: 100vh;
+}
+
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 2rem;
+    width: 100%;
+    background-color: lightslategray;
+    color: white;
+}
+
+.footer-item + .footer-item {
+    margin-left: 1rem;
 }
 
 a {
@@ -51,22 +70,6 @@ ul {
     margin: 0;
 }
 
-footer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: absolute;
-    bottom: 0;
-    height: 2rem;
-    width: 100%;
-    background-color: lightslategray;
-    color: white;
-}
-
-.footer-item + .footer-item {
-    margin-left: 1rem;
-}
-
 .noscript {
     display: flex;
     font-size: 2.5rem;
@@ -74,4 +77,10 @@ footer {
     justify-content: center;
     border-bottom: 1rem solid black;
     padding: 10px;
+}
+
+.custom-check-or-radio {
+    /* Little hack in order to hide the original components of the check/radio button */
+    opacity: 0.0;
+    position: absolute;
 }

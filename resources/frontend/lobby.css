@@ -34,10 +34,10 @@
     padding: 5px;
     display: grid;
     grid-template-columns: 15rem auto 18rem;
-    grid-template-rows: min-content auto auto min-content;
+    grid-template-rows: min-content auto;
     grid-gap: 5px;
+    flex: 1 1;
 }
-
 
 /*
  * These two ensure that the drawing board has an aspect ratio of 16/9.
@@ -102,7 +102,7 @@
     grid-template-rows: auto fit-content(100%);
     grid-column: 3;
     grid-row-start: 2;
-    grid-row-end: 4;
+    grid-row-end: 3;
 }
 
 #message-container {
@@ -199,12 +199,6 @@ input[type="button"]:active,
     height: 1.7rem;
 }
 
-.custom-check-or-radio {
-    /* Little hack in order to hide the original components of the check/radio button */
-    opacity: 0.0;
-    position: absolute;
-}
-
 .dot {
     background-color: black;
     border-radius: 50%;
@@ -231,7 +225,7 @@ input[type="button"]:active,
     background-color: rgb(218, 218, 218);
     height: 50px;
     width: 50px;
-    padding: 0px;
+    padding: 0;
 }
 
 @-moz-document url-prefix() {
@@ -252,9 +246,10 @@ input[type="button"]:active,
 }
 
 .color-button-container {
-    border: 1px solid black;
+    border: 1px solid gray;
     display: flex;
     flex-direction: column;
+    height: 48px;
 }
 
 .color-button-row {
@@ -277,11 +272,11 @@ input[type="button"]:active,
 }
 
 #toolbox {
-    grid-column-start: 2;
-    grid-column-end: 3;
+    position: absolute;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    margin-top: 10px;
 }
 
 .toolbox-group {
@@ -302,7 +297,7 @@ input[type="button"]:active,
     flex-direction: column;
     grid-column: 1;
     grid-row-start: 2;
-    grid-row-end: 4;
+    grid-row-end: 3;
 }
 
 .player {

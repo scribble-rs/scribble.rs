@@ -56,11 +56,11 @@ func Test_getRandomWords(t *testing.T) {
 	t.Run("Test getRandomWords with 3 words in list", func(t *testing.T) {
 		lobby := &Lobby{
 			CurrentWord: "",
-			Words:       []string{"a", "b", "c"},
+			words:       []string{"a", "b", "c"},
 		}
 
 		randomWords := GetRandomWords(lobby)
-		for _, lobbyWord := range lobby.Words {
+		for _, lobbyWord := range lobby.words {
 			if !arrayContains(randomWords, lobbyWord) {
 				t.Errorf("Random words %s, didn't contain lobbyWord %s", randomWords, lobbyWord)
 			}
@@ -70,13 +70,13 @@ func Test_getRandomWords(t *testing.T) {
 	t.Run("Test getRandomWords with 3 words in list and 3 more in custom word list, but with 0 chance", func(t *testing.T) {
 		lobby := &Lobby{
 			CurrentWord:       "",
-			Words:             []string{"a", "b", "c"},
+			words:             []string{"a", "b", "c"},
 			CustomWordsChance: 0,
 			CustomWords:       []string{"d", "e", "f"},
 		}
 
 		randomWords := GetRandomWords(lobby)
-		for _, lobbyWord := range lobby.Words {
+		for _, lobbyWord := range lobby.words {
 			if !arrayContains(randomWords, lobbyWord) {
 				t.Errorf("Random words %s, didn't contain lobbyWord %s", randomWords, lobbyWord)
 			}
@@ -86,13 +86,13 @@ func Test_getRandomWords(t *testing.T) {
 	t.Run("Test getRandomWords with 3 words in list and 100% custom word chance, but without custom words", func(t *testing.T) {
 		lobby := &Lobby{
 			CurrentWord:       "",
-			Words:             []string{"a", "b", "c"},
+			words:             []string{"a", "b", "c"},
 			CustomWordsChance: 100,
 			CustomWords:       nil,
 		}
 
 		randomWords := GetRandomWords(lobby)
-		for _, lobbyWord := range lobby.Words {
+		for _, lobbyWord := range lobby.words {
 			if !arrayContains(randomWords, lobbyWord) {
 				t.Errorf("Random words %s, didn't contain lobbyWord %s", randomWords, lobbyWord)
 			}
@@ -102,7 +102,7 @@ func Test_getRandomWords(t *testing.T) {
 	t.Run("Test getRandomWords with 3 words in list and 100% custom word chance, with 3 custom words", func(t *testing.T) {
 		lobby := &Lobby{
 			CurrentWord:       "",
-			Words:             []string{"a", "b", "c"},
+			words:             []string{"a", "b", "c"},
 			CustomWordsChance: 100,
 			CustomWords:       []string{"d", "e", "f"},
 		}
@@ -120,7 +120,7 @@ func Test_getRandomWords(t *testing.T) {
 	t.Run("Test getRandomWords with 3 words in list and 100% custom word chance, with 3 custom words and one of them on the used list", func(t *testing.T) {
 		lobby := &Lobby{
 			CurrentWord:       "",
-			Words:             []string{"a", "b", "c"},
+			words:             []string{"a", "b", "c"},
 			CustomWordsChance: 100,
 			CustomWords:       []string{"d", "e", "f"},
 			alreadyUsedWords:  []string{"f"},
