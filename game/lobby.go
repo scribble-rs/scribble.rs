@@ -36,7 +36,7 @@ var (
 		MaxClientsPerIPLimit: 24,
 	}
 	SupportedLanguages = map[string]string{
-        "catala": "Catala",
+        	"catala": "Catala",
 		"dutch":   "Dutch",
 		"english": "English",
 		"french":  "French",
