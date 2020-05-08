@@ -11,11 +11,12 @@ import (
 var (
 	wordListCache = make(map[string][]string)
 	languageMap   = map[string]string{
-		"english": "en",
-		"italian": "it",
-		"german":  "de",
-		"french":  "fr",
+        "catala": "ca",
 		"dutch":   "nl",
+		"english": "en",
+		"french":  "fr",
+		"german":  "de",
+		"italian": "it",
 	}
 	wordBox = packr.New("words", "../resources/words")
 )
