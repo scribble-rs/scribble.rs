@@ -410,7 +410,6 @@ func commandSetMP(caller *Player, lobby *Lobby, args []string) {
 func endTurn(lobby *Lobby) {
 	if lobby.timeLeftTicker != nil {
 		lobby.timeLeftTicker.Stop()
-		lobby.timeLeftTicker = nil
 		lobby.timeLeftTickerReset <- struct{}{}
 	}
 
@@ -476,7 +475,6 @@ func advanceLobby(lobby *Lobby) {
 
 	//We use milliseconds for higher accuracy
 	lobby.RoundEndTime = time.Now().UTC().UnixNano()/1000000 + int64(lobby.DrawingTime)*1000
-	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
 	go roundTimerTicker(lobby)
 
 	TriggerComplexUpdateEvent("next-turn", &NextTurn{
