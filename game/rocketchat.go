@@ -47,7 +47,7 @@ func updateRocketChat(lobby *Lobby, player *Player) {
 
 	var count int
 	// Only count connected players
-	for _, p := range lobby.Players {
+	for _, p := range lobby.GetPlayers() {
 		if p.Connected {
 			count++
 		}
