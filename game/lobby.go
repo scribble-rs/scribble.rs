@@ -411,7 +411,7 @@ func commandSetMP(caller *Player, lobby *Lobby, args []string) {
 func endTurn(lobby *Lobby) {
 	if lobby.timeLeftTicker != nil {
 		lobby.timeLeftTicker.Stop()
-		lobby.timeLeftTickerReset <- struct{}{}
+		lobby.timeLeftTicker = nil
 	}
 
 	var roundOverMessage string
@@ -476,6 +476,7 @@ func advanceLobby(lobby *Lobby) {
 
 	//We use milliseconds for higher accuracy
 	lobby.RoundEndTime = time.Now().UTC().UnixNano()/1000000 + int64(lobby.DrawingTime)*1000
+	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
 	go roundTimerTicker(lobby)
 
 	TriggerComplexUpdateEvent("next-turn", &NextTurn{
@@ -521,8 +522,13 @@ func roundTimerTicker(lobby *Lobby) {
 	revealHintAtMillisecondsLeft := lobby.DrawingTime * 1000 / 3
 
 	for {
+		ticker := lobby.timeLeftTicker
+		if ticker == nil {
+			return
+		}
+
 		select {
-		case <-lobby.timeLeftTicker.C:
+		case <-ticker.C:
 			currentTime := getTimeAsMillis()
 			if currentTime >= lobby.RoundEndTime {
 				go endTurn(lobby)
@@ -543,8 +549,6 @@ func roundTimerTicker(lobby *Lobby) {
 					}
 				}
 			}
-		case <-lobby.timeLeftTickerReset:
-			return
 		}
 	}
 }
