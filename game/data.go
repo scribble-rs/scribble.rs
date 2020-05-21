@@ -51,7 +51,6 @@ type Lobby struct {
 	RoundEndTime int64
 
 	timeLeftTicker        *time.Ticker
-	timeLeftTickerReset   chan struct{}
 	scoreEarnedByGuessers int
 	alreadyUsedWords      []string
 	CustomWordsChance     int
@@ -251,7 +250,6 @@ func createLobby(
 		MaxPlayers:          maxPlayers,
 		CustomWords:         customWords,
 		CustomWordsChance:   customWordsChance,
-		timeLeftTickerReset: make(chan struct{}),
 		ClientsPerIPLimit:   clientsPerIPLimit,
 		EnableVotekick:      enableVotekick,
 		CurrentDrawing:      make([]interface{}, 0, 0),
@@ -263,7 +261,6 @@ func createLobby(
 		})
 	}
 
-	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
 	lobbies = append(lobbies, lobby)
 
 	createDeleteMutex.Unlock()
