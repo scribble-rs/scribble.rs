@@ -266,6 +266,7 @@ func createLobby(
 		})
 	}
 
+	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
 	lobbies = append(lobbies, lobby)
 
 	createDeleteMutex.Unlock()
