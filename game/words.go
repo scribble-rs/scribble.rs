@@ -16,6 +16,7 @@ var (
 		"german":  "de",
 		"french":  "fr",
 		"dutch":   "nl",
+		"mongolia":"mn",
 	}
 	wordBox = packr.New("words", "../resources/words")
 )
