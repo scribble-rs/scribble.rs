@@ -26,7 +26,7 @@ var (
 
 var (
 	LobbySettingBounds = &SettingBounds{
-		MinDrawingTime:       60,
+		MinDrawingTime:       30,
 		MaxDrawingTime:       300,
 		MinRounds:            1,
 		MaxRounds:            20,
@@ -36,6 +36,7 @@ var (
 		MaxClientsPerIPLimit: 24,
 	}
 	SupportedLanguages = map[string]string{
+		"farsi" : "فارسی",
 		"english": "English",
 		"italian": "Italian",
 		"german":  "German",
@@ -198,7 +199,7 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 			sender.Score += sender.LastScore
 			lobby.scoreEarnedByGuessers += sender.LastScore
 			sender.State = Standby
-			WriteAsJSON(sender, JSEvent{Type: "system-message", Data: "You have correctly guessed the word."})
+			WriteAsJSON(sender, JSEvent{Type: "system-message", Data: "درست حدس زدی ✅"})
 
 			if !lobby.isAnyoneStillGuessing() {
 				endTurn(lobby)
@@ -212,7 +213,7 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 
 			return
 		} else if levenshtein.ComputeDistance(normInput, normSearched) == 1 {
-			WriteAsJSON(sender, JSEvent{Type: "system-message", Data: fmt.Sprintf("'%s' is very close.", trimmed)})
+			WriteAsJSON(sender, JSEvent{Type: "system-message", Data: fmt.Sprintf("'%s' خیلی نزدیکه", trimmed)})
 		}
 
 		sendMessageToAll(trimmed, sender, lobby)
@@ -415,9 +416,9 @@ func endTurn(lobby *Lobby) {
 
 	var roundOverMessage string
 	if lobby.CurrentWord == "" {
-		roundOverMessage = "Round over. No word was chosen."
+		roundOverMessage = "راند تمام شد و کلمه ای انتخاب نشد"
 	} else {
-		roundOverMessage = fmt.Sprintf("Round over. The word was '%s'", lobby.CurrentWord)
+		roundOverMessage = fmt.Sprintf("کلمه '%s' بود", lobby.CurrentWord)
 	}
 
 	//The drawer can potentially be null if he's kicked, in that case we proceed with the round if anyone has already

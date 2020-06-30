@@ -11,6 +11,10 @@
     text-align: center;
 }
 
+#word-container {
+    direction: rtl;
+}
+
 .guess-letter-underline {
     text-transform: uppercase;
     border-bottom: 0.3rem black solid;

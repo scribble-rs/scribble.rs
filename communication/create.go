@@ -26,13 +26,13 @@ func createDefaultLobbyCreatePageData() *CreatePageData {
 	return &CreatePageData{
 		SettingBounds:     game.LobbySettingBounds,
 		Languages:         game.SupportedLanguages,
-		DrawingTime:       "120",
+		DrawingTime:       "90",
 		Rounds:            "4",
 		MaxPlayers:        "12",
 		CustomWordsChance: "50",
-		ClientsPerIPLimit: "1",
+		ClientsPerIPLimit: "2",
 		EnableVotekick:    "true",
-		Language:          "english",
+		Language:          "farsi",
 	}
 }
 
@@ -68,7 +68,6 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 	customWordChance, customWordChanceInvalid := parseCustomWordsChance(r.Form.Get("custom_words_chance"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := parseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
 	enableVotekick := r.Form.Get("enable_votekick") == "true"
-
 	//Prevent resetting the form, since that would be annoying as hell.
 	pageData := CreatePageData{
 		SettingBounds:     game.LobbySettingBounds,

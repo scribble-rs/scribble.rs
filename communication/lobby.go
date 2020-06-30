@@ -68,6 +68,7 @@ func getPlayername(r *http.Request) string {
 	return game.GeneratePlayerName()
 }
 
+
 func trimDownTo(text string, size int) string {
 	if len(text) <= size {
 		return text

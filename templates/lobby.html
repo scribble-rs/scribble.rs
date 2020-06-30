@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Scribble.rs - Game</title>
+    <title>بکِش بکِش</title>
     <meta charset="UTF-8"/>
     <link rel="stylesheet" type="text/css" href="/resources/base.css"/>
     <link rel="stylesheet" type="text/css" href="/resources/lobby.css"/>
@@ -22,17 +22,17 @@
             have a uniform look with the other buttons in the header, we are not using
             a checkbox anymore. -->
             <button onclick="toggleSound()" class="dialog-button header-button"
-                    alt="Toggle soundeffects" title="Toggle soundeffects">
+                    alt="Toggle soundeffects" title="قطعی وصلی صدا">
                 <img id="sound-toggle-label" class="header-button-image"/>
             </button>
 
             <button onclick="showKickDialog()" class="dialog-button header-button"
-                    alt="Votekick a player" title="Votekick a player">
+                    alt="Votekick a player" title="رای گیری برای اخراج">
                 <img src="/resources/kick.png" class="header-button-image"/>
             </button>
 
             <button onclick="showNameChangeDialog()" class="dialog-button header-button"
-                    alt="Change your name" title="Change your name">
+                    alt="Change your name" title="تغییر نام کاربری">
                 <img src="/resources/user.svg" class="header-button-image"/>
             </button>
         </div>
@@ -55,7 +55,7 @@
             than one dialog visible at a time, but they'll be layered. -->
             <div id="center-dialog">
                 <div id="word-dialog" class="center-dialog-content">
-                    <span class="dialog-title">Choose a word</span>
+                    <span class="dialog-title">یک کلمه انتخاب کنید</span>
                     <div class="word-button-container">
                         <button id="word-button-zero" class="dialog-button" onclick="chooseWord(0)">Placeholder</button>
                         <button id="word-button-one" class="dialog-button" onclick="chooseWord(1)">Placeholder</button>
@@ -64,12 +64,12 @@
                 </div>
 
                 <div id="start-dialog" class="center-dialog-content">
-                    <span class="dialog-title">Start the game</span>
-                    <button class="dialog-button" onclick="startGame()">Start</button>
+                    <span class="dialog-title">بزن بریم بکش بکش</span>
+                    <button class="dialog-button" onclick="startGame()">شروع</button>
                 </div>
 
                 <div id="kick-dialog" class="center-dialog-content">
-                    <span class="dialog-title">Vote to kick a player</span>
+                    <span class="dialog-title">رای گیری برای اخراج</span>
                     <div id="kick-dialog-players"></div>
                     <button onclick="hideKickDialog()" class="dialog-button dialog-close-button">Close</button>
                 </div>
@@ -80,7 +80,7 @@
     <div id="chat">
         <div id="message-container"></div>
         <form class="message-input-form" onsubmit="return sendMessage()">
-            <input id="message-input" type="text" autocomplete="off" placeholder="Type your message"/>
+            <input id="message-input" type="text" autocomplete="off" placeholder="پیام خود را وارد کنید"/>
         </form>
     </div>
     <div id="toolbox">
@@ -150,7 +150,7 @@
                 <input id="tool-type-fill" class="custom-check-or-radio line-width-button"
                        onchange="chooseTool(fillBucket)" type="radio" name="tool-type">
                 <div class="line-width-button-content">
-                    <img alt="Fill" title="Fill tool" src="/resources/fill.svg" width="40px"
+                    <img alt="Fill" title="سطل" src="/resources/fill.svg" width="40px"
                          height="40px"/>
                 </div>
             </label>
@@ -158,7 +158,7 @@
                 <input id="tool-type-rubber" class="custom-check-or-radio line-width-button"
                        onchange="chooseTool(rubber)" type="radio" name="tool-type">
                 <div class="line-width-button-content">
-                    <img alt="Rubber" title="Rubber tool" src="/resources/rubber.svg" width="40px"
+                    <img alt="Rubber" title="پاککن" src="/resources/rubber.svg" width="40px"
                          height="40px"/>
                 </div>
             </label>
@@ -194,7 +194,7 @@
             </label>
         </div>
         <button class="canvas-button toolbox-group" style="font-size: 2rem;" onclick="clearCanvasAndSendEvent()"
-                alt="Clear the canvas" title="Clear the canvas">🗑
+                alt="Clear the canvas" title="پاک کردن کامل صفحه">🗑
         </button>
     </div>
 </div>
@@ -255,7 +255,7 @@
     }
 
     function showNameChangeDialog() {
-        let choice = prompt("Please choose your new name. Clearing the name will assign you a new random name.", ownName);
+        let choice = prompt("لطفا اسم جدید را وارد کنید. در صورت خالی وارد کردن اطلاعات, اسم شانسی انتخاب میشود.", ownName);
         //Hitting cancel results in null.
         //Since we pre fill the dialog with the current name, empty means that
         //it has been cleared on purpose.
@@ -538,10 +538,10 @@
 
     window.setInterval(function () {
         if (roundEndTime >= 0) {
-            timeLeft.innerText = "Time Left: " + Math.floor(roundEndTime / 1000);
+            timeLeft.innerText = "زمان باقیمانده: " + Math.floor(roundEndTime / 1000);
             roundEndTime -= 500;
         } else {
-            timeLeft.innerText = "Time Left: ∞";
+            timeLeft.innerText = "بازی شروع نشده";
         }
     }, 500);
 
@@ -588,8 +588,7 @@
                 '">' + player.name + '</span>' +
                 '<div class="score-and-status">' +
                 '<div>' +
-                '<span class="playerscore">' + player.score + '</span>' +
-                '<span class="last-turn-score">(Last turn: ' + player.lastScore + ')</span>' +
+                '<span class="playerscore">' + player.score +
                 '</div>';
             if (player.state === 1) {
                 newPlayerElement += '<span>✏️</span>';
@@ -614,7 +613,7 @@
             } else {
                 let char = String.fromCharCode(hint.character);
                 if (hint.underline) {
-                    wordContainer.innerHTML += '<span class="guess-letter guess-letter-underline">' + char + '</span>'
+                    wordContainer.innerHTML += '<span class="guess-letter">' + char + '</span>'
                 } else {
                     wordContainer.innerHTML += '<span class="guess-letter">' + char + '</span>';
                 }
