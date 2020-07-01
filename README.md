@@ -3,7 +3,7 @@
 
 Feel free to play:
 
-* https://bekeshbekesh.herokuapp.com/
+* http://95.216.53.221:24000/
   > Might not respond right-away, just wait some seconds
 
 
