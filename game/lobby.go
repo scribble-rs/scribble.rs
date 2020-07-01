@@ -494,8 +494,25 @@ func endGame(lobby *Lobby) {
 
 	recalculateRanks(lobby)
 	triggerPlayersUpdate(lobby)
+	winners := ""
+	for _ , p := range lobby.Players{
+		winners += string(p.Rank) + " "+ p.Name
+	}
+	WritePublicSystemMessage(lobby, "بازی تموم شد" + "\n" + "برنده ها:" + "\n" + winners)
 
-	WritePublicSystemMessage(lobby, "Game over. Type !start again to start a new round.")
+	if lobby.Round == 0 && lobby.Drawer == lobby.Owner {
+		//We are reseting each players score, since players could
+		//technically be player a second game after the last one
+		//has already ended.
+		for _, otherPlayer := range lobby.Players {
+			otherPlayer.Score = 0
+			otherPlayer.LastScore = 0
+			//Since nobody has any points in the beginning, everyone has practically
+			//the same rank, therefore y'll winners for now.
+			otherPlayer.Rank = 1
+		}
+		advanceLobby(lobby)
+	}
 }
 
 // selectNextDrawer returns the next person that's supposed to be drawing, but
@@ -668,10 +685,8 @@ func CreateLobby(playerName, language string, drawingTime, rounds, maxPlayers, c
 // of an adverb, an adjective and a animal name. The result can generally be
 // trusted to be sane.
 func GeneratePlayerName() string {
-	adjective := strings.Title(petname.Adjective())
-	adverb := strings.Title(petname.Adverb())
 	name := strings.Title(petname.Name())
-	return adverb + adjective + name
+	return name
 }
 
 // Message represents a message in the chatroom.

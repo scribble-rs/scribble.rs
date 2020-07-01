@@ -111,6 +111,7 @@
 
 #message-container {
     padding: 5px;
+    direction: rtl;
     overflow-y: scroll;
     word-break: break-all;
     background-color: white;
@@ -133,6 +134,7 @@
 }
 
 .message-input-form {
+    direction: rtl;
     display: flex;
 }
 
@@ -144,6 +146,7 @@
 }
 
 #message-input:focus {
+    direction: rtl;
     outline: none;
     background-color: rgb(250, 232, 235);
 }

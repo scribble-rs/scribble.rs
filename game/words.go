@@ -66,6 +66,7 @@ func readWordList(chosenLanguage string) ([]string, error) {
 // chosen from the custom words and the default dictionary, depending on the
 // settings specified by the Lobby-Owner.
 func GetRandomWords(lobby *Lobby) []string {
+
 	rand.Seed(time.Now().Unix())
 	wordsNotToPick := lobby.alreadyUsedWords
 	wordOne := getRandomWordWithCustomWordChance(lobby, wordsNotToPick, lobby.CustomWords, lobby.CustomWordsChance)

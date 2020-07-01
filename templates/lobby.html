@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa">
 
 <head>
     <title>بکِش بکِش</title>
@@ -264,6 +264,10 @@
         }
 
         // Username should be cleared.
+        while(choice === "")
+        {
+            choice = prompt("لطفا اسم جدید خود را وارد کنید.", ownName);
+        }
         if (choice === "") {
             document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
         } else {
@@ -487,7 +491,7 @@
         } else if (parsed.type === "message") {
             applyMessage("", parsed.data.author, parsed.data.content);
         } else if (parsed.type === "system-message") {
-            applyMessage("system-message", "System", parsed.data);
+            applyMessage("system-message", "سیستم", parsed.data);
         } else if (parsed.type === "non-guessing-player-message") {
             applyMessage("non-guessing-player-message", parsed.data.author, parsed.data.content);
         } else if (parsed.type === "line") {

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html dir="rtl" lang="fa">
 
 <head>
     <title>بِکِش بِکِش</title>
@@ -30,9 +30,6 @@
 
             {{end}}
             <form id="lobby-create" class="input-container" action="/ssrCreateLobby" method="POST">
-{{/*                <b>نام کاربری</b>*/}}
-{{/*                <input class="input-item" name="name"*/}}
-{{/*                          placeholder="">{{.CustomWords}}</input>*/}}
                 <b>زبان اتاق</b>
                 <select class="input-item" name="language" placeholder="زبان مورد نظر را انتخاب کنید">
                     {{$language := .Language}}
@@ -66,8 +63,9 @@
         </div>
     </div>
 </div>
-
+<span dir="ltr">
 {{template "footer"}}
+</span>
 </body>
 
 </html>
