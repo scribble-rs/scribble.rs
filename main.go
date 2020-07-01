@@ -27,7 +27,7 @@ func main() {
 			portHTTP = int(parsed)
 			log.Printf("Listening on port %d sourced from PORT environment variable\n", portHTTP)
 		} else {
-			portHTTP = 8080
+			portHTTP = 4000
 			log.Printf("Listening on default port %d\n", portHTTP)
 		}
 	}

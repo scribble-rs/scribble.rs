@@ -68,7 +68,6 @@ func getPlayername(r *http.Request) string {
 	return game.GeneratePlayerName()
 }
 
-
 func trimDownTo(text string, size int) string {
 	if len(text) <= size {
 		return text
@@ -162,15 +161,15 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 	// TODO Improve this. Return metadata or so instead.
 	userAgent := strings.ToLower(r.UserAgent())
 	if !(strings.Contains(userAgent, "gecko") || strings.Contains(userAgent, "chrom") || strings.Contains(userAgent, "opera") || strings.Contains(userAgent, "safari")) {
-		userFacingError(w, "Sorry, no robots allowed.")
+		userFacingError(w, "رباتا بازی نمیکنن")
 		return
 	}
 
 	//FIXME Temporary
-	if strings.Contains(userAgent, "iphone") || strings.Contains(userAgent, "android") {
-		userFacingError(w, "Sorry, mobile is currently not supported.")
-		return
-	}
+	//if strings.Contains(userAgent, "iphone") || strings.Contains(userAgent, "android") {
+	//	userFacingError(w, "Sorry, mobile is currently not supported.")
+	//	return
+	//}
 
 	player := getPlayer(lobby, r)
 
@@ -184,7 +183,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 
 	if player == nil {
 		if len(lobby.Players) >= lobby.MaxPlayers {
-			userFacingError(w, "Sorry, but the lobby is full.")
+			userFacingError(w, "اتاق پره :(")
 			return
 		}
 
@@ -194,7 +193,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 			if otherPlayer.GetLastKnownAddress() == requestAddress {
 				clientsWithSameIP++
 				if clientsWithSameIP >= lobby.ClientsPerIPLimit {
-					userFacingError(w, "Sorry, but you have exceeded the maximum number of clients per IP.")
+					userFacingError(w, "ببخشید ولی بیشتر از این نمیتونن از یه اینترنت به این اتاق وصل شن")
 					return
 				}
 			}
@@ -211,7 +210,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 		})
 	} else {
 		if player.Connected && player.GetWebsocket() != nil {
-			userFacingError(w, "It appears you already have an open tab for this lobby.")
+			userFacingError(w, "فکر کنم تو یه صفحه دیگه این اتاقو باز کردی")
 			return
 		}
 		player.SetLastKnownAddress(getIPAddressFromRequest(r))
