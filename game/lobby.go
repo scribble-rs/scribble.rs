@@ -22,6 +22,7 @@ import (
 var (
 	createDeleteMutex          = &sync.Mutex{}
 	lobbies           []*Lobby = nil
+	lobbiesNum =       0
 )
 
 var (
@@ -662,14 +663,13 @@ type Rounds struct {
 	Round     int `json:"round"`
 	MaxRounds int `json:"maxRounds"`
 }
-
 // CreateLobby allows creating a lobby, optionally returning errors that
 // occurred during creation.
 func CreateLobby(playerName, language string, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit int, customWords []string, enableVotekick bool) (*Player, *Lobby, error) {
 	lobby := createLobby(drawingTime, rounds, maxPlayers, customWords, customWordChance, clientsPerIPLimit, enableVotekick)
 	player := createPlayer(playerName)
-	lobby.ID = player.Name + strconv.Itoa((rand.Int()%100))
-
+	lobby.ID = player.Name + strconv.Itoa((lobbiesNum))
+	lobbiesNum++
 	lobby.Players = append(lobby.Players, player)
 	lobby.Owner = player
 
