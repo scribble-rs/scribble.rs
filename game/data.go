@@ -245,6 +245,7 @@ func createLobby(
 
 	lobby := &Lobby{
 		ID:                  uuid.NewV4().String(),
+		//ID:                  ,
 		DrawingTime:         drawingTime,
 		MaxRounds:           rounds,
 		MaxPlayers:          maxPlayers,

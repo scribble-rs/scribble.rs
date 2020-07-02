@@ -668,6 +668,7 @@ type Rounds struct {
 func CreateLobby(playerName, language string, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit int, customWords []string, enableVotekick bool) (*Player, *Lobby, error) {
 	lobby := createLobby(drawingTime, rounds, maxPlayers, customWords, customWordChance, clientsPerIPLimit, enableVotekick)
 	player := createPlayer(playerName)
+	lobby.ID = player.Name + strconv.Itoa((rand.Int()%100))
 
 	lobby.Players = append(lobby.Players, player)
 	lobby.Owner = player
