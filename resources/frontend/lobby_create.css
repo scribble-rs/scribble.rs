@@ -1,5 +1,10 @@
 .content-wrapper {
-    padding-bottom: 2rem;
+    padding-top: 5em;
+    padding-bottom: initial;
+    vertical-align: middle;
+    horiz-align: center;
+    /*background-image: url('background.png');*/
+    /*background-repeat: repeat;*/
 }
 
 .center-container {
@@ -9,11 +14,14 @@
     justify-content: center;
     margin-top: 10px;
     margin-bottom: 10px;
+
 }
+
+/*Jadvale sakhte lobby*/
 
 .content-container {
     display: block;
-    background-color: rgb(250, 192, 202);
+    background-color: rgb(255, 255, 255);
     border-radius: 15px;
     padding: 20px;
 }
