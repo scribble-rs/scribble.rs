@@ -36,6 +36,7 @@
 
 #lobby {
     padding: 5px;
+    /*position: fixed;*/
     display: grid;
     grid-template-columns: 15rem auto 18rem;
     grid-template-rows: min-content auto auto min-content;

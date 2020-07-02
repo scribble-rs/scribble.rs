@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="fa">
-
+<meta name="viewport" content="height=device-height, user-scalable=no" />
 <head>
     <title>بکِش بکِش</title>
     <meta charset="UTF-8"/>
@@ -713,6 +713,41 @@
 
         return false;
     };
+
+    let sizeSlot = 0;
+    function wheelSize(e) {
+        event.preventDefault();
+
+        sizeSlot += Math.min(Math.max(-1, e.deltaY), 1);
+        if (sizeSlot < 0) {
+            sizeSlot = 0;
+        } else if (sizeSlot > 3) {
+            sizeSlot = 3;
+        }
+
+        switch (sizeSlot) {
+            case 0:
+                n = 8;
+                break;
+            case 1:
+                n = 15;
+                break;
+            case 2:
+                n = 30;
+                break;
+            case 3:
+                n = 40;
+                break;
+            default:
+                console.log('No existing slot?');
+                break;
+        }
+
+        document.getElementById('size' + n).checked = true;
+        setLineWidth(n);
+    }
+
+    drawingBoard.onwheel = wheelSize;
 
     // This is executed even if the mouse is not above the browser anymore.
     window.onmouseup = function (e) {
