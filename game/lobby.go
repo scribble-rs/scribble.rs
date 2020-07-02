@@ -494,11 +494,14 @@ func endGame(lobby *Lobby) {
 
 	recalculateRanks(lobby)
 	triggerPlayersUpdate(lobby)
-	winners := ""
+	winner := ""
 	for _ , p := range lobby.Players{
-		winners += string(p.Rank) + " "+ p.Name
+		if p.Rank == 1 {
+			winner += p.Name
+			break
+		}
 	}
-	WritePublicSystemMessage(lobby, "بازی تموم شد" + "\n" + "برنده ها:" + "\n" + winners)
+	WritePublicSystemMessage(lobby, "بازی تموم شد. برنده: " + winner)
 
 	if lobby.Round == 0 && lobby.Drawer == lobby.Owner {
 		//We are reseting each players score, since players could
