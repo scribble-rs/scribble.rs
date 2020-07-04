@@ -35,7 +35,7 @@
                     alt="Change your name" title="تغییر نام کاربری">
                 <img src="/resources/user.svg" class="header-button-image"/>
             </button>
-            <input class="input-id" contenteditable="false" id="id_text" spellcheck="false" value=idText() onclick="setIdTextBox()">
+            <input class="input-id" contenteditable="false" id="id_text" spellcheck="false" value="موستو بیار آی دی اتاقو ببینی" onclick="copyText()" onmouseenter="setId()" onmouseleave="setDefault()">
 
 
 
@@ -940,7 +940,7 @@
         imageData.data[offset + 3] = color[3];
     }
 
-    function setIdTextBox(){
+    function copyText(){
         var copyText = document.getElementById("id_text");
 
         /* Select the text field */
@@ -950,10 +950,19 @@
         document.execCommand("copy");
     }
 
-    window.onload = function() {
+    function setId()
+    {
         const urlParams = new URLSearchParams(window.location.search);
         const param = urlParams.get('lobby_id');
         document.getElementById("id_text").value = param;
+    }
+
+    function setDefault()
+    {
+        document.getElementById("id_text").value = "موستو بیار اینجا آی دی اتاقو ببینی"
+    }
+
+    window.onload = function() {
         socket.send(JSON.stringify({
             type: "message",
             data: "وارد اتاق شد!"
