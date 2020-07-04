@@ -12,7 +12,7 @@ import (
 
 var (
 	noLobbyIdSuppliedError = errors.New("اتاق مورد نظر پیدا نشد")
-	lobbyNotExistentError  = errors.New("آدرس رو دوباره چک کنید")
+	lobbyNotExistentError  = errors.New("آی دی اتاق اشتباه وارد شده")
 )
 
 func getLobby(r *http.Request) (*game.Lobby, error) {
@@ -85,7 +85,7 @@ func GetPlayers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if getPlayer(lobby, r) == nil {
-		http.Error(w, "you aren't part of this lobby", http.StatusUnauthorized)
+		http.Error(w, "تو توی این لابی نیستی", http.StatusUnauthorized)
 		return
 	}
 
@@ -105,7 +105,7 @@ func GetRounds(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if getPlayer(lobby, r) == nil {
-		http.Error(w, "you aren't part of this lobby", http.StatusUnauthorized)
+		http.Error(w, "تو توی این لابی نیستی", http.StatusUnauthorized)
 		return
 	}
 
@@ -126,7 +126,7 @@ func GetWordHint(w http.ResponseWriter, r *http.Request) {
 
 	player := getPlayer(lobby, r)
 	if player == nil {
-		http.Error(w, "you aren't part of this lobby", http.StatusUnauthorized)
+		http.Error(w, "تو توی این لابی نیست", http.StatusUnauthorized)
 		return
 	}
 
@@ -161,15 +161,15 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 	// TODO Improve this. Return metadata or so instead.
 	userAgent := strings.ToLower(r.UserAgent())
 	if !(strings.Contains(userAgent, "gecko") || strings.Contains(userAgent, "chrom") || strings.Contains(userAgent, "opera") || strings.Contains(userAgent, "safari")) {
-		userFacingError(w, "رباتا بازی نمیکنن")
+		userFacingError(w, "رباتا بازی نمیکنن (مرورگر ناشناخته)")
 		return
 	}
 
 	//FIXME Temporary
-	//if strings.Contains(userAgent, "iphone") || strings.Contains(userAgent, "android") {
-	//	userFacingError(w, "Sorry, mobile is currently not supported.")
-	//	return
-	//}
+	if strings.Contains(userAgent, "iphone") || strings.Contains(userAgent, "android") {
+		userFacingError(w, "فعلا تو گوشیت نمیتونی بازی کنی :(")
+		return
+	}
 
 	player := getPlayer(lobby, r)
 

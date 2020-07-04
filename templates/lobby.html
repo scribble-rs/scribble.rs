@@ -35,6 +35,10 @@
                     alt="Change your name" title="تغییر نام کاربری">
                 <img src="/resources/user.svg" class="header-button-image"/>
             </button>
+            <input class="input-id" contenteditable="false" id="id_text" spellcheck="false" value=idText() onclick="setIdTextBox()">
+
+
+
         </div>
         <div id="word-container" style="position:absolute;left: 50%; transform: translate(-50%, 0);"></div>
     </div>
@@ -71,7 +75,7 @@
                 <div id="kick-dialog" class="center-dialog-content">
                     <span class="dialog-title">رای گیری برای اخراج</span>
                     <div id="kick-dialog-players"></div>
-                    <button onclick="hideKickDialog()" class="dialog-button dialog-close-button">Close</button>
+                    <button onclick="hideKickDialog()" class="dialog-button dialog-close-button">بستن</button>
                 </div>
             </div>
         </div>
@@ -85,7 +89,7 @@
     </div>
     <div id="toolbox">
         <input class="toolbox-group" type="color" id="color-picker" onchange="setColor()" value="#000000"
-               alt="Current color (Click to change)" title="Current color (Click to change)">
+               alt="تغییر رنگ" title="تغییر رنگ">
         <div class="color-button-container toolbox-group">
             <!-- These buttons use !important for their color in order
             to prevent hover and active colors to appear. -->
@@ -200,7 +204,6 @@
 </div>
 
 {{template "footer"}}
-
 <script type="text/javascript" src="/resources/floodfill.js"></script>
 <script type="text/javascript">
     console.log("Attempting Connection on port " + location.port + "...");
@@ -253,6 +256,7 @@
     function hideKickDialog() {
         kickDialog.style.visibility = "hidden";
     }
+
 
     function showNameChangeDialog() {
         let choice = prompt("لطفا اسم جدید را وارد کنید. در صورت خالی وارد کردن اطلاعات, اسم شانسی انتخاب میشود.", ownName);
@@ -530,6 +534,8 @@
         wordButtonTwo.textContent = wordThree;
         wordDialog.style.visibility = "visible";
     }
+
+
 
     function playWav(file) {
         if (sound) {
@@ -933,6 +939,26 @@
         imageData.data[offset + 2] = color[2];
         imageData.data[offset + 3] = color[3];
     }
+
+    function setIdTextBox(){
+        var copyText = document.getElementById("id_text");
+
+        /* Select the text field */
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+        /* Copy the text inside the text field */
+        document.execCommand("copy");
+    }
+
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const param = urlParams.get('lobby_id');
+        document.getElementById("id_text").value = param;
+        socket.send(JSON.stringify({
+            type: "message",
+            data: "وارد اتاق شد!"
+        }));
+    };
 
     //Call intially to correct initial state
     handleCanvasResize();

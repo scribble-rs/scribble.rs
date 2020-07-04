@@ -503,20 +503,6 @@ func endGame(lobby *Lobby) {
 		}
 	}
 	WritePublicSystemMessage(lobby, "بازی تموم شد. برنده: " + winner)
-
-	if lobby.Round == 0 && lobby.Drawer == lobby.Owner {
-		//We are reseting each players score, since players could
-		//technically be player a second game after the last one
-		//has already ended.
-		for _, otherPlayer := range lobby.Players {
-			otherPlayer.Score = 0
-			otherPlayer.LastScore = 0
-			//Since nobody has any points in the beginning, everyone has practically
-			//the same rank, therefore y'll winners for now.
-			otherPlayer.Rank = 1
-		}
-		advanceLobby(lobby)
-	}
 }
 
 // selectNextDrawer returns the next person that's supposed to be drawing, but
@@ -681,7 +667,6 @@ func CreateLobby(playerName, language string, drawingTime, rounds, maxPlayers, c
 	}
 
 	lobby.Words = words
-
 	return player, lobby, nil
 }
 

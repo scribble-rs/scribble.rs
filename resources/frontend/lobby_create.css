@@ -40,6 +40,22 @@
     min-width: 300px;
 }
 
+.input-id {
+    height: 40px;
+    font-weight: bold;
+    direction: ltr;
+    font-size: 30px;
+    margin-bottom: 5px;
+    width: 290px;
+}
+
+.center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+
+}
+
 .error-list {
     background-color: rgb(236, 93, 93);
     padding: 10px;

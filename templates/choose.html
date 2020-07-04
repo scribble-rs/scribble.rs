@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <title>بِکِش بِکِش</title>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" type="text/css" href="/resources/base.css"/>
+    <link rel="stylesheet" type="text/css" href="/resources/lobby_create.css"/>
+    <link rel="icon" type="image/png" href="/resources/favicon.png"/>
+</head>
+
+<div class="content-wrapper">
+    <h1><img src="/resources/BekeshBekeshLogo.png" alt="بِکِش بِکِش"></h1>
+
+    <div class="center-container">
+        <div class="content-container">
+
+
+
+
+            <input class="input-id" id="game_id" name="gameid"
+                      placeholder="آی دی بازی را وارد کنید">{{.CustomWords}}</input>
+            <br>
+
+            <a class="center" id="join" type="submit" onclick="function openURL() {
+                var id = document.getElementById('game_id').value;
+                var url = '/ssrEnterLobby?lobby_id=' + encodeURIComponent(id);
+
+                // In current window
+                window.location.href = url;
+
+                // In new window
+                window.open(url);
+             }
+            openURL()"><img border="0" alt="ورود" src="/resources/vorood.png"></a>
+            <br>
+            <a class="center" href="create_new_lobby">
+                <img border="0" alt="ساخت اتاق جدید" src="/resources/sakht.png">
+            </a>
+
+        </div>
+    </div>
+</div>
+<span dir="ltr">
+{{template "footer"}}
+</span>
+</body>
+<script>
+    var input = document.getElementById("game_id");
+
+    // Execute a function when the user releases a key on the keyboard
+    input.addEventListener("keyup", function(event) {
+        // Number 13 is the "Enter" key on the keyboard
+        if (event.keyCode === 13) {
+            // Cancel the default action, if needed
+            event.preventDefault();
+            // Trigger the button element with a click
+            document.getElementById("join").click();
+        }
+    });
+</script>
+</html>
+

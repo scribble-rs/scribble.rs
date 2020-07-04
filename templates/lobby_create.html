@@ -15,7 +15,7 @@
         <div class="content-container">
             {{if .Errors}}
                 <div class="error-list">
-                    Your input contains invalid data:
+                    ورودی ها نا معتبر است
                     <ul>
                         {{range .Errors}}
                             <li>{{.}}</li>
@@ -56,6 +56,11 @@
                        checked="{{.EnableVotekick}}"/>
                 <button type="submit" form="lobby-create" style="grid-column-start: 1; grid-column-end: 3;">ساخت اتاق
                 </button>
+                <style>
+                    a {text-align: center}
+                </style>
+                <a style="grid-column-start: 1; grid-column-end: 3;" class="go-back" href="/">بازگشت منوی اصلی 🏠</a>
+
             </form>
         </div>
     </div>

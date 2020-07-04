@@ -11,6 +11,7 @@ var (
 	errorPage       *template.Template
 	lobbyCreatePage *template.Template
 	lobbyPage       *template.Template
+	choosePage       *template.Template
 )
 
 func findStringFromBox(box *packr.Box, name string) string {
@@ -56,6 +57,15 @@ func init() {
 		panic(parseError)
 	}
 
+	choosePage, parseError = template.New("choose.html").Parse(findStringFromBox(templates, "choose.html"))
+	if parseError != nil {
+		panic(parseError)
+	}
+	choosePage, parseError = choosePage.New("footer.html").Parse(findStringFromBox(templates, "footer.html"))
+	if parseError != nil {
+		panic(parseError)
+	}
+
 	setupRoutes()
 }
 
@@ -63,9 +73,10 @@ func setupRoutes() {
 	frontendRessourcesBox := packr.New("frontend", "../resources/frontend")
 	//Endpoints for official webclient
 	http.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(frontendRessourcesBox)))
-	http.HandleFunc("/", homePage)
+	http.HandleFunc("/", choose)
 	http.HandleFunc("/ssrEnterLobby", ssrEnterLobby)
 	http.HandleFunc("/ssrCreateLobby", ssrCreateLobby)
+	http.HandleFunc("/create_new_lobby", createLobbyPage)
 
 	//The websocket is shared between the public API and the official client
 	http.HandleFunc("/v1/ws", wsEndpoint)
