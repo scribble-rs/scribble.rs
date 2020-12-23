@@ -50,7 +50,7 @@ cd scribble.rs
 
 For -nix systems:
 ```shell
-# run `make` to see all availables commands
+# run `make` to see all available commands
 make build
 ```
 
