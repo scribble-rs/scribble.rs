@@ -160,7 +160,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 
 	// TODO Improve this. Return metadata or so instead.
 	userAgent := strings.ToLower(r.UserAgent())
-	if !(strings.Contains(userAgent, "gecko") || strings.Contains(userAgent, "chrom") || strings.Contains(userAgent, "opera") || strings.Contains(userAgent, "safari")) {
+	if !(strings.Contains(userAgent, "gecko") || strings.Contains(userAgent, "chrome") || strings.Contains(userAgent, "opera") || strings.Contains(userAgent, "safari")) {
 		userFacingError(w, "Sorry, no robots allowed.")
 		return
 	}
