@@ -9,7 +9,7 @@ DESTINATION_FILE="../resources/words/${TO}"
 if [ ! -f ${SOURCE_FILE} ]; then echo "file: ${SOURCE_FILE} does not exist"; fi;
 if [ -f ${DESTINATION_FILE} ]; then
     echo "WARNING! file: ${DESTINATION_FILE} already exist!";
-    echo "Do you want to overide it? [yes/no]"
+    echo "Do you want to override it? [yes/no]"
     read -r choice
     if [[ "${choice}" != "yes" ]]; then
         echo "Aborting"
@@ -27,7 +27,7 @@ while read sourceWord; do
 
   echo -n "Translating '${cleanWord}'... "
 
-  # Wanne exclude some words based on a tag?
+  # Wanna exclude some words based on a tag?
   # Just un-comment and edit the following lines
   if [[ ${tag} == "i" ]]; then
     echo "❌ Skipping due to tag setting."
