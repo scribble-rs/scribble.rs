@@ -22,12 +22,11 @@ The site will not display any ads or share any data with third parties.
 
 ## Play now
 
-Feel free to play on any of these instances:
+Feel free to play on this instance
 
 * https://scribblers-official.herokuapp.com/
-  > Might not respond right-away, just wait some seconds
-* http://scribble.rs
-  > No HTTPS!
+  > Might not respond right-away, just wait some seconds / minutes, as it
+  > shuts down automatically when unused.
 
 ### Hosting your own instance for free
 
