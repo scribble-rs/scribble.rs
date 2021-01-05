@@ -17,6 +17,8 @@ import (
 	"github.com/agnivade/levenshtein"
 	petname "github.com/dustinkirkland/golang-petname"
 	"github.com/kennygrant/sanitize"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 var (
@@ -186,11 +188,11 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 	if sender.State == Drawing || sender.State == Standby {
 		sendMessageToAllNonGuessing(trimmed, sender, lobby)
 	} else if sender.State == Guessing {
-		lowerCasedInput := strings.ToLower(trimmed)
-		lowerCasedSearched := strings.ToLower(lobby.CurrentWord)
+		lowerCasedInput := lobby.lowercaser.String(trimmed)
+		currentWord := lobby.CurrentWord
 
 		normInput := removeAccents(lowerCasedInput)
-		normSearched := removeAccents(lowerCasedSearched)
+		normSearched := removeAccents(currentWord)
 
 		if normSearched == normInput {
 			secondsLeft := lobby.RoundEndTime/1000 - time.Now().UTC().UnixNano()/1000000000
@@ -645,17 +647,27 @@ type Rounds struct {
 
 // CreateLobby allows creating a lobby, optionally returning errors that
 // occurred during creation.
-func CreateLobby(playerName, language string, publicLobby bool, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit int, customWords []string, enableVotekick bool) (*Player, *Lobby, error) {
+func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit int, customWords []string, enableVotekick bool) (*Player, *Lobby, error) {
 	lobby := createLobby(drawingTime, rounds, maxPlayers, customWords, customWordChance, clientsPerIPLimit, enableVotekick)
-	lobby.Wordpack = language
+	lobby.Wordpack = chosenLanguage
 	lobby.public = publicLobby
+
+	//Neccessary to correctly treat words from player, however, custom words might be treated incorrectly.
+	lobby.lowercaser = cases.Lower(language.Make(getLanguageIdentifier(chosenLanguage)))
+
+	//customWords are lowercased afterwards, as they are direct user input.
+	if len(customWords) > 0 {
+		for customWordIndex, customWord := range customWords {
+			customWords[customWordIndex] = lobby.lowercaser.String(customWord)
+		}
+	}
+
 	player := createPlayer(playerName)
 
 	lobby.players = append(lobby.players, player)
 	lobby.owner = player
 
-	// Read wordlist according to the chosen language
-	words, err := readWordList(language)
+	words, err := readWordList(lobby.lowercaser, chosenLanguage)
 	if err != nil {
 		RemoveLobby(lobby.ID)
 		return nil, nil, err
@@ -777,4 +789,8 @@ func removeAccents(s string) string {
 	return strings.
 		NewReplacer(" ", "", "-", "", "_", "").
 		Replace(sanitize.Accents(s))
+}
+
+func (lobby *Lobby) Lowercase(text string) {
+
 }

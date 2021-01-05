@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 func Test_readWordList(t *testing.T) {
@@ -15,13 +18,13 @@ func Test_readWordList(t *testing.T) {
 				panic(fmt.Sprintf("Test should've failed, but returned nil error"))
 			}
 		}()
-		_, readError := readWordList("owO")
+		_, readError := readWordList(cases.Lower(language.English), "owO")
 		if readError == nil {
 			t.Errorf("Reading word list didn't return an error, even though the langauge doesn't exist.")
 		}
 	})
 
-	for language := range languageMap {
+	for language := range languageIdentifiers {
 		t.Run(fmt.Sprintf("Testing language file for %s", language), func(t *testing.T) {
 			//First run from box/drive
 			testWordList(language, t)
@@ -31,19 +34,19 @@ func Test_readWordList(t *testing.T) {
 	}
 }
 
-func testWordList(language string, t *testing.T) {
-	words, readError := readWordList(language)
+func testWordList(chosenLanguage string, t *testing.T) {
+	words, readError := readWordList(cases.Lower(language.English), chosenLanguage)
 	if readError != nil {
-		t.Errorf("Error reading language %s: %s", language, readError)
+		t.Errorf("Error reading language %s: %s", chosenLanguage, readError)
 	}
 
 	if len(words) == 0 {
-		t.Errorf("Wordlist for language %s was empty.", language)
+		t.Errorf("Wordlist for language %s was empty.", chosenLanguage)
 	}
 
 	for _, word := range words {
 		if word == "" {
-			t.Errorf("Wordlist for language %s contained empty word", language)
+			t.Errorf("Wordlist for language %s contained empty word", chosenLanguage)
 		}
 
 		if strings.HasPrefix(word, " ") || strings.HasSuffix(word, " ") {

@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/scribble-rs/scribble.rs/game"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 //This file contains the API for the official web client.
@@ -225,6 +227,7 @@ func parseCustomWords(value string) ([]string, error) {
 
 	result := strings.Split(trimmedValue, ",")
 	for index, item := range result {
+		cases.Lower(language.English)
 		trimmedItem := strings.ToLower(strings.TrimSpace(item))
 		if trimmedItem == "" {
 			return nil, errors.New("custom words must not be empty")

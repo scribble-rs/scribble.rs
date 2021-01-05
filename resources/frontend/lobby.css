@@ -12,7 +12,6 @@
 }
 
 .guess-letter-underline {
-    text-transform: uppercase;
     border-bottom: 0.3rem black solid;
 }
 

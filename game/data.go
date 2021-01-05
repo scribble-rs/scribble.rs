@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	uuid "github.com/satori/go.uuid"
+	"golang.org/x/text/cases"
 )
 
 // Lobby represents a game session.
@@ -28,6 +29,7 @@ type Lobby struct {
 	CustomWords []string
 	words       []string
 	public      bool
+	lowercaser  cases.Caser
 
 	// players references all participants of the Lobby.
 	players []*Player
@@ -247,15 +249,15 @@ func createLobby(
 	createDeleteMutex.Lock()
 
 	lobby := &Lobby{
-		ID:                  uuid.NewV4().String(),
-		DrawingTime:         drawingTime,
-		MaxRounds:           rounds,
-		MaxPlayers:          maxPlayers,
-		CustomWords:         customWords,
-		CustomWordsChance:   customWordsChance,
-		ClientsPerIPLimit:   clientsPerIPLimit,
-		EnableVotekick:      enableVotekick,
-		currentDrawing:      make([]interface{}, 0, 0),
+		ID:                uuid.NewV4().String(),
+		DrawingTime:       drawingTime,
+		MaxRounds:         rounds,
+		MaxPlayers:        maxPlayers,
+		CustomWords:       customWords,
+		CustomWordsChance: customWordsChance,
+		ClientsPerIPLimit: clientsPerIPLimit,
+		EnableVotekick:    enableVotekick,
+		currentDrawing:    make([]interface{}, 0, 0),
 	}
 
 	if len(customWords) > 1 {

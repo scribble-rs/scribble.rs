@@ -6,11 +6,12 @@ import (
 	"time"
 
 	"github.com/gobuffalo/packr/v2"
+	"golang.org/x/text/cases"
 )
 
 var (
-	wordListCache = make(map[string][]string)
-	languageMap   = map[string]string{
+	wordListCache       = make(map[string][]string)
+	languageIdentifiers = map[string]string{
 		"english": "en",
 		"italian": "it",
 		"german":  "de",
@@ -20,14 +21,18 @@ var (
 	wordBox = packr.New("words", "../resources/words")
 )
 
-func readWordList(chosenLanguage string) ([]string, error) {
-	langFileName := languageMap[chosenLanguage]
-	list, available := wordListCache[langFileName]
+func getLanguageIdentifier(language string) string {
+	return languageIdentifiers[language]
+}
+
+func readWordList(lowercaser cases.Caser, chosenLanguage string) ([]string, error) {
+	languageIdentifier := getLanguageIdentifier(chosenLanguage)
+	list, available := wordListCache[languageIdentifier]
 	if available {
 		return list, nil
 	}
 
-	wordListFile, pkgerError := wordBox.FindString(langFileName)
+	wordListFile, pkgerError := wordBox.FindString(languageIdentifier)
 	if pkgerError != nil {
 		panic(pkgerError)
 	}
@@ -50,13 +55,13 @@ func readWordList(chosenLanguage string) ([]string, error) {
 		//Since not all words use the tag system, we can just instantly return for words that don't use it.
 		lastIndexNumberSign := strings.LastIndex(word, "#")
 		if lastIndexNumberSign == -1 {
-			words = append(words, word)
+			words = append(words, lowercaser.String(word))
 		} else {
-			words = append(words, word[:lastIndexNumberSign])
+			words = append(words, lowercaser.String(word[:lastIndexNumberSign]))
 		}
 	}
 
-	wordListCache[langFileName] = words
+	wordListCache[languageIdentifier] = words
 
 	return words, nil
 }
