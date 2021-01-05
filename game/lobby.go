@@ -565,7 +565,7 @@ func getTimeAsMillis() int64 {
 type NextTurn struct {
 	Round        int       `json:"round"`
 	Players      []*Player `json:"players"`
-	RoundEndTime int       `json:"RoundEndTime"`
+	RoundEndTime int       `json:"roundEndTime"`
 }
 
 // recalculateRanks will assign each player his respective rank in the lobby
@@ -707,7 +707,7 @@ type Ready struct {
 	OwnerID        string        `json:"ownerId"`
 	Round          int           `json:"round"`
 	MaxRound       int           `json:"maxRounds"`
-	RoundEndTime   int           `json:"RoundEndTime"`
+	RoundEndTime   int           `json:"roundEndTime"`
 	WordHints      []*WordHint   `json:"wordHints"`
 	Players        []*Player     `json:"players"`
 	CurrentDrawing []interface{} `json:"currentDrawing"`
