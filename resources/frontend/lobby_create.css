@@ -76,6 +76,12 @@
     width: 100%;
 }
 
+.open-lobby-info {
+    margin-top: 1em;
+    margin-bottom: 1em;
+    text-align: center;
+}
+
 .table-wrapper {
     height: 50vh;
     overflow: auto;

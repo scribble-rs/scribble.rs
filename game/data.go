@@ -207,6 +207,13 @@ func GetLobby(id string) *Lobby {
 	return nil
 }
 
+// GetActiveLobbyCount indicates how many activate lobby there are. This includes
+// both private and public lobbies and it doesn't matter whether the game is
+// already over, hasn't even started or is still ongoing.
+func GetActiveLobbyCount() int {
+	return len(lobbies)
+}
+
 // RemoveLobby deletes a lobby, not allowing anyone to connect to it again.
 func RemoveLobby(id string) {
 	indexToDelete := -1
