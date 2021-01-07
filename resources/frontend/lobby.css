@@ -84,10 +84,6 @@
     align-items: center;
     visibility: hidden;
     padding: 1rem;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
     /* A dialog should never fully hide the canvas. */
     max-width: 80%;
     max-height: 80%;
