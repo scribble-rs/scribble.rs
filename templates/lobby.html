@@ -54,53 +54,65 @@
                 "center-dialog" is the window content. Depending on which dialog
                 we want to show, we show a different content. Technically there could be more
                 than one dialog visible at a time, but they'll be layered. -->
-                <div id="center-dialog-container">
-                    <div id="word-dialog" class="center-dialog">
-                        <span class="dialog-title">Choose a word</span>
-                        <div class="center-dialog-content">
-                            <div class="word-button-container">
-                                <button id="word-button-zero" class="dialog-button" onclick="chooseWord(0)">Placeholder
-                                </button>
-                                <button id="word-button-one" class="dialog-button" onclick="chooseWord(1)">Placeholder
-                                </button>
-                                <button id="word-button-two" class="dialog-button" onclick="chooseWord(2)">Placeholder
-                                </button>
+                <div id="center-dialogs">
+                    <div id="center-dialog-container">
+                        <div id="word-dialog" class="center-dialog">
+                            <span class="dialog-title">Choose a word</span>
+                            <div class="center-dialog-content">
+                                <div class="word-button-container">
+                                    <button id="word-button-zero" class="dialog-button" onclick="chooseWord(0)">Placeholder
+                                    </button>
+                                    <button id="word-button-one" class="dialog-button" onclick="chooseWord(1)">Placeholder
+                                    </button>
+                                    <button id="word-button-two" class="dialog-button" onclick="chooseWord(2)">Placeholder
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div id="start-dialog" class="center-dialog">
-                        <span class="dialog-title">Start the game</span>
-                        <div class="center-dialog-content">
-                            <button class="dialog-button" onclick="startGame()">Start</button>
+                    <div id="center-dialog-container">
+                        <div id="start-dialog" class="center-dialog">
+                            <span class="dialog-title">Start the game</span>
+                            <div class="center-dialog-content">
+                                <button class="dialog-button" onclick="startGame()">Start</button>
+                            </div>
                         </div>
                     </div>
 
-                    <div id="game-over-dialog" class="center-dialog">
-                        <span class="dialog-title">Game over!</span>
-                        <div class="center-dialog-content">
-                            Please wait for your lobby host to restart the game.
+                    <div id="center-dialog-container">
+                        <div id="game-over-dialog" class="center-dialog">
+                            <span class="dialog-title">Game over!</span>
+                            <div class="center-dialog-content">
+                                Please wait for your lobby host to restart the game.
+                            </div>
                         </div>
                     </div>
 
-                    <div id="restart-dialog" class="center-dialog">
-                        <span class="dialog-title">Game over!</span>
-                        <div class="center-dialog-content">
-                            <button class="dialog-button" onclick="startGame()">Restart</button>
+                    <div id="center-dialog-container">
+                        <div id="restart-dialog" class="center-dialog">
+                            <span class="dialog-title">Game over!</span>
+                            <div class="center-dialog-content">
+                                <button class="dialog-button" onclick="startGame()">Restart</button>
+                            </div>
                         </div>
                     </div>
 
-                    <div id="unstarted-dialog" class="center-dialog">
-                        <span class="dialog-title">Game hasn't started</span>
-                        <div class="center-dialog-content">
-                            Please wait for your lobby host to start the game.
+                    <div id="center-dialog-container">
+                        <div id="unstarted-dialog" class="center-dialog">
+                            <span class="dialog-title">Game hasn't started</span>
+                            <div class="center-dialog-content">
+                                Please wait for your lobby host to start the game.
+                            </div>
                         </div>
                     </div>
 
-                    <div id="kick-dialog" class="center-dialog">
-                        <span class="dialog-title">Vote to kick a player</span>
-                        <div id="kick-dialog-players"></div>
-                        <button onclick="hideKickDialog()" class="dialog-button dialog-close-button">Close</button>
+                    <div id="center-dialog-container">
+                        <div id="kick-dialog" class="center-dialog">
+                            <span class="dialog-title">Vote to kick a player</span>
+                            <div id="kick-dialog-players"></div>
+                            <button onclick="hideKickDialog()" class="dialog-button dialog-close-button">Close</button>
+                        </div>
                     </div>
                 </div>
                 <div id="toolbox">
