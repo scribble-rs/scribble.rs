@@ -807,7 +807,3 @@ func removeAccents(s string) string {
 		NewReplacer(" ", "", "-", "", "_", "").
 		Replace(sanitize.Accents(s))
 }
-
-func (lobby *Lobby) Lowercase(text string) {
-
-}
