@@ -29,11 +29,12 @@ type Lobby struct {
 	CustomWords []string
 	words       []string
 	public      bool
-	lowercaser  cases.Caser
 
 	// players references all participants of the Lobby.
 	players []*Player
 
+	// whether the game has started, is ongoing or already over.
+	state gameState
 	// drawer references the Player that is currently drawing.
 	drawer *Player
 	// owner references the Player that created the lobby.
@@ -66,7 +67,17 @@ type Lobby struct {
 	// lobby object.
 	currentDrawing []interface{}
 	EnableVotekick bool
+
+	lowercaser cases.Caser
 }
+
+type gameState string
+
+const (
+	unstarted gameState = "unstarted"
+	ongoing   gameState = "ongoing"
+	gameOver  gameState = "gameOver"
+)
 
 // WordHint describes a character of the word that is to be guessed, whether
 // the character should be shown and whether it should be underlined on the
@@ -265,6 +276,7 @@ func createLobby(
 		ClientsPerIPLimit: clientsPerIPLimit,
 		EnableVotekick:    enableVotekick,
 		currentDrawing:    make([]interface{}, 0, 0),
+		state:             unstarted,
 	}
 
 	if len(customWords) > 1 {

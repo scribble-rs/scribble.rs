@@ -458,8 +458,6 @@ func advanceLobby(lobby *Lobby) {
 		otherPlayer.votedForKick = make(map[string]bool)
 	}
 
-	lobby.ClearDrawing()
-
 	newDrawer, roundOver := selectNextDrawer(lobby)
 	if roundOver {
 		if lobby.Round == lobby.MaxRounds {
@@ -470,8 +468,10 @@ func advanceLobby(lobby *Lobby) {
 		lobby.Round++
 	}
 
+	lobby.ClearDrawing()
 	lobby.drawer = newDrawer
 	lobby.drawer.State = Drawing
+	lobby.state = ongoing
 	lobby.wordChoice = GetRandomWords(lobby)
 
 	recalculateRanks(lobby)
@@ -493,11 +493,17 @@ func advanceLobby(lobby *Lobby) {
 func endGame(lobby *Lobby) {
 	lobby.drawer = nil
 	lobby.Round = 0
+	lobby.state = gameOver
 
 	recalculateRanks(lobby)
 	triggerPlayersUpdate(lobby)
 
-	WritePublicSystemMessage(lobby, "Game over. Type !start again to start a new round.")
+	for _, player := range lobby.players {
+		WriteAsJSON(player, JSEvent{
+			Type: "ready",
+			Data: generateReadyData(lobby, player),
+		})
+	}
 }
 
 // selectNextDrawer returns the next person that's supposed to be drawing, but
@@ -704,6 +710,7 @@ type Ready struct {
 	PlayerName string `json:"playerName"`
 	Drawing    bool   `json:"drawing"`
 
+	GameState      gameState     `json:"gameState"`
 	OwnerID        string        `json:"ownerId"`
 	Round          int           `json:"round"`
 	MaxRound       int           `json:"maxRounds"`
@@ -713,21 +720,35 @@ type Ready struct {
 	CurrentDrawing []interface{} `json:"currentDrawing"`
 }
 
-func OnConnected(lobby *Lobby, player *Player) {
-	player.Connected = true
-	WriteAsJSON(player, JSEvent{Type: "ready", Data: &Ready{
+func generateReadyData(lobby *Lobby, player *Player) *Ready {
+	ready := &Ready{
 		PlayerID:   player.ID,
 		Drawing:    player.State == Drawing,
 		PlayerName: player.Name,
 
+		GameState:      lobby.state,
 		OwnerID:        lobby.owner.ID,
 		Round:          lobby.Round,
 		MaxRound:       lobby.MaxRounds,
-		RoundEndTime:   int(lobby.RoundEndTime - getTimeAsMillis()),
 		WordHints:      lobby.GetAvailableWordHints(player),
 		Players:        lobby.players,
 		CurrentDrawing: lobby.currentDrawing,
-	}})
+	}
+
+	//Game over already
+	if lobby.state != ongoing {
+		//0 is interpreted as "no time left".
+		ready.RoundEndTime = 0
+	} else {
+		ready.RoundEndTime = int(lobby.RoundEndTime - getTimeAsMillis())
+	}
+
+	return ready
+}
+
+func OnConnected(lobby *Lobby, player *Player) {
+	player.Connected = true
+	WriteAsJSON(player, JSEvent{Type: "ready", Data: generateReadyData(lobby, player)})
 
 	//This state is reached when the player refreshes before having chosen a word.
 	if lobby.drawer == player && lobby.CurrentWord == "" {

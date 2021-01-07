@@ -50,29 +50,54 @@
 
                 <!-- The so called "center dialogs" are divs that float above the canvas.
                 They are centered are always a fraction of the canvas size but never bigger.
-                The "center-dialog" is basically like a "window" if you will and the
-                "center-dialog-content" is the window content. Depending on which dialog
+                The "center-dialog-container" is basically like a "window" if you will and the
+                "center-dialog" is the window content. Depending on which dialog
                 we want to show, we show a different content. Technically there could be more
                 than one dialog visible at a time, but they'll be layered. -->
-                <div id="center-dialog">
-                    <div id="word-dialog" class="center-dialog-content">
+                <div id="center-dialog-container">
+                    <div id="word-dialog" class="center-dialog">
                         <span class="dialog-title">Choose a word</span>
-                        <div class="word-button-container">
-                            <button id="word-button-zero" class="dialog-button" onclick="chooseWord(0)">Placeholder
-                            </button>
-                            <button id="word-button-one" class="dialog-button" onclick="chooseWord(1)">Placeholder
-                            </button>
-                            <button id="word-button-two" class="dialog-button" onclick="chooseWord(2)">Placeholder
-                            </button>
+                        <div class="center-dialog-content">
+                            <div class="word-button-container">
+                                <button id="word-button-zero" class="dialog-button" onclick="chooseWord(0)">Placeholder
+                                </button>
+                                <button id="word-button-one" class="dialog-button" onclick="chooseWord(1)">Placeholder
+                                </button>
+                                <button id="word-button-two" class="dialog-button" onclick="chooseWord(2)">Placeholder
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <div id="start-dialog" class="center-dialog-content">
+                    <div id="start-dialog" class="center-dialog">
                         <span class="dialog-title">Start the game</span>
-                        <button class="dialog-button" onclick="startGame()">Start</button>
+                        <div class="center-dialog-content">
+                            <button class="dialog-button" onclick="startGame()">Start</button>
+                        </div>
                     </div>
 
-                    <div id="kick-dialog" class="center-dialog-content">
+                    <div id="game-over-dialog" class="center-dialog">
+                        <span class="dialog-title">Game over!</span>
+                        <div class="center-dialog-content">
+                            Please wait for your lobby host to restart the game.
+                        </div>
+                    </div>
+
+                    <div id="restart-dialog" class="center-dialog">
+                        <span class="dialog-title">Game over!</span>
+                        <div class="center-dialog-content">
+                            <button class="dialog-button" onclick="startGame()">Restart</button>
+                        </div>
+                    </div>
+
+                    <div id="unstarted-dialog" class="center-dialog">
+                        <span class="dialog-title">Game hasn't started</span>
+                        <div class="center-dialog-content">
+                            Please wait for your lobby host to start the game.
+                        </div>
+                    </div>
+
+                    <div id="kick-dialog" class="center-dialog">
                         <span class="dialog-title">Vote to kick a player</span>
                         <div id="kick-dialog-players"></div>
                         <button onclick="hideKickDialog()" class="dialog-button dialog-close-button">Close</button>
@@ -233,7 +258,10 @@
     const colorPicker = document.getElementById("color-picker");
 
     const centerDialog = document.getElementById("center-dialog");
+    const unstartedDialog = document.getElementById("unstarted-dialog");
     const startDialog = document.getElementById("start-dialog");
+    const restartDialog = document.getElementById("restart-dialog");
+    const gameOverDialog = document.getElementById("game-over-dialog");
     const wordDialog = document.getElementById("word-dialog");
     const wordButtonZero = document.getElementById("word-button-zero");
     const wordButtonOne = document.getElementById("word-button-one");
@@ -354,7 +382,6 @@
         socket.send(JSON.stringify({
             type: "start",
         }))
-        startDialog.style.visibility = "hidden";
     }
 
     function setColor(value) {
@@ -468,29 +495,21 @@
         let parsed = JSON.parse(event.data);
         if (parsed.type === "ready") {
             let ready = parsed.data;
-            ownerID = ready.ownerId;
-            ownName = ready.playerName;
-            allowDrawing = ready.drawing;
-            ownID = ready.playerId;
-            maxRounds = ready.maxRounds;
-            roundEndTime = ready.roundEndTime;
-            applyRounds(ready.round, ready.maxRounds);
-
-            if (ready.round === 0 && ownerID === ownID) {
-                startDialog.style.visibility = "visible";
+            handleReadyEvent(ready);
+            if (ready.gameState === "unstarted") {
+                if(ownerID === ownID) {
+                    startDialog.style.visibility = "visible";
+                } else {
+                    unstartedDialog.style.visibility = "visible";
+                }
+            } else if (ready.gameState === "gameOver") {
+                if(ownerID === ownID) {
+                    restartDialog.style.visibility = "visible";
+                } else {
+                    gameOverDialog.style.visibility = "visible";
+                }
             }
-
-            if (ready.players && ready.players.length) {
-                applyPlayers(ready.players)
-            }
-            if (ready.currentDrawing && ready.currentDrawing.length) {
-                applyDrawData(ready.currentDrawing)
-            }
-            if (ready.wordHints && ready.wordHints.length) {
-                applyWordHints(ready.wordHints)
-            }
-        }
-        if (parsed.type === "update-players") {
+        } else if (parsed.type === "update-players") {
             applyPlayers(parsed.data);
         } else if (parsed.type === "correct-guess") {
             playWav('/resources/plop.wav');
@@ -509,6 +528,14 @@
         } else if (parsed.type === "clear-drawing-board") {
             clear(context)
         } else if (parsed.type === "next-turn") {
+            //As soon as a turn starts, the round should be ongoing, so we make
+            //sure that all types of dialogs, that indicate the game isn't
+            //ongoing, are not visible anymore.
+            unstartedDialog.style.visibility = "hidden";
+            startDialog.style.visibility = "hidden";
+            restartDialog.style.visibility = "hidden";
+            gameOverDialog.style.visibility = "hidden";
+
             //If a player doesn't choose, the dialog will still be up.
             wordDialog.style.visibility = "hidden";
             playWav('/resources/end-turn.wav');
@@ -529,6 +556,26 @@
             promptWords(parsed.data[0], parsed.data[1], parsed.data[2]);
         }
     };
+
+    function handleReadyEvent(ready) {
+        ownerID = ready.ownerId;
+        ownName = ready.playerName;
+        allowDrawing = ready.drawing;
+        ownID = ready.playerId;
+        maxRounds = ready.maxRounds;
+        roundEndTime = ready.roundEndTime;
+        applyRounds(ready.round, ready.maxRounds);
+
+        if (ready.players && ready.players.length) {
+            applyPlayers(ready.players)
+        }
+        if (ready.currentDrawing && ready.currentDrawing.length) {
+            applyDrawData(ready.currentDrawing)
+        }
+        if (ready.wordHints && ready.wordHints.length) {
+            applyWordHints(ready.wordHints)
+        }
+    }
 
     socket.onclose = event => console.log("Socket Closed Connection: ", event);
     socket.onerror = error => console.log("Socket Error: ", error);

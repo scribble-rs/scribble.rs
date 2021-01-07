@@ -65,7 +65,7 @@
     height: 100%;
 }
 
-#center-dialog {
+#center-dialog-container {
     pointer-events: none;
     touch-action: none;
     position: absolute;
@@ -74,7 +74,7 @@
     z-index: 20;
 }
 
-.center-dialog-content {
+.center-dialog {
     pointer-events: all;
     touch-action: auto;
     background-color: rgb(225, 221, 221);
@@ -83,8 +83,7 @@
     justify-content: center;
     align-items: center;
     visibility: hidden;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    padding: 1rem;
     position: absolute;
     left: 50%;
     top: 50%;
@@ -144,12 +143,10 @@
 }
 
 .dialog-title {
-    margin-bottom: 15px;
-    font-size: 3rem;
+    margin-bottom: 1rem;
+    font-size: 2rem;
     font-weight: bold;
     color: rgb(240, 105, 127);
-    margin-left: 20px;
-    margin-right: 20px;
 }
 
 .word-button-container {
@@ -354,9 +351,8 @@ input[type="button"]:active,
 }
 
 .kick-player-button {
-    width: 70%;
+    width: 100%;
     border: none;
-    margin-left: 15%;
     padding-top: 1rem;
     padding-bottom: 1rem;
 }
