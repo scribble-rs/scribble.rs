@@ -513,6 +513,18 @@
             applyPlayers(parsed.data);
         } else if (parsed.type === "correct-guess") {
             playWav('/resources/plop.wav');
+
+            if (parsed.data === ownID) {
+                applyMessage("correct-guess-message", "System", "You have correctly guessed the word.")
+            } else {
+                for (let i = 0; i < cachedPlayers.length; i++) {
+                    let player = cachedPlayers[i];
+                    if (player.id === parsed.data) {
+                        applyMessage("correct-guess-message", "System", player.name + " correctly guessed the word.")
+                        break;
+                    }
+                }
+            }
         } else if (parsed.type === "update-wordhint") {
             applyWordHints(parsed.data);
         } else if (parsed.type === "message") {
@@ -520,7 +532,7 @@
         } else if (parsed.type === "system-message") {
             applyMessage("system-message", "System", parsed.data);
         } else if (parsed.type === "non-guessing-player-message") {
-            applyMessage("non-guessing-player-message", parsed.data.author, parsed.data.content);
+            applyMessage("correct-guess-message", parsed.data.author, parsed.data.content);
         } else if (parsed.type === "line") {
             drawLine(context, parsed.data.fromX * scaleDownFactor(), parsed.data.fromY * scaleDownFactor(), parsed.data.toX * scaleDownFactor(), parsed.data.toY * scaleDownFactor(), parsed.data.color, parsed.data.lineWidth * scaleDownFactor());
         } else if (parsed.type === "fill") {
