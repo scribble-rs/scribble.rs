@@ -24,7 +24,7 @@ func main() {
 		envPort, portVarAvailable := os.LookupEnv("PORT")
 		if portVarAvailable {
 			log.Printf("'PORT' environment variable found: '%s'\n", envPort)
-			parsed, parseError := strconv.ParseInt(envPort, 10, 16)
+			parsed, parseError := strconv.ParseInt(envPort, 10, 32)
 			if parseError == nil {
 				portHTTP = int(parsed)
 				log.Printf("Listening on port %d sourced from 'PORT' environment variable\n", portHTTP)
