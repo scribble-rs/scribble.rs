@@ -283,7 +283,7 @@
     const kickDialogPlayers = document.getElementById("kick-dialog-players");
 
     const soundToggleLabel = document.getElementById("sound-toggle-label");
-    let sound = localStorage.getItem("sound") === "true";
+    let sound = localStorage.getItem("sound") !== "false";
     updateSoundIcon();
 
     function showKickDialog() {
