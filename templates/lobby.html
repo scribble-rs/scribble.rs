@@ -381,14 +381,14 @@
     setLineWidth(5);
 
     //Those are not scaled for now, as the whole toolbar would then have to incorrectly size up and down.
-    document.getElementById("size-8-button").style.width = 8 + "px";
-    document.getElementById("size-8-button").style.height = 8 + "px";
-    document.getElementById("size-15-button").style.width = 15 + "px";
-    document.getElementById("size-15-button").style.height = 15 + "px";
-    document.getElementById("size-30-button").style.width = 30 + "px";
-    document.getElementById("size-30-button").style.height = 30 + "px";
-    document.getElementById("size-40-button").style.width = 40 + "px";
-    document.getElementById("size-40-button").style.height = 40 + "px";
+    document.getElementById("size-8-button").style.width = "8px";
+    document.getElementById("size-8-button").style.height = "8px";
+    document.getElementById("size-15-button").style.width = "15px";
+    document.getElementById("size-15-button").style.height = "15px";
+    document.getElementById("size-30-button").style.width = "30px";
+    document.getElementById("size-30-button").style.height = "30px";
+    document.getElementById("size-40-button").style.width = "40px";
+    document.getElementById("size-40-button").style.height = "40px";
 
     function startGame() {
         socket.send(JSON.stringify({
