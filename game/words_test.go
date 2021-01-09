@@ -11,13 +11,6 @@ import (
 
 func Test_readWordList(t *testing.T) {
 	t.Run("test invalid language file", func(t *testing.T) {
-		//We expect a panic for invalid language files.
-		defer func() {
-			err := recover()
-			if err == nil {
-				panic(fmt.Sprintf("Test should've failed, but returned nil error"))
-			}
-		}()
 		_, readError := readWordList(cases.Lower(language.English), "owO")
 		if readError == nil {
 			t.Errorf("Reading word list didn't return an error, even though the langauge doesn't exist.")
@@ -62,7 +55,7 @@ func Test_getRandomWords(t *testing.T) {
 			words:       []string{"a", "b", "c"},
 		}
 
-		randomWords := GetRandomWords(lobby)
+		randomWords := GetRandomWords(3, lobby)
 		for _, lobbyWord := range lobby.words {
 			if !arrayContains(randomWords, lobbyWord) {
 				t.Errorf("Random words %s, didn't contain lobbyWord %s", randomWords, lobbyWord)
@@ -78,7 +71,7 @@ func Test_getRandomWords(t *testing.T) {
 			CustomWords:       []string{"d", "e", "f"},
 		}
 
-		randomWords := GetRandomWords(lobby)
+		randomWords := GetRandomWords(3, lobby)
 		for _, lobbyWord := range lobby.words {
 			if !arrayContains(randomWords, lobbyWord) {
 				t.Errorf("Random words %s, didn't contain lobbyWord %s", randomWords, lobbyWord)
@@ -94,7 +87,7 @@ func Test_getRandomWords(t *testing.T) {
 			CustomWords:       nil,
 		}
 
-		randomWords := GetRandomWords(lobby)
+		randomWords := GetRandomWords(3, lobby)
 		for _, lobbyWord := range lobby.words {
 			if !arrayContains(randomWords, lobbyWord) {
 				t.Errorf("Random words %s, didn't contain lobbyWord %s", randomWords, lobbyWord)
@@ -110,37 +103,70 @@ func Test_getRandomWords(t *testing.T) {
 			CustomWords:       []string{"d", "e", "f"},
 		}
 
-		for i := 0; i < 1000; i++ {
-			randomWords := GetRandomWords(lobby)
-			for _, customWord := range lobby.CustomWords {
-				if !arrayContains(randomWords, customWord) {
-					t.Errorf("Random words %s, didn't contain customWord %s", randomWords, customWord)
-				}
+		randomWords := GetRandomWords(3, lobby)
+		for _, customWord := range lobby.CustomWords {
+			if !arrayContains(randomWords, customWord) {
+				t.Errorf("Random words %s, didn't contain customWord %s", randomWords, customWord)
+			}
+		}
+	})
+}
+
+func Test_getRandomWordsReloading(t *testing.T) {
+	wordList, err := readWordListInternal(cases.Lower(language.English), "test", func(language string) (string, error) {
+		return "a\nb\nc", nil
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	t.Run("test reload with 3 words and 0 custom words and 0 chance", func(t2 *testing.T) {
+		lobby := &Lobby{
+			words:             wordList,
+			CustomWordsChance: 0,
+			CustomWords:       nil,
+		}
+
+		//Running this 10 times, expecting it to get 3 words each time, even
+		//though our pool has only got a size of 3.
+		for i := 0; i < 10; i++ {
+			words := GetRandomWords(3, lobby)
+			if len(words) != 3 {
+				t.Errorf("Test failed, incorrect wordcount: %d", len(words))
 			}
 		}
 	})
 
-	t.Run("Test getRandomWords with 3 words in list and 100% custom word chance, with 3 custom words and one of them on the used list", func(t *testing.T) {
+	t.Run("test reload with 3 words and 0 custom words and 100 chance", func(t2 *testing.T) {
 		lobby := &Lobby{
-			CurrentWord:       "",
-			words:             []string{"a", "b", "c"},
+			words:             wordList,
 			CustomWordsChance: 100,
-			CustomWords:       []string{"d", "e", "f"},
-			alreadyUsedWords:  []string{"f"},
+			CustomWords:       nil,
 		}
 
-		for i := 0; i < 1000; i++ {
-			randomWords := GetRandomWords(lobby)
-			if !arrayContains(randomWords, "d") {
-				t.Errorf("Random words %s, didn't contain customWord d", randomWords)
+		//Running this 10 times, expecting it to get 3 words each time, even
+		//though our pool has only got a size of 3.
+		for i := 0; i < 10; i++ {
+			words := GetRandomWords(3, lobby)
+			if len(words) != 3 {
+				t.Errorf("Test failed, incorrect wordcount: %d", len(words))
 			}
+		}
+	})
 
-			if !arrayContains(randomWords, "e") {
-				t.Errorf("Random words %s, didn't contain customWord e", randomWords)
-			}
+	t.Run("test reload with 3 words and 1 custom words and 0 chance", func(t2 *testing.T) {
+		lobby := &Lobby{
+			words:             wordList,
+			CustomWordsChance: 100,
+			CustomWords:       []string{"a"},
+		}
 
-			if arrayContains(randomWords, "f") {
-				t.Errorf("Random words %s, contained customWord f", randomWords)
+		//Running this 10 times, expecting it to get 3 words each time, even
+		//though our pool has only got a size of 3.
+		for i := 0; i < 10; i++ {
+			words := GetRandomWords(3, lobby)
+			if len(words) != 3 {
+				t.Errorf("Test failed, incorrect wordcount: %d", len(words))
 			}
 		}
 	})

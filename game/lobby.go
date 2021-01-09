@@ -444,7 +444,6 @@ func endTurn(lobby *Lobby) {
 	}
 
 	lobby.scoreEarnedByGuessers = 0
-	lobby.alreadyUsedWords = append(lobby.alreadyUsedWords, lobby.CurrentWord)
 	lobby.CurrentWord = ""
 	lobby.wordHints = nil
 
@@ -482,7 +481,7 @@ func advanceLobby(lobby *Lobby) {
 	lobby.drawer = newDrawer
 	lobby.drawer.State = Drawing
 	lobby.state = ongoing
-	lobby.wordChoice = GetRandomWords(lobby)
+	lobby.wordChoice = GetRandomWords(3, lobby)
 
 	recalculateRanks(lobby)
 

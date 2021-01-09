@@ -49,7 +49,7 @@ type Lobby struct {
 	// Round is the round that the Lobby is currently in. This is a number
 	// between 0 and MaxRounds. 0 indicates that it hasn't started yet.
 	Round int
-	// wordChoice represents the current choice of words.
+	// wordChoice represents the current choice of words present to the drawer.
 	wordChoice []string
 	Wordpack   string
 	// RoundEndTime represents the time at which the current round will end.
@@ -58,7 +58,6 @@ type Lobby struct {
 
 	timeLeftTicker        *time.Ticker
 	scoreEarnedByGuessers int
-	alreadyUsedWords      []string
 	CustomWordsChance     int
 	ClientsPerIPLimit     int
 	// currentDrawing represents the state of the current canvas. The elements

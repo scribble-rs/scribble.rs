@@ -25,16 +25,23 @@ func getLanguageIdentifier(language string) string {
 	return languageIdentifiers[language]
 }
 
-func readWordList(lowercaser cases.Caser, chosenLanguage string) ([]string, error) {
+// readWordListInternal exists for testing purposes.
+func readWordListInternal(
+	lowercaser cases.Caser, chosenLanguage string,
+	wordlistSupplier func(string) (string, error)) ([]string, error) {
+
 	languageIdentifier := getLanguageIdentifier(chosenLanguage)
 	list, available := wordListCache[languageIdentifier]
 	if available {
-		return list, nil
+		copiedList := make([]string, len(list))
+		copy(copiedList, list)
+		shuffleWordList(copiedList)
+		return copiedList, nil
 	}
 
-	wordListFile, pkgerError := wordBox.FindString(languageIdentifier)
+	wordListFile, pkgerError := wordlistSupplier(languageIdentifier)
 	if pkgerError != nil {
-		panic(pkgerError)
+		return nil, pkgerError
 	}
 
 	tempWords := strings.Split(wordListFile, "\n")
@@ -47,86 +54,100 @@ func readWordList(lowercaser cases.Caser, chosenLanguage string) ([]string, erro
 			continue
 		}
 
-		//The "i" was "impossible", as in "impossible to draw", tag initially supplied.
-		if strings.HasSuffix(word, "#i") {
-			continue
-		}
-
 		//Since not all words use the tag system, we can just instantly return for words that don't use it.
 		lastIndexNumberSign := strings.LastIndex(word, "#")
 		if lastIndexNumberSign == -1 {
 			words = append(words, lowercaser.String(word))
 		} else {
+			//The "i" is the "impossible" tag, meaning the word was rated as undrawable / unguessable.
+			if "#i" == word[lastIndexNumberSign:] {
+				continue
+			}
 			words = append(words, lowercaser.String(word[:lastIndexNumberSign]))
 		}
 	}
 
 	wordListCache[languageIdentifier] = words
 
-	return words, nil
+	copiedList := make([]string, len(words))
+	copy(copiedList, words)
+	shuffleWordList(copiedList)
+	return copiedList, nil
 }
 
-// GetRandomWords gets 3 random words for the passed Lobby. The words will be
-// chosen from the custom words and the default dictionary, depending on the
-// settings specified by the Lobby-owner.
-func GetRandomWords(lobby *Lobby) []string {
+// readWordList reads the wordlist for the given language from the filesystem.
+// If found, the list is cached and will be read from the cache upon next
+// request. The returned slice is a safe copy and can be mutated. If the
+// specified has no corresponding wordlist, an error is returned. This has been
+// a panic before, however, this could enable a user to forcefully crash the
+// whole application.
+func readWordList(lowercaser cases.Caser, chosenLanguage string) ([]string, error) {
+	return readWordListInternal(lowercaser, chosenLanguage, wordBox.FindString)
+}
+
+// GetRandomWords gets a custom amount of random words for the passed Lobby.
+// The words will be chosen from the custom words and the default
+// dictionary, depending on the settings specified by the lobbies creator.
+func GetRandomWords(wordCount int, lobby *Lobby) []string {
+	if lobby.CustomWordsChance > 0 && len(lobby.CustomWords) > 0 {
+		//Always get custom words
+		if lobby.CustomWordsChance == 100 {
+			if len(lobby.CustomWords) >= wordCount {
+				return popCustomWords(wordCount, lobby)
+			}
+
+			leftOverCustomWords := len(lobby.CustomWords)
+			return append(
+				popCustomWords(len(lobby.CustomWords), lobby),
+				popWordpackWords(wordCount-leftOverCustomWords, lobby)...)
+		}
+
+		words := make([]string, 0, wordCount)
+		for i := 0; i <= wordCount; i++ {
+			if rand.Intn(100)+1 < lobby.CustomWordsChance {
+				words = append(words, popCustomWords(1, lobby)...)
+			} else {
+				words = append(words, popWordpackWords(1, lobby)...)
+			}
+		}
+
+		return words
+	}
+
+	return popWordpackWords(wordCount, lobby)
+}
+
+func popCustomWords(wordCount int, lobby *Lobby) []string {
+	wordIndex := len(lobby.CustomWords) - wordCount
+	lastWords := lobby.CustomWords[wordIndex:]
+	lobby.CustomWords = lobby.CustomWords[:wordIndex]
+	return lastWords
+}
+
+// popWordpackWords gets X words from the wordpack. The major difference to
+// popCustomWords is, that the wordlist gets reset and reshuffeled once every
+// item has been popped.
+func popWordpackWords(wordCount int, lobby *Lobby) []string {
+	if len(lobby.words) < wordCount {
+		var readError error
+		lobby.words, readError = readWordList(lobby.lowercaser, lobby.Wordpack)
+		if readError != nil {
+			//Since this list should've been successfully read once before, we
+			//can "safely" panic if this happens, assuming that there's a
+			//deeper problem.
+			panic(readError)
+		}
+		shuffleWordList(lobby.words)
+	}
+	wordIndex := len(lobby.words) - wordCount
+	lastThreeWords := lobby.words[wordIndex:]
+	lobby.words = lobby.words[:wordIndex]
+	return lastThreeWords
+}
+
+func shuffleWordList(wordlist []string) {
 	rand.Seed(time.Now().Unix())
-	wordsNotToPick := lobby.alreadyUsedWords
-	wordOne := getRandomWordWithCustomWordChance(lobby, wordsNotToPick, lobby.CustomWords, lobby.CustomWordsChance)
-	wordsNotToPick = append(wordsNotToPick, wordOne)
-	wordTwo := getRandomWordWithCustomWordChance(lobby, wordsNotToPick, lobby.CustomWords, lobby.CustomWordsChance)
-	wordsNotToPick = append(wordsNotToPick, wordTwo)
-	wordThree := getRandomWordWithCustomWordChance(lobby, wordsNotToPick, lobby.CustomWords, lobby.CustomWordsChance)
-
-	return []string{
-		wordOne,
-		wordTwo,
-		wordThree,
-	}
-}
-
-func getRandomWordWithCustomWordChance(lobby *Lobby, wordsAlreadyUsed []string, customWords []string, customWordChance int) string {
-	if len(lobby.CustomWords) > 0 && customWordChance > 0 && rand.Intn(100)+1 <= customWordChance {
-		return getUnusedCustomWord(lobby, wordsAlreadyUsed, customWords)
-	}
-
-	return getUnusedRandomWord(lobby, wordsAlreadyUsed)
-}
-
-func getUnusedCustomWord(lobby *Lobby, wordsAlreadyUsed []string, customWords []string) string {
-OUTER_LOOP:
-	for _, word := range customWords {
-		for _, usedWord := range wordsAlreadyUsed {
-			if usedWord == word {
-				continue OUTER_LOOP
-			}
-		}
-
-		return word
-	}
-
-	return getUnusedRandomWord(lobby, wordsAlreadyUsed)
-}
-
-func getUnusedRandomWord(lobby *Lobby, wordsAlreadyUsed []string) string {
-	//We attempt to find a random word for a hundred times, afterwards we just use any.
-	randomnessAttempts := 0
-	var word string
-OUTER_LOOP:
-	for {
-		word = lobby.words[rand.Int()%len(lobby.words)]
-		for _, usedWord := range wordsAlreadyUsed {
-			if usedWord == word {
-				if randomnessAttempts == 100 {
-					break OUTER_LOOP
-				}
-
-				randomnessAttempts++
-				continue OUTER_LOOP
-			}
-		}
-		break
-	}
-
-	return word
+	rand.Shuffle(len(wordlist), func(a, b int) {
+		wordlist[a], wordlist[b] = wordlist[b], wordlist[a]
+	})
 }
