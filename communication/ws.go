@@ -86,7 +86,6 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 				strings.Contains(err.Error(), "use of closed network connection") {
 				//Make sure that the sockethandler is called
 				game.OnDisconnected(lobby, player)
-				log.Println(player.Name + " disconnected.")
 				return
 			}
 
