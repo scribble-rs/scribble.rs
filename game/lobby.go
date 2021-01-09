@@ -177,6 +177,8 @@ func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) er
 			return fmt.Errorf("invalid data in name-change event: %v", received.Data)
 		}
 		commandNick(player, lobby, newName)
+	} else if received.Type == "request-drawing" {
+		WriteAsJSON(player, JSEvent{Type: "drawing", Data: lobby.currentDrawing})
 	}
 
 	return nil

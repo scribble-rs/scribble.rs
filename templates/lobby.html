@@ -354,19 +354,12 @@
     const context = drawingBoard.getContext("2d");
 
     function handleCanvasResize() {
-        const imageData = context.getImageData(0, 0, drawingBoard.width, drawingBoard.height);
-        const canvasRescaleFactor = drawingBoard.clientWidth/drawingBoard.width
-
         //Resize canvas HTML element properly.
         drawingBoard.width = drawingBoard.clientWidth;
         drawingBoard.height = drawingBoard.clientHeight;
         setLineWidth(localLineWidthUnscaled);
         chat.style.maxHeight = drawingBoard.height + "px";
         toolBox.style.top = drawingBoard.height + "px";
-
-        //Recreate previous drawing
-        context.scale(canvasRescaleFactor)
-        context.putImageData(imageData,0,0)
     }
 
     function scaleUpFactor() {
@@ -586,6 +579,8 @@
             playWav('/resources/your-turn.wav');
 
             promptWords(parsed.data[0], parsed.data[1], parsed.data[2]);
+        } else if (parsed.type === "drawing") {
+            applyDrawData(parsed.data)
         }
     };
 
@@ -990,7 +985,16 @@
 
     //Call intially to correct initial state
     handleCanvasResize();
-    window.addEventListener("resize", handleCanvasResize, false);
+    window.addEventListener("resize", () => {
+        handleCanvasResize();
+        //Since the canvas gets cleared, we request the drawing again.
+        //Saving it locally would be wasteful and might slow down some
+        //clients due to a lot of memory allocation.
+        socket.send(JSON.stringify({
+            type: "request-drawing",
+        }));
+    }, false);
+
 </script>
 </body>
 
