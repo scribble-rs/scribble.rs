@@ -94,6 +94,14 @@ func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) er
 			if jsonError != nil {
 				return fmt.Errorf("error decoding data: %s", jsonError)
 			}
+
+			//In case the line is too big, we overwrite the data of the event.
+			//This will prevent clients from lagging due to too thick lines.
+			if line.Data.LineWidth > 40.0 {
+				line.Data.LineWidth = 40.0
+				received.Data = line
+			}
+
 			lobby.AppendLine(line)
 
 			//We directly forward the event, as it seems to be valid.
