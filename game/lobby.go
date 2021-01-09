@@ -771,6 +771,7 @@ func OnDisconnected(lobby *Lobby, player *Player) {
 		return
 	}
 
+	log.Printf("Player %s(%s) disconnected.\n", player.Name, player.ID)
 	player.Connected = false
 	player.ws = nil
 
