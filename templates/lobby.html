@@ -257,6 +257,13 @@
         socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/v1/ws?lobby_id={{.LobbyID}}");
     }
 
+    //Makes sure that the server notices that the player disconnects.
+    //Otherwise a refresh (on chromium based browsers) can lead to the server
+    //thinking that there's already an open tab with this lobby.
+    window.onbeforeunload = () => {
+        socket.close();
+    };
+
     const messageInput = document.getElementById("message-input");
     const playerContainer = document.getElementById("player-container");
     const wordContainer = document.getElementById("word-container");
