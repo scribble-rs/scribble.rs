@@ -666,7 +666,7 @@
             }
 
             let stateStyleClass;
-            if (player.state === 2) {
+            if (player.state === "standby") {
                 stateStyleClass = 'player-done';
             } else {
                 stateStyleClass = '';
@@ -684,9 +684,9 @@
                 '<span class="playerscore">' + player.score + '</span>' +
                 '<span class="last-turn-score">(Last turn: ' + player.lastScore + ')</span>' +
                 '</div>';
-            if (player.state === 1) {
+            if (player.state === "drawing") {
                 newPlayerElement += '<span>✏️</span>';
-            } else if (player.state === 2) {
+            } else if (player.state === "standby") {
                 newPlayerElement += '<span>✔️</span>';
             }
             newPlayerElement += '</div></div>';

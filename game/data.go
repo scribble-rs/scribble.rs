@@ -168,12 +168,12 @@ func (player *Player) GetUserSession() string {
 	return player.userSession
 }
 
-type PlayerState int
+type PlayerState string
 
 const (
-	Guessing PlayerState = 0
-	Drawing  PlayerState = 1
-	Standby  PlayerState = 2
+	Guessing PlayerState = "guessing"
+	Drawing  PlayerState = "drawing"
+	Standby  PlayerState = "standby"
 )
 
 // GetPlayer searches for a player, identifying them by usersession.
