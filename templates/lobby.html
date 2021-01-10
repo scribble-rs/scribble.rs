@@ -81,29 +81,19 @@
                     </div>
 
                     <div id="center-dialog-container">
-                        <div id="game-over-dialog" class="center-dialog">
-                            <span class="dialog-title">Game over!</span>
-                            <div class="center-dialog-content">
-                                Please wait for your lobby host to restart the game.
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="center-dialog-container">
-                        <div id="restart-dialog" class="center-dialog">
-                            <span class="dialog-title">Game over!</span>
-                            <div class="center-dialog-content">
-                                <button class="dialog-button" onclick="startGame()">Restart</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="center-dialog-container">
                         <div id="unstarted-dialog" class="center-dialog">
                             <span class="dialog-title">Game hasn't started</span>
                             <div class="center-dialog-content">
                                 Please wait for your lobby host to start the game.
                             </div>
+                        </div>
+                    </div>
+
+                    <div id="center-dialog-container">
+                        <div id="game-over-dialog" class="center-dialog">
+                            <span id="game-over-dialog-title" class="dialog-title">Game over!</span>
+                            <div id="game-over-scoreboard"></div>
+                            <button id="restart-button" class="dialog-button" onclick="startGame()">Restart</button>
                         </div>
                     </div>
 
@@ -304,8 +294,10 @@
     const centerDialog = document.getElementById("center-dialog");
     const unstartedDialog = document.getElementById("unstarted-dialog");
     const startDialog = document.getElementById("start-dialog");
-    const restartDialog = document.getElementById("restart-dialog");
     const gameOverDialog = document.getElementById("game-over-dialog");
+    const gameOverDialogTitle = document.getElementById("game-over-dialog-title");
+    const gameOverScoreboard = document.getElementById("game-over-scoreboard");
+    const restartButton = document.getElementById("restart-button");
     const wordDialog = document.getElementById("word-dialog");
     const wordButtonZero = document.getElementById("word-button-zero");
     const wordButtonOne = document.getElementById("word-button-one");
@@ -548,10 +540,36 @@
                     unstartedDialog.style.visibility = "visible";
                 }
             } else if (ready.gameState === "gameOver") {
+                gameOverDialog.style.visibility = "visible";
                 if(ownerID === ownID) {
-                    restartDialog.style.visibility = "visible";
-                } else {
-                    gameOverDialog.style.visibility = "visible";
+                    restartButton.style.display = "block";
+                }
+
+                gameOverScoreboard.innerHTML = "";
+
+                //Copying array so we can sort.
+                let players = cachedPlayers.slice();
+                players.sort((a,b) => {
+                    return a.rank - b.rank;
+                });
+
+                for (let i = 0; i < players.length; i++) {
+                    let player = players[i];
+                    gameOverScoreboard.innerHTML += '<div class="gameover-scoreboard-entry">'
+                            + '<div class="gameover-scoreboard-rank">'
+                                +player.rank
+                            + '</div>'
+                            + '<div class="gameover-scoreboard-name">'
+                                + player.name 
+                            +'</div>'
+                        + '</div>';
+                    if (player.id === ownID) {
+                        if (player.rank == 1) {
+                            gameOverDialogTitle.innerHTML = "Picasso, is it you?";
+                        } else {
+                            gameOverDialogTitle.innerHTML = "Next time you'll win!";
+                        }
+                    }
                 }
             }
         } else if (parsed.type === "update-players") {
@@ -590,7 +608,7 @@
             //ongoing, are not visible anymore.
             unstartedDialog.style.visibility = "hidden";
             startDialog.style.visibility = "hidden";
-            restartDialog.style.visibility = "hidden";
+            restartButton.style.display = "none";
             gameOverDialog.style.visibility = "hidden";
 
             //If a player doesn't choose, the dialog will still be up.

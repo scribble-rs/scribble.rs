@@ -91,6 +91,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    /* All dialogs are initially invisible. */
     visibility: hidden;
     padding: 1rem;
     /* A dialog should never fully hide the canvas. */
@@ -149,7 +150,7 @@
 
 .dialog-title {
     margin-bottom: 1rem;
-    font-size: 3rem;
+    font-size: 2.75rem;
     font-weight: bold;
     color: rgb(240, 105, 127);
 }
@@ -364,4 +365,41 @@ input[type="button"]:active,
 
 .kick-player-button + .kick-player-button {
     margin-top: 0.5rem;
+}
+
+.game-over-scoreboard {
+    overflow-y: auto;
+}
+
+.gameover-scoreboard-entry {
+    font-size: 1.3rem;
+    padding: 0.3rem 1rem 0.3rem 1rem;
+    display: flex;
+    flex-direction: row;
+    background-color: rgb(245, 245, 245);
+}
+
+.gameover-scoreboard-entry + .gameover-scoreboard-entry {
+    margin-top: 0.5rem;
+}
+
+.gameover-scoreboard-entry:last-child {
+    margin-bottom: 1rem;
+}
+
+.gameover-scoreboard-entry:first-child {
+    font-weight: bold;
+}
+
+.gameover-scoreboard-rank {
+    margin-right: 1rem;
+}
+
+.gameover-scoreboard-name {
+    flex:1;
+    text-align: center;
+}
+
+#restart-button {
+    display: none;
 }
