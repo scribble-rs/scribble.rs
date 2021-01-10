@@ -123,111 +123,136 @@
                         to prevent hover and active colors to appear. -->
                         <div class="color-button-row">
                             <button class="color-button" style="background-color: #ffffff !Important"
-                                    onclick="setColor('#ffffff')"></button>
+                                    onmousedown="setColor('#ffffff')" onclick="setColor('#ffffff')"></button>
                             <button class="color-button" style="background-color: #c1c1c1 !Important"
-                                    onclick="setColor('#c1c1c1')"></button>
+                                    onmousedown="setColor('#c1c1c1')" onclick="setColor('#c1c1c1')"></button>
                             <button class="color-button" style="background-color: #ef130b !Important"
-                                    onclick="setColor('#ef130b')"></button>
+                                    onmousedown="setColor('#ef130b')" onclick="setColor('#ef130b')"></button>
                             <button class="color-button" style="background-color: #ff7100 !Important"
-                                    onclick="setColor('#ff7100')"></button>
+                                    onmousedown="setColor('#ff7100')" onclick="setColor('#ff7100')"></button>
                             <button class="color-button" style="background-color: #ffe400 !Important"
-                                    onclick="setColor('#ffe400')"></button>
+                                    onmousedown="setColor('#ffe400')" onclick="setColor('#ffe400')"></button>
                             <button class="color-button" style="background-color: #00cc00 !Important"
-                                    onclick="setColor('#00cc00')"></button>
+                                    onmousedown="setColor('#00cc00')" onclick="setColor('#00cc00')"></button>
                             <button class="color-button" style="background-color: #00b2ff !Important"
-                                    onclick="setColor('#00b2ff')"></button>
+                                    onmousedown="setColor('#00b2ff')" onclick="setColor('#00b2ff')"></button>
                             <button class="color-button" style="background-color: #231fd3 !Important"
-                                    onclick="setColor('#231fd3')"></button>
+                                    onmousedown="setColor('#231fd3')" onclick="setColor('#231fd3')"></button>
                             <button class="color-button" style="background-color: #a300ba !Important"
-                                    onclick="setColor('#a300ba')"></button>
+                                    onmousedown="setColor('#a300ba')" onclick="setColor('#a300ba')"></button>
                             <button class="color-button" style="background-color: #d37caa !Important"
-                                    onclick="setColor('#d37caa')"></button>
+                                    onmousedown="setColor('#d37caa')" onclick="setColor('#d37caa')"></button>
                             <button class="color-button" style="background-color: #a0522d !Important"
-                                    onclick="setColor('#a0522d')"></button>
+                                    onmousedown="setColor('#a0522d')" onclick="setColor('#a0522d')"></button>
                         </div>
                         <div class="color-button-row">
                             <button class="color-button" style="background-color: #000000 !Important"
-                                    onclick="setColor('#000000')"></button>
+                                    onmousedown="setColor('#000000')" onclick="setColor('#000000')"></button>
                             <button class="color-button" style="background-color: #4c4c4c !Important"
-                                    onclick="setColor('#4c4c4c')"></button>
+                                    onmousedown="setColor('#4c4c4c')" onclick="setColor('#4c4c4c')"></button>
                             <button class="color-button" style="background-color: #740b07 !Important"
-                                    onclick="setColor('#740b07')"></button>
+                                    onmousedown="setColor('#740b07')" onclick="setColor('#740b07')"></button>
                             <button class="color-button" style="background-color: #c23800 !Important"
-                                    onclick="setColor('#c23800')"></button>
+                                    onmousedown="setColor('#c23800')" onclick="setColor('#c23800')"></button>
                             <button class="color-button" style="background-color: #e8a200 !Important"
-                                    onclick="setColor('#e8a200')"></button>
+                                    onmousedown="setColor('#e8a200')" onclick="setColor('#e8a200')"></button>
                             <button class="color-button" style="background-color: #005510 !Important"
-                                    onclick="setColor('#005510')"></button>
+                                    onmousedown="setColor('#005510')" onclick="setColor('#005510')"></button>
                             <button class="color-button" style="background-color: #00569e !Important"
-                                    onclick="setColor('#00569e')"></button>
+                                    onmousedown="setColor('#00569e')" onclick="setColor('#00569e')"></button>
                             <button class="color-button" style="background-color: #0e0865 !Important"
-                                    onclick="setColor('#0e0865')"></button>
+                                    onmousedown="setColor('#0e0865')" onclick="setColor('#0e0865')"></button>
                             <button class="color-button" style="background-color: #550069 !Important"
-                                    onclick="setColor('#550069')"></button>
+                                    onmousedown="setColor('#550069')" onclick="setColor('#550069')"></button>
                             <button class="color-button" style="background-color: #a75574 !Important"
-                                    onclick="setColor('#a75574')"></button>
+                                    onmousedown="setColor('#a75574')" onclick="setColor('#a75574')"></button>
                             <button class="color-button" style="background-color: #63300d !Important"
-                                    onclick="setColor('#63300d')"></button>
+                                    onmousedown="setColor('#63300d')" onclick="setColor('#63300d')"></button>
                         </div>
                     </div>
+                    <!--The following buttons als override onmousedown and onmouseup to make
+                        selection more foolproof. This was done, because many people seem to
+                        only make half a click (either up or down) in the right location.-->
                     <div class="pencil-sizes-container toolbox-group">
                         <label for="tool-type-pencil">
                             <input id="tool-type-pencil" class="custom-check-or-radio line-width-button"
-                                   onchange="chooseTool(pen)" type="radio" name="tool-type" checked>
-                            <div class="line-width-button-content">
-                                <span id="tool-type-pencil-button" style="font-size: 2rem;">✏️</span>
+                                onchange="chooseTool(pen)" type="radio" name="tool-type" checked>
+                            <div
+                                onmousedown="document.getElementById('tool-type-pencil').click()"
+                                onmouseup="document.getElementById('tool-type-pencil').click()"
+                                class="line-width-button-content">
+                                <span  id="tool-type-pencil-button" style="font-size: 2rem;">✏️</span>
                             </div>
                         </label>
                         <label for="tool-type-fill">
                             <input id="tool-type-fill" class="custom-check-or-radio line-width-button"
-                                   onchange="chooseTool(fillBucket)" type="radio" name="tool-type">
-                            <div class="line-width-button-content">
+                                onchange="console.log('test');chooseTool(fillBucket)" type="radio" name="tool-type">
+                            <div 
+                                onmousedown="document.getElementById('tool-type-fill').click()"
+                                onmouseup="document.getElementById('tool-type-fill').click()"
+                                class="line-width-button-content">
                                 <img alt="Fill" title="Fill tool" src="/resources/fill.svg" width="40px"
-                                     height="40px"/>
+                                    height="40px"/>
                             </div>
                         </label>
                         <label for="tool-type-rubber">
                             <input id="tool-type-rubber" class="custom-check-or-radio line-width-button"
-                                   onchange="chooseTool(rubber)" type="radio" name="tool-type">
-                            <div class="line-width-button-content">
+                                    onchange="chooseTool(rubber)" type="radio" name="tool-type">
+                            <div
+                                onmousedown="document.getElementById('tool-type-rubber').click()"
+                                onmouseup="document.getElementById('tool-type-rubber').click()"
+                                class="line-width-button-content">
                                 <img alt="Rubber" title="Rubber tool" src="/resources/rubber.svg" width="40px"
-                                     height="40px"/>
+                                    height="40px"/>
                             </div>
                         </label>
                     </div>
                     <div class="pencil-sizes-container toolbox-group">
                         <label for="size8">
                             <input id="size8" class="custom-check-or-radio line-width-button" onchange="setLineWidth(8)"
-                                   type="radio" name="line-width" checked>
-                            <div class="line-width-button-content">
+                                    type="radio" name="line-width" checked>
+                            <div
+                                onmousedown="document.getElementById('size8').click()"
+                                onmouseup="document.getElementById('size8').click()"
+                                class="line-width-button-content">
                                 <div id="size-8-button" class="dot"></div>
                             </div>
                         </label>
                         <label for="size15">
                             <input id="size15" class="custom-check-or-radio line-width-button"
-                                   onchange="setLineWidth(15)"
-                                   type="radio" name="line-width">
-                            <div class="line-width-button-content">
+                                    onchange="setLineWidth(15)"
+                                    type="radio" name="line-width">
+                            <div
+                                onmousedown="document.getElementById('size15').click()"
+                                onmouseup="document.getElementById('size15').click()"
+                                class="line-width-button-content">
                                 <div id="size-15-button" class="dot"></div>
                             </div>
                         </label>
                         <label for="size30">
                             <input id="size30" class="custom-check-or-radio line-width-button"
-                                   onchange="setLineWidth(30)"
-                                   type="radio" name="line-width">
-                            <div class="line-width-button-content">
-                                <div id="size-30-button" class="dot"></div>
+                                    onchange="setLineWidth(30)"
+                                    type="radio" name="line-width">
+                                <div
+                                    onmousedown="document.getElementById('size30').click()"
+                                    onmouseup="document.getElementById('size30').click()"
+                                    class="line-width-button-content">
+                                    <div id="size-30-button" class="dot"></div>
                             </div>
                         </label>
                         <label for="size40">
                             <input id="size40" class="custom-check-or-radio line-width-button"
-                                   onchange="setLineWidth(40)"
-                                   type="radio" name="line-width">
-                            <div class="line-width-button-content">
+                                    onchange="setLineWidth(40)"
+                                    type="radio" name="line-width">
+                                <div
+                                    onmousedown="document.getElementById('size40').click()"
+                                    onmouseup="document.getElementById('size40').click()"
+                                    class="line-width-button-content">
                                 <div id="size-40-button" class="dot"></div>
                             </div>
                         </label>
                     </div>
+                    <!--We won't make this button easier to click, as there's no going back. -->
                     <button class="canvas-button toolbox-group" style="font-size: 2rem;"
                             onclick="clearCanvasAndSendEvent()"
                             alt="Clear the canvas" title="Clear the canvas">🗑
