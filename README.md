@@ -88,6 +88,12 @@ The default port is `8080`. To override it, run:
 docker run -p <port-number>:<port-number> biosmarcel/scribble.rs --portHTTP=<port-number>
 ```
 
+## Discord
+
+While you can find a link to a discord server at the top, for personally
+reasons you won't find me on that server anymore, however, you can still reach
+me via E-Mail or even the issue section.
+
 ## Contributing
 
 There are many ways you can contribute:
