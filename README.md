@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/scribble-rs/scribble.rs/actions">
-    <img src="https://github.com/scribble-rs/scribble.rs/workflows/scribble-rs/badge.svg">
+    <img src="https://github.com/scribble-rs/scribble.rs/workflows/Run%20scribble-rs%20tests/badge.svg">
   </a>
   <a href="https://codecov.io/gh/scribble-rs/scribble.rs">
     <img src="https://codecov.io/gh/scribble-rs/scribble.rs/branch/master/graph/badge.svg">
