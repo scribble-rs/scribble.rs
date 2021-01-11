@@ -714,9 +714,9 @@ type Message struct {
 // This includes all the necessary things for properly running a client
 // without receiving any more data.
 type Ready struct {
-	PlayerID   string `json:"playerId"`
-	PlayerName string `json:"playerName"`
-	Drawing    bool   `json:"drawing"`
+	PlayerID     string `json:"playerId"`
+	PlayerName   string `json:"playerName"`
+	AllowDrawing bool   `json:"allowDrawing"`
 
 	GameState      gameState     `json:"gameState"`
 	OwnerID        string        `json:"ownerId"`
@@ -730,9 +730,9 @@ type Ready struct {
 
 func generateReadyData(lobby *Lobby, player *Player) *Ready {
 	ready := &Ready{
-		PlayerID:   player.ID,
-		Drawing:    player.State == Drawing,
-		PlayerName: player.Name,
+		PlayerID:     player.ID,
+		AllowDrawing: player.State == Drawing,
+		PlayerName:   player.Name,
 
 		GameState:      lobby.state,
 		OwnerID:        lobby.owner.ID,
