@@ -131,6 +131,10 @@
     color: rgb(38, 187, 38);
 }
 
+.close-guess-message {
+    color:rgb(25, 166, 166);
+}
+
 .message-input-form {
     display: flex;
 }

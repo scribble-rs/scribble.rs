@@ -631,6 +631,8 @@
                     }
                 }
             }
+        } else if (parsed.type === "close-guess") {
+            applyMessage("close-guess-message", "System", "'"+ parsed.data + "'' is very close.")
         } else if (parsed.type === "update-wordhint") {
             applyWordHints(parsed.data);
         } else if (parsed.type === "message") {
