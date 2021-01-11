@@ -156,9 +156,9 @@ func WriteAsJSON(player *game.Player, object interface{}) error {
 }
 
 func WritePublicSystemMessage(lobby *game.Lobby, text string) {
-	playerHasBeenKickedMsg := &game.JSEvent{Type: "system-message", Data: html.EscapeString(text)}
+	systemMessageEvent := &game.JSEvent{Type: "system-message", Data: html.EscapeString(text)}
 	for _, otherPlayer := range lobby.GetPlayers() {
 		//In simple message events we ignore write failures.
-		WriteAsJSON(otherPlayer, playerHasBeenKickedMsg)
+		WriteAsJSON(otherPlayer, systemMessageEvent)
 	}
 }
