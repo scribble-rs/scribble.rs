@@ -179,6 +179,9 @@ func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) er
 		commandNick(player, lobby, newName)
 	} else if received.Type == "request-drawing" {
 		WriteAsJSON(player, JSEvent{Type: "drawing", Data: lobby.currentDrawing})
+	} else if received.Type == "keep-alive" {
+		//This is a known dummy event in order to avoid accidental websocket
+		//connection closure. However, no action is required on the server.
 	}
 
 	return nil
@@ -779,8 +782,15 @@ func OnDisconnected(lobby *Lobby, player *Player) {
 	updateRocketChat(lobby, player)
 
 	if !lobby.HasConnectedPlayers() {
-		RemoveLobby(lobby.ID)
-		log.Printf("Closing lobby %s. There are currently %d open lobbies left.\n", lobby.ID, len(lobbies))
+		go func() {
+			//We try preserving the lobby for a moment in order to avoid
+			//closing lobbies on temporary player disconnects.
+			lobbyRemovalTimer := time.NewTimer(120 * time.Second)
+			<-lobbyRemovalTimer.C
+			if !lobby.HasConnectedPlayers() {
+				RemoveLobby(lobby.ID)
+			}
+		}()
 	} else {
 		triggerPlayersUpdate(lobby)
 	}

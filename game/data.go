@@ -1,6 +1,7 @@
 package game
 
 import (
+	"log"
 	"math/rand"
 	"sync"
 	"time"
@@ -235,7 +236,9 @@ func RemoveLobby(id string) {
 	}
 
 	if indexToDelete != -1 {
+		lobby := lobbies[indexToDelete]
 		lobbies = append(lobbies[:indexToDelete], lobbies[indexToDelete+1:]...)
+		log.Printf("Closing lobby %s. There are currently %d open lobbies left.\n", lobby.ID, len(lobbies))
 	}
 }
 

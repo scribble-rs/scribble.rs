@@ -104,10 +104,18 @@
                             <button onclick="hideKickDialog()" class="dialog-button dialog-close-button">Close</button>
                         </div>
                     </div>
+
+                    <div id="center-dialog-container">
+                        <div id="reconnect-dialog" class="center-dialog">
+                            <span id="game-over-dialog-title" class="dialog-title">Connection lost!</span>
+                            <p>Attempting to reconnect ...</p>
+                            <p>Make sure your internet connection works.<br/>If the problem persists, contact the webmaster.</p>
+                        </div>
+                    </div>
                 </div>
                 <div id="toolbox">
                     <input class="toolbox-group" type="color" id="color-picker" onchange="setColor()" value="#000000"
-                           alt="Current color (Click to change)" title="Current color (Click to change)">
+                            alt="Current color (Click to change)" title="Current color (Click to change)">
                     <div class="color-button-container toolbox-group">
                         <!-- These buttons use !important for their color in order
                         to prevent hover and active colors to appear. -->
@@ -264,18 +272,55 @@
 
 <script type="text/javascript" src="/resources/floodfill.js"></script>
 <script type="text/javascript">
-    console.log("Attempting Connection on port " + location.port + "...");
+    const reconnectDialog = document.getElementById("reconnect-dialog");
+    let socketIsConnecting = false;
     let socket;
-    if (location.protocol === 'https:') {
-        socket = new WebSocket("wss://" + location.hostname + ":" + location.port + "/v1/ws?lobby_id={{.LobbyID}}");
-    } else {
-        socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/v1/ws?lobby_id={{.LobbyID}}");
+    function connectToWebsocket() {
+        if (socketIsConnecting === true) {
+            return;
+        }
+        socketIsConnecting = true;
+
+        if (location.protocol === 'https:') {
+            console.log("Attempting secure socket connection on port " + location.port + "...");
+            socket = new WebSocket("wss://" + location.hostname + ":" + location.port + "/v1/ws?lobby_id={{.LobbyID}}");
+        } else {
+            console.log("Attempting socket connection on port " + location.port + "...");
+            socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/v1/ws?lobby_id={{.LobbyID}}");
+        }
+
+        socket.onopen = () => {
+            reconnectDialog.style.visibility = "hidden";
+            socket.onclose = event => {
+                console.log("Socket Closed Connection: ", event);
+                console.log("Attempting to reestablish socket connection.");
+                reconnectDialog.style.visibility = "visible";
+                connectToWebsocket();
+            };
+            socket.onerror = error => console.log("Socket Error: ", error);
+
+            socketIsConnecting = false;
+            console.log("Successfully Connected");
+        };
     }
+
+    connectToWebsocket();
+
+    //In order to avoid automatically canceling the socket connection, we keep
+    //sending dummy events every 5 seconds. This was a problem on Heroku. If
+    //a player took a very long time to choose a word, the connection of all
+    //players could be killed and even cause the lobby being closed. Since
+    //that's very frustrating, we want to avoid that.
+    window.setInterval(() => {
+        socket.send(JSON.stringify({type: "keep-alive"}));
+    }, 5000);
 
     //Makes sure that the server notices that the player disconnects.
     //Otherwise a refresh (on chromium based browsers) can lead to the server
     //thinking that there's already an open tab with this lobby.
     window.onbeforeunload = () => {
+        //Avoid unintentionally reestablishing connection.
+        socket.onclose = null;
         socket.close();
     };
 
@@ -523,8 +568,6 @@
             subtree: false
         });
 
-    socket.onopen = () => console.log("Successfully Connected");
-
     let ownID, ownerID, ownName;
     let maxRounds = 0;
     let roundEndTime = 0;
@@ -653,9 +696,6 @@
             applyWordHints(ready.wordHints)
         }
     }
-
-    socket.onclose = event => console.log("Socket Closed Connection: ", event);
-    socket.onerror = error => console.log("Socket Error: ", error);
 
     function promptWords(wordOne, wordTwo, wordThree) {
         wordButtonZero.textContent = wordOne;
