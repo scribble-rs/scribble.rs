@@ -722,14 +722,15 @@ type Ready struct {
 	PlayerName   string `json:"playerName"`
 	AllowDrawing bool   `json:"allowDrawing"`
 
-	GameState      gameState     `json:"gameState"`
-	OwnerID        string        `json:"ownerId"`
-	Round          int           `json:"round"`
-	MaxRound       int           `json:"maxRounds"`
-	RoundEndTime   int           `json:"roundEndTime"`
-	WordHints      []*WordHint   `json:"wordHints"`
-	Players        []*Player     `json:"players"`
-	CurrentDrawing []interface{} `json:"currentDrawing"`
+	VotekickEnabled bool          `json:"votekickEnabled"`
+	GameState       gameState     `json:"gameState"`
+	OwnerID         string        `json:"ownerId"`
+	Round           int           `json:"round"`
+	MaxRound        int           `json:"maxRounds"`
+	RoundEndTime    int           `json:"roundEndTime"`
+	WordHints       []*WordHint   `json:"wordHints"`
+	Players         []*Player     `json:"players"`
+	CurrentDrawing  []interface{} `json:"currentDrawing"`
 }
 
 func generateReadyData(lobby *Lobby, player *Player) *Ready {
@@ -738,13 +739,14 @@ func generateReadyData(lobby *Lobby, player *Player) *Ready {
 		AllowDrawing: player.State == Drawing,
 		PlayerName:   player.Name,
 
-		GameState:      lobby.state,
-		OwnerID:        lobby.owner.ID,
-		Round:          lobby.Round,
-		MaxRound:       lobby.MaxRounds,
-		WordHints:      lobby.GetAvailableWordHints(player),
-		Players:        lobby.players,
-		CurrentDrawing: lobby.currentDrawing,
+		VotekickEnabled: lobby.EnableVotekick,
+		GameState:       lobby.state,
+		OwnerID:         lobby.owner.ID,
+		Round:           lobby.Round,
+		MaxRound:        lobby.MaxRounds,
+		WordHints:       lobby.GetAvailableWordHints(player),
+		Players:         lobby.players,
+		CurrentDrawing:  lobby.currentDrawing,
 	}
 
 	//Game over already
