@@ -249,8 +249,9 @@ func sendMessageToAll(message string, sender *Player, lobby *Lobby) {
 	escaped := html.EscapeString(discordemojimap.Replace(message))
 	for _, target := range lobby.players {
 		WriteAsJSON(target, JSEvent{Type: "message", Data: Message{
-			Author:  html.EscapeString(sender.Name),
-			Content: escaped,
+			Author:   html.EscapeString(sender.Name),
+			AuthorID: sender.Name,
+			Content:  escaped,
 		}})
 	}
 }
@@ -260,8 +261,9 @@ func sendMessageToAllNonGuessing(message string, sender *Player, lobby *Lobby) {
 	for _, target := range lobby.players {
 		if target.State != Guessing {
 			WriteAsJSON(target, JSEvent{Type: "non-guessing-player-message", Data: Message{
-				Author:  html.EscapeString(sender.Name),
-				Content: escaped,
+				Author:   html.EscapeString(sender.Name),
+				AuthorID: sender.ID,
+				Content:  escaped,
 			}})
 		}
 	}
@@ -706,6 +708,8 @@ func GeneratePlayerName() string {
 type Message struct {
 	// Author is the player / thing that wrote the message
 	Author string `json:"author"`
+	// AuthorID is the unique identifier of the authors player object.
+	AuthorID string `json:"authorId"`
 	// Content is the actual message text.
 	Content string `json:"content"`
 }
