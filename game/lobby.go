@@ -75,6 +75,13 @@ type FillEvent struct {
 	Data *Fill  `json:"data"`
 }
 
+type KickVote struct {
+	PlayerID          string `json:"playerId"`
+	PlayerName        string `json:"playerName"`
+	VoteCount         int    `json:"voteCount"`
+	RequiredVoteCount int    `json:"requiredVoteCount"`
+}
+
 func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) error {
 	if received.Type == "message" {
 		dataAsString, isString := (received.Data).(string)
@@ -302,7 +309,19 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 
 		votesNeeded := calculateVotesNeededToKick(len(lobby.players))
 
-		WritePublicSystemMessage(lobby, fmt.Sprintf("(%d/%d) players voted to kick %s", voteKickCount, votesNeeded, playerToKick.Name))
+		kickEvent := &JSEvent{
+			Type: "kick-vote",
+			Data: &KickVote{
+				PlayerID:          playerToKick.ID,
+				PlayerName:        playerToKick.Name,
+				VoteCount:         voteKickCount,
+				RequiredVoteCount: votesNeeded,
+			},
+		}
+
+		for _, otherPlayer := range lobby.players {
+			WriteAsJSON(otherPlayer, kickEvent)
+		}
 
 		if voteKickCount >= votesNeeded {
 			//Since the player is already kicked, we first clean up the kicking information related to that player
@@ -312,8 +331,6 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 					break
 				}
 			}
-
-			WritePublicSystemMessage(lobby, fmt.Sprintf("%s has been kicked from the lobby", playerToKick.Name))
 
 			if lobby.drawer == playerToKick {
 				WritePublicSystemMessage(lobby, "Since the kicked player has been drawing, none of you will get any points this round.")
