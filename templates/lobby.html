@@ -184,7 +184,7 @@
                         </label>
                         <label for="tool-type-fill">
                             <input id="tool-type-fill" class="custom-check-or-radio line-width-button"
-                                onchange="console.log('test');chooseTool(fillBucket)" type="radio" name="tool-type">
+                                onchange="chooseTool(fillBucket)" type="radio" name="tool-type">
                             <div 
                                 onmousedown="document.getElementById('tool-type-fill').click()"
                                 onmouseup="document.getElementById('tool-type-fill').click()"
@@ -356,6 +356,11 @@
     updateSoundIcon();
 
     function showKickDialog() {
+        if (votekickEnabled !== true) {
+            alert("Votekicking isn't enabled in this lobby.");
+            return;
+        }
+
         if (cachedPlayers && cachedPlayers) {
             kickDialogPlayers.innerHTML = "";
 
@@ -571,6 +576,7 @@
     let ownID, ownerID, ownName;
     let maxRounds = 0;
     let roundEndTime = 0;
+    let votekickEnabled
     socket.onmessage = event => {
         let parsed = JSON.parse(event.data);
         if (parsed.type === "ready") {
@@ -669,6 +675,14 @@
             //We clear this, since there's no word chosen right now.
             wordContainer.innerHTML = "";
 
+            if (parsed.data.previousWord !== null) {
+                if (parsed.data.previousWord === "") {
+                    applyMessage("system-message", "System", "Round over. No word was chosen.");
+                } else {
+                    applyMessage("system-message", "System", "Round over. Previous word was '"+parsed.data.previousWord+"'");
+                }
+            }
+
             allowDrawing = false;
         } else if (parsed.type === "your-turn") {
             playWav('/resources/your-turn.wav');
@@ -704,6 +718,7 @@
         ownID = ready.playerId;
         maxRounds = ready.maxRounds;
         roundEndTime = ready.roundEndTime;
+        votekickEnabled = ready.votekickEnabled;
         applyRounds(ready.round, ready.maxRounds);
 
         if (ready.players && ready.players.length) {
