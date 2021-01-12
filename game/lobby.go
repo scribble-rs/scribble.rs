@@ -151,11 +151,7 @@ func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) er
 			triggerWordHintUpdate(lobby)
 		}
 	} else if received.Type == "kick-vote" {
-		if !lobby.EnableVotekick {
-			// Votekicking is disabled in the lobby
-			// We tell the user and do not continue with the event
-			WriteAsJSON(player, JSEvent{Type: "system-message", Data: "Votekick is disabled in this lobby!"})
-		} else {
+		if lobby.EnableVotekick {
 			toKickID, isString := (received.Data).(string)
 			if !isString {
 				return fmt.Errorf("invalid data in kick-vote event: %v", received.Data)
