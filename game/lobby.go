@@ -257,7 +257,7 @@ func sendMessageToAll(message string, sender *Player, lobby *Lobby) {
 	for _, target := range lobby.players {
 		WriteAsJSON(target, JSEvent{Type: "message", Data: Message{
 			Author:   html.EscapeString(sender.Name),
-			AuthorID: sender.Name,
+			AuthorID: sender.ID,
 			Content:  escaped,
 		}})
 	}
