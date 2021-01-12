@@ -669,6 +669,14 @@
             //We clear this, since there's no word chosen right now.
             wordContainer.innerHTML = "";
 
+            if (parsed.data.previousWord !== null) {
+                if (parsed.data.previousWord === "") {
+                    applyMessage("system-message", "System", "Round over. No word was chosen.");
+                } else {
+                    applyMessage("system-message", "System", "Round over. Previous word was '"+parsed.data.previousWord+"'");
+                }
+            }
+
             allowDrawing = false;
         } else if (parsed.type === "your-turn") {
             playWav('/resources/your-turn.wav');

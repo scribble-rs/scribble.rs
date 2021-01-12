@@ -225,7 +225,7 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 			TriggerComplexUpdateEvent("correct-guess", sender.ID, lobby)
 
 			if !lobby.isAnyoneStillGuessing() {
-				endTurn(lobby)
+				advanceLobby(lobby)
 			} else {
 				//Since the word has been guessed correctly, we reveal it.
 				WriteAsJSON(sender, JSEvent{Type: "update-wordhint", Data: lobby.wordHintsShown})
@@ -366,7 +366,7 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 			triggerPlayersUpdate(lobby)
 
 			if lobby.drawer == playerToKick || !lobby.isAnyoneStillGuessing() {
-				endTurn(lobby)
+				advanceLobby(lobby)
 			}
 		}
 	}
@@ -442,17 +442,11 @@ func commandSetMP(caller *Player, lobby *Lobby, args []string) {
 	}
 }
 
-func endTurn(lobby *Lobby) {
+// advanceLobby will either start the game or jump over to the next turn.
+func advanceLobby(lobby *Lobby) {
 	if lobby.timeLeftTicker != nil {
 		lobby.timeLeftTicker.Stop()
 		lobby.timeLeftTicker = nil
-	}
-
-	var roundOverMessage string
-	if lobby.CurrentWord == "" {
-		roundOverMessage = "Round over. No word was chosen."
-	} else {
-		roundOverMessage = fmt.Sprintf("Round over. The word was '%s'", lobby.CurrentWord)
 	}
 
 	//The drawer can potentially be null if he's kicked, in that case we proceed with the round if anyone has already
@@ -465,25 +459,22 @@ func endTurn(lobby *Lobby) {
 		}
 	}
 
+	//We need this for the next-turn event, in order to allow the client
+	//to know which word was previously supposed to be guessed.
+	previousWord := lobby.CurrentWord
+
 	lobby.scoreEarnedByGuessers = 0
 	lobby.CurrentWord = ""
 	lobby.wordHints = nil
 
 	//If the round ends and people still have guessing, that means the "Last" value
-	////for the next turn has to be "no score earned".
+	//for the next turn has to be "no score earned".
 	for _, otherPlayer := range lobby.players {
 		if otherPlayer.State == Guessing {
 			otherPlayer.LastScore = 0
 		}
 	}
 
-	WritePublicSystemMessage(lobby, roundOverMessage)
-
-	advanceLobby(lobby)
-}
-
-// advanceLobby will either start the game or jump over to the next turn.
-func advanceLobby(lobby *Lobby) {
 	for _, otherPlayer := range lobby.players {
 		otherPlayer.State = Guessing
 		otherPlayer.votedForKick = make(map[string]bool)
@@ -499,6 +490,8 @@ func advanceLobby(lobby *Lobby) {
 		lobby.Round++
 	}
 
+	firstTurn := lobby.state != ongoing
+
 	lobby.ClearDrawing()
 	lobby.drawer = newDrawer
 	lobby.drawer.State = Drawing
@@ -512,11 +505,23 @@ func advanceLobby(lobby *Lobby) {
 	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
 	go roundTimerTicker(lobby)
 
-	TriggerComplexUpdateEvent("next-turn", &NextTurn{
+	//Add Turncount
+	//Add last word
+
+	nextTurnEvent := &NextTurn{
 		Round:        lobby.Round,
 		Players:      lobby.players,
 		RoundEndTime: int(lobby.RoundEndTime - getTimeAsMillis()),
-	}, lobby)
+	}
+
+	//In the first turn, we set this field to null to signal that
+	//there hasn't been no choice, but no turn before this round.
+	//Meaning that for the API user empty string and nil are to be
+	//treated with a different meaning.
+	if !firstTurn {
+		nextTurnEvent.PreviousWord = &previousWord
+	}
+	TriggerComplexUpdateEvent("next-turn", nextTurnEvent, lobby)
 
 	WriteAsJSON(lobby.drawer, &JSEvent{Type: "your-turn", Data: lobby.wordChoice})
 }
@@ -570,7 +575,7 @@ func roundTimerTicker(lobby *Lobby) {
 		case <-ticker.C:
 			currentTime := getTimeAsMillis()
 			if currentTime >= lobby.RoundEndTime {
-				go endTurn(lobby)
+				go advanceLobby(lobby)
 			}
 
 			if hintsLeft > 0 && lobby.wordHints != nil {
@@ -603,6 +608,7 @@ type NextTurn struct {
 	Round        int       `json:"round"`
 	Players      []*Player `json:"players"`
 	RoundEndTime int       `json:"roundEndTime"`
+	PreviousWord *string   `json:"previousWord"`
 }
 
 // recalculateRanks will assign each player his respective rank in the lobby
