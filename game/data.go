@@ -294,8 +294,8 @@ func createLobby(
 	return lobby
 }
 
-// JSEvent contains an eventtype and optionally any data.
-type JSEvent struct {
+// GameEvent contains an eventtype and optionally any data.
+type GameEvent struct {
 	Type string      `json:"type"`
 	Data interface{} `json:"data"`
 }

@@ -91,11 +91,11 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 
 			log.Printf("Error reading from socket: %s\n", err)
 		} else if messageType == websocket.TextMessage {
-			received := &game.JSEvent{}
+			received := &game.GameEvent{}
 			err := json.Unmarshal(data, received)
 			if err != nil {
 				log.Printf("Error unmarshalling message: %s\n", err)
-				sendError := WriteAsJSON(player, game.JSEvent{Type: "system-message", Data: fmt.Sprintf("An error occurred trying to read your request, please report the error via GitHub: %s!", err)})
+				sendError := WriteAsJSON(player, game.GameEvent{Type: "system-message", Data: fmt.Sprintf("An error occurred trying to read your request, please report the error via GitHub: %s!", err)})
 				if sendError != nil {
 					log.Printf("Error sending errormessage: %s\n", sendError)
 				}
@@ -119,7 +119,7 @@ func SendDataToConnectedPlayers(sender *game.Player, lobby *game.Lobby, data int
 }
 
 func TriggerSimpleUpdateEvent(eventType string, lobby *game.Lobby) {
-	event := &game.JSEvent{Type: eventType}
+	event := &game.GameEvent{Type: eventType}
 	for _, otherPlayer := range lobby.GetPlayers() {
 		//FIXME Why did i use a goroutine here but not anywhere else?
 		go func(player *game.Player) {
@@ -129,7 +129,7 @@ func TriggerSimpleUpdateEvent(eventType string, lobby *game.Lobby) {
 }
 
 func TriggerComplexUpdateEvent(eventType string, data interface{}, lobby *game.Lobby) {
-	event := &game.JSEvent{Type: eventType, Data: data}
+	event := &game.GameEvent{Type: eventType, Data: data}
 	for _, otherPlayer := range lobby.GetPlayers() {
 		WriteAsJSON(otherPlayer, event)
 	}
@@ -137,7 +137,7 @@ func TriggerComplexUpdateEvent(eventType string, data interface{}, lobby *game.L
 
 func TriggerComplexUpdatePerPlayerEvent(eventType string, data func(*game.Player) interface{}, lobby *game.Lobby) {
 	for _, otherPlayer := range lobby.GetPlayers() {
-		WriteAsJSON(otherPlayer, &game.JSEvent{Type: eventType, Data: data(otherPlayer)})
+		WriteAsJSON(otherPlayer, &game.GameEvent{Type: eventType, Data: data(otherPlayer)})
 	}
 }
 
@@ -156,7 +156,7 @@ func WriteAsJSON(player *game.Player, object interface{}) error {
 }
 
 func WritePublicSystemMessage(lobby *game.Lobby, text string) {
-	systemMessageEvent := &game.JSEvent{Type: "system-message", Data: html.EscapeString(text)}
+	systemMessageEvent := &game.GameEvent{Type: "system-message", Data: html.EscapeString(text)}
 	for _, otherPlayer := range lobby.GetPlayers() {
 		//In simple message events we ignore write failures.
 		WriteAsJSON(otherPlayer, systemMessageEvent)
