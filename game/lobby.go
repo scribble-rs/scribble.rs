@@ -9,7 +9,6 @@ import (
 	"math/rand"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	commands "github.com/Bios-Marcel/cmdp"
@@ -19,11 +18,6 @@ import (
 	"github.com/kennygrant/sanitize"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
-)
-
-var (
-	createDeleteMutex          = &sync.Mutex{}
-	lobbies           []*Lobby = nil
 )
 
 var (
@@ -704,7 +698,6 @@ func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTim
 
 	words, err := readWordList(lobby.lowercaser, chosenLanguage)
 	if err != nil {
-		RemoveLobby(lobby.ID)
 		return nil, nil, err
 	}
 
@@ -804,19 +797,12 @@ func OnDisconnected(lobby *Lobby, player *Player) {
 	player.Connected = false
 	player.ws = nil
 
+	disconnectTime := time.Now()
+	lobby.LastPlayerDisconnectTime = &disconnectTime
+
 	updateRocketChat(lobby, player)
 
-	if !lobby.HasConnectedPlayers() {
-		go func() {
-			//We try preserving the lobby for a moment in order to avoid
-			//closing lobbies on temporary player disconnects.
-			lobbyRemovalTimer := time.NewTimer(120 * time.Second)
-			<-lobbyRemovalTimer.C
-			if !lobby.HasConnectedPlayers() {
-				RemoveLobby(lobby.ID)
-			}
-		}()
-	} else {
+	if lobby.HasConnectedPlayers() {
 		triggerPlayersUpdate(lobby)
 	}
 }

@@ -1,7 +1,6 @@
 package game
 
 import (
-	"log"
 	"math/rand"
 	"sync"
 	"time"
@@ -69,6 +68,10 @@ type Lobby struct {
 	EnableVotekick bool
 
 	lowercaser cases.Caser
+
+	//LastPlayerDisconnectTime is used to know since when a lobby is empty, in case
+	//it is empty.
+	LastPlayerDisconnectTime *time.Time
 }
 
 type gameState string
@@ -206,42 +209,6 @@ func (lobby *Lobby) AppendFill(fill *FillEvent) {
 	lobby.currentDrawing = append(lobby.currentDrawing, fill)
 }
 
-// GetLobby returns a Lobby that has a matching ID or no Lobby if none could
-// be found.
-func GetLobby(id string) *Lobby {
-	for _, l := range lobbies {
-		if l.ID == id {
-			return l
-		}
-	}
-
-	return nil
-}
-
-// GetActiveLobbyCount indicates how many activate lobby there are. This includes
-// both private and public lobbies and it doesn't matter whether the game is
-// already over, hasn't even started or is still ongoing.
-func GetActiveLobbyCount() int {
-	return len(lobbies)
-}
-
-// RemoveLobby deletes a lobby, not allowing anyone to connect to it again.
-func RemoveLobby(id string) {
-	indexToDelete := -1
-	for index, l := range lobbies {
-		if l.ID == id {
-			indexToDelete = index
-			break
-		}
-	}
-
-	if indexToDelete != -1 {
-		lobby := lobbies[indexToDelete]
-		lobbies = append(lobbies[:indexToDelete], lobbies[indexToDelete+1:]...)
-		log.Printf("Closing lobby %s. There are currently %d open lobbies left.\n", lobby.ID, len(lobbies))
-	}
-}
-
 func createPlayer(name string) *Player {
 	return &Player{
 		Name:         name,
@@ -266,8 +233,6 @@ func createLobby(
 	clientsPerIPLimit int,
 	enableVotekick bool) *Lobby {
 
-	createDeleteMutex.Lock()
-
 	lobby := &Lobby{
 		ID:                uuid.NewV4().String(),
 		DrawingTime:       drawingTime,
@@ -286,10 +251,6 @@ func createLobby(
 			lobby.CustomWords[i], lobby.CustomWords[j] = lobby.CustomWords[j], lobby.CustomWords[i]
 		})
 	}
-
-	lobbies = append(lobbies, lobby)
-
-	createDeleteMutex.Unlock()
 
 	return lobby
 }
@@ -316,15 +277,4 @@ func (lobby *Lobby) IsPublic() bool {
 
 func (lobby *Lobby) GetPlayers() []*Player {
 	return lobby.players
-}
-
-func GetPublicLobbies() []*Lobby {
-	var publicLobbies []*Lobby
-	for _, lobby := range lobbies {
-		if lobby.IsPublic() {
-			publicLobbies = append(publicLobbies, lobby)
-		}
-	}
-
-	return publicLobbies
 }

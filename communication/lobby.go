@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/scribble-rs/scribble.rs/game"
+	"github.com/scribble-rs/scribble.rs/state"
 )
 
 var (
@@ -21,7 +22,7 @@ func getLobby(r *http.Request) (*game.Lobby, error) {
 		return nil, noLobbyIdSuppliedError
 	}
 
-	lobby := game.GetLobby(lobbyID)
+	lobby := state.GetLobby(lobbyID)
 
 	if lobby == nil {
 		return nil, lobbyNotExistentError
