@@ -17,6 +17,22 @@ type rocketChatPayload struct {
 }
 
 var (
+	rocketchatWebhook string
+	scribbleURL       string
+
+	netTransport *http.Transport
+	netClient    *http.Client
+)
+
+func init() {
+	rocketchatWebhook, _ = os.LookupEnv("ROCKETCHAT_WEBHOOK")
+	scribbleURL, _ = os.LookupEnv("SCRIBBLE_URL")
+
+	if rocketchatWebhook == "" || scribbleURL == "" {
+		//If one of these wasn't set up correctly, we needn't init the additional state.
+		return
+	}
+
 	// Go doesn't set timeouts by default
 	netTransport = &http.Transport{
 		Dial: (&net.Dialer{
@@ -29,14 +45,6 @@ var (
 		Timeout:   time.Second * 10,
 		Transport: netTransport,
 	}
-
-	rocketchatWebhook string
-	scribbleURL       string
-)
-
-func init() {
-	rocketchatWebhook, _ = os.LookupEnv("ROCKETCHAT_WEBHOOK")
-	scribbleURL, _ = os.LookupEnv("SCRIBBLE_URL")
 }
 
 func updateRocketChat(lobby *Lobby, player *Player) {
@@ -60,12 +68,15 @@ func updateRocketChat(lobby *Lobby, player *Player) {
 		action = "connected"
 	}
 
+	//FIXME Technically not correct anymore, as the lobby is only
+	//closed if no player reconnects within a certain time.
 	if count == 0 {
 		sendRocketChatMessage(fmt.Sprintf("%v has %v. The game has ended.", player.Name, action))
 	} else {
 		sendRocketChatMessage(fmt.Sprintf("%v has %v. There are %v players in the game. Join [here](%v/ssrEnterLobby?lobby_id=%v)", player.Name, action, count, scribbleURL, lobby.ID))
 	}
 }
+
 func sendRocketChatMessage(msg string) {
 	payload := rocketChatPayload{
 		Alias: "Scribble Bot",
