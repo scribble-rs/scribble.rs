@@ -22,7 +22,8 @@ func init() {
 
 			createDeleteMutex.Lock()
 
-			for index, lobby := range lobbies {
+			for index := len(lobbies) - 1; index >= 0; index-- {
+				lobby := lobbies[index]
 				if lobby.HasConnectedPlayers() {
 					continue
 				}
