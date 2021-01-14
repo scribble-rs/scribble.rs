@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/scribble-rs/scribble.rs/game"
+	"github.com/scribble-rs/scribble.rs/state"
 )
 
 //This file contains the API methods for the public API
@@ -25,7 +26,7 @@ type LobbyEntry struct {
 }
 
 func publicLobbies(w http.ResponseWriter, r *http.Request) {
-	lobbies := game.GetPublicLobbies()
+	lobbies := state.GetPublicLobbies()
 	lobbyEntries := make([]*LobbyEntry, 0, len(lobbies))
 	for _, lobby := range lobbies {
 		lobbyEntries = append(lobbyEntries, &LobbyEntry{
@@ -117,11 +118,11 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 
 	encodingError := json.NewEncoder(w).Encode(lobbyData)
 	if encodingError != nil {
-		//If the encoding / transmitting fails, the creator will never know the
-		//ID, therefore we can directly kill the lobby.
-		game.RemoveLobby(lobby.ID)
 		http.Error(w, encodingError.Error(), http.StatusInternalServerError)
 	}
+
+	//We only add the lobby if everything else was successful.
+	state.AddLobby(lobby)
 }
 
 func enterLobby(w http.ResponseWriter, r *http.Request) {

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/scribble-rs/scribble.rs/game"
+	"github.com/scribble-rs/scribble.rs/state"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
@@ -35,7 +36,7 @@ func createDefaultLobbyCreatePageData() *CreatePageData {
 		ClientsPerIPLimit:      "1",
 		EnableVotekick:         "true",
 		Language:               "english",
-		CurrentlyActiveLobbies: game.GetActiveLobbyCount(),
+		CurrentlyActiveLobbies: state.GetActiveLobbyCount(),
 	}
 }
 
@@ -88,7 +89,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 		ClientsPerIPLimit:      r.Form.Get("clients_per_ip_limit"),
 		EnableVotekick:         r.Form.Get("enable_votekick"),
 		Language:               r.Form.Get("language"),
-		CurrentlyActiveLobbies: game.GetActiveLobbyCount(),
+		CurrentlyActiveLobbies: state.GetActiveLobbyCount(),
 	}
 
 	if languageInvalid != nil {
@@ -143,6 +144,9 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		SameSite: http.SameSiteStrictMode,
 	})
+
+	//We only add the lobby if we could do all neccessary pre-steps successfully.
+	state.AddLobby(lobby)
 
 	http.Redirect(w, r, "/ssrEnterLobby?lobby_id="+lobby.ID, http.StatusFound)
 }

@@ -9,7 +9,6 @@ import (
 	"math/rand"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	commands "github.com/Bios-Marcel/cmdp"
@@ -19,11 +18,6 @@ import (
 	"github.com/kennygrant/sanitize"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
-)
-
-var (
-	createDeleteMutex          = &sync.Mutex{}
-	lobbies           []*Lobby = nil
 )
 
 var (
@@ -59,7 +53,7 @@ type SettingBounds struct {
 	MaxClientsPerIPLimit int64
 }
 
-// LineEvent is basically the same as JSEvent, but with a specific Data type.
+// LineEvent is basically the same as GameEvent, but with a specific Data type.
 // We use this for reparsing as soon as we know that the type is right. It's
 // a bit unperformant, but will do for now.
 type LineEvent struct {
@@ -67,7 +61,7 @@ type LineEvent struct {
 	Data *Line  `json:"data"`
 }
 
-// LineEvent is basically the same as JSEvent, but with a specific Data type.
+// LineEvent is basically the same as GameEvent, but with a specific Data type.
 // We use this for reparsing as soon as we know that the type is right. It's
 // a bit unperformant, but will do for now.
 type FillEvent struct {
@@ -82,7 +76,7 @@ type KickVote struct {
 	RequiredVoteCount int    `json:"requiredVoteCount"`
 }
 
-func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) error {
+func HandleEvent(raw []byte, received *GameEvent, lobby *Lobby, player *Player) error {
 	if received.Type == "message" {
 		dataAsString, isString := (received.Data).(string)
 		if !isString {
@@ -181,7 +175,7 @@ func HandleEvent(raw []byte, received *JSEvent, lobby *Lobby, player *Player) er
 		}
 		commandNick(player, lobby, newName)
 	} else if received.Type == "request-drawing" {
-		WriteAsJSON(player, JSEvent{Type: "drawing", Data: lobby.currentDrawing})
+		WriteAsJSON(player, GameEvent{Type: "drawing", Data: lobby.currentDrawing})
 	} else if received.Type == "keep-alive" {
 		//This is a known dummy event in order to avoid accidental websocket
 		//connection closure. However, no action is required on the server.
@@ -224,14 +218,14 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 				advanceLobby(lobby)
 			} else {
 				//Since the word has been guessed correctly, we reveal it.
-				WriteAsJSON(sender, JSEvent{Type: "update-wordhint", Data: lobby.wordHintsShown})
+				WriteAsJSON(sender, GameEvent{Type: "update-wordhint", Data: lobby.wordHintsShown})
 				recalculateRanks(lobby)
 				triggerPlayersUpdate(lobby)
 			}
 
 			return
 		} else if levenshtein.ComputeDistance(normInput, normSearched) == 1 {
-			WriteAsJSON(sender, JSEvent{Type: "close-guess", Data: trimmed})
+			WriteAsJSON(sender, GameEvent{Type: "close-guess", Data: trimmed})
 		}
 
 		sendMessageToAll(trimmed, sender, lobby)
@@ -251,7 +245,7 @@ func (lobby *Lobby) isAnyoneStillGuessing() bool {
 func sendMessageToAll(message string, sender *Player, lobby *Lobby) {
 	escaped := html.EscapeString(discordemojimap.Replace(message))
 	for _, target := range lobby.players {
-		WriteAsJSON(target, JSEvent{Type: "message", Data: Message{
+		WriteAsJSON(target, GameEvent{Type: "message", Data: Message{
 			Author:   html.EscapeString(sender.Name),
 			AuthorID: sender.ID,
 			Content:  escaped,
@@ -263,7 +257,7 @@ func sendMessageToAllNonGuessing(message string, sender *Player, lobby *Lobby) {
 	escaped := html.EscapeString(discordemojimap.Replace(message))
 	for _, target := range lobby.players {
 		if target.State != Guessing {
-			WriteAsJSON(target, JSEvent{Type: "non-guessing-player-message", Data: Message{
+			WriteAsJSON(target, GameEvent{Type: "non-guessing-player-message", Data: Message{
 				Author:   html.EscapeString(sender.Name),
 				AuthorID: sender.ID,
 				Content:  escaped,
@@ -305,7 +299,7 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 
 		votesNeeded := calculateVotesNeededToKick(len(lobby.players))
 
-		kickEvent := &JSEvent{
+		kickEvent := &GameEvent{
 			Type: "kick-vote",
 			Data: &KickVote{
 				PlayerID:          playerToKick.ID,
@@ -425,16 +419,16 @@ func commandSetMP(caller *Player, lobby *Lobby, args []string) {
 				WritePublicSystemMessage(lobby, fmt.Sprintf("MaxPlayers value has been changed to %d", lobby.MaxPlayers))
 			} else {
 				if len(lobby.players) > int(LobbySettingBounds.MinMaxPlayers) {
-					WriteAsJSON(caller, JSEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value should be between %d and %d.", len(lobby.players), LobbySettingBounds.MaxMaxPlayers)})
+					WriteAsJSON(caller, GameEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value should be between %d and %d.", len(lobby.players), LobbySettingBounds.MaxMaxPlayers)})
 				} else {
-					WriteAsJSON(caller, JSEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value should be between %d and %d.", LobbySettingBounds.MinMaxPlayers, LobbySettingBounds.MaxMaxPlayers)})
+					WriteAsJSON(caller, GameEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value should be between %d and %d.", LobbySettingBounds.MinMaxPlayers, LobbySettingBounds.MaxMaxPlayers)})
 				}
 			}
 		} else {
-			WriteAsJSON(caller, JSEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value must be numeric.")})
+			WriteAsJSON(caller, GameEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value must be numeric.")})
 		}
 	} else {
-		WriteAsJSON(caller, JSEvent{Type: "system-message", Data: fmt.Sprintf("Only the lobby owner can change MaxPlayers setting.")})
+		WriteAsJSON(caller, GameEvent{Type: "system-message", Data: fmt.Sprintf("Only the lobby owner can change MaxPlayers setting.")})
 	}
 }
 
@@ -519,7 +513,7 @@ func advanceLobby(lobby *Lobby) {
 	}
 	TriggerComplexUpdateEvent("next-turn", nextTurnEvent, lobby)
 
-	WriteAsJSON(lobby.drawer, &JSEvent{Type: "your-turn", Data: lobby.wordChoice})
+	WriteAsJSON(lobby.drawer, &GameEvent{Type: "your-turn", Data: lobby.wordChoice})
 }
 
 func endGame(lobby *Lobby) {
@@ -531,7 +525,7 @@ func endGame(lobby *Lobby) {
 	triggerPlayersUpdate(lobby)
 
 	for _, player := range lobby.players {
-		WriteAsJSON(player, JSEvent{
+		WriteAsJSON(player, GameEvent{
 			Type: "ready",
 			Data: generateReadyData(lobby, player),
 		})
@@ -704,7 +698,6 @@ func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTim
 
 	words, err := readWordList(lobby.lowercaser, chosenLanguage)
 	if err != nil {
-		RemoveLobby(lobby.ID)
 		return nil, nil, err
 	}
 
@@ -781,11 +774,11 @@ func generateReadyData(lobby *Lobby, player *Player) *Ready {
 
 func OnConnected(lobby *Lobby, player *Player) {
 	player.Connected = true
-	WriteAsJSON(player, JSEvent{Type: "ready", Data: generateReadyData(lobby, player)})
+	WriteAsJSON(player, GameEvent{Type: "ready", Data: generateReadyData(lobby, player)})
 
 	//This state is reached when the player refreshes before having chosen a word.
 	if lobby.drawer == player && lobby.CurrentWord == "" {
-		WriteAsJSON(lobby.drawer, &JSEvent{Type: "your-turn", Data: lobby.wordChoice})
+		WriteAsJSON(lobby.drawer, &GameEvent{Type: "your-turn", Data: lobby.wordChoice})
 	}
 
 	updateRocketChat(lobby, player)
@@ -804,19 +797,12 @@ func OnDisconnected(lobby *Lobby, player *Player) {
 	player.Connected = false
 	player.ws = nil
 
+	disconnectTime := time.Now()
+	lobby.LastPlayerDisconnectTime = &disconnectTime
+
 	updateRocketChat(lobby, player)
 
-	if !lobby.HasConnectedPlayers() {
-		go func() {
-			//We try preserving the lobby for a moment in order to avoid
-			//closing lobbies on temporary player disconnects.
-			lobbyRemovalTimer := time.NewTimer(120 * time.Second)
-			<-lobbyRemovalTimer.C
-			if !lobby.HasConnectedPlayers() {
-				RemoveLobby(lobby.ID)
-			}
-		}()
-	} else {
+	if lobby.HasConnectedPlayers() {
 		triggerPlayersUpdate(lobby)
 	}
 }
