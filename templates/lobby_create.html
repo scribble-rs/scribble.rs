@@ -18,12 +18,12 @@
     <div class="tab-header">
         <label for="create-lobby-tab-button">
             <input id="create-lobby-tab-button" class="custom-check-or-radio tab-button"
-                   type="radio" onclick="openTab('create-lobby')" name="tab" checked>
+                type="radio" onclick="openTab('create-lobby')" name="tab" checked>
             <div class="tab-label">Create Lobby</div>
         </label>
         <label for="join-lobby-tab-button">
             <input id="join-lobby-tab-button" class="custom-check-or-radio tab-button"
-                   type="radio" onclick="openTab('join-lobby')" name="tab">
+                type="radio" onclick="openTab('join-lobby')" name="tab">
             <div class="tab-label">Join Lobby</div>
         </label>
     </div>
@@ -52,31 +52,36 @@
                             <option value="{{$k}}" {{if eq $k $language}}selected="selected"{{end}}>{{$v}}</option>
                         {{end}}
                     </select>
-                    <b>Public Lobby</b>
-                    <input class="input-item" type="checkbox" name="public" value="true"
-                           {{if eq .Public "true"}}checked{{end}}/>
                     <b>Drawing Time</b>
                     <input class="input-item" type="number" name="drawing_time" min="{{.MinDrawingTime}}"
-                           max="{{.MaxDrawingTime}}" value="{{.DrawingTime}}"/>
+                    max="{{.MaxDrawingTime}}" value="{{.DrawingTime}}"/>
                     <b>Rounds</b>
                     <input class="input-item" type="number" name="rounds" min="{{.MinRounds}}" max="{{.MaxRounds}}"
-                           value="{{.Rounds}}"/>
+                    value="{{.Rounds}}"/>
                     <b>Maximum Players</b>
                     <input class="input-item" type="number" name="max_players" min="{{.MinMaxPlayers}}"
-                           max="{{.MaxMaxPlayers}}" value="{{.MaxPlayers}}"/>
+                    max="{{.MaxMaxPlayers}}" value="{{.MaxPlayers}}"/>
+                    <b>Public Lobby</b>
+                    <input class="input-item" type="checkbox" name="public" value="true"
+                        {{if eq .Public "true"}}checked{{end}}/>
                     <b>Custom Words</b>
                     <textarea class="input-item" name="custom_words"
-                              placeholder="Enter your additional words, separating them by commas">{{.CustomWords}}</textarea>
+                    placeholder="Enter your additional words, separating them by commas">{{.CustomWords}}</textarea>
                     <b>Custom Words Chance</b>
                     <input type="range" name="custom_words_chance" min="1" max="100" value="{{.CustomWordsChance}}">
-                    <b>Clients per IP Limit</b>
-                    <input class="input-item" type="number" name="clients_per_ip_limit" min="{{.MinClientsPerIPLimit}}"
-                           max="{{.MaxClientsPerIPLimit}}" value="{{.ClientsPerIPLimit}}"/>
-                    <b>Enable Votekick</b>
-                    <input class="input-item" type="checkbox" name="enable_votekick" value="true"
-                           {{if eq .EnableVotekick "true"}}checked{{end}}/>
+                    <details class="advanced-section">
+                        <summary>Advanced</summary>
+                        <div class="input-container">
+                            <b>Players per IP Limit</b>
+                            <input class="input-item" type="number" name="clients_per_ip_limit" min="{{.MinClientsPerIPLimit}}"
+                            max="{{.MaxClientsPerIPLimit}}" value="{{.ClientsPerIPLimit}}"/>
+                            <b>Enable Votekick</b>
+                            <input class="input-item" type="checkbox" name="enable_votekick" value="true"
+                            {{if eq .EnableVotekick "true"}}checked{{end}}/>
+                        </div>
+                    </details>
                     <button type="submit" form="lobby-create" style="grid-column-start: 1; grid-column-end: 3;">
-                        Create Lobby
+                            Create Lobby
                     </button>
                 </form>
             </div>
@@ -84,26 +89,42 @@
     </div>
 
     <div id="join-lobby" class="tab-content">
-        <div class="table-wrapper">
-            <table id="lobby-table">
-                <thead>
-                <tr>
-                    <th>Wordpack</th>
-                    <th>Rounds</th>
-                    <th>Players</th>
-                    <th>Drawing Time</th>
-                    <th>Custom Words</th>
-                    <th>Votekicking</th>
-                    <th>Clients per IP</th>
-                </tr>
-                </thead>
-                <tbody id="lobby-table-body">
-                </tbody>
-            </table>
-        </div>
-        <div class="join-button-bar">
-            <button onclick="loadLobbyTable()">Refresh</button>
-            <button id="join-button" class="join-button" onclick="onJoin()" disabled>Join</button>
+        <div class="join-lobby-data">
+            <div class="table-wrapper-wrapper">
+                <button id="refresh-button" onclick="loadLobbyTable()">Refresh</button>
+                <div class="table-wrapper">
+                    <table id="lobby-table">
+                        <thead>
+                            <tr>
+                                <th>Language</th>
+                                <th>Rounds</th>
+                                <th>Players</th>
+                                <th>Drawing Time</th>
+                                <th>Custom Words</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lobby-table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="lobby-details">
+                <span class="lobby-detail">Language:</span>
+                <span id="wordpack-detail"></span>
+                <span class="lobby-detail">Rounds:</span>
+                <span id="rounds-detail"></span>
+                <span class="lobby-detail">Players:</span>
+                <span id="players-detail"></span>
+                <span class="lobby-detail">Drawing Time:</span>
+                <span id="drawing-time-detail"></span>
+                <span class="lobby-detail">Custom Words:</span>
+                <span id="custom-words-detail"></span>
+                <span class="lobby-detail">Allow Votekicking:</span>
+                <span id="votekicking-detail"></span>
+                <span class="lobby-detail">Maximum Players per IP:</span>
+                <span id="max-clients-ip-detail"></span>
+                <button id="join-button" onclick="onJoin()" disabled>Join</button>
+            </div>
         </div>
     </div>
 
@@ -119,6 +140,14 @@
 
     let joinButton = document.getElementById("join-button");
 
+    let wordpackDetail = document.getElementById("wordpack-detail");
+    let roundsDetail = document.getElementById("rounds-detail");
+    let playersDetail = document.getElementById("players-detail");
+    let drawingTimeDetail = document.getElementById("drawing-time-detail");
+    let customWordsDetail = document.getElementById("custom-words-detail");
+    let votekickingDetail = document.getElementById("votekicking-detail");
+    let maxClientsIPDetail = document.getElementById("max-clients-ip-detail");
+
     function onJoin() {
         window.open("/ssrEnterLobby?lobby_id=" + selectedLobby, "_self");
     }
@@ -126,15 +155,21 @@
     function loadLobbyTable() {
         lobbyTableLoaded = true;
 
-        lobbyTableBody.childNodes.forEach(node => {
-            lobbyTableBody.removeChild(node);
-        })
+        if (lobbyTableBody.childNodes.length > 0) {
+            for (let i = lobbyTableBody.childNodes.length-1; i >= 0; i--) {
+                lobbyTableBody.removeChild(lobbyTableBody.childNodes.item(i));
+            }
+        }
 
         fetch("/v1/lobby")
             .then((response) => {
                 return response.json();
             })
             .then((data) => {
+                //Initially remove all data and disable join button, as we don't know
+                //whether we'll have any data after fetching.
+                showLobbyDetails(null);
+
                 data.forEach(lobby => {
                     const wordpackCell = document.createElement("td");
                     wordpackCell.innerText = lobby.wordpack;
@@ -146,10 +181,6 @@
                     drawingTimeCell.innerText = lobby.drawingTime.toString();
                     const customWordsCell = document.createElement("td");
                     customWordsCell.innerText = lobby.customWords ? "Yes" : "No";
-                    const votekickCell = document.createElement("td");
-                    votekickCell.innerText = lobby.enableVotekick ? "Yes" : "No";
-                    const clientsPerIPCell = document.createElement("td");
-                    clientsPerIPCell.innerText = lobby.maxClientsPerIp.toString();
 
                     const newRow = document.createElement("tr");
                     newRow.appendChild(wordpackCell);
@@ -157,8 +188,6 @@
                     newRow.appendChild(playersCell);
                     newRow.appendChild(drawingTimeCell);
                     newRow.appendChild(customWordsCell);
-                    newRow.appendChild(votekickCell);
-                    newRow.appendChild(clientsPerIPCell);
 
                     lobbyTableBody.appendChild(newRow);
 
@@ -168,11 +197,33 @@
                         })
                         newRow.setAttribute("selected", "true");
                         selectedLobby = lobby.id;
-                        joinButton.removeAttribute("disabled");
+                        showLobbyDetails(lobby);
                     };
-                    newRow.childNodes.forEach(td => td.addEventListener("click", clickHandler, false));
+                    newRow.addEventListener("click", clickHandler, false);
                 })
             });
+    }
+
+    function showLobbyDetails(lobby) {
+        if (lobby === null) {
+            wordpackDetail.innerText = "";
+            roundsDetail = "";
+            playersDetail.innerText = "";
+            drawingTimeDetail.innerText = "";
+            customWordsDetail.innerText = "";
+            votekickingDetail.innerText = "";
+            maxClientsIPDetail.innerText = "";
+            joinButton.disabled = true;
+        } else {
+            wordpackDetail.innerText = lobby.wordpack;
+            roundsDetail.innerText = lobby.round + "/" + lobby.maxRounds;
+            playersDetail.innerText = lobby.playerCount + "/" + lobby.maxPlayers;
+            drawingTimeDetail.innerText = lobby.drawingTime.toString();
+            customWordsDetail.innerText = lobby.customWords ? "Yes" : "No";
+            votekickingDetail.innerText = lobby.votekick ? "Yes" : "No";
+            maxClientsIPDetail.innerText = lobby.maxClientsPerIp ? "Yes" : "No";
+            joinButton.disabled = false;
+        }
     }
 
     function openTab(tabId) {
@@ -187,7 +238,7 @@
         }
 
         //Show the newly selected tab.
-        document.getElementById(tabId).style.display = "block";
+        document.getElementById(tabId).style.display = "flex";
     }
 </script>
 </body>
