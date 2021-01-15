@@ -153,9 +153,11 @@
     function loadLobbyTable() {
         lobbyTableLoaded = true;
 
-        lobbyTableBody.childNodes.forEach(node => {
-            lobbyTableBody.removeChild(node);
-        })
+        if (lobbyTableBody.childNodes.length > 0) {
+            for (let i = lobbyTableBody.childNodes.length-1; i >= 0; i--) {
+                lobbyTableBody.removeChild(lobbyTableBody.childNodes.item(i));
+            }
+        }
 
         fetch("/v1/lobby")
             .then((response) => {
@@ -195,7 +197,7 @@
                         selectedLobby = lobby.id;
                         showLobbyDetails(lobby);
                     };
-                    newRow.childNodes.forEach(td => td.addEventListener("click", clickHandler, false));
+                    newRow.addEventListener("click", clickHandler, false);
                 })
             });
     }
