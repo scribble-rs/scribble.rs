@@ -697,6 +697,7 @@
                 }
             }
         } else if (parsed.type === "owner-change") {
+            ownerID = parsed.data.playerId;
             applyMessage("system-message", "System", parsed.data.playerName + " is the new lobby owner.");
         }
     };
