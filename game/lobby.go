@@ -843,13 +843,13 @@ func (lobby *Lobby) GetAvailableWordHints(player *Player) []*WordHint {
 	}
 }
 
+// JoinPlayer creates a new player object using the given name and adds it
+// to the lobbies playerlist. The new players is returned.
 func (lobby *Lobby) JoinPlayer(playerName string) *Player {
 	player := createPlayer(playerName)
 
 	//FIXME Make a dedicated method that uses a mutex?
 	lobby.players = append(lobby.players, player)
-	recalculateRanks(lobby)
-	triggerPlayersUpdate(lobby)
 
 	return player
 }
