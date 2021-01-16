@@ -109,10 +109,6 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 	}
 }
 
-func onPlayerDisconnect(lobby *game.Lobby, player *game.Player) {
-	game.OnDisconnected(lobby, player)
-}
-
 func SendDataToEveryoneExceptSender(sender *game.Player, lobby *game.Lobby, data interface{}) {
 	for _, otherPlayer := range lobby.GetPlayers() {
 		if otherPlayer != sender {
