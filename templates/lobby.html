@@ -691,10 +691,11 @@
             applyDrawData(parsed.data);
         } else if (parsed.type === "kick-vote") {
             if (parsed.data.playerId !== ownID) {
-                applyMessage("system-message", "System", "("+parsed.data.voteCount+"/"+parsed.data.requiredVoteCount+") players voted to kick "+parsed.data.playerName+".");
+                let kickMessage = "("+parsed.data.voteCount+"/"+parsed.data.requiredVoteCount+") players voted to kick "+parsed.data.playerName+".";
                 if (parsed.data.voteCount >= parsed.data.requiredVoteCount) {
-                    applyMessage("system-message", "System", parsed.data.playerName+" has been kicked.");
+                    kickMessage += " Player has been kicked.";
                 }
+                applyMessage("system-message", "System", kickMessage);
             }
         } else if (parsed.type === "owner-change") {
             ownerID = parsed.data.playerId;
