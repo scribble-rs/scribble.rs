@@ -29,7 +29,7 @@ func init() {
 				}
 
 				disconnectTime := lobby.LastPlayerDisconnectTime
-				if disconnectTime == nil || time.Now().Sub(*disconnectTime) >= 75*time.Second {
+				if disconnectTime == nil || time.Since(*disconnectTime) >= 75*time.Second {
 					removeLobbyByIndex(index)
 				}
 			}
