@@ -22,7 +22,7 @@ var upgrader = websocket.Upgrader{
 
 func init() {
 	game.TriggerUpdateEvent = TriggerUpdateEvent
-	game.SendDataToConnectedPlayers = SendDataToConnectedPlayers
+	game.SendDataToEveryoneExceptSender = SendDataToEveryoneExceptSender
 	game.WriteAsJSON = WriteAsJSON
 	game.WritePublicSystemMessage = WritePublicSystemMessage
 	game.TriggerUpdatePerPlayerEvent = TriggerUpdatePerPlayerEvent
@@ -113,7 +113,7 @@ func onPlayerDisconnect(lobby *game.Lobby, player *game.Player) {
 	game.OnDisconnected(lobby, player)
 }
 
-func SendDataToConnectedPlayers(sender *game.Player, lobby *game.Lobby, data interface{}) {
+func SendDataToEveryoneExceptSender(sender *game.Player, lobby *game.Lobby, data interface{}) {
 	for _, otherPlayer := range lobby.GetPlayers() {
 		if otherPlayer != sender {
 			WriteAsJSON(otherPlayer, data)

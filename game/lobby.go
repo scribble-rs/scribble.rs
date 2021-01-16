@@ -107,7 +107,7 @@ func HandleEvent(raw []byte, received *GameEvent, lobby *Lobby, player *Player) 
 			lobby.AppendLine(line)
 
 			//We directly forward the event, as it seems to be valid.
-			SendDataToConnectedPlayers(player, lobby, received)
+			SendDataToEveryoneExceptSender(player, lobby, received)
 		}
 	} else if received.Type == "fill" {
 		if lobby.canDraw(player) {
@@ -119,12 +119,12 @@ func HandleEvent(raw []byte, received *GameEvent, lobby *Lobby, player *Player) 
 			lobby.AppendFill(fill)
 
 			//We directly forward the event, as it seems to be valid.
-			SendDataToConnectedPlayers(player, lobby, received)
+			SendDataToEveryoneExceptSender(player, lobby, received)
 		}
 	} else if received.Type == "clear-drawing-board" {
 		if lobby.canDraw(player) && len(lobby.currentDrawing) > 0 {
 			lobby.ClearDrawing()
-			SendDataToConnectedPlayers(player, lobby, received)
+			SendDataToEveryoneExceptSender(player, lobby, received)
 		}
 	} else if received.Type == "choose-word" {
 		chosenIndex, isInt := (received.Data).(int)
@@ -676,7 +676,7 @@ func createWordHintFor(word string, showAll bool) []*WordHint {
 
 var TriggerUpdatePerPlayerEvent func(eventType string, data func(*Player) interface{}, lobby *Lobby)
 var TriggerUpdateEvent func(eventType string, data interface{}, lobby *Lobby)
-var SendDataToConnectedPlayers func(sender *Player, lobby *Lobby, data interface{})
+var SendDataToEveryoneExceptSender func(sender *Player, lobby *Lobby, data interface{})
 var WriteAsJSON func(player *Player, object interface{}) error
 var WritePublicSystemMessage func(lobby *Lobby, text string)
 
