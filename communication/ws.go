@@ -22,7 +22,6 @@ var upgrader = websocket.Upgrader{
 
 func init() {
 	game.TriggerComplexUpdateEvent = TriggerComplexUpdateEvent
-	game.TriggerSimpleUpdateEvent = TriggerSimpleUpdateEvent
 	game.SendDataToConnectedPlayers = SendDataToConnectedPlayers
 	game.WriteAsJSON = WriteAsJSON
 	game.WritePublicSystemMessage = WritePublicSystemMessage
@@ -119,16 +118,6 @@ func SendDataToConnectedPlayers(sender *game.Player, lobby *game.Lobby, data int
 		if otherPlayer != sender {
 			WriteAsJSON(otherPlayer, data)
 		}
-	}
-}
-
-func TriggerSimpleUpdateEvent(eventType string, lobby *game.Lobby) {
-	event := &game.GameEvent{Type: eventType}
-	for _, otherPlayer := range lobby.GetPlayers() {
-		//FIXME Why did i use a goroutine here but not anywhere else?
-		go func(player *game.Player) {
-			WriteAsJSON(player, event)
-		}(otherPlayer)
 	}
 }
 

@@ -674,7 +674,6 @@ func createWordHintFor(word string, showAll bool) []*WordHint {
 	return wordHints
 }
 
-var TriggerSimpleUpdateEvent func(eventType string, lobby *Lobby)
 var TriggerComplexUpdatePerPlayerEvent func(eventType string, data func(*Player) interface{}, lobby *Lobby)
 var TriggerComplexUpdateEvent func(eventType string, data interface{}, lobby *Lobby)
 var SendDataToConnectedPlayers func(sender *Player, lobby *Lobby, data interface{})
