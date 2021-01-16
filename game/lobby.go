@@ -495,9 +495,6 @@ func advanceLobby(lobby *Lobby) {
 	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
 	go roundTimerTicker(lobby)
 
-	//Add Turncount
-	//Add last word
-
 	nextTurnEvent := &NextTurn{
 		Round:        lobby.Round,
 		Players:      lobby.players,
