@@ -21,11 +21,11 @@ var upgrader = websocket.Upgrader{
 }
 
 func init() {
-	game.TriggerComplexUpdateEvent = TriggerComplexUpdateEvent
+	game.TriggerUpdateEvent = TriggerUpdateEvent
 	game.SendDataToConnectedPlayers = SendDataToConnectedPlayers
 	game.WriteAsJSON = WriteAsJSON
 	game.WritePublicSystemMessage = WritePublicSystemMessage
-	game.TriggerComplexUpdatePerPlayerEvent = TriggerComplexUpdatePerPlayerEvent
+	game.TriggerUpdatePerPlayerEvent = TriggerUpdatePerPlayerEvent
 }
 
 func wsEndpoint(w http.ResponseWriter, r *http.Request) {
@@ -121,14 +121,14 @@ func SendDataToConnectedPlayers(sender *game.Player, lobby *game.Lobby, data int
 	}
 }
 
-func TriggerComplexUpdateEvent(eventType string, data interface{}, lobby *game.Lobby) {
+func TriggerUpdateEvent(eventType string, data interface{}, lobby *game.Lobby) {
 	event := &game.GameEvent{Type: eventType, Data: data}
 	for _, otherPlayer := range lobby.GetPlayers() {
 		WriteAsJSON(otherPlayer, event)
 	}
 }
 
-func TriggerComplexUpdatePerPlayerEvent(eventType string, data func(*game.Player) interface{}, lobby *game.Lobby) {
+func TriggerUpdatePerPlayerEvent(eventType string, data func(*game.Player) interface{}, lobby *game.Lobby) {
 	for _, otherPlayer := range lobby.GetPlayers() {
 		WriteAsJSON(otherPlayer, &game.GameEvent{Type: eventType, Data: data(otherPlayer)})
 	}

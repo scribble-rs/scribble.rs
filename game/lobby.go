@@ -228,7 +228,7 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 			lobby.scoreEarnedByGuessers += sender.LastScore
 			sender.State = Standby
 
-			TriggerComplexUpdateEvent("correct-guess", sender.ID, lobby)
+			TriggerUpdateEvent("correct-guess", sender.ID, lobby)
 
 			if !lobby.isAnyoneStillGuessing() {
 				advanceLobby(lobby)
@@ -365,7 +365,7 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 					potentialOwner := otherPlayer
 					if potentialOwner.Connected {
 						lobby.owner = potentialOwner
-						TriggerComplexUpdateEvent("owner-change", &OwnerChangeEvent{
+						TriggerUpdateEvent("owner-change", &OwnerChangeEvent{
 							PlayerID:   potentialOwner.ID,
 							PlayerName: potentialOwner.Name,
 						}, lobby)
@@ -534,7 +534,7 @@ func advanceLobby(lobby *Lobby) {
 	if !firstTurn {
 		nextTurnEvent.PreviousWord = &previousWord
 	}
-	TriggerComplexUpdateEvent("next-turn", nextTurnEvent, lobby)
+	TriggerUpdateEvent("next-turn", nextTurnEvent, lobby)
 
 	WriteAsJSON(lobby.drawer, &GameEvent{Type: "your-turn", Data: lobby.wordChoice})
 }
@@ -674,14 +674,14 @@ func createWordHintFor(word string, showAll bool) []*WordHint {
 	return wordHints
 }
 
-var TriggerComplexUpdatePerPlayerEvent func(eventType string, data func(*Player) interface{}, lobby *Lobby)
-var TriggerComplexUpdateEvent func(eventType string, data interface{}, lobby *Lobby)
+var TriggerUpdatePerPlayerEvent func(eventType string, data func(*Player) interface{}, lobby *Lobby)
+var TriggerUpdateEvent func(eventType string, data interface{}, lobby *Lobby)
 var SendDataToConnectedPlayers func(sender *Player, lobby *Lobby, data interface{})
 var WriteAsJSON func(player *Player, object interface{}) error
 var WritePublicSystemMessage func(lobby *Lobby, text string)
 
 func triggerPlayersUpdate(lobby *Lobby) {
-	TriggerComplexUpdateEvent("update-players", lobby.players, lobby)
+	TriggerUpdateEvent("update-players", lobby.players, lobby)
 }
 
 func triggerWordHintUpdate(lobby *Lobby) {
@@ -689,7 +689,7 @@ func triggerWordHintUpdate(lobby *Lobby) {
 		return
 	}
 
-	TriggerComplexUpdatePerPlayerEvent("update-wordhint", func(player *Player) interface{} {
+	TriggerUpdatePerPlayerEvent("update-wordhint", func(player *Player) interface{} {
 		return lobby.GetAvailableWordHints(player)
 	}, lobby)
 }
