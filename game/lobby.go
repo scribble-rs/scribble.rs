@@ -363,7 +363,10 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 					potentialOwner := otherPlayer
 					if potentialOwner.Connected {
 						lobby.owner = potentialOwner
-						WritePublicSystemMessage(lobby, fmt.Sprintf("%s is the new lobby owner.", potentialOwner.Name))
+						TriggerComplexUpdateEvent("owner-change", &OwnerChangeEvent{
+							PlayerID:   potentialOwner.ID,
+							PlayerName: potentialOwner.Name,
+						}, lobby)
 						break
 					}
 				}
@@ -376,6 +379,11 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 			}
 		}
 	}
+}
+
+type OwnerChangeEvent struct {
+	PlayerID   string `json:"playerId"`
+	PlayerName string `json:"playerName"`
 }
 
 func calculateVotesNeededToKick(amountOfPlayers int) int {

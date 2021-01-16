@@ -696,6 +696,8 @@
                     applyMessage("system-message", "System", parsed.data.playerName+" has been kicked.");
                 }
             }
+        } else if (parsed.type === "owner-change") {
+            applyMessage("system-message", "System", parsed.data.playerName + " is the new lobby owner.");
         }
     };
 
