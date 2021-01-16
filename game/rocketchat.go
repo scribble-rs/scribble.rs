@@ -82,7 +82,12 @@ func sendRocketChatMessage(msg string) {
 		Alias: "Scribble Bot",
 		Text:  msg,
 	}
+
 	payloadByte, err := json.Marshal(payload)
+	if err != nil {
+		log.Println(err)
+	}
+
 	_, err = netClient.Post(rocketchatWebhook, "application/json", bytes.NewReader(payloadByte))
 	if err != nil {
 		log.Println(err)
