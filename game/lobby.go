@@ -341,7 +341,7 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 			}
 
 			if lobby.drawer == playerToKick {
-				WritePublicSystemMessage(lobby, "Since the kicked player has been drawing, none of you will get any points this round.")
+				TriggerUpdateEvent("drawer-kicked", nil, lobby)
 				//Since the drawing person has been kicked, that probably means that he/she was trolling, therefore
 				//we redact everyones last earned score.
 				for _, otherPlayer := range lobby.players {

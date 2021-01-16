@@ -699,6 +699,8 @@
         } else if (parsed.type === "owner-change") {
             ownerID = parsed.data.playerId;
             applyMessage("system-message", "System", parsed.data.playerName + " is the new lobby owner.");
+        } else if (parsed.type === "drawer-kicked") {
+            applyMessage("system-message", "System", "Since the kicked player has been drawing, none of you will get any points this round.");
         }
     };
 
