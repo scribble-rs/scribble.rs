@@ -451,10 +451,10 @@ func commandSetMP(caller *Player, lobby *Lobby, args []string) {
 				}
 			}
 		} else {
-			WriteAsJSON(caller, GameEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value must be numeric.")})
+			WriteAsJSON(caller, GameEvent{Type: "system-message", Data: "MaxPlayers value must be numeric."})
 		}
 	} else {
-		WriteAsJSON(caller, GameEvent{Type: "system-message", Data: fmt.Sprintf("Only the lobby owner can change MaxPlayers setting.")})
+		WriteAsJSON(caller, GameEvent{Type: "system-message", Data: "Only the lobby owner can change MaxPlayers setting."})
 	}
 }
 
