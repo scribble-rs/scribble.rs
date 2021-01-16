@@ -62,7 +62,7 @@ type LineEvent struct {
 	Data *Line  `json:"data"`
 }
 
-// LineEvent is basically the same as GameEvent, but with a specific Data type.
+// FillEvent is basically the same as GameEvent, but with a specific Data type.
 // We use this for reparsing as soon as we know that the type is right. It's
 // a bit unperformant, but will do for now.
 type FillEvent struct {
