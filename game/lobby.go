@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	commands "github.com/Bios-Marcel/cmdp"
 	"github.com/Bios-Marcel/discordemojimap"
@@ -139,6 +140,21 @@ func HandleEvent(raw []byte, received *GameEvent, lobby *Lobby, player *Player) 
 		drawer := lobby.drawer
 		if player == drawer && len(lobby.wordChoice) > 0 && chosenIndex >= 0 && chosenIndex <= 2 {
 			lobby.CurrentWord = lobby.wordChoice[chosenIndex]
+
+			//Depending on how long the word is, a fixed amount of hints
+			//would be too easy or too hard.
+			runeCount := utf8.RuneCountInString(lobby.CurrentWord)
+			if runeCount <= 2 {
+				lobby.hintCount = 0
+			} else if runeCount <= 4 {
+				lobby.hintCount = 1
+			} else if runeCount <= 9 {
+				lobby.hintCount = 2
+			} else {
+				lobby.hintCount = 3
+			}
+			lobby.hintsLeft = lobby.hintCount
+
 			lobby.wordChoice = nil
 			lobby.wordHints = createWordHintFor(lobby.CurrentWord, false)
 			lobby.wordHintsShown = createWordHintFor(lobby.CurrentWord, true)
@@ -549,9 +565,6 @@ func selectNextDrawer(lobby *Lobby) (*Player, bool) {
 }
 
 func roundTimerTicker(lobby *Lobby) {
-	hintsLeft := 2
-	revealHintAtMillisecondsLeft := lobby.DrawingTime * 1000 / 3
-
 	for {
 		ticker := lobby.timeLeftTicker
 		if ticker == nil {
@@ -565,10 +578,17 @@ func roundTimerTicker(lobby *Lobby) {
 				go advanceLobby(lobby)
 			}
 
-			if hintsLeft > 0 && lobby.wordHints != nil {
+			if lobby.hintsLeft > 0 && lobby.wordHints != nil {
+				revealHintEveryXMilliseconds := int64(lobby.DrawingTime * 1000 / (lobby.hintCount + 1))
+				//If you have a drawingtime of 120 seconds and three hints, you
+				//want to reveal a hint every 40 seconds, so that the two hints
+				//are visible for at least a third of the time. //If the word
+				//was chosen at 60 seconds, we'll still reveal one hint
+				//instantly, as the time is already lower than 80.
+				revealHintAtXOrLower := revealHintEveryXMilliseconds * int64(lobby.hintsLeft)
 				timeLeft := lobby.RoundEndTime - currentTime
-				if timeLeft <= int64(revealHintAtMillisecondsLeft*hintsLeft) {
-					hintsLeft--
+				if timeLeft <= revealHintAtXOrLower {
+					lobby.hintsLeft--
 
 					for {
 						randomIndex := rand.Int() % len(lobby.wordHints)
