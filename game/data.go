@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/gorilla/websocket"
-	uuid "github.com/satori/go.uuid"
 	"golang.org/x/text/cases"
 )
 
@@ -212,8 +212,8 @@ func (lobby *Lobby) AppendFill(fill *FillEvent) {
 func createPlayer(name string) *Player {
 	return &Player{
 		Name:         name,
-		ID:           uuid.NewV4().String(),
-		userSession:  uuid.NewV4().String(),
+		ID:           uuid.Must(uuid.NewV4()).String(),
+		userSession:  uuid.Must(uuid.NewV4()).String(),
 		Score:        0,
 		LastScore:    0,
 		Rank:         1,
@@ -234,7 +234,7 @@ func createLobby(
 	enableVotekick bool) *Lobby {
 
 	lobby := &Lobby{
-		ID:                uuid.NewV4().String(),
+		ID:                uuid.Must(uuid.NewV4()).String(),
 		DrawingTime:       drawingTime,
 		MaxRounds:         rounds,
 		MaxPlayers:        maxPlayers,
