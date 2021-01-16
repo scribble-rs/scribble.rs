@@ -543,7 +543,6 @@ func endGame(lobby *Lobby) {
 	lobby.state = gameOver
 
 	recalculateRanks(lobby)
-	triggerPlayersUpdate(lobby)
 
 	for _, player := range lobby.players {
 		WriteAsJSON(player, GameEvent{
