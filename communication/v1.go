@@ -141,7 +141,7 @@ func enterLobby(w http.ResponseWriter, r *http.Request) {
 	player := getPlayer(lobby, r)
 
 	if player == nil {
-		if len(lobby.GetPlayers()) >= lobby.MaxPlayers {
+		if !lobby.HasFreePlayerSlot() {
 			http.Error(w, "lobby already full", http.StatusUnauthorized)
 			return
 		}

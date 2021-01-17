@@ -10,6 +10,8 @@ import (
 	"golang.org/x/text/cases"
 )
 
+const slotReservationTime = time.Minute * 5
+
 // Lobby represents a game session.
 // FIXME Field visibilities should be changed in case we ever serialize this.
 type Lobby struct {
@@ -119,6 +121,10 @@ type Player struct {
 	ws               *websocket.Conn
 	socketMutex      *sync.Mutex
 	lastKnownAddress string
+	// disconnectTime is used to kick a player in case the lobby doesn't have
+	// space for new players. The player with the oldest disconnect.Time will
+	// get kicked.
+	disconnectTime *time.Time
 
 	votedForKick map[string]bool
 
@@ -282,4 +288,28 @@ func (lobby *Lobby) IsPublic() bool {
 
 func (lobby *Lobby) GetPlayers() []*Player {
 	return lobby.players
+}
+
+// HasFreePlayerSlot determines whether the lobby still has a slot for at
+// least one more player. If a player has disconnected recently, his slot
+// will be preserved for 5 minutes.
+func (lobby *Lobby) HasFreePlayerSlot() bool {
+	var playerCount int
+	now := time.Now()
+	for _, player := range lobby.players {
+		if player.Connected {
+			playerCount++
+		} else {
+			disconnectTime := player.disconnectTime
+
+			//If a player hasn't been disconnected for a certain
+			//timeframe, we will reserve the slot. This avoids frustration
+			//in situations where a player has to restart their PC or so.
+			if disconnectTime == nil || now.Sub(*disconnectTime) < slotReservationTime {
+				playerCount++
+			}
+		}
+	}
+
+	return playerCount < lobby.MaxPlayers
 }

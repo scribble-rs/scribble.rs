@@ -821,8 +821,9 @@ func OnDisconnected(lobby *Lobby, player *Player) {
 	log.Printf("Player %s(%s) disconnected.\n", player.Name, player.ID)
 	player.Connected = false
 	player.ws = nil
-
 	disconnectTime := time.Now()
+	player.disconnectTime = &disconnectTime
+
 	lobby.LastPlayerDisconnectTime = &disconnectTime
 
 	updateRocketChat(lobby, player)

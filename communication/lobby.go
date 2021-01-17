@@ -180,10 +180,8 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 		DrawingBoardBaseHeight: DrawingBoardBaseHeight,
 	}
 
-	var templateError error
-
 	if player == nil {
-		if len(lobby.GetPlayers()) >= lobby.MaxPlayers {
+		if !lobby.HasFreePlayerSlot() {
 			userFacingError(w, "Sorry, but the lobby is full.")
 			return
 		}
@@ -217,7 +215,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 		player.SetLastKnownAddress(getIPAddressFromRequest(r))
 	}
 
-	templateError = lobbyPage.ExecuteTemplate(w, "lobby.html", pageData)
+	templateError := lobbyPage.ExecuteTemplate(w, "lobby.html", pageData)
 	if templateError != nil {
 		panic(templateError)
 	}
