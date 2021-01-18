@@ -470,6 +470,10 @@
         }))
     }
 
+    let toolButtonPen = document.getElementById("tool-type-pencil");
+    let toolButtonRubber = document.getElementById("tool-type-rubber");
+    let toolButtonFill = document.getElementById("tool-type-fill");
+
     function setColor(value) {
         if (value === undefined) {
             localColor = colorPicker.value;
@@ -477,7 +481,15 @@
             localColor = value;
             colorPicker.value = value;
         }
-        updateCursor();
+
+        if (localTool === rubber) {
+            //Hack to correct selection. Doesn't automatically trigger chooseTool(pen).
+            toolButtonPen.click();
+            chooseTool(pen);
+            //Cursor update is implicit.
+        } else {
+            updateCursor();
+        }
     }
 
     function setLineWidth(value) {
@@ -493,6 +505,7 @@
             //If this ends up with an invalid value, we use the pencil.
             localTool = pen;
         }
+        updateCursor();
     }
 
     function hexToRgb(hex) {
@@ -502,10 +515,20 @@
     }
 
     function updateCursor() {
+        if (localTool === rubber) {
+            setCircleCursor("#FFFFFF", localLineWidth);
+        } else if (localTool === fillBucket) {
+            setCircleCursor(localColor, 8);
+        } else {
+            setCircleCursor(localColor, localLineWidth);
+        }
+    }
+
+    function setCircleCursor(color, size) {
         let cursorColor;
         let borderColor = "#FFFFFF";
-        if (localColor.startsWith("#")) {
-            cursorColor = hexToRgb(localColor);
+        if (color.startsWith("#")) {
+            cursorColor = hexToRgb(color);
 
             const hsp = Math.sqrt(
                 0.299 * (cursorColor[0] * cursorColor[0]) +
@@ -521,10 +544,10 @@
 
             cursorColor = "rgb(" + cursorColor[0] + "," + cursorColor[1] + "," + cursorColor[2] + ")";
         } else {
-            cursorColor = localColor;
+            cursorColor = color;
         }
 
-        let circleSize = localLineWidth * scaleUpFactor();
+        let circleSize = size * scaleUpFactor();
         drawingBoard.style.cursor = "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"" + (circleSize + 2) + "\" height=\"" + (circleSize + 2) + "\"><circle cx=\"" + (circleSize / 2) + "\" cy=\"" + (circleSize / 2) + "\" r=\"" + (circleSize / 2) + "\" style=\"fill: " + cursorColor + "; stroke: " + borderColor + ";\"/></svg>') " + (circleSize / 2) + " " + (circleSize / 2) + ", auto";
     }
 
