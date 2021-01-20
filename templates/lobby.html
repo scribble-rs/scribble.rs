@@ -37,6 +37,11 @@
                 </button>
             </div>
             <div id="word-container" style="position:absolute;left: 50%; transform: translate(-50%, 0);"></div>
+            <div id="word-container" style="position:absolute;left: 100%; transform: translate(-100%, 0);">
+                <button onclick="showNameChangeDialog()" class="dialog-button" >
+                    QUIT
+                </button>
+            </div>
         </div>
 
         <span id="time-left">Time Left: ∞</span>
@@ -215,37 +220,37 @@
                                 <div id="size-8-button" class="dot"></div>
                             </div>
                         </label>
-                        <label for="size15">
-                            <input id="size15" class="custom-check-or-radio line-width-button"
-                                    onchange="setLineWidth(15)"
+                        <label for="size16">
+                            <input id="size16" class="custom-check-or-radio line-width-button"
+                                    onchange="setLineWidth(16)"
                                     type="radio" name="line-width">
                             <div
-                                onmousedown="document.getElementById('size15').click()"
-                                onmouseup="document.getElementById('size15').click()"
+                                onmousedown="document.getElementById('size16').click()"
+                                onmouseup="document.getElementById('size16').click()"
                                 class="line-width-button-content">
-                                <div id="size-15-button" class="dot"></div>
+                                <div id="size-16-button" class="dot"></div>
                             </div>
                         </label>
-                        <label for="size30">
-                            <input id="size30" class="custom-check-or-radio line-width-button"
-                                    onchange="setLineWidth(30)"
+                        <label for="size24">
+                            <input id="size24" class="custom-check-or-radio line-width-button"
+                                    onchange="setLineWidth(24)"
                                     type="radio" name="line-width">
                                 <div
-                                    onmousedown="document.getElementById('size30').click()"
-                                    onmouseup="document.getElementById('size30').click()"
+                                    onmousedown="document.getElementById('size24').click()"
+                                    onmouseup="document.getElementById('size24').click()"
                                     class="line-width-button-content">
-                                    <div id="size-30-button" class="dot"></div>
+                                    <div id="size-24-button" class="dot"></div>
                             </div>
                         </label>
-                        <label for="size40">
-                            <input id="size40" class="custom-check-or-radio line-width-button"
-                                    onchange="setLineWidth(40)"
+                        <label for="size32">
+                            <input id="size32" class="custom-check-or-radio line-width-button"
+                                    onchange="setLineWidth(32)"
                                     type="radio" name="line-width">
                                 <div
-                                    onmousedown="document.getElementById('size40').click()"
-                                    onmouseup="document.getElementById('size40').click()"
+                                    onmousedown="document.getElementById('size32').click()"
+                                    onmouseup="document.getElementById('size32').click()"
                                     class="line-width-button-content">
-                                <div id="size-40-button" class="dot"></div>
+                                <div id="size-32-button" class="dot"></div>
                             </div>
                         </label>
                     </div>
@@ -457,12 +462,12 @@
     //Those are not scaled for now, as the whole toolbar would then have to incorrectly size up and down.
     document.getElementById("size-8-button").style.width = "8px";
     document.getElementById("size-8-button").style.height = "8px";
-    document.getElementById("size-15-button").style.width = "15px";
-    document.getElementById("size-15-button").style.height = "15px";
-    document.getElementById("size-30-button").style.width = "30px";
-    document.getElementById("size-30-button").style.height = "30px";
-    document.getElementById("size-40-button").style.width = "40px";
-    document.getElementById("size-40-button").style.height = "40px";
+    document.getElementById("size-16-button").style.width = "16px";
+    document.getElementById("size-16-button").style.height = "16px";
+    document.getElementById("size-24-button").style.width = "24px";
+    document.getElementById("size-24-button").style.height = "24px";
+    document.getElementById("size-32-button").style.width = "32px";
+    document.getElementById("size-32-button").style.height = "32px";
 
     function startGame() {
         socket.send(JSON.stringify({
@@ -518,37 +523,67 @@
         if (localTool === rubber) {
             setCircleCursor("#FFFFFF", localLineWidth);
         } else if (localTool === fillBucket) {
-            setCircleCursor(localColor, 8);
-        } else {
+            const {innerColor, outerColor} = getCursorColors(localColor);
+            //HACK HACK HACK IT GETS CRAZY
+            //So, the goal here was to use fill.svg as our cursor, but still
+            //have our default cursor, so that the user knows where exactly
+            //he's going to fill and with which color he's going to fill.
+            //The idea was simple, minify paste the SVG inline. However, for
+            //some reason the browser (neither chrome nor firefox) rendered
+            //the image. Even though there was no error or warning, it simply
+            //accepted the input. However, when using the exact same svg text
+            //data and passing it as base64 encoding, everything works. Sadly
+            //I can't understand why this happens, but I'll live with it. If
+            //anyone can explain this to me ... please, please enlighten me.
+            //The image used here is basically fill.svg, however, the size
+            //has been decreased and the image has been mirrored.
+            //REMARK it could be that we need to escape character by using
+            //encodeURI. While I've tried this and it didn't work, I don't
+            //care anymore ...
+            drawingBoard.style.cursor = `url('data:image/svg+xml;base64,`+btoa(`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="32" width="32">`+getSVGCircle(8,innerColor, outerColor)+`<path d="M8.583 22.081a4.913 5.083 0 0 0 1.449-3.618 4.437 4.59 0 0 1 4.433-4.585h2.022a.391.404 0 0 1 .276.69l-1.547 1.6a.391.404 0 0 0 0 .572l3.299 3.412a.391.404 0 0 1 .115.286v1.323a.977 1.011 0 0 1-.977 1.011.195.202 0 0 0-.195.202V25.4a1.368 1.415 0 0 1-2.736 0v-.606a.391.404 0 0 0-.782 0v2.628a1.368 1.415 0 0 1-2.736 0v-1.415a.391.404 0 0 0-.782 0v3.032a1.759 1.819 0 0 1-3.517 0V26.27a5.689 5.885 0 0 1 1.678-4.19zm4.966-.927a.782.809 0 0 0 1.563 0v-1.213a.782.809 0 0 0-1.563 0zm1.563 8.691a.977 1.011 0 1 0 1.95-.118 2.42 2.504 0 0 0-.69-1.422.387.401 0 0 0-.566 0 2.33 2.41 0 0 0-.693 1.54z" fill="#c4a2fc"/><path d="M14.988 15.596l5.529-5.721V8.218a2.345 2.426 0 0 1 4.689 0v2.975l5.586 5.778a1.174 1.215 0 0 1 0 1.715l-6.409 6.63a1.174 1.215 0 0 1-1.658 0l-7.738-8.004a1.172 1.213 0 0 1 .001-1.715zm9.437-7.378a1.563 1.617 0 0 0-3.126 0v.849l.098-.101a1.2 1.241 0 0 1 1.658 0l1.37 1.419zm-.346 2.951l-1.055 1.091 4.533 4.691 1.086-1.061zm-8.536 5.571l7.738 8.004a.391.404 0 0 0 .553 0l6.409-6.63a.391.404 0 0 0 0-.572l-1.046-1.078-1.376 1.347a.391.404 0 0 1-.545-.008l-5.08-5.255a.391.404 0 0 1 0-.572l1.331-1.377-1.024-1.059a.4.414 0 0 0-.553 0l-.651.673v3.74a1.172 1.213 0 1 1-.782 0V11.02l-4.975 5.148a.391.404 0 0 0 0 .572zm5.366-2.054a.391.404 0 1 0 .391.404.391.404 0 0 0-.391-.404z" fill="#151a6a"/></svg>`)+`') 4 4, auto`;
+ } else {
             setCircleCursor(localColor, localLineWidth);
         }
     }
 
-    function setCircleCursor(color, size) {
-        let cursorColor;
-        let borderColor = "#FFFFFF";
+    function getCursorColors(color) {
+        let innerColor;
+        let outerColor = "#FFFFFF";
         if (color.startsWith("#")) {
-            cursorColor = hexToRgb(color);
+            innerColor = hexToRgb(color);
 
             const hsp = Math.sqrt(
-                0.299 * (cursorColor[0] * cursorColor[0]) +
-                0.587 * (cursorColor[1] * cursorColor[1]) +
-                0.114 * (cursorColor[2] * cursorColor[2])
+                0.299 * (innerColor[0] * innerColor[0]) +
+                0.587 * (innerColor[1] * innerColor[1]) +
+                0.114 * (innerColor[2] * innerColor[2])
             );
 
             if (hsp > 127.5) {
-                borderColor = "rgb(0,0,0)";
+                outerColor = "rgb(0,0,0)";
             } else {
-                borderColor = "rgb(255,255,255)";
+                outerColor = "rgb(255,255,255)";
             }
 
-            cursorColor = "rgb(" + cursorColor[0] + "," + cursorColor[1] + "," + cursorColor[2] + ")";
+            innerColor = "rgb(" + innerColor[0] + "," + innerColor[1] + "," + innerColor[2] + ")";
         } else {
-            cursorColor = color;
+            innerColor = color;
         }
 
+        return {
+            innerColor: innerColor,
+            outerColor: outerColor,
+        }
+    }
+
+    function setCircleCursor(color, size) {
+        const {innerColor, outerColor} = getCursorColors(color);
+
         let circleSize = size * scaleUpFactor();
-        drawingBoard.style.cursor = "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"" + (circleSize + 2) + "\" height=\"" + (circleSize + 2) + "\"><circle cx=\"" + (circleSize / 2) + "\" cy=\"" + (circleSize / 2) + "\" r=\"" + (circleSize / 2) + "\" style=\"fill: " + cursorColor + "; stroke: " + borderColor + ";\"/></svg>') " + (circleSize / 2) + " " + (circleSize / 2) + ", auto";
+        drawingBoard.style.cursor = "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"32\" height=\"32\">"+getSVGCircle(circleSize, innerColor, outerColor)+"</svg>') " + (circleSize / 2) + " " + (circleSize / 2) + ", auto";
+    }
+
+    function getSVGCircle(circleSize, innerColor, outerColor) {
+        return "<circle cx=\"" + (circleSize / 2) + "\" cy=\"" + (circleSize / 2) + "\" r=\"" + (circleSize / 2) + "\" style=\"fill: " + innerColor + "; stroke: " + outerColor + ";\"/>";
     }
 
     function clearCanvasAndSendEvent() {
