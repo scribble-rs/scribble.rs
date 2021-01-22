@@ -453,31 +453,54 @@
     const fillBucket = 2;
 
     let allowDrawing = false;
+
+    //Initially, we require some values to avoid running into nullpointers
+    //or undefined errors. The specific values don't really matter.
     let localColor = "#000000";
-    let localLineWidth;
-    let localLineWidthUnscaled;
     let localTool = pen;
-    setLineWidth(8);
+    let localLineWidth = 8;
+    let localLineWidthUnscaled = 8;
 
     //Those are not scaled for now, as the whole toolbar would then have to incorrectly size up and down.
-    document.getElementById("size-8-button").style.width = "8px";
-    document.getElementById("size-8-button").style.height = "8px";
-    document.getElementById("size-16-button").style.width = "16px";
-    document.getElementById("size-16-button").style.height = "16px";
-    document.getElementById("size-24-button").style.width = "24px";
-    document.getElementById("size-24-button").style.height = "24px";
-    document.getElementById("size-32-button").style.width = "32px";
-    document.getElementById("size-32-button").style.height = "32px";
-
-    function startGame() {
-        socket.send(JSON.stringify({
-            type: "start",
-        }))
-    }
+    let sizeButton8 = document.getElementById("size-8-button");
+    let sizeButton16 = document.getElementById("size-16-button");
+    let sizeButton24 = document.getElementById("size-24-button");
+    let sizeButton32 = document.getElementById("size-32-button");
+    sizeButton8.style.width = "8px";
+    sizeButton8.style.height = "8px";
+    sizeButton16.style.width = "16px";
+    sizeButton16.style.height = "16px";
+    sizeButton24.style.width = "24px";
+    sizeButton24.style.height = "24px";
+    sizeButton32.style.width = "32px";
+    sizeButton32.style.height = "32px";
 
     let toolButtonPen = document.getElementById("tool-type-pencil");
     let toolButtonRubber = document.getElementById("tool-type-rubber");
     let toolButtonFill = document.getElementById("tool-type-fill");
+
+    //We use the states present in UI elements, since in case of
+    //hitting F5(Refresh), the browser will not reset these states to the
+    //initial values defined in the HTML.
+    localColor = colorPicker.value;
+
+    if (sizeButton8.checked) {
+        setLineWidth(8);
+    } else if (sizeButton16.checked) {
+        setLineWidth(16);
+    } else if (sizeButton24.checked) {
+        setLineWidth(24);
+    } else if (sizeButton32.checked) {
+        setLineWidth(32);
+    }
+
+    if (toolButtonPen.checked) {
+        chooseTool(pen);
+    } else if (toolButtonFill.checked) {
+        chooseTool(fillBucket);
+    } else if (toolButtonRubber.checked) {
+        chooseTool(rubber);
+    }
 
     function setColor(value) {
         if (value === undefined) {
@@ -500,6 +523,7 @@
     function setLineWidth(value) {
         localLineWidthUnscaled = value;
         localLineWidth = value * scaleDownFactor();
+        console.log(localLineWidth);
         updateCursor();
     }
 
@@ -584,6 +608,12 @@
 
     function getSVGCircle(circleSize, innerColor, outerColor) {
         return "<circle cx=\"" + (circleSize / 2) + "\" cy=\"" + (circleSize / 2) + "\" r=\"" + (circleSize / 2) + "\" style=\"fill: " + innerColor + "; stroke: " + outerColor + ";\"/>";
+    }
+
+    function startGame() {
+        socket.send(JSON.stringify({
+            type: "start",
+        }))
     }
 
     function clearCanvasAndSendEvent() {
