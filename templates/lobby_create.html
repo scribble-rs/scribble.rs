@@ -137,6 +137,9 @@
     let lobbyTableLoaded = false;
     let lobbyTableBody = document.getElementById("lobby-table-body");
     let selectedLobby;
+    
+    let createLobbyTabButton = document.getElementById("create-lobby-tab-button");
+    let joinLobbyTabButton = document.getElementById("join-lobby-tab-button");
 
     let joinButton = document.getElementById("join-button");
 
@@ -239,6 +242,12 @@
 
         //Show the newly selected tab.
         document.getElementById(tabId).style.display = "flex";
+    }
+
+    if(createLobbyTabButton.checked) {
+        openTab('create-lobby');
+    } else if (joinLobbyTabButton.checked) {
+        openTab('join-lobby');
     }
 </script>
 </body>
