@@ -23,8 +23,8 @@ func Test_CalculateVotesNeededToKick(t *testing.T) {
 	t.Run("Check necessary kick vote amount for players", func(test *testing.T) {
 		var expectedResults = map[int]int{
 			//Kinda irrelevant since you can't kick yourself, but who cares.
-			1:  1,
-			2:  1,
+			1:  2,
+			2:  2,
 			3:  2,
 			4:  2,
 			5:  3,
