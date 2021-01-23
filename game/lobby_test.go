@@ -4,6 +4,21 @@ import (
 	"testing"
 )
 
+func createLobbyWithDemoPlayers(playercount int) *Lobby {
+	owner := &Player{}
+	lobby := &Lobby{
+		owner:   owner,
+		creator: owner,
+	}
+	for i := 0; i < playercount; i++ {
+		lobby.players = append(lobby.players, &Player{
+			Connected: true,
+		})
+	}
+
+	return lobby
+}
+
 func Test_CalculateVotesNeededToKick(t *testing.T) {
 	t.Run("Check necessary kick vote amount for players", func(test *testing.T) {
 		var expectedResults = map[int]int{
@@ -20,10 +35,11 @@ func Test_CalculateVotesNeededToKick(t *testing.T) {
 			10: 5,
 		}
 
-		for k, v := range expectedResults {
-			result := calculateVotesNeededToKick(k)
-			if result != v {
-				t.Errorf("Error. Necessary vote amount was %d, but should've been %d", result, v)
+		for playerCount, expctedRequiredVotes := range expectedResults {
+			lobby := createLobbyWithDemoPlayers(playerCount)
+			result := calculateVotesNeededToKick(nil, lobby)
+			if result != expctedRequiredVotes {
+				t.Errorf("Error. Necessary vote amount was %d, but should've been %d", result, expctedRequiredVotes)
 			}
 		}
 	})
@@ -32,25 +48,25 @@ func Test_CalculateVotesNeededToKick(t *testing.T) {
 func Test_RemoveAccents(t *testing.T) {
 	t.Run("Check removing accented characters", func(test *testing.T) {
 		var expectedResults = map[string]string{
-			"é":  "e",
-			"É":  "E",
-			"à":  "a",
-			"À":  "A",
-			"ç":  "c",
-			"Ç":  "C",
-			"ö":  "oe",
-			"Ö":  "OE",
-			"œ":  "oe",
-			"\n":  "\n",
-			"\t":  "\t",
-			"\r":  "\r",
-			"":  "",
-			"·":  "·",
-			"?:!":  "?:!",
-			"ac-ab":  "acab",
-			"ac - _ab-- ":  "acab",
+			"é":           "e",
+			"É":           "E",
+			"à":           "a",
+			"À":           "A",
+			"ç":           "c",
+			"Ç":           "C",
+			"ö":           "oe",
+			"Ö":           "OE",
+			"œ":           "oe",
+			"\n":          "\n",
+			"\t":          "\t",
+			"\r":          "\r",
+			"":            "",
+			"·":           "·",
+			"?:!":         "?:!",
+			"ac-ab":       "acab",
+			"ac - _ab-- ": "acab",
 		}
-	
+
 		for k, v := range expectedResults {
 			result := removeAccents(k)
 			if result != v {
