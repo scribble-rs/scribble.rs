@@ -391,18 +391,18 @@ type OwnerChangeEvent struct {
 
 func calculateVotesNeededToKick(player *Player, lobby *Lobby) int {
 	connectedPlayerCount := lobby.GetConnectedPlayerCount()
+
+	//If there are only two players, e.g. none of them should be able to
+	//kick the other.
+	if connectedPlayerCount <= 2 {
+		return 2
+	}
+
 	if player == lobby.creator {
-		//We don't want to allow people to kick the owner, as this could
-		//potentially annoy certain owners. For example a streamer playing
+		//We don't want to allow people to kick the creator, as this could
+		//potentially annoy certain creators. For example a streamer playing
 		//a game with viewers could get trolled this way. Just one
 		//hypothetical scenario, I am sure there are more ;)
-
-		//If there are only two players, e.g. the creator and the one that
-		//kick voted, we will make a condition that can't be met. A bit hacky
-		//but it will do for now.
-		if connectedPlayerCount <= 2 {
-			return 2
-		}
 
 		//All players excluding the owner themselves.
 		return connectedPlayerCount - 1
