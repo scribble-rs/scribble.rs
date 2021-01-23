@@ -39,8 +39,13 @@ type Lobby struct {
 	state gameState
 	// drawer references the Player that is currently drawing.
 	drawer *Player
-	// owner references the Player that created the lobby.
+	// owner references the Player that currently owns the lobby.
+	// Meaning this player has rights to restart or change certain settings.
 	owner *Player
+	// creator is the player that opened a lobby. Initially creator and owner
+	// are set to the same player. While the owner can change throughout the
+	// game, the creator can't.
+	creator *Player
 	// CurrentWord represents the word that was last selected. If no word has
 	// been selected yet or the round is already over, this should be empty.
 	CurrentWord string
@@ -270,6 +275,19 @@ func createLobby(
 type GameEvent struct {
 	Type string      `json:"type"`
 	Data interface{} `json:"data"`
+}
+
+// GetConnectedPlayerCount returns the amount of player that have currently
+// established a socket connection.
+func (lobby *Lobby) GetConnectedPlayerCount() int {
+	var count int
+	for _, player := range lobby.players {
+		if player.Connected {
+			count++
+		}
+	}
+
+	return count
 }
 
 func (lobby *Lobby) HasConnectedPlayers() bool {

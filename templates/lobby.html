@@ -370,7 +370,7 @@
 
             cachedPlayers.forEach(player => {
                 //Don't wanna allow kicking ourselves.
-                if (player.id !== ownID) {
+                if (player.id !== ownID && player.connected) {
                     kickDialogPlayers.innerHTML += '<button class="kick-player-button" onclick="onVotekickPlayer(\'' + player.id + '\')">' + player.name + '</button>';
                 }
             });

@@ -303,19 +303,24 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 		}
 	}
 
-	//If we haven't found the player, we can't kick him/her.
+	//If we haven't found the player, we can't kick them.
 	if toKick != -1 {
-		player.votedForKick[toKickID] = true
 		playerToKick := lobby.players[toKick]
+		if !playerToKick.Connected {
+			//TODO Send error event
+			WriteAsJSON(player, GameEvent{Type: "system-message", Data: fmt.Sprintf("You can't kick a disconnected player.")})
+			return
+		}
 
+		player.votedForKick[toKickID] = true
 		var voteKickCount int
 		for _, otherPlayer := range lobby.players {
-			if otherPlayer.votedForKick[toKickID] == true {
+			if otherPlayer.Connected && otherPlayer.votedForKick[toKickID] {
 				voteKickCount++
 			}
 		}
 
-		votesNeeded := calculateVotesNeededToKick(len(lobby.players))
+		votesNeeded := calculateVotesNeededToKick(playerToKick, lobby)
 
 		kickEvent := &GameEvent{
 			Type: "kick-vote",
@@ -334,11 +339,13 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 		if voteKickCount >= votesNeeded {
 			//Since the player is already kicked, we first clean up the kicking information related to that player
 			for _, otherPlayer := range lobby.players {
-				if otherPlayer.votedForKick[toKickID] == true {
-					delete(player.votedForKick, toKickID)
-					break
-				}
+				delete(otherPlayer.votedForKick, toKickID)
 			}
+
+			if playerToKick.ws != nil {
+				playerToKick.ws.Close()
+			}
+			lobby.players = append(lobby.players[:toKick], lobby.players[toKick+1:]...)
 
 			if lobby.drawer == playerToKick {
 				TriggerUpdateEvent("drawer-kicked", nil, lobby)
@@ -351,13 +358,6 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 				lobby.scoreEarnedByGuessers = 0
 				//We must absolutely not set lobby.drawer to nil, since this would cause the drawing order to be ruined.
 			}
-
-			if playerToKick.ws != nil {
-				playerToKick.ws.Close()
-			}
-			lobby.players = append(lobby.players[:toKick], lobby.players[toKick+1:]...)
-
-			recalculateRanks(lobby)
 
 			//If the owner is kicked, we choose the next best person as the owner.
 			if lobby.owner == playerToKick {
@@ -374,6 +374,7 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 				}
 			}
 
+			recalculateRanks(lobby)
 			triggerPlayersUpdate(lobby)
 
 			if lobby.drawer == playerToKick || !lobby.isAnyoneStillGuessing() {
@@ -388,7 +389,25 @@ type OwnerChangeEvent struct {
 	PlayerName string `json:"playerName"`
 }
 
-func calculateVotesNeededToKick(amountOfPlayers int) int {
+func calculateVotesNeededToKick(player *Player, lobby *Lobby) int {
+	connectedPlayerCount := lobby.GetConnectedPlayerCount()
+	if player == lobby.creator {
+		//We don't want to allow people to kick the owner, as this could
+		//potentially annoy certain owners. For example a streamer playing
+		//a game with viewers could get trolled this way. Just one
+		//hypothetical scenario, I am sure there are more ;)
+
+		//If there are only two players, e.g. the creator and the one that
+		//kick voted, we will make a condition that can't be met. A bit hacky
+		//but it will do for now.
+		if connectedPlayerCount <= 2 {
+			return 2
+		}
+
+		//All players excluding the owner themselves.
+		return connectedPlayerCount - 1
+	}
+
 	//If the amount of players equals an even number, such as 6, we will always
 	//need half of that. If the amount is uneven, we'll get a floored result.
 	//therefore we always add one to the amount.
@@ -396,7 +415,7 @@ func calculateVotesNeededToKick(amountOfPlayers int) int {
 	//    (6+1)/2 = 3
 	//    (5+1)/2 = 3
 	//Therefore it'll never be possible for a minority to kick a player.
-	return (amountOfPlayers + 1) / 2
+	return (connectedPlayerCount + 1) / 2
 }
 
 func handleCommand(commandString string, caller *Player, lobby *Lobby) {
@@ -720,6 +739,7 @@ func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTim
 
 	lobby.players = append(lobby.players, player)
 	lobby.owner = player
+	lobby.creator = player
 
 	words, err := readWordList(lobby.lowercaser, chosenLanguage)
 	if err != nil {
