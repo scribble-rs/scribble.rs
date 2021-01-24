@@ -110,11 +110,7 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteStrictMode,
 	})
 
-	lobbyData := &LobbyData{
-		LobbyID:                lobby.ID,
-		DrawingBoardBaseWidth:  DrawingBoardBaseWidth,
-		DrawingBoardBaseHeight: DrawingBoardBaseHeight,
-	}
+	lobbyData := createLobbyData(lobby.ID)
 
 	encodingError := json.NewEncoder(w).Encode(lobbyData)
 	if encodingError != nil {
@@ -172,11 +168,7 @@ func enterLobby(w http.ResponseWriter, r *http.Request) {
 		player.SetLastKnownAddress(getIPAddressFromRequest(r))
 	}
 
-	lobbyData := &LobbyData{
-		LobbyID:                lobby.ID,
-		DrawingBoardBaseWidth:  DrawingBoardBaseWidth,
-		DrawingBoardBaseHeight: DrawingBoardBaseHeight,
-	}
+	lobbyData := createLobbyData(lobby.ID)
 
 	encodingError := json.NewEncoder(w).Encode(lobbyData)
 	if encodingError != nil {

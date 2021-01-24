@@ -138,9 +138,9 @@ func GetWordHint(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-const (
-	DrawingBoardBaseWidth  = 1600
-	DrawingBoardBaseHeight = 900
+var (
+	CanvasColor         = [3]uint8{255, 255, 255}
+	SuggestedBrushSizes = [4]uint8{8, 16, 24, 32}
 )
 
 // LobbyData is the data necessary for initially displaying all data of
@@ -149,6 +149,29 @@ type LobbyData struct {
 	LobbyID                string `json:"lobbyId"`
 	DrawingBoardBaseWidth  int    `json:"drawingBoardBaseWidth"`
 	DrawingBoardBaseHeight int    `json:"drawingBoardBaseHeight"`
+	//MinBrushSize is the minimum amount of pixels the brush can draw in.
+	MinBrushSize int `json:"minBrushSize"`
+	//MaxBrushSize is the maximum amount of pixels the brush can draw in.
+	MaxBrushSize int `json:"maxBrushSize"`
+	//CanvasColor is the initial (empty) color of the canvas.
+	//It's an array containing [R,G,B]
+	CanvasColor [3]uint8 `json:"canvasColor"`
+	//SuggestedBrushSizes are suggestions for the different brush sizes
+	//that the user can choose between. These brushes are guaranted to
+	//be ordered from low to high and stay with the bounds.
+	SuggestedBrushSizes [4]uint8 `json:"suggestedBrushSizes"`
+}
+
+func createLobbyData(lobbyID string) *LobbyData {
+	return &LobbyData{
+		LobbyID:                lobbyID,
+		DrawingBoardBaseWidth:  game.DrawingBoardBaseWidth,
+		DrawingBoardBaseHeight: game.DrawingBoardBaseHeight,
+		MinBrushSize:           game.MinBrushSize,
+		MaxBrushSize:           game.MaxBrushSize,
+		CanvasColor:            CanvasColor,
+		SuggestedBrushSizes:    SuggestedBrushSizes,
+	}
 }
 
 // ssrEnterLobby opens a lobby, either opening it directly or asking for a lobby.
@@ -174,11 +197,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 
 	player := getPlayer(lobby, r)
 
-	pageData := &LobbyData{
-		LobbyID:                lobby.ID,
-		DrawingBoardBaseWidth:  DrawingBoardBaseWidth,
-		DrawingBoardBaseHeight: DrawingBoardBaseHeight,
-	}
+	pageData := createLobbyData(lobby.ID)
 
 	if player == nil {
 		if !lobby.HasFreePlayerSlot() {

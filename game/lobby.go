@@ -41,6 +41,13 @@ var (
 	}
 )
 
+const (
+	DrawingBoardBaseWidth  = 1600
+	DrawingBoardBaseHeight = 900
+	MinBrushSize           = 8
+	MaxBrushSize           = 32
+)
+
 // SettingBounds defines the lower and upper bounds for the user-specified
 // lobby creation input.
 type SettingBounds struct {
@@ -99,8 +106,11 @@ func HandleEvent(raw []byte, received *GameEvent, lobby *Lobby, player *Player) 
 
 			//In case the line is too big, we overwrite the data of the event.
 			//This will prevent clients from lagging due to too thick lines.
-			if line.Data.LineWidth > 40.0 {
-				line.Data.LineWidth = 40.0
+			if line.Data.LineWidth > float32(MaxBrushSize) {
+				line.Data.LineWidth = MaxBrushSize
+				received.Data = line
+			} else if line.Data.LineWidth < float32(MinBrushSize) {
+				line.Data.LineWidth = MinBrushSize
 				received.Data = line
 			}
 
