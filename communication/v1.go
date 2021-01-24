@@ -124,9 +124,9 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 func enterLobby(w http.ResponseWriter, r *http.Request) {
 	lobby, err := getLobby(r)
 	if err != nil {
-		if err == noLobbyIdSuppliedError {
+		if err == errNoLobbyIDSupplied {
 			http.Error(w, err.Error(), http.StatusBadRequest)
-		} else if err == lobbyNotExistentError {
+		} else if err == errLobbyNotExistent {
 			http.Error(w, err.Error(), http.StatusNotFound)
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
