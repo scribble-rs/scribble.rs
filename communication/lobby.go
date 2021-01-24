@@ -12,20 +12,20 @@ import (
 )
 
 var (
-	noLobbyIdSuppliedError = errors.New("please supply a lobby id via the 'lobby_id' query parameter")
-	lobbyNotExistentError  = errors.New("the requested lobby doesn't exist")
+	errNoLobbyIDSupplied = errors.New("please supply a lobby id via the 'lobby_id' query parameter")
+	errLobbyNotExistent  = errors.New("the requested lobby doesn't exist")
 )
 
 func getLobby(r *http.Request) (*game.Lobby, error) {
 	lobbyID := r.URL.Query().Get("lobby_id")
 	if lobbyID == "" {
-		return nil, noLobbyIdSuppliedError
+		return nil, errNoLobbyIDSupplied
 	}
 
 	lobby := state.GetLobby(lobbyID)
 
 	if lobby == nil {
-		return nil, lobbyNotExistentError
+		return nil, errLobbyNotExistent
 	}
 
 	return lobby, nil
@@ -49,6 +49,8 @@ func getPlayer(lobby *game.Lobby, r *http.Request) *game.Player {
 	return lobby.GetPlayer(getUserSession(r))
 }
 
+// getPlayername either retrieves the playername from a cookie, the URL form
+// or generates a new random name if no name can be found.
 func getPlayername(r *http.Request) string {
 	usernameCookie, noCookieError := r.Cookie("username")
 	if noCookieError == nil {
@@ -98,16 +100,26 @@ func GetPlayers(w http.ResponseWriter, r *http.Request) {
 }
 
 var (
-	CanvasColor         = [3]uint8{255, 255, 255}
+	//CanvasColor is the initialy / empty canvas colors value used for
+	//Lobbydata objects.
+	CanvasColor = [3]uint8{255, 255, 255}
+	//SuggestedBrushSizes is suggested brush sizes value used for
+	//Lobbydata objects. A unit test makes sure these values are ordered
+	//and within the specified bounds.
 	SuggestedBrushSizes = [4]uint8{8, 16, 24, 32}
 )
 
-// LobbyData is the data necessary for initially displaying all data of
-// the lobbies webpage.
+// LobbyData is the data necessary for correctly configuring a lobby.
+// While unofficial clients will probably need all of these values, the
+// official webclient doesn't use all of them as of now.
 type LobbyData struct {
-	LobbyID                string `json:"lobbyId"`
-	DrawingBoardBaseWidth  int    `json:"drawingBoardBaseWidth"`
-	DrawingBoardBaseHeight int    `json:"drawingBoardBaseHeight"`
+	LobbyID string `json:"lobbyId"`
+	//DrawingBoardBaseWidth is the internal canvas width and is needed for
+	//correctly up- / downscaling drawing instructions.
+	DrawingBoardBaseWidth int `json:"drawingBoardBaseWidth"`
+	//DrawingBoardBaseHeight is the internal canvas height and is needed for
+	//correctly up- / downscaling drawing instructions.
+	DrawingBoardBaseHeight int `json:"drawingBoardBaseHeight"`
 	//MinBrushSize is the minimum amount of pixels the brush can draw in.
 	MinBrushSize int `json:"minBrushSize"`
 	//MaxBrushSize is the maximum amount of pixels the brush can draw in.
