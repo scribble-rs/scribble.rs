@@ -308,15 +308,17 @@ func (lobby *Lobby) GetPlayers() []*Player {
 	return lobby.players
 }
 
-// HasFreePlayerSlot determines whether the lobby still has a slot for at
-// least one more player. If a player has disconnected recently, his slot
-// will be preserved for 5 minutes.
-func (lobby *Lobby) HasFreePlayerSlot() bool {
-	var playerCount int
+// GetOccupiedPlayerSlots counts the available slots which can be taken by new
+// players. Whether a slot is available is determined by the player count and
+// whether a player is disconnect or furthermore how long they have been
+// disconnected for. Therefore the result of this function will differ from
+// Lobby.GetConnectedPlayerCount.
+func (lobby *Lobby) GetOccupiedPlayerSlots() int {
+	var occupiedPlayerSlots int
 	now := time.Now()
 	for _, player := range lobby.players {
 		if player.Connected {
-			playerCount++
+			occupiedPlayerSlots++
 		} else {
 			disconnectTime := player.disconnectTime
 
@@ -324,10 +326,22 @@ func (lobby *Lobby) HasFreePlayerSlot() bool {
 			//timeframe, we will reserve the slot. This avoids frustration
 			//in situations where a player has to restart their PC or so.
 			if disconnectTime == nil || now.Sub(*disconnectTime) < slotReservationTime {
-				playerCount++
+				occupiedPlayerSlots++
 			}
 		}
 	}
 
-	return playerCount < lobby.MaxPlayers
+	return occupiedPlayerSlots
+}
+
+// HasFreePlayerSlot determines whether the lobby still has a slot for at
+// least one more player. If a player has disconnected recently, the slot
+// will be preserved for 5 minutes. This function should be used over
+// Lobby.GetOccupiedPlayerSlots, as it is potentially faster.
+func (lobby *Lobby) HasFreePlayerSlot() bool {
+	if len(lobby.players) < lobby.MaxPlayers {
+		return true
+	}
+
+	return lobby.GetOccupiedPlayerSlots() < lobby.MaxPlayers
 }

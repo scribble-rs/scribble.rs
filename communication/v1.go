@@ -31,7 +31,7 @@ func publicLobbies(w http.ResponseWriter, r *http.Request) {
 	for _, lobby := range lobbies {
 		lobbyEntries = append(lobbyEntries, &LobbyEntry{
 			ID:              lobby.ID,
-			PlayerCount:     len(lobby.GetPlayers()),
+			PlayerCount:     lobby.GetOccupiedPlayerSlots(),
 			MaxPlayers:      lobby.MaxPlayers,
 			Round:           lobby.Round,
 			MaxRounds:       lobby.MaxRounds,
