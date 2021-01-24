@@ -97,47 +97,6 @@ func GetPlayers(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//GetRounds returns the html structure and data for the current round info.
-func GetRounds(w http.ResponseWriter, r *http.Request) {
-	lobby, err := getLobby(r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
-	}
-
-	if getPlayer(lobby, r) == nil {
-		http.Error(w, "you aren't part of this lobby", http.StatusUnauthorized)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(game.Rounds{Round: lobby.Round, MaxRounds: lobby.MaxRounds})
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-}
-
-// GetWordHint returns the html structure and data for the current word hint.
-func GetWordHint(w http.ResponseWriter, r *http.Request) {
-	lobby, err := getLobby(r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
-	}
-
-	player := getPlayer(lobby, r)
-	if player == nil {
-		http.Error(w, "you aren't part of this lobby", http.StatusUnauthorized)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(lobby.GetAvailableWordHints(player))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-}
-
 var (
 	CanvasColor         = [3]uint8{255, 255, 255}
 	SuggestedBrushSizes = [4]uint8{8, 16, 24, 32}
