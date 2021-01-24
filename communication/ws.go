@@ -55,7 +55,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(player.Name + " has connected")
+	log.Printf("%s(%s) has connected\n", player.Name, player.ID)
 
 	player.SetWebsocket(ws)
 	game.OnConnected(lobby, player)
