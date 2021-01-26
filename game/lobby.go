@@ -240,7 +240,7 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 			//The forumla here represents an exponential decline based on the time taken.
 			//This way fast players get more points, however not a lot more.
 			//The bonus gained by guessing before hints are shown is therefore still somewhat relevant.
-			declineFactor := math.Ceil(1.0 / float64(lobby.DrawingTime))
+			declineFactor := 1.0 / float64(lobby.DrawingTime)
 			baseScore := int(maxBaseScore * math.Pow(1.0-declineFactor, float64(secondsLeft)))
 
 			//Every hint not shown, e.g. not needed, will give the player bonus points.
