@@ -240,7 +240,7 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 			//The forumla here represents an exponential decline based on the time taken.
 			//This way fast players get more points, however not a lot more.
 			//The bonus gained by guessing before hints are shown is therefore still somewhat relevant.
-			declineFactor := math.Ceil(1 / float64(lobby.DrawingTime))
+			declineFactor := math.Ceil(1.0 / float64(lobby.DrawingTime))
 			baseScore := int(maxBaseScore * math.Pow(1.0-declineFactor, float64(secondsLeft)))
 
 			//Every hint not shown, e.g. not needed, will give the player bonus points.
@@ -516,21 +516,32 @@ func advanceLobby(lobby *Lobby) {
 	if drawer != nil && lobby.scoreEarnedByGuessers > 0 {
 
 		//Average score, but minus one player, since the own score is 0 and doesn't count.
-		averageScore := lobby.scoreEarnedByGuessers / (len(lobby.players) - 1)
+		playerCount := lobby.GetConnectedPlayerCount()
+		//If the drawer isn't connected though, we mustn't subtract from the count.
+		if drawer.Connected {
+			playerCount--
+		}
+
+		var averageScore int
+		if playerCount > 0 {
+			averageScore = lobby.scoreEarnedByGuessers / playerCount
+		}
 		if averageScore > 0 {
 			//To award the drawer for making a drawing that was "good enough for
 			//everyone to get it", they get awarded with 10 bonus points.
 			hasEveryoneGuessedCorrectly := true
 			for _, player := range lobby.players {
 				//At least one player hasn't guessed correctly
-				if player != drawer && player.State == Guessing {
+				//We won't take disconnected players into account for now.
+				//Maybe we can be more accurate here.
+				if player != drawer && player.Connected && player.State == Guessing {
 					hasEveryoneGuessedCorrectly = false
 				}
 			}
 
 			drawer.LastScore = averageScore
 			if hasEveryoneGuessedCorrectly {
-				drawer.LastScore += averageScore
+				drawer.LastScore += 10
 			}
 			drawer.Score += drawer.LastScore
 		}
