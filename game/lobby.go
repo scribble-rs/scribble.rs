@@ -46,6 +46,9 @@ const (
 	DrawingBoardBaseHeight = 900
 	MinBrushSize           = 8
 	MaxBrushSize           = 32
+
+	maxBaseScore      = 200
+	maxHintBonusScore = 60
 )
 
 // SettingBounds defines the lower and upper bounds for the user-specified
@@ -233,8 +236,22 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 		if normSearched == normInput {
 			secondsLeft := lobby.RoundEndTime/1000 - time.Now().UTC().UnixNano()/1000000000
 
-			sender.LastScore = int(math.Ceil(math.Pow(math.Max(float64(secondsLeft), 1), 1.3) * 2))
+			//The base score is based on the general time taken.
+			//The forumla here represents an exponential decline based on the time taken.
+			//This way fast players get more points, however not a lot more.
+			//The bonus gained by guessing before hints are shown is therefore still somewhat relevant.
+			declineFactor := math.Ceil(1 / float64(lobby.DrawingTime))
+			baseScore := int(maxBaseScore * math.Pow(1.0-declineFactor, float64(secondsLeft)))
+
+			//Every hint not shown, e.g. not needed, will give the player bonus points.
+			var hintBonusScore int
+			if lobby.hintCount > 0 {
+				hintBonusScore = lobby.hintsLeft * (maxHintBonusScore / lobby.hintCount)
+			}
+
+			sender.LastScore = baseScore + hintBonusScore
 			sender.Score += sender.LastScore
+
 			lobby.scoreEarnedByGuessers += sender.LastScore
 			sender.State = Standby
 
@@ -497,9 +514,24 @@ func advanceLobby(lobby *Lobby) {
 	//The drawer can potentially be null if he's kicked, in that case we proceed with the round if anyone has already
 	drawer := lobby.drawer
 	if drawer != nil && lobby.scoreEarnedByGuessers > 0 {
-		averageScore := float64(lobby.scoreEarnedByGuessers) / float64(len(lobby.players)-1)
+
+		//Average score, but minus one player, since the own score is 0 and doesn't count.
+		averageScore := lobby.scoreEarnedByGuessers / (len(lobby.players) - 1)
 		if averageScore > 0 {
-			drawer.LastScore = int(averageScore * 1.1)
+			//To award the drawer for making a drawing that was "good enough for
+			//everyone to get it", they get awarded with 10 bonus points.
+			hasEveryoneGuessedCorrectly := true
+			for _, player := range lobby.players {
+				//At least one player hasn't guessed correctly
+				if player != drawer && player.State == Guessing {
+					hasEveryoneGuessedCorrectly = false
+				}
+			}
+
+			drawer.LastScore = averageScore
+			if hasEveryoneGuessedCorrectly {
+				drawer.LastScore += averageScore
+			}
 			drawer.Score += drawer.LastScore
 		}
 	}
@@ -518,9 +550,6 @@ func advanceLobby(lobby *Lobby) {
 		if otherPlayer.State == Guessing {
 			otherPlayer.LastScore = 0
 		}
-	}
-
-	for _, otherPlayer := range lobby.players {
 		otherPlayer.State = Guessing
 		otherPlayer.votedForKick = make(map[string]bool)
 	}
