@@ -5,10 +5,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/gorilla/websocket"
-	uuid "github.com/satori/go.uuid"
 	"golang.org/x/text/cases"
 )
+
+const slotReservationTime = time.Minute * 5
 
 // Lobby represents a game session.
 // FIXME Field visibilities should be changed in case we ever serialize this.
@@ -37,8 +39,13 @@ type Lobby struct {
 	state gameState
 	// drawer references the Player that is currently drawing.
 	drawer *Player
-	// owner references the Player that created the lobby.
+	// owner references the Player that currently owns the lobby.
+	// Meaning this player has rights to restart or change certain settings.
 	owner *Player
+	// creator is the player that opened a lobby. Initially creator and owner
+	// are set to the same player. While the owner can change throughout the
+	// game, the creator can't.
+	creator *Player
 	// CurrentWord represents the word that was last selected. If no word has
 	// been selected yet or the round is already over, this should be empty.
 	CurrentWord string
@@ -46,6 +53,11 @@ type Lobby struct {
 	wordHints []*WordHint
 	// wordHintsShown are the same as wordHints with characters visible.
 	wordHintsShown []*WordHint
+	// hintsLeft is the amount of hints still available for relevation.
+	hintsLeft int
+	// hintCount is the amount of hints that were initially available
+	//for relevation.
+	hintCount int
 	// Round is the round that the Lobby is currently in. This is a number
 	// between 0 and MaxRounds. 0 indicates that it hasn't started yet.
 	Round int
@@ -114,6 +126,10 @@ type Player struct {
 	ws               *websocket.Conn
 	socketMutex      *sync.Mutex
 	lastKnownAddress string
+	// disconnectTime is used to kick a player in case the lobby doesn't have
+	// space for new players. The player with the oldest disconnect.Time will
+	// get kicked.
+	disconnectTime *time.Time
 
 	votedForKick map[string]bool
 
@@ -212,8 +228,8 @@ func (lobby *Lobby) AppendFill(fill *FillEvent) {
 func createPlayer(name string) *Player {
 	return &Player{
 		Name:         name,
-		ID:           uuid.NewV4().String(),
-		userSession:  uuid.NewV4().String(),
+		ID:           uuid.Must(uuid.NewV4()).String(),
+		userSession:  uuid.Must(uuid.NewV4()).String(),
 		Score:        0,
 		LastScore:    0,
 		Rank:         1,
@@ -234,7 +250,7 @@ func createLobby(
 	enableVotekick bool) *Lobby {
 
 	lobby := &Lobby{
-		ID:                uuid.NewV4().String(),
+		ID:                uuid.Must(uuid.NewV4()).String(),
 		DrawingTime:       drawingTime,
 		MaxRounds:         rounds,
 		MaxPlayers:        maxPlayers,
@@ -261,6 +277,19 @@ type GameEvent struct {
 	Data interface{} `json:"data"`
 }
 
+// GetConnectedPlayerCount returns the amount of player that have currently
+// established a socket connection.
+func (lobby *Lobby) GetConnectedPlayerCount() int {
+	var count int
+	for _, player := range lobby.players {
+		if player.Connected {
+			count++
+		}
+	}
+
+	return count
+}
+
 func (lobby *Lobby) HasConnectedPlayers() bool {
 	for _, otherPlayer := range lobby.players {
 		if otherPlayer.Connected {
@@ -277,4 +306,42 @@ func (lobby *Lobby) IsPublic() bool {
 
 func (lobby *Lobby) GetPlayers() []*Player {
 	return lobby.players
+}
+
+// GetOccupiedPlayerSlots counts the available slots which can be taken by new
+// players. Whether a slot is available is determined by the player count and
+// whether a player is disconnect or furthermore how long they have been
+// disconnected for. Therefore the result of this function will differ from
+// Lobby.GetConnectedPlayerCount.
+func (lobby *Lobby) GetOccupiedPlayerSlots() int {
+	var occupiedPlayerSlots int
+	now := time.Now()
+	for _, player := range lobby.players {
+		if player.Connected {
+			occupiedPlayerSlots++
+		} else {
+			disconnectTime := player.disconnectTime
+
+			//If a player hasn't been disconnected for a certain
+			//timeframe, we will reserve the slot. This avoids frustration
+			//in situations where a player has to restart their PC or so.
+			if disconnectTime == nil || now.Sub(*disconnectTime) < slotReservationTime {
+				occupiedPlayerSlots++
+			}
+		}
+	}
+
+	return occupiedPlayerSlots
+}
+
+// HasFreePlayerSlot determines whether the lobby still has a slot for at
+// least one more player. If a player has disconnected recently, the slot
+// will be preserved for 5 minutes. This function should be used over
+// Lobby.GetOccupiedPlayerSlots, as it is potentially faster.
+func (lobby *Lobby) HasFreePlayerSlot() bool {
+	if len(lobby.players) < lobby.MaxPlayers {
+		return true
+	}
+
+	return lobby.GetOccupiedPlayerSlots() < lobby.MaxPlayers
 }

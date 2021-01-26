@@ -21,12 +21,11 @@ var upgrader = websocket.Upgrader{
 }
 
 func init() {
-	game.TriggerComplexUpdateEvent = TriggerComplexUpdateEvent
-	game.TriggerSimpleUpdateEvent = TriggerSimpleUpdateEvent
-	game.SendDataToConnectedPlayers = SendDataToConnectedPlayers
+	game.TriggerUpdateEvent = TriggerUpdateEvent
+	game.SendDataToEveryoneExceptSender = SendDataToEveryoneExceptSender
 	game.WriteAsJSON = WriteAsJSON
 	game.WritePublicSystemMessage = WritePublicSystemMessage
-	game.TriggerComplexUpdatePerPlayerEvent = TriggerComplexUpdatePerPlayerEvent
+	game.TriggerUpdatePerPlayerEvent = TriggerUpdatePerPlayerEvent
 }
 
 func wsEndpoint(w http.ResponseWriter, r *http.Request) {
@@ -56,7 +55,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(player.Name + " has connected")
+	log.Printf("%s(%s) has connected\n", player.Name, player.ID)
 
 	player.SetWebsocket(ws)
 	game.OnConnected(lobby, player)
@@ -110,11 +109,7 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 	}
 }
 
-func onPlayerDisconnect(lobby *game.Lobby, player *game.Player) {
-	game.OnDisconnected(lobby, player)
-}
-
-func SendDataToConnectedPlayers(sender *game.Player, lobby *game.Lobby, data interface{}) {
+func SendDataToEveryoneExceptSender(sender *game.Player, lobby *game.Lobby, data interface{}) {
 	for _, otherPlayer := range lobby.GetPlayers() {
 		if otherPlayer != sender {
 			WriteAsJSON(otherPlayer, data)
@@ -122,24 +117,14 @@ func SendDataToConnectedPlayers(sender *game.Player, lobby *game.Lobby, data int
 	}
 }
 
-func TriggerSimpleUpdateEvent(eventType string, lobby *game.Lobby) {
-	event := &game.GameEvent{Type: eventType}
-	for _, otherPlayer := range lobby.GetPlayers() {
-		//FIXME Why did i use a goroutine here but not anywhere else?
-		go func(player *game.Player) {
-			WriteAsJSON(player, event)
-		}(otherPlayer)
-	}
-}
-
-func TriggerComplexUpdateEvent(eventType string, data interface{}, lobby *game.Lobby) {
+func TriggerUpdateEvent(eventType string, data interface{}, lobby *game.Lobby) {
 	event := &game.GameEvent{Type: eventType, Data: data}
 	for _, otherPlayer := range lobby.GetPlayers() {
 		WriteAsJSON(otherPlayer, event)
 	}
 }
 
-func TriggerComplexUpdatePerPlayerEvent(eventType string, data func(*game.Player) interface{}, lobby *game.Lobby) {
+func TriggerUpdatePerPlayerEvent(eventType string, data func(*game.Player) interface{}, lobby *game.Lobby) {
 	for _, otherPlayer := range lobby.GetPlayers() {
 		WriteAsJSON(otherPlayer, &game.GameEvent{Type: eventType, Data: data(otherPlayer)})
 	}

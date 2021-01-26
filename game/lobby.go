@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	commands "github.com/Bios-Marcel/cmdp"
 	"github.com/Bios-Marcel/discordemojimap"
@@ -40,6 +41,13 @@ var (
 	}
 )
 
+const (
+	DrawingBoardBaseWidth  = 1600
+	DrawingBoardBaseHeight = 900
+	MinBrushSize           = 8
+	MaxBrushSize           = 32
+)
+
 // SettingBounds defines the lower and upper bounds for the user-specified
 // lobby creation input.
 type SettingBounds struct {
@@ -61,7 +69,7 @@ type LineEvent struct {
 	Data *Line  `json:"data"`
 }
 
-// LineEvent is basically the same as GameEvent, but with a specific Data type.
+// FillEvent is basically the same as GameEvent, but with a specific Data type.
 // We use this for reparsing as soon as we know that the type is right. It's
 // a bit unperformant, but will do for now.
 type FillEvent struct {
@@ -98,15 +106,18 @@ func HandleEvent(raw []byte, received *GameEvent, lobby *Lobby, player *Player) 
 
 			//In case the line is too big, we overwrite the data of the event.
 			//This will prevent clients from lagging due to too thick lines.
-			if line.Data.LineWidth > 40.0 {
-				line.Data.LineWidth = 40.0
+			if line.Data.LineWidth > float32(MaxBrushSize) {
+				line.Data.LineWidth = MaxBrushSize
+				received.Data = line
+			} else if line.Data.LineWidth < float32(MinBrushSize) {
+				line.Data.LineWidth = MinBrushSize
 				received.Data = line
 			}
 
 			lobby.AppendLine(line)
 
 			//We directly forward the event, as it seems to be valid.
-			SendDataToConnectedPlayers(player, lobby, received)
+			SendDataToEveryoneExceptSender(player, lobby, received)
 		}
 	} else if received.Type == "fill" {
 		if lobby.canDraw(player) {
@@ -118,12 +129,12 @@ func HandleEvent(raw []byte, received *GameEvent, lobby *Lobby, player *Player) 
 			lobby.AppendFill(fill)
 
 			//We directly forward the event, as it seems to be valid.
-			SendDataToConnectedPlayers(player, lobby, received)
+			SendDataToEveryoneExceptSender(player, lobby, received)
 		}
 	} else if received.Type == "clear-drawing-board" {
 		if lobby.canDraw(player) && len(lobby.currentDrawing) > 0 {
 			lobby.ClearDrawing()
-			SendDataToConnectedPlayers(player, lobby, received)
+			SendDataToEveryoneExceptSender(player, lobby, received)
 		}
 	} else if received.Type == "choose-word" {
 		chosenIndex, isInt := (received.Data).(int)
@@ -139,6 +150,21 @@ func HandleEvent(raw []byte, received *GameEvent, lobby *Lobby, player *Player) 
 		drawer := lobby.drawer
 		if player == drawer && len(lobby.wordChoice) > 0 && chosenIndex >= 0 && chosenIndex <= 2 {
 			lobby.CurrentWord = lobby.wordChoice[chosenIndex]
+
+			//Depending on how long the word is, a fixed amount of hints
+			//would be too easy or too hard.
+			runeCount := utf8.RuneCountInString(lobby.CurrentWord)
+			if runeCount <= 2 {
+				lobby.hintCount = 0
+			} else if runeCount <= 4 {
+				lobby.hintCount = 1
+			} else if runeCount <= 9 {
+				lobby.hintCount = 2
+			} else {
+				lobby.hintCount = 3
+			}
+			lobby.hintsLeft = lobby.hintCount
+
 			lobby.wordChoice = nil
 			lobby.wordHints = createWordHintFor(lobby.CurrentWord, false)
 			lobby.wordHintsShown = createWordHintFor(lobby.CurrentWord, true)
@@ -212,7 +238,7 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 			lobby.scoreEarnedByGuessers += sender.LastScore
 			sender.State = Standby
 
-			TriggerComplexUpdateEvent("correct-guess", sender.ID, lobby)
+			TriggerUpdateEvent("correct-guess", sender.ID, lobby)
 
 			if !lobby.isAnyoneStillGuessing() {
 				advanceLobby(lobby)
@@ -222,13 +248,15 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 				recalculateRanks(lobby)
 				triggerPlayersUpdate(lobby)
 			}
-
-			return
 		} else if levenshtein.ComputeDistance(normInput, normSearched) == 1 {
 			WriteAsJSON(sender, GameEvent{Type: "close-guess", Data: trimmed})
+			//In cases of a close guess, we still send the message to everyone.
+			//This allows other players to guess the word by watching what the
+			//other players are misstyping.
+			sendMessageToAll(trimmed, sender, lobby)
+		} else {
+			sendMessageToAll(trimmed, sender, lobby)
 		}
-
-		sendMessageToAll(trimmed, sender, lobby)
 	}
 }
 
@@ -285,19 +313,24 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 		}
 	}
 
-	//If we haven't found the player, we can't kick him/her.
+	//If we haven't found the player, we can't kick them.
 	if toKick != -1 {
-		player.votedForKick[toKickID] = true
 		playerToKick := lobby.players[toKick]
+		if !playerToKick.Connected {
+			//TODO Send error event
+			WriteAsJSON(player, GameEvent{Type: "system-message", Data: fmt.Sprintf("You can't kick a disconnected player.")})
+			return
+		}
 
+		player.votedForKick[toKickID] = true
 		var voteKickCount int
 		for _, otherPlayer := range lobby.players {
-			if otherPlayer.votedForKick[toKickID] == true {
+			if otherPlayer.Connected && otherPlayer.votedForKick[toKickID] {
 				voteKickCount++
 			}
 		}
 
-		votesNeeded := calculateVotesNeededToKick(len(lobby.players))
+		votesNeeded := calculateVotesNeededToKick(playerToKick, lobby)
 
 		kickEvent := &GameEvent{
 			Type: "kick-vote",
@@ -316,14 +349,16 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 		if voteKickCount >= votesNeeded {
 			//Since the player is already kicked, we first clean up the kicking information related to that player
 			for _, otherPlayer := range lobby.players {
-				if otherPlayer.votedForKick[toKickID] == true {
-					delete(player.votedForKick, toKickID)
-					break
-				}
+				delete(otherPlayer.votedForKick, toKickID)
 			}
 
+			if playerToKick.ws != nil {
+				playerToKick.ws.Close()
+			}
+			lobby.players = append(lobby.players[:toKick], lobby.players[toKick+1:]...)
+
 			if lobby.drawer == playerToKick {
-				WritePublicSystemMessage(lobby, "Since the kicked player has been drawing, none of you will get any points this round.")
+				TriggerUpdateEvent("drawer-kicked", nil, lobby)
 				//Since the drawing person has been kicked, that probably means that he/she was trolling, therefore
 				//we redact everyones last earned score.
 				for _, otherPlayer := range lobby.players {
@@ -334,25 +369,22 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 				//We must absolutely not set lobby.drawer to nil, since this would cause the drawing order to be ruined.
 			}
 
-			if playerToKick.ws != nil {
-				playerToKick.ws.Close()
-			}
-			lobby.players = append(lobby.players[:toKick], lobby.players[toKick+1:]...)
-
-			recalculateRanks(lobby)
-
 			//If the owner is kicked, we choose the next best person as the owner.
 			if lobby.owner == playerToKick {
 				for _, otherPlayer := range lobby.players {
 					potentialOwner := otherPlayer
 					if potentialOwner.Connected {
 						lobby.owner = potentialOwner
-						WritePublicSystemMessage(lobby, fmt.Sprintf("%s is the new lobby owner.", potentialOwner.Name))
+						TriggerUpdateEvent("owner-change", &OwnerChangeEvent{
+							PlayerID:   potentialOwner.ID,
+							PlayerName: potentialOwner.Name,
+						}, lobby)
 						break
 					}
 				}
 			}
 
+			recalculateRanks(lobby)
 			triggerPlayersUpdate(lobby)
 
 			if lobby.drawer == playerToKick || !lobby.isAnyoneStillGuessing() {
@@ -362,7 +394,30 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 	}
 }
 
-func calculateVotesNeededToKick(amountOfPlayers int) int {
+type OwnerChangeEvent struct {
+	PlayerID   string `json:"playerId"`
+	PlayerName string `json:"playerName"`
+}
+
+func calculateVotesNeededToKick(player *Player, lobby *Lobby) int {
+	connectedPlayerCount := lobby.GetConnectedPlayerCount()
+
+	//If there are only two players, e.g. none of them should be able to
+	//kick the other.
+	if connectedPlayerCount <= 2 {
+		return 2
+	}
+
+	if player == lobby.creator {
+		//We don't want to allow people to kick the creator, as this could
+		//potentially annoy certain creators. For example a streamer playing
+		//a game with viewers could get trolled this way. Just one
+		//hypothetical scenario, I am sure there are more ;)
+
+		//All players excluding the owner themselves.
+		return connectedPlayerCount - 1
+	}
+
 	//If the amount of players equals an even number, such as 6, we will always
 	//need half of that. If the amount is uneven, we'll get a floored result.
 	//therefore we always add one to the amount.
@@ -370,7 +425,7 @@ func calculateVotesNeededToKick(amountOfPlayers int) int {
 	//    (6+1)/2 = 3
 	//    (5+1)/2 = 3
 	//Therefore it'll never be possible for a minority to kick a player.
-	return (amountOfPlayers + 1) / 2
+	return (connectedPlayerCount + 1) / 2
 }
 
 func handleCommand(commandString string, caller *Player, lobby *Lobby) {
@@ -425,10 +480,10 @@ func commandSetMP(caller *Player, lobby *Lobby, args []string) {
 				}
 			}
 		} else {
-			WriteAsJSON(caller, GameEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value must be numeric.")})
+			WriteAsJSON(caller, GameEvent{Type: "system-message", Data: "MaxPlayers value must be numeric."})
 		}
 	} else {
-		WriteAsJSON(caller, GameEvent{Type: "system-message", Data: fmt.Sprintf("Only the lobby owner can change MaxPlayers setting.")})
+		WriteAsJSON(caller, GameEvent{Type: "system-message", Data: "Only the lobby owner can change MaxPlayers setting."})
 	}
 }
 
@@ -495,9 +550,6 @@ func advanceLobby(lobby *Lobby) {
 	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
 	go roundTimerTicker(lobby)
 
-	//Add Turncount
-	//Add last word
-
 	nextTurnEvent := &NextTurn{
 		Round:        lobby.Round,
 		Players:      lobby.players,
@@ -511,7 +563,7 @@ func advanceLobby(lobby *Lobby) {
 	if !firstTurn {
 		nextTurnEvent.PreviousWord = &previousWord
 	}
-	TriggerComplexUpdateEvent("next-turn", nextTurnEvent, lobby)
+	TriggerUpdateEvent("next-turn", nextTurnEvent, lobby)
 
 	WriteAsJSON(lobby.drawer, &GameEvent{Type: "your-turn", Data: lobby.wordChoice})
 }
@@ -522,7 +574,6 @@ func endGame(lobby *Lobby) {
 	lobby.state = gameOver
 
 	recalculateRanks(lobby)
-	triggerPlayersUpdate(lobby)
 
 	for _, player := range lobby.players {
 		WriteAsJSON(player, GameEvent{
@@ -552,9 +603,6 @@ func selectNextDrawer(lobby *Lobby) (*Player, bool) {
 }
 
 func roundTimerTicker(lobby *Lobby) {
-	hintsLeft := 2
-	revealHintAtMillisecondsLeft := lobby.DrawingTime * 1000 / 3
-
 	for {
 		ticker := lobby.timeLeftTicker
 		if ticker == nil {
@@ -568,10 +616,17 @@ func roundTimerTicker(lobby *Lobby) {
 				go advanceLobby(lobby)
 			}
 
-			if hintsLeft > 0 && lobby.wordHints != nil {
+			if lobby.hintsLeft > 0 && lobby.wordHints != nil {
+				revealHintEveryXMilliseconds := int64(lobby.DrawingTime * 1000 / (lobby.hintCount + 1))
+				//If you have a drawingtime of 120 seconds and three hints, you
+				//want to reveal a hint every 40 seconds, so that the two hints
+				//are visible for at least a third of the time. //If the word
+				//was chosen at 60 seconds, we'll still reveal one hint
+				//instantly, as the time is already lower than 80.
+				revealHintAtXOrLower := revealHintEveryXMilliseconds * int64(lobby.hintsLeft)
 				timeLeft := lobby.RoundEndTime - currentTime
-				if timeLeft <= int64(revealHintAtMillisecondsLeft*hintsLeft) {
-					hintsLeft--
+				if timeLeft <= revealHintAtXOrLower {
+					lobby.hintsLeft--
 
 					for {
 						randomIndex := rand.Int() % len(lobby.wordHints)
@@ -648,15 +703,14 @@ func createWordHintFor(word string, showAll bool) []*WordHint {
 	return wordHints
 }
 
-var TriggerSimpleUpdateEvent func(eventType string, lobby *Lobby)
-var TriggerComplexUpdatePerPlayerEvent func(eventType string, data func(*Player) interface{}, lobby *Lobby)
-var TriggerComplexUpdateEvent func(eventType string, data interface{}, lobby *Lobby)
-var SendDataToConnectedPlayers func(sender *Player, lobby *Lobby, data interface{})
+var TriggerUpdatePerPlayerEvent func(eventType string, data func(*Player) interface{}, lobby *Lobby)
+var TriggerUpdateEvent func(eventType string, data interface{}, lobby *Lobby)
+var SendDataToEveryoneExceptSender func(sender *Player, lobby *Lobby, data interface{})
 var WriteAsJSON func(player *Player, object interface{}) error
 var WritePublicSystemMessage func(lobby *Lobby, text string)
 
 func triggerPlayersUpdate(lobby *Lobby) {
-	TriggerComplexUpdateEvent("update-players", lobby.players, lobby)
+	TriggerUpdateEvent("update-players", lobby.players, lobby)
 }
 
 func triggerWordHintUpdate(lobby *Lobby) {
@@ -664,7 +718,7 @@ func triggerWordHintUpdate(lobby *Lobby) {
 		return
 	}
 
-	TriggerComplexUpdatePerPlayerEvent("update-wordhint", func(player *Player) interface{} {
+	TriggerUpdatePerPlayerEvent("update-wordhint", func(player *Player) interface{} {
 		return lobby.GetAvailableWordHints(player)
 	}, lobby)
 }
@@ -695,6 +749,7 @@ func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTim
 
 	lobby.players = append(lobby.players, player)
 	lobby.owner = player
+	lobby.creator = player
 
 	words, err := readWordList(lobby.lowercaser, chosenLanguage)
 	if err != nil {
@@ -796,8 +851,9 @@ func OnDisconnected(lobby *Lobby, player *Player) {
 	log.Printf("Player %s(%s) disconnected.\n", player.Name, player.ID)
 	player.Connected = false
 	player.ws = nil
-
 	disconnectTime := time.Now()
+	player.disconnectTime = &disconnectTime
+
 	lobby.LastPlayerDisconnectTime = &disconnectTime
 
 	updateRocketChat(lobby, player)
@@ -818,13 +874,13 @@ func (lobby *Lobby) GetAvailableWordHints(player *Player) []*WordHint {
 	}
 }
 
+// JoinPlayer creates a new player object using the given name and adds it
+// to the lobbies playerlist. The new players is returned.
 func (lobby *Lobby) JoinPlayer(playerName string) *Player {
 	player := createPlayer(playerName)
 
 	//FIXME Make a dedicated method that uses a mutex?
 	lobby.players = append(lobby.players, player)
-	recalculateRanks(lobby)
-	triggerPlayersUpdate(lobby)
 
 	return player
 }

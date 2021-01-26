@@ -31,7 +31,7 @@ func publicLobbies(w http.ResponseWriter, r *http.Request) {
 	for _, lobby := range lobbies {
 		lobbyEntries = append(lobbyEntries, &LobbyEntry{
 			ID:              lobby.ID,
-			PlayerCount:     len(lobby.GetPlayers()),
+			PlayerCount:     lobby.GetOccupiedPlayerSlots(),
 			MaxPlayers:      lobby.MaxPlayers,
 			Round:           lobby.Round,
 			MaxRounds:       lobby.MaxRounds,
@@ -110,11 +110,7 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteStrictMode,
 	})
 
-	lobbyData := &LobbyData{
-		LobbyID:                lobby.ID,
-		DrawingBoardBaseWidth:  DrawingBoardBaseWidth,
-		DrawingBoardBaseHeight: DrawingBoardBaseHeight,
-	}
+	lobbyData := createLobbyData(lobby.ID)
 
 	encodingError := json.NewEncoder(w).Encode(lobbyData)
 	if encodingError != nil {
@@ -128,9 +124,9 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 func enterLobby(w http.ResponseWriter, r *http.Request) {
 	lobby, err := getLobby(r)
 	if err != nil {
-		if err == noLobbyIdSuppliedError {
+		if err == errNoLobbyIDSupplied {
 			http.Error(w, err.Error(), http.StatusBadRequest)
-		} else if err == lobbyNotExistentError {
+		} else if err == errLobbyNotExistent {
 			http.Error(w, err.Error(), http.StatusNotFound)
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -141,7 +137,7 @@ func enterLobby(w http.ResponseWriter, r *http.Request) {
 	player := getPlayer(lobby, r)
 
 	if player == nil {
-		if len(lobby.GetPlayers()) >= lobby.MaxPlayers {
+		if !lobby.HasFreePlayerSlot() {
 			http.Error(w, "lobby already full", http.StatusUnauthorized)
 			return
 		}
@@ -172,11 +168,7 @@ func enterLobby(w http.ResponseWriter, r *http.Request) {
 		player.SetLastKnownAddress(getIPAddressFromRequest(r))
 	}
 
-	lobbyData := &LobbyData{
-		LobbyID:                lobby.ID,
-		DrawingBoardBaseWidth:  DrawingBoardBaseWidth,
-		DrawingBoardBaseHeight: DrawingBoardBaseHeight,
-	}
+	lobbyData := createLobbyData(lobby.ID)
 
 	encodingError := json.NewEncoder(w).Encode(lobbyData)
 	if encodingError != nil {
