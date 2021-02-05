@@ -526,25 +526,9 @@ func advanceLobby(lobby *Lobby) {
 		if playerCount > 0 {
 			averageScore = lobby.scoreEarnedByGuessers / playerCount
 		}
-		if averageScore > 0 {
-			//To award the drawer for making a drawing that was "good enough for
-			//everyone to get it", they get awarded with 10 bonus points.
-			hasEveryoneGuessedCorrectly := true
-			for _, player := range lobby.players {
-				//At least one player hasn't guessed correctly
-				//We won't take disconnected players into account for now.
-				//Maybe we can be more accurate here.
-				if player != drawer && player.Connected && player.State == Guessing {
-					hasEveryoneGuessedCorrectly = false
-				}
-			}
 
-			drawer.LastScore = averageScore
-			if hasEveryoneGuessedCorrectly {
-				drawer.LastScore += 10
-			}
-			drawer.Score += drawer.LastScore
-		}
+		drawer.LastScore = averageScore
+		drawer.Score += drawer.LastScore
 	}
 
 	//We need this for the next-turn event, in order to allow the client
