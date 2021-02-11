@@ -411,3 +411,8 @@ input[type="button"]:active,
     /* As this dialog is very important, it should always be on the top. */
     z-index: 100;
 }
+
+#drawer-name {
+    font-weight: bold;
+}
+

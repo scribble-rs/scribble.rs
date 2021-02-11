@@ -89,6 +89,15 @@
                     </div>
 
                     <div id="center-dialog-container">
+                        <div id="waiting-dialog" class="center-dialog">
+                            <span class="dialog-title">Waiting for selection</span>
+                            <div class="center-dialog-content">
+                                <span id="drawer-name"></span> is choosing a word.
+                            </div>
+                        </div>
+                    </div>                    
+
+                    <div id="center-dialog-container">
                         <div id="game-over-dialog" class="center-dialog">
                             <span id="game-over-dialog-title" class="dialog-title">Game over!</span>
                             <div id="game-over-scoreboard"></div>
@@ -337,6 +346,8 @@
 
     const centerDialog = document.getElementById("center-dialog");
     const unstartedDialog = document.getElementById("unstarted-dialog");
+    const waitingDialog = document.getElementById("waiting-dialog");
+    const drawerNameSpan = document.getElementById("drawer-name");
     const startDialog = document.getElementById("start-dialog");
     const gameOverDialog = document.getElementById("game-over-dialog");
     const gameOverDialogTitle = document.getElementById("game-over-dialog-title");
@@ -655,7 +666,7 @@
             subtree: false
         });
 
-    let ownID, ownerID, ownName;
+    let ownID, ownerID, ownName, drawerName;
     let maxRounds = 0;
     let roundEndTime = 0;
     let votekickEnabled
@@ -726,6 +737,7 @@
         } else if (parsed.type === "close-guess") {
             applyMessage("close-guess-message", "System", "'"+ parsed.data + "'' is very close.")
         } else if (parsed.type === "update-wordhint") {
+            waitingDialog.style.visibility = "hidden";
             applyWordHints(parsed.data);
         } else if (parsed.type === "message") {
             applyMessage("", parsed.data.author, parsed.data.content);
@@ -744,6 +756,7 @@
             //sure that all types of dialogs, that indicate the game isn't
             //ongoing, are not visible anymore.
             unstartedDialog.style.visibility = "hidden";
+            waitingDialog.style.visibility = "visible";
             startDialog.style.visibility = "hidden";
             restartButton.style.display = "none";
             gameOverDialog.style.visibility = "hidden";
@@ -757,6 +770,8 @@
             roundEndTime = parsed.data.roundEndTime;
             applyRounds(parsed.data.round, maxRounds);
             applyPlayers(parsed.data.players);
+
+			drawerNameSpan.innerHTML = drawerName;
 
             //We clear this, since there's no word chosen right now.
             wordContainer.innerHTML = "";
@@ -772,7 +787,8 @@
             allowDrawing = false;
         } else if (parsed.type === "your-turn") {
             playWav('/resources/your-turn.wav');
-
+			waitingDialog.style.visibility = "hidden";
+			
             promptWords(parsed.data[0], parsed.data[1], parsed.data[2]);
         } else if (parsed.type === "drawing") {
             applyDrawData(parsed.data);
@@ -895,6 +911,7 @@
                 '<span class="last-turn-score">(Last turn: ' + player.lastScore + ')</span>' +
                 '</div>';
             if (player.state === "drawing") {
+                drawerName = player.name;
                 newPlayerElement += '<span>✏️</span>';
             } else if (player.state === "standby") {
                 newPlayerElement += '<span>✔️</span>';
