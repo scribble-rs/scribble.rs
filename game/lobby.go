@@ -111,10 +111,10 @@ func HandleEvent(raw []byte, received *GameEvent, lobby *Lobby, player *Player) 
 			//This will prevent clients from lagging due to too thick lines.
 			if line.Data.LineWidth > float32(MaxBrushSize) {
 				line.Data.LineWidth = MaxBrushSize
-				received.Data = line
+				received.Data = line.Data
 			} else if line.Data.LineWidth < float32(MinBrushSize) {
 				line.Data.LineWidth = MinBrushSize
-				received.Data = line
+				received.Data = line.Data
 			}
 
 			lobby.AppendLine(line)
