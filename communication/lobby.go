@@ -54,7 +54,7 @@ func getPlayer(lobby *game.Lobby, r *http.Request) *game.Player {
 func getPlayername(r *http.Request) string {
 	parseError := r.ParseForm()
 	if parseError == nil {
-		username := r.Form.Get("username")
+		username := html.EscapeString(strings.TrimSpace(r.Form.Get("username")))
 		if username != "" {
 			return trimDownTo(username, game.MaxPlayerNameLength)
 		}
