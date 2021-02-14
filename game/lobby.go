@@ -464,8 +464,8 @@ func commandNick(caller *Player, lobby *Lobby, name string) {
 	newName := html.EscapeString(strings.TrimSpace(name))
 
 	//We don't want super-long names
-	if len(newName) > 30 {
-		newName = newName[:31]
+	if len(newName) > MaxPlayerNameLength {
+		newName = newName[:MaxPlayerNameLength+1]
 	}
 
 	if newName == "" {
