@@ -756,7 +756,6 @@
             //sure that all types of dialogs, that indicate the game isn't
             //ongoing, are not visible anymore.
             unstartedDialog.style.visibility = "hidden";
-            waitingDialog.style.visibility = "visible";
             startDialog.style.visibility = "hidden";
             restartButton.style.display = "none";
             gameOverDialog.style.visibility = "hidden";
@@ -771,7 +770,9 @@
             applyRounds(parsed.data.round, maxRounds);
             applyPlayers(parsed.data.players);
 
+            //Show additional dialog, that another user (drawer) is choosing a word
             drawerNameSpan.innerHTML = drawerName;
+            waitingDialog.style.visibility = "visible";
 
             //We clear this, since there's no word chosen right now.
             wordContainer.innerHTML = "";
