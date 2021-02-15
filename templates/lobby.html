@@ -85,6 +85,11 @@
                             <div class="center-dialog-content">
                                 Please wait for your lobby host to start the game.
                             </div>
+                            <br/>
+                            <div class="center-dialog-content">
+                                Your name is: <span id="own-name"></span>
+                                <button class="dialog-button" onclick="showNameChangeDialog()">Change name</button>
+                            </div>
                         </div>
                     </div>
 
@@ -337,6 +342,7 @@
 
     const centerDialog = document.getElementById("center-dialog");
     const unstartedDialog = document.getElementById("unstarted-dialog");
+    const ownNameSpan = document.getElementById("own-name");
     const startDialog = document.getElementById("start-dialog");
     const gameOverDialog = document.getElementById("game-over-dialog");
     const gameOverDialogTitle = document.getElementById("game-over-dialog-title");
@@ -873,6 +879,7 @@
             //We simply abuse the player events to get our latest name, since there's no separate event for this.
             if (player.id === ownID) {
                 ownName = player.name;
+                ownNameSpan.innerHTML = ownName;
             }
 
             let stateStyleClass;
