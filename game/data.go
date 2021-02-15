@@ -119,6 +119,10 @@ type Fill struct {
 	Color string  `json:"color"`
 }
 
+// MaxPlayerNameLength defines how long a string can be at max when used
+// as the playername.
+const MaxPlayerNameLength int = 30
+
 // Player represents a participant in a Lobby.
 type Player struct {
 	// userSession uniquely identifies the player.

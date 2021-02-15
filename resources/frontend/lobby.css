@@ -243,6 +243,7 @@ input[type="button"]:active,
     height: 50px;
     width: 50px;
     border: 0;
+    padding: 0;
     background-color: rgb(218, 218, 218);
 }
 

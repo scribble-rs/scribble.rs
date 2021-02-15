@@ -111,10 +111,10 @@ func HandleEvent(raw []byte, received *GameEvent, lobby *Lobby, player *Player) 
 			//This will prevent clients from lagging due to too thick lines.
 			if line.Data.LineWidth > float32(MaxBrushSize) {
 				line.Data.LineWidth = MaxBrushSize
-				received.Data = line
+				received.Data = line.Data
 			} else if line.Data.LineWidth < float32(MinBrushSize) {
 				line.Data.LineWidth = MinBrushSize
-				received.Data = line
+				received.Data = line.Data
 			}
 
 			lobby.AppendLine(line)
@@ -213,43 +213,30 @@ func HandleEvent(raw []byte, received *GameEvent, lobby *Lobby, player *Player) 
 	return nil
 }
 
-func handleMessage(input string, sender *Player, lobby *Lobby) {
-	trimmed := strings.TrimSpace(input)
-	if trimmed == "" {
+func handleMessage(message string, sender *Player, lobby *Lobby) {
+	trimmedMessage := strings.TrimSpace(message)
+	if trimmedMessage == "" {
 		return
 	}
 
 	if lobby.CurrentWord == "" {
-		sendMessageToAll(trimmed, sender, lobby)
+		sendMessageToAll(trimmedMessage, sender, lobby)
 		return
 	}
 
 	if sender.State == Drawing || sender.State == Standby {
-		sendMessageToAllNonGuessing(trimmed, sender, lobby)
+		sendMessageToAllNonGuessing(trimmedMessage, sender, lobby)
 	} else if sender.State == Guessing {
-		lowerCasedInput := lobby.lowercaser.String(trimmed)
+		lowerCasedInput := lobby.lowercaser.String(trimmedMessage)
 		currentWord := lobby.CurrentWord
 
-		normInput := removeAccents(lowerCasedInput)
-		normSearched := removeAccents(currentWord)
+		normInput := simplifyText(lowerCasedInput)
+		normSearched := simplifyText(currentWord)
 
 		if normSearched == normInput {
-			secondsLeft := lobby.RoundEndTime/1000 - time.Now().UTC().UnixNano()/1000000000
+			secondsLeft := int(lobby.RoundEndTime/1000 - time.Now().UTC().UnixNano()/1000000000)
 
-			//The base score is based on the general time taken.
-			//The forumla here represents an exponential decline based on the time taken.
-			//This way fast players get more points, however not a lot more.
-			//The bonus gained by guessing before hints are shown is therefore still somewhat relevant.
-			declineFactor := 1.0 / float64(lobby.DrawingTime)
-			baseScore := int(maxBaseScore * math.Pow(1.0-declineFactor, float64(secondsLeft)))
-
-			//Every hint not shown, e.g. not needed, will give the player bonus points.
-			var hintBonusScore int
-			if lobby.hintCount > 0 {
-				hintBonusScore = lobby.hintsLeft * (maxHintBonusScore / lobby.hintCount)
-			}
-
-			sender.LastScore = baseScore + hintBonusScore
+			sender.LastScore = calculateGuesserScore(lobby.hintsLeft, lobby.hintCount, secondsLeft, lobby.DrawingTime)
 			sender.Score += sender.LastScore
 
 			lobby.scoreEarnedByGuessers += sender.LastScore
@@ -266,15 +253,31 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 				triggerPlayersUpdate(lobby)
 			}
 		} else if levenshtein.ComputeDistance(normInput, normSearched) == 1 {
-			WriteAsJSON(sender, GameEvent{Type: "close-guess", Data: trimmed})
+			WriteAsJSON(sender, GameEvent{Type: "close-guess", Data: trimmedMessage})
 			//In cases of a close guess, we still send the message to everyone.
 			//This allows other players to guess the word by watching what the
 			//other players are misstyping.
-			sendMessageToAll(trimmed, sender, lobby)
+			sendMessageToAll(trimmedMessage, sender, lobby)
 		} else {
-			sendMessageToAll(trimmed, sender, lobby)
+			sendMessageToAll(trimmedMessage, sender, lobby)
 		}
 	}
+}
+
+func calculateGuesserScore(hintCount, hintsLeft, secondsLeft, drawingTime int) int {
+	//The base score is based on the general time taken.
+	//The forumla here represents an exponential decline based on the time taken.
+	//This way fast players get more points, however not a lot more.
+	//The bonus gained by guessing before hints are shown is therefore still somewhat relevant.
+	declineFactor := 1.0 / float64(drawingTime)
+	baseScore := int(maxBaseScore * math.Pow(1.0-declineFactor, float64(drawingTime-secondsLeft)))
+
+	//Every hint not shown, e.g. not needed, will give the player bonus points.
+	if hintCount < 1 {
+		return baseScore
+	}
+
+	return baseScore + hintsLeft*(maxHintBonusScore/hintCount)
 }
 
 func (lobby *Lobby) isAnyoneStillGuessing() bool {
@@ -288,25 +291,25 @@ func (lobby *Lobby) isAnyoneStillGuessing() bool {
 }
 
 func sendMessageToAll(message string, sender *Player, lobby *Lobby) {
-	escaped := html.EscapeString(discordemojimap.Replace(message))
+	messageEvent := GameEvent{Type: "message", Data: Message{
+		Author:   html.EscapeString(sender.Name),
+		AuthorID: sender.ID,
+		Content:  html.EscapeString(discordemojimap.Replace(message)),
+	}}
 	for _, target := range lobby.players {
-		WriteAsJSON(target, GameEvent{Type: "message", Data: Message{
-			Author:   html.EscapeString(sender.Name),
-			AuthorID: sender.ID,
-			Content:  escaped,
-		}})
+		WriteAsJSON(target, messageEvent)
 	}
 }
 
 func sendMessageToAllNonGuessing(message string, sender *Player, lobby *Lobby) {
-	escaped := html.EscapeString(discordemojimap.Replace(message))
+	messageEvent := GameEvent{Type: "non-guessing-player-message", Data: Message{
+		Author:   html.EscapeString(sender.Name),
+		AuthorID: sender.ID,
+		Content:  html.EscapeString(discordemojimap.Replace(message)),
+	}}
 	for _, target := range lobby.players {
 		if target.State != Guessing {
-			WriteAsJSON(target, GameEvent{Type: "non-guessing-player-message", Data: Message{
-				Author:   html.EscapeString(sender.Name),
-				AuthorID: sender.ID,
-				Content:  escaped,
-			}})
+			WriteAsJSON(target, messageEvent)
 		}
 	}
 }
@@ -461,8 +464,8 @@ func commandNick(caller *Player, lobby *Lobby, name string) {
 	newName := html.EscapeString(strings.TrimSpace(name))
 
 	//We don't want super-long names
-	if len(newName) > 30 {
-		newName = newName[:31]
+	if len(newName) > MaxPlayerNameLength {
+		newName = newName[:MaxPlayerNameLength+1]
 	}
 
 	if newName == "" {
@@ -887,6 +890,9 @@ func OnDisconnected(lobby *Lobby, player *Player) {
 	}
 }
 
+// GetAvailableWordHints returns a WordHint array depending on the players
+// game state, since people that are drawing or have already guessed correctly
+// can see all hints.
 func (lobby *Lobby) GetAvailableWordHints(player *Player) []*WordHint {
 	//The draw simple gets every character as a word-hint. We basically abuse
 	//the hints for displaying the word, instead of having yet another GUI
@@ -913,8 +919,11 @@ func (lobby *Lobby) canDraw(player *Player) bool {
 	return lobby.drawer == player && lobby.CurrentWord != ""
 }
 
-func removeAccents(s string) string {
-	return strings.
-		NewReplacer(" ", "", "-", "", "_", "").
+var connectionCharacterReplacer = strings.NewReplacer(" ", "", "-", "", "_", "")
+
+// simplifyText prepares the string for a more lax comparison of two words.
+// Spaces, dashes, underscores and accented characters are removed or replaced.
+func simplifyText(s string) string {
+	return connectionCharacterReplacer.
 		Replace(sanitize.Accents(s))
 }
