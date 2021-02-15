@@ -771,7 +771,7 @@
             applyRounds(parsed.data.round, maxRounds);
             applyPlayers(parsed.data.players);
 
-			drawerNameSpan.innerHTML = drawerName;
+            drawerNameSpan.innerHTML = drawerName;
 
             //We clear this, since there's no word chosen right now.
             wordContainer.innerHTML = "";
@@ -787,7 +787,7 @@
             allowDrawing = false;
         } else if (parsed.type === "your-turn") {
             playWav('/resources/your-turn.wav');
-			waitingDialog.style.visibility = "hidden";
+            waitingDialog.style.visibility = "hidden";
 			
             promptWords(parsed.data[0], parsed.data[1], parsed.data[2]);
         } else if (parsed.type === "drawing") {
