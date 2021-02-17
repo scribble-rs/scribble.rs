@@ -4,7 +4,6 @@ import (
 	"embed"
 	"io"
 	"math/rand"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -87,7 +86,7 @@ func readWordListInternal(
 // whole application.
 func readWordList(lowercaser cases.Caser, chosenLanguage string) ([]string, error) {
 	return readWordListInternal(lowercaser, chosenLanguage, func(key string) (string, error) {
-		wordFile, wordErr := wordFS.Open(filepath.Join("words/", key))
+		wordFile, wordErr := wordFS.Open("words/" + key)
 		if wordErr != nil {
 			return "", wordErr
 		}
