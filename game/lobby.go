@@ -468,13 +468,14 @@ func commandNick(caller *Player, lobby *Lobby, name string) {
 		newName = newName[:MaxPlayerNameLength+1]
 	}
 
+	oldName := caller.Name
 	if newName == "" {
 		caller.Name = GeneratePlayerName()
 	} else {
 		caller.Name = newName
 	}
 
-	fmt.Printf("%s is now %s\n", caller.Name, newName)
+	log.Printf("%s is now %s\n", oldName, newName)
 
 	triggerPlayersUpdate(lobby)
 }
