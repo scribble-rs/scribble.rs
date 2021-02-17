@@ -83,6 +83,9 @@ Alternatively there's a docker container:
 docker pull biosmarcel/scribble.rs
 ```
 
+The docker container is built from the master branch on every push, so it
+should always be up-to-date.
+
 ### Changing default port
 
 The default port is `8080`. To override it, run:
