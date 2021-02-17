@@ -1,11 +1,13 @@
 package game
 
 import (
+	"embed"
+	"io"
 	"math/rand"
+	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/gobuffalo/packr/v2"
 	"golang.org/x/text/cases"
 )
 
@@ -18,7 +20,9 @@ var (
 		"french":  "fr",
 		"dutch":   "nl",
 	}
-	wordBox = packr.New("words", "../resources/words")
+
+	//go:embed words/*
+	wordFS embed.FS
 )
 
 func getLanguageIdentifier(language string) string {
@@ -82,7 +86,19 @@ func readWordListInternal(
 // a panic before, however, this could enable a user to forcefully crash the
 // whole application.
 func readWordList(lowercaser cases.Caser, chosenLanguage string) ([]string, error) {
-	return readWordListInternal(lowercaser, chosenLanguage, wordBox.FindString)
+	return readWordListInternal(lowercaser, chosenLanguage, func(key string) (string, error) {
+		wordFile, wordErr := wordFS.Open(filepath.Join("words/", key))
+		if wordErr != nil {
+			return "", wordErr
+		}
+
+		wordBytes, readError := io.ReadAll(wordFile)
+		if readError != nil {
+			return "", readError
+		}
+
+		return string(wordBytes), nil
+	})
 }
 
 // GetRandomWords gets a custom amount of random words for the passed Lobby.

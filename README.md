@@ -60,7 +60,6 @@ make build
 
 For Windows:
 ```shell
-go run github.com/gobuffalo/packr/v2/packr2
 go build -o scribblers .
 ```
 
@@ -74,7 +73,7 @@ port though.
 It should run on any system that go supports as a compilation target.
 
 This application uses go modules, therefore you need to make sure that you
-have go version `1.13` or higher.
+have go version `1.16` or higher.
 
 ## Docker
 
