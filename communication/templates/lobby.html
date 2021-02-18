@@ -74,7 +74,17 @@
                         <div id="start-dialog" class="center-dialog">
                             <span class="dialog-title">Start the game</span>
                             <div class="center-dialog-content">
-                                <button class="dialog-button" onclick="startGame()">Start</button>
+                                <div style="display: flex; flex-direction: column;">
+                                    Change your username:
+                                    <div style="display: flex; flex-direction: row;">
+                                        <input class="namechange-field" type="text" id="namechange-field-start-dialog"></input>
+                                        <button class="dialog-button" onclick="changeName(document.getElementById('namechange-field-start-dialog').value)">Change</button>
+                                        <button class="dialog-button" onclick="changeName('')">Randomize</button>
+                                    </div>
+                                </div>
+                                <div class="button-center-wrapper">
+                                    <button class="dialog-button" onclick="startGame()">Start</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -83,7 +93,33 @@
                         <div id="unstarted-dialog" class="center-dialog">
                             <span class="dialog-title">Game hasn't started</span>
                             <div class="center-dialog-content">
-                                Please wait for your lobby host to start the game.
+                                <div style="display: flex; flex-direction: column;">
+                                    Please wait for your lobby host to start the game.<br/><br/>
+                                    Change your username:
+                                    <div style="display: flex; flex-direction: row;">
+                                        <input class="namechange-field" type="text" id="namechange-field-unstarted-dialog"></input>
+                                        <button class="dialog-button" onclick="changeName(document.getElementById('namechange-field-unstarted-dialog').value)">Change</button>
+                                        <button class="dialog-button" onclick="changeName('')">Randomize</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="center-dialog-container">
+                        <div id="namechange-dialog" class="center-dialog">
+                            <span class="dialog-title">Change your username</span>
+                            <div class="center-dialog-content">
+                                <div style="display: flex; flex-direction: column;">
+                                    <div style="display: flex; flex-direction: row;">
+                                        <input class="namechange-field" type="text" id="namechange-field"></input>
+                                        <button class="dialog-button" onclick="changeName(document.getElementById('namechange-field').value)">Change</button>
+                                        <button class="dialog-button" onclick="changeName('')">Randomize</button>
+                                    </div>
+                                    <div class="button-center-wrapper">
+                                        <button class="dialog-button" onclick="hideNameChangeDialog()">Close</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -337,6 +373,10 @@
 
     const centerDialog = document.getElementById("center-dialog");
     const unstartedDialog = document.getElementById("unstarted-dialog");
+    const namechangeDialog = document.getElementById("namechange-dialog");
+    const namechangeFieldUnstartedDialog = document.getElementById("namechange-field-unstarted-dialog");
+    const namechangeFieldStartDialog = document.getElementById("namechange-field-start-dialog");
+
     const startDialog = document.getElementById("start-dialog");
     const gameOverDialog = document.getElementById("game-over-dialog");
     const gameOverDialogTitle = document.getElementById("game-over-dialog-title");
@@ -379,27 +419,24 @@
     }
 
     function showNameChangeDialog() {
-        let choice = prompt("Please choose your new name. Clearing the name will assign you a new random name.", ownName);
-        //Hitting cancel results in null.
-        //Since we pre fill the dialog with the current name, empty means that
-        //it has been cleared on purpose.
-        if (choice == null) {
-            return;
-        }
+        namechangeDialog.style.visibility = "visible";
+    }
 
-        // Username should be cleared.
-        if (choice === "") {
-            document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        } else {
-            //We already persist our new username here. If the backend doesn't like it, it will reset it either way.
-            //Therefore it shouldn't matter.
-            document.cookie = "username=" + choice + ";expires=Tue, 19 Jan 2038 00:00:00 UTC;path=/;samesite=strict";
-        }
+    function hideNameChangeDialog() {
+        namechangeDialog.style.visibility = "hidden";
+    }
 
+    function changeName(name) {
         socket.send(JSON.stringify({
             type: "name-change",
-            data: choice,
+            data: name,
         }));
+    }
+
+    function setUsernameLocally(name) {
+        ownName = name;
+        namechangeFieldUnstartedDialog.value = name;
+        namechangeFieldStartDialog.value = name;
     }
 
     function toggleSound() {
@@ -518,7 +555,6 @@
     function setLineWidth(value) {
         localLineWidthUnscaled = value;
         localLineWidth = value * scaleDownFactor();
-        console.log(localLineWidth);
         updateCursor();
     }
 
@@ -805,7 +841,7 @@
 
     function handleReadyEvent(ready) {
         ownerID = ready.ownerId;
-        ownName = ready.playerName;
+        setUsernameLocally(ready.playerName);
         allowDrawing = ready.allowDrawing;
         ownID = ready.playerId;
         maxRounds = ready.maxRounds;
@@ -872,7 +908,7 @@
 
             //We simply abuse the player events to get our latest name, since there's no separate event for this.
             if (player.id === ownID) {
-                ownName = player.name;
+                setUsernameLocally(player.name);
             }
 
             let stateStyleClass;

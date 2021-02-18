@@ -1,10 +1,9 @@
 package communication
 
 import (
+	"embed"
 	"html/template"
 	"net/http"
-
-	"github.com/gobuffalo/packr/v2"
 )
 
 var (
@@ -13,45 +12,38 @@ var (
 	lobbyPage       *template.Template
 )
 
-func findStringFromBox(box *packr.Box, name string) string {
-	result, err := box.FindString(name)
-	//Since this isn't a runtime error that should happen, we instantly panic.
-	if err != nil {
-		panic(errorPage)
-	}
-
-	return result
-}
+//go:embed templates/*
+var templateFS embed.FS
 
 //In this init hook we initialize all templates that could at some point be
 //needed during the server runtime. If any of the templates can't be loaded, we
 //panic.
 func init() {
-	templates := packr.New("templates", "../templates")
 	var parseError error
-	errorPage, parseError = template.New("error.html").Parse(findStringFromBox(templates, "error.html"))
+
+	errorPage, parseError = template.ParseFS(templateFS, "templates/error.html")
 	if parseError != nil {
 		panic(parseError)
 	}
-	errorPage, parseError = errorPage.New("footer.html").Parse(findStringFromBox(templates, "footer.html"))
+	errorPage, parseError = errorPage.New("footer.html").ParseFS(templateFS, "templates/footer.html")
 	if parseError != nil {
 		panic(parseError)
 	}
 
-	lobbyCreatePage, parseError = template.New("lobby_create.html").Parse(findStringFromBox(templates, "lobby_create.html"))
+	lobbyCreatePage, parseError = template.ParseFS(templateFS, "templates/lobby_create.html")
 	if parseError != nil {
 		panic(parseError)
 	}
-	lobbyCreatePage, parseError = lobbyCreatePage.New("footer.html").Parse(findStringFromBox(templates, "footer.html"))
+	lobbyCreatePage, parseError = lobbyCreatePage.New("footer.html").ParseFS(templateFS, "templates/footer.html")
 	if parseError != nil {
 		panic(parseError)
 	}
 
-	lobbyPage, parseError = template.New("lobby.html").Parse(findStringFromBox(templates, "lobby.html"))
+	lobbyPage, parseError = template.ParseFS(templateFS, "templates/lobby.html")
 	if parseError != nil {
 		panic(parseError)
 	}
-	lobbyPage, parseError = lobbyPage.New("footer.html").Parse(findStringFromBox(templates, "footer.html"))
+	lobbyPage, parseError = lobbyPage.New("footer.html").ParseFS(templateFS, "templates/footer.html")
 	if parseError != nil {
 		panic(parseError)
 	}
@@ -59,10 +51,12 @@ func init() {
 	setupRoutes()
 }
 
+//go:embed resources/*
+var frontendRessources embed.FS
+
 func setupRoutes() {
-	frontendRessourcesBox := packr.New("frontend", "../resources/frontend")
 	//Endpoints for official webclient
-	http.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(frontendRessourcesBox)))
+	http.Handle("/resources/", http.FileServer(http.FS(frontendRessources)))
 	http.HandleFunc("/", homePage)
 	http.HandleFunc("/ssrEnterLobby", ssrEnterLobby)
 	http.HandleFunc("/ssrCreateLobby", ssrCreateLobby)

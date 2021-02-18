@@ -171,6 +171,13 @@
     padding: 0.5rem 1rem 0.5rem 1rem;
 }
 
+.button-center-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1em;
+}
+
 .dialog-button + .dialog-button {
     margin-left: 0.25rem;
 }
@@ -411,4 +418,8 @@ input[type="button"]:active,
 #reconnect-dialog {
     /* As this dialog is very important, it should always be on the top. */
     z-index: 100;
+}
+
+.namechange-field {
+    margin-right: 0.25rem;
 }
