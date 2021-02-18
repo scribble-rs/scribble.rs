@@ -205,7 +205,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 		player.SetLastKnownAddress(getIPAddressFromRequest(r))
 	}
 
-	templateError := lobbyPage.ExecuteTemplate(w, "lobby.html", pageData)
+	templateError := pageTemplates.ExecuteTemplate(w, "lobby-page", pageData)
 	if templateError != nil {
 		panic(templateError)
 	}
