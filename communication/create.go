@@ -145,7 +145,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteStrictMode,
 	})
 
-	//We only add the lobby if we could do all neccessary pre-steps successfully.
+	//We only add the lobby if we could do all necessary pre-steps successfully.
 	state.AddLobby(lobby)
 
 	http.Redirect(w, r, "/ssrEnterLobby?lobby_id="+lobby.ID, http.StatusFound)

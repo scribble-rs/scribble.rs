@@ -266,7 +266,7 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 
 func calculateGuesserScore(hintCount, hintsLeft, secondsLeft, drawingTime int) int {
 	//The base score is based on the general time taken.
-	//The forumla here represents an exponential decline based on the time taken.
+	//The formula here represents an exponential decline based on the time taken.
 	//This way fast players get more points, however not a lot more.
 	//The bonus gained by guessing before hints are shown is therefore still somewhat relevant.
 	declineFactor := 1.0 / float64(drawingTime)
