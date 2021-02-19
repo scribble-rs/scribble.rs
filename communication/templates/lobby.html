@@ -769,6 +769,14 @@
             }
         } else if (parsed.type === "update-players") {
             applyPlayers(parsed.data);
+        } else if (parsed.type === "name-change") {
+            const playernameSpan = document.getElementById("playername-" + parsed.data.playerId);
+            if (playernameSpan !== null) {
+                playernameSpan.innerText = parsed.data.playerName;
+            }
+            if (parsed.data.playerId === ownID) {
+                setUsernameLocally(parsed.data.playerName)
+            }
         } else if (parsed.type === "correct-guess") {
             playWav('/resources/plop.wav');
 
@@ -930,11 +938,6 @@
                 return;
             }
 
-            //We simply abuse the player events to get our latest name, since there's no separate event for this.
-            if (player.id === ownID) {
-                setUsernameLocally(player.name);
-            }
-
             let stateStyleClass;
             if (player.state === "standby") {
                 stateStyleClass = 'player-done';
@@ -943,7 +946,7 @@
             }
             let newPlayerElement = '<div class="player ' + stateStyleClass + '">' +
                 '<span class="rank">' + player.rank + '</span>' +
-                '<span class="playername';
+                '<span id="playername-' + player.id + '" class="playername';
             if (player.id === ownID) {
                 newPlayerElement += ' playername-self';
             }

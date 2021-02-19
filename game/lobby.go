@@ -203,7 +203,7 @@ func HandleEvent(raw []byte, received *GameEvent, lobby *Lobby, player *Player) 
 		if !isString {
 			return fmt.Errorf("invalid data in name-change event: %v", received.Data)
 		}
-		commandNick(player, lobby, newName)
+		handleNameChangeEvent(player, lobby, newName)
 	} else if received.Type == "request-drawing" {
 		WriteAsJSON(player, GameEvent{Type: "drawing", Data: lobby.currentDrawing})
 	} else if received.Type == "keep-alive" {
@@ -420,6 +420,11 @@ type OwnerChangeEvent struct {
 	PlayerName string `json:"playerName"`
 }
 
+type NameChangeEvent struct {
+	PlayerID   string `json:"playerId"`
+	PlayerName string `json:"playerName"`
+}
+
 func calculateVotesNeededToKick(player *Player, lobby *Lobby) int {
 	connectedPlayerCount := lobby.GetConnectedPlayerCount()
 
@@ -461,7 +466,7 @@ func handleCommand(commandString string, caller *Player, lobby *Lobby) {
 	}
 }
 
-func commandNick(caller *Player, lobby *Lobby, name string) {
+func handleNameChangeEvent(caller *Player, lobby *Lobby, name string) {
 	newName := html.EscapeString(strings.TrimSpace(name))
 
 	//We don't want super-long names
@@ -478,7 +483,10 @@ func commandNick(caller *Player, lobby *Lobby, name string) {
 
 	log.Printf("%s is now %s\n", oldName, newName)
 
-	triggerPlayersUpdate(lobby)
+	TriggerUpdateEvent("name-change", &NameChangeEvent{
+		PlayerID:   caller.ID,
+		PlayerName: newName,
+	}, lobby)
 }
 
 func commandSetMP(caller *Player, lobby *Lobby, args []string) {
