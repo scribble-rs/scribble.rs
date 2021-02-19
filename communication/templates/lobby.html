@@ -377,6 +377,7 @@
     const namechangeDialog = document.getElementById("namechange-dialog");
     const namechangeFieldUnstartedDialog = document.getElementById("namechange-field-unstarted-dialog");
     const namechangeFieldStartDialog = document.getElementById("namechange-field-start-dialog");
+    const namechangeField = document.getElementById("namechange-field");
 
     const startDialog = document.getElementById("start-dialog");
     const gameOverDialog = document.getElementById("game-over-dialog");
@@ -438,6 +439,7 @@
         ownName = name;
         namechangeFieldUnstartedDialog.value = name;
         namechangeFieldStartDialog.value = name;
+        namechangeField.value = name;
     }
 
     function toggleSound() {
