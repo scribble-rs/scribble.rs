@@ -53,10 +53,10 @@ type Lobby struct {
 	wordHints []*WordHint
 	// wordHintsShown are the same as wordHints with characters visible.
 	wordHintsShown []*WordHint
-	// hintsLeft is the amount of hints still available for relevation.
+	// hintsLeft is the amount of hints still available for revelation.
 	hintsLeft int
 	// hintCount is the amount of hints that were initially available
-	//for relevation.
+	//for revelation.
 	hintCount int
 	// Round is the round that the Lobby is currently in. This is a number
 	// between 0 and MaxRounds. 0 indicates that it hasn't started yet.

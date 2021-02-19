@@ -110,6 +110,47 @@ func Test_simplifyText(t *testing.T) {
 	}
 }
 
+func Test_recalculateRanks(t *testing.T) {
+	lobby := &Lobby{}
+	lobby.players = append(lobby.players, &Player{
+		ID:        "a",
+		Score:     1,
+		Connected: true,
+	})
+	lobby.players = append(lobby.players, &Player{
+		ID:        "b",
+		Score:     1,
+		Connected: true,
+	})
+	recalculateRanks(lobby)
+
+	rankPlayerA := lobby.players[0].Rank
+	rankPlayerB := lobby.players[1].Rank
+	if rankPlayerA != 1 || rankPlayerB != 1 {
+		t.Errorf("With equal score, ranks should be equal. (A: %d; B: %d)",
+			rankPlayerA, rankPlayerB)
+	}
+
+	lobby.players = append(lobby.players, &Player{
+		ID:        "c",
+		Score:     0,
+		Connected: true,
+	})
+	recalculateRanks(lobby)
+
+	rankPlayerA = lobby.players[0].Rank
+	rankPlayerB = lobby.players[1].Rank
+	if rankPlayerA != 1 || rankPlayerB != 1 {
+		t.Errorf("With equal score, ranks should be equal. (A: %d; B: %d)",
+			rankPlayerA, rankPlayerB)
+	}
+
+	rankPlayerC := lobby.players[2].Rank
+	if rankPlayerC != 2 {
+		t.Errorf("new player should be rank 2, since the previous two players had the same rank. (C: %d)", rankPlayerC)
+	}
+}
+
 func Test_calculateGuesserScore(t *testing.T) {
 	lastScore := calculateGuesserScore(0, 0, 115, 120)
 	if lastScore >= maxBaseScore {

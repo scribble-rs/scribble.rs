@@ -171,6 +171,13 @@
     padding: 0.5rem 1rem 0.5rem 1rem;
 }
 
+.button-center-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1em;
+}
+
 .dialog-button + .dialog-button {
     margin-left: 0.25rem;
 }
@@ -387,12 +394,12 @@ input[type="button"]:active,
     margin-top: 0.5rem;
 }
 
-.gameover-scoreboard-entry:last-child {
-    margin-bottom: 1rem;
+.gameover-scoreboard-entry-self {
+    font-weight: bold;
 }
 
-.gameover-scoreboard-entry:first-child {
-    font-weight: bold;
+.gameover-scoreboard-entry:last-child {
+    margin-bottom: 1rem;
 }
 
 .gameover-scoreboard-rank {
@@ -404,6 +411,10 @@ input[type="button"]:active,
     text-align: center;
 }
 
+.gameover-scoreboard-score {
+    margin-left: 1rem;
+}
+
 #restart-button {
     display: none;
 }
@@ -413,7 +424,10 @@ input[type="button"]:active,
     z-index: 100;
 }
 
+.namechange-field {
+    margin-right: 0.25rem;
+}
+
 #drawer-name {
     font-weight: bold;
 }
-
