@@ -126,10 +126,10 @@
                     </div>
 
                     <div id="center-dialog-container">
-                        <div id="waiting-dialog" class="center-dialog">
+                        <div id="waitchoose-dialog" class="center-dialog">
                             <span class="dialog-title">Waiting for selection</span>
                             <div class="center-dialog-content">
-                                <span id="drawer-name"></span> is choosing a word.
+                                <span id="waitchoose-drawer"></span> is choosing a word.
                             </div>
                         </div>
                     </div>                    
@@ -383,8 +383,8 @@
 
     const centerDialog = document.getElementById("center-dialog");
     const unstartedDialog = document.getElementById("unstarted-dialog");
-    const waitingDialog = document.getElementById("waiting-dialog");
-    const drawerNameSpan = document.getElementById("drawer-name");
+    const waitChooseDialog = document.getElementById("waitchoose-dialog");
+    const waitChooseDrawerSpan = document.getElementById("waitchoose-drawer");
     const namechangeDialog = document.getElementById("namechange-dialog");
     const namechangeFieldUnstartedDialog = document.getElementById("namechange-field-unstarted-dialog");
     const namechangeFieldStartDialog = document.getElementById("namechange-field-start-dialog");
@@ -775,6 +775,24 @@
                         }
                     }
                 }
+            } else if (ready.gameState === "ongoing") {
+                // The wordHints are empty if the round is not started
+                if (ready.wordHints === null) {
+                    for (let i = 0; i < ready.players.length; i++) {
+                        let player = ready.players[i];
+                        if (!player.connected) {
+                            continue;
+                        }
+                        
+                        // check if the actual player is not drawing
+                        if ((player.id === ownID) && (player.state != "drawing")) {
+                            //Show additional dialog, that another user (drawer) is choosing a word
+                            waitChooseDrawerSpan.innerHTML = drawerName;
+                            waitChooseDialog.style.visibility = "visible";
+                            break;
+                        }
+                    }
+                }
             }
         } else if (parsed.type === "update-players") {
             applyPlayers(parsed.data);
@@ -795,7 +813,7 @@
         } else if (parsed.type === "close-guess") {
             applyMessage("close-guess-message", "System", "'"+ parsed.data + "'' is very close.")
         } else if (parsed.type === "update-wordhint") {
-            waitingDialog.style.visibility = "hidden";
+            waitChooseDialog.style.visibility = "hidden";
             applyWordHints(parsed.data);
         } else if (parsed.type === "message") {
             applyMessage("", parsed.data.author, parsed.data.content);
@@ -829,8 +847,8 @@
             applyPlayers(parsed.data.players);
 
             //Show additional dialog, that another user (drawer) is choosing a word
-            drawerNameSpan.innerHTML = drawerName;
-            waitingDialog.style.visibility = "visible";
+            waitChooseDrawerSpan.innerHTML = drawerName;
+            waitChooseDialog.style.visibility = "visible";
 
             //We clear this, since there's no word chosen right now.
             wordContainer.innerHTML = "";
@@ -846,7 +864,7 @@
             allowDrawing = false;
         } else if (parsed.type === "your-turn") {
             playWav('/resources/your-turn.wav');
-            waitingDialog.style.visibility = "hidden";
+            waitChooseDialog.style.visibility = "hidden";
 			
             promptWords(parsed.data[0], parsed.data[1], parsed.data[2]);
         } else if (parsed.type === "drawing") {
