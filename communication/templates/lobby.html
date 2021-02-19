@@ -734,8 +734,9 @@
 
                     const isSelf = player.id === ownID;
 
-                    //Even if we don't want to show a player-entry, we still need to iterate over all players to handle the dialog titles.
-                    if (i < maxScoreboardSize) {
+                    //Even if we don't want to show a player-entry, we still need to iterate
+                    //over all players to handle the dialog titles.
+                    if (player.rank <= maxScoreboardSize) {
                         let newEntry = '<div class="gameover-scoreboard-entry';
                         if (isSelf) {
                             newEntry += ' gameover-scoreboard-entry-self';
