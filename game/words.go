@@ -13,7 +13,8 @@ import (
 var (
 	wordListCache       = make(map[string][]string)
 	languageIdentifiers = map[string]string{
-		"english": "en",
+		"english (GB)": "en_gb",
+		"english (US)": "en_us",
 		"italian": "it",
 		"german":  "de",
 		"french":  "fr",
