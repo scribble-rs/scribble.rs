@@ -236,7 +236,7 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 		if normSearched == normInput {
 			secondsLeft := int(lobby.RoundEndTime/1000 - time.Now().UTC().UnixNano()/1000000000)
 
-			sender.LastScore = calculateGuesserScore(lobby.hintsLeft, lobby.hintCount, secondsLeft, lobby.DrawingTime)
+			sender.LastScore = calculateGuesserScore(lobby.hintCount, lobby.hintsLeft, secondsLeft, lobby.DrawingTime)
 			sender.Score += sender.LastScore
 
 			lobby.scoreEarnedByGuessers += sender.LastScore
