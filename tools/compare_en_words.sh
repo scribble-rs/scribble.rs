@@ -7,9 +7,6 @@ US_DICT="../game/words/en_us"
 
 SYSTEM_GB_DICT='/usr/share/dict/british-english-large'
 OUTPUT_GB_DICT="../game/words/en_gb"
-
-PROPER_NOUN_LIST="../game/words/proper_nouns"
-
 FIXLIST="./fixlist"
 
 rm -f ${FIXLIST} ${OUTPUT_GB_DICT}
