@@ -12,7 +12,7 @@ PROPER_NOUN_LIST="../game/words/proper_nouns"
 
 FIXLIST="./fixlist"
 
-rm ${FIXLIST} ${OUTPUT_GB_DICT} || true
+rm -f ${FIXLIST} ${OUTPUT_GB_DICT}
 
 while IFS= read -r line
 do 
