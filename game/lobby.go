@@ -7,6 +7,7 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -236,7 +237,7 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 		if normSearched == normInput {
 			secondsLeft := int(lobby.RoundEndTime/1000 - time.Now().UTC().UnixNano()/1000000000)
 
-			sender.LastScore = calculateGuesserScore(lobby.hintsLeft, lobby.hintCount, secondsLeft, lobby.DrawingTime)
+			sender.LastScore = calculateGuesserScore(lobby.hintCount, lobby.hintsLeft, secondsLeft, lobby.DrawingTime)
 			sender.Score += sender.LastScore
 
 			lobby.scoreEarnedByGuessers += sender.LastScore
@@ -266,7 +267,7 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 
 func calculateGuesserScore(hintCount, hintsLeft, secondsLeft, drawingTime int) int {
 	//The base score is based on the general time taken.
-	//The forumla here represents an exponential decline based on the time taken.
+	//The formula here represents an exponential decline based on the time taken.
 	//This way fast players get more points, however not a lot more.
 	//The bonus gained by guessing before hints are shown is therefore still somewhat relevant.
 	declineFactor := 1.0 / float64(drawingTime)
@@ -687,21 +688,32 @@ type NextTurn struct {
 // recalculateRanks will assign each player his respective rank in the lobby
 // according to everyones current score. This will not trigger any events.
 func recalculateRanks(lobby *Lobby) {
-	for _, a := range lobby.players {
-		if !a.Connected {
+	sortedPlayers := make([]*Player, len(lobby.players))
+	copy(sortedPlayers, lobby.players)
+	sort.Slice(sortedPlayers, func(a, b int) bool {
+		return sortedPlayers[a].Score > sortedPlayers[b].Score
+	})
+
+	//We start at maxint32, since we want the first player to cause an
+	//increment of the the score, which will always happen this way, as
+	//no player can have a score this high.
+	lastScore := math.MaxInt32
+	var lastRank int
+	for _, player := range sortedPlayers {
+		if !player.Connected {
 			continue
 		}
-		playersThatAreHigher := 0
-		for _, b := range lobby.players {
-			if !b.Connected {
-				continue
-			}
-			if b.Score > a.Score {
-				playersThatAreHigher++
-			}
+
+		if player.Score < lastScore {
+			lastRank++
+			player.Rank = lastRank
+		} else {
+			//Since the players are already sorted from high to low, we only
+			//have the cases equal or higher.
+			player.Rank = lastRank
 		}
 
-		a.Rank = playersThatAreHigher + 1
+		lastScore = player.Score
 	}
 }
 
@@ -857,6 +869,7 @@ func generateReadyData(lobby *Lobby, player *Player) *Ready {
 
 func OnConnected(lobby *Lobby, player *Player) {
 	player.Connected = true
+	recalculateRanks(lobby)
 	WriteAsJSON(player, GameEvent{Type: "ready", Data: generateReadyData(lobby, player)})
 
 	//This state is reached when the player refreshes before having chosen a word.
@@ -886,6 +899,7 @@ func OnDisconnected(lobby *Lobby, player *Player) {
 
 	updateRocketChat(lobby, player)
 
+	recalculateRanks(lobby)
 	if lobby.HasConnectedPlayers() {
 		triggerPlayersUpdate(lobby)
 	}

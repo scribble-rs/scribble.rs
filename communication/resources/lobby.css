@@ -394,12 +394,12 @@ input[type="button"]:active,
     margin-top: 0.5rem;
 }
 
-.gameover-scoreboard-entry:last-child {
-    margin-bottom: 1rem;
+.gameover-scoreboard-entry-self {
+    font-weight: bold;
 }
 
-.gameover-scoreboard-entry:first-child {
-    font-weight: bold;
+.gameover-scoreboard-entry:last-child {
+    margin-bottom: 1rem;
 }
 
 .gameover-scoreboard-rank {
@@ -409,6 +409,10 @@ input[type="button"]:active,
 .gameover-scoreboard-name {
     flex:1;
     text-align: center;
+}
+
+.gameover-scoreboard-score {
+    margin-left: 1rem;
 }
 
 #restart-button {

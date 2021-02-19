@@ -18,7 +18,7 @@ import (
 // homePage servers the default page for scribble.rs, which is the page to
 // create a new lobby.
 func homePage(w http.ResponseWriter, r *http.Request) {
-	err := lobbyCreatePage.ExecuteTemplate(w, "lobby_create.html", createDefaultLobbyCreatePageData())
+	err := pageTemplates.ExecuteTemplate(w, "lobby-create-page", createDefaultLobbyCreatePageData())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -115,7 +115,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(pageData.Errors) != 0 {
-		err := lobbyCreatePage.ExecuteTemplate(w, "lobby_create.html", pageData)
+		err := pageTemplates.ExecuteTemplate(w, "lobby-create-page", pageData)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
@@ -127,7 +127,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 	player, lobby, createError := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
 	if createError != nil {
 		pageData.Errors = append(pageData.Errors, createError.Error())
-		templateError := lobbyCreatePage.ExecuteTemplate(w, "lobby_create.html", pageData)
+		templateError := pageTemplates.ExecuteTemplate(w, "lobby-create-page", pageData)
 		if templateError != nil {
 			userFacingError(w, templateError.Error())
 		}
@@ -145,7 +145,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteStrictMode,
 	})
 
-	//We only add the lobby if we could do all neccessary pre-steps successfully.
+	//We only add the lobby if we could do all necessary pre-steps successfully.
 	state.AddLobby(lobby)
 
 	http.Redirect(w, r, "/ssrEnterLobby?lobby_id="+lobby.ID, http.StatusFound)

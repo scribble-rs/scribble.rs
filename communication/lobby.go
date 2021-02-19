@@ -100,7 +100,7 @@ func GetPlayers(w http.ResponseWriter, r *http.Request) {
 }
 
 var (
-	//CanvasColor is the initialy / empty canvas colors value used for
+	//CanvasColor is the initially / empty canvas colors value used for
 	//Lobbydata objects.
 	CanvasColor = [3]uint8{255, 255, 255}
 	//SuggestedBrushSizes is suggested brush sizes value used for
@@ -128,7 +128,7 @@ type LobbyData struct {
 	//It's an array containing [R,G,B]
 	CanvasColor [3]uint8 `json:"canvasColor"`
 	//SuggestedBrushSizes are suggestions for the different brush sizes
-	//that the user can choose between. These brushes are guaranted to
+	//that the user can choose between. These brushes are guaranteed to
 	//be ordered from low to high and stay with the bounds.
 	SuggestedBrushSizes [4]uint8 `json:"suggestedBrushSizes"`
 }
@@ -205,7 +205,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 		player.SetLastKnownAddress(getIPAddressFromRequest(r))
 	}
 
-	templateError := lobbyPage.ExecuteTemplate(w, "lobby.html", pageData)
+	templateError := pageTemplates.ExecuteTemplate(w, "lobby-page", pageData)
 	if templateError != nil {
 		panic(templateError)
 	}
