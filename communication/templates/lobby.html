@@ -651,11 +651,13 @@
     }
 
     function clearCanvasAndSendEvent() {
-        //Avoid unnecessary traffic back to us.
-        clear(context);
-        socket.send(JSON.stringify({
-            type: "clear-drawing-board"
-        }));
+        if (isDrawing) {
+            //Avoid unnecessary traffic back to us and handle the clear directly.
+            clear(context);
+            socket.send(JSON.stringify({
+                type: "clear-drawing-board"
+            }));
+        }
     }
 
     const sendMessage = () => {
