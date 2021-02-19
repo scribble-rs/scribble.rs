@@ -739,9 +739,9 @@
                         + '</div>';
                     if (player.id === ownID) {
                         if (player.rank == 1) {
-                            gameOverDialogTitle.innerHTML = "Picasso, is it you?";
+                            gameOverDialogTitle.innerText = "Congratiulations, you won!";
                         } else {
-                            gameOverDialogTitle.innerHTML = "Next time you'll win!";
+                            gameOverDialogTitle.innerText = "You placed " + player.rank + ".";
                         }
                     }
                 }
