@@ -723,7 +723,8 @@
                     return a.rank - b.rank;
                 });
 
-                for (let i = 0; i < players.length; i++) {
+                //Show at least 2 players, but up to 5.
+                for (let i = 0; i < players.length && i < 5; i++) {
                     let player = players[i];
                     if (!player.connected) {
                         continue;
