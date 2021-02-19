@@ -394,12 +394,12 @@ input[type="button"]:active,
     margin-top: 0.5rem;
 }
 
-.gameover-scoreboard-entry:last-child {
-    margin-bottom: 1rem;
+.gameover-scoreboard-entry-self {
+    font-weight: bold;
 }
 
-.gameover-scoreboard-entry:first-child {
-    font-weight: bold;
+.gameover-scoreboard-entry:last-child {
+    margin-bottom: 1rem;
 }
 
 .gameover-scoreboard-rank {

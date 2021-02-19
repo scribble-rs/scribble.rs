@@ -724,28 +724,42 @@
                 });
 
                 //Show at least 2 players, but up to 5.
-                for (let i = 0; i < players.length && i < 5; i++) {
+                const maxScoreboardSize = 5;
+
+                for (let i = 0; i < players.length; i++) {
                     let player = players[i];
                     if (!player.connected) {
                         continue;
                     }
 
-                    gameOverScoreboard.innerHTML += '<div class="gameover-scoreboard-entry">'
-                            + '<div class="gameover-scoreboard-rank">'
-                                +player.rank
-                            + '</div>'
-                            + '<div class="gameover-scoreboard-name">'
-                                + player.name 
-                            + '</div>'
-                            + '<span class="gameover-scoreboard-score">'
-                                + player.score
-                            + '</span>'
-                        + '</div>';
-                    if (player.id === ownID) {
+                    const isSelf = player.id === ownID;
+
+                    //Even if we don't want to show a player-entry, we still need to iterate over all players to handle the dialog titles.
+                    if (i < maxScoreboardSize) {
+                        let newEntry = '<div class="gameover-scoreboard-entry';
+                        if (isSelf) {
+                            newEntry += ' gameover-scoreboard-entry-self';
+                        }
+                        newEntry += '">'
+                                + '<div class="gameover-scoreboard-rank">'
+                                    + player.rank
+                                + '</div>'
+                                + '<div class="gameover-scoreboard-name">'
+                                    + player.name
+                                + '</div>'
+                                + '<span class="gameover-scoreboard-score">'
+                                    + player.score
+                                + '</span>'
+                            + '</div>';
+
+                        gameOverScoreboard.innerHTML += newEntry;
+                    }
+
+                    if (isSelf) {
                         if (player.rank == 1) {
                             gameOverDialogTitle.innerText = "Congratiulations, you won!";
                         } else {
-                            gameOverDialogTitle.innerText = "You placed " + player.rank + ".";
+                            gameOverDialogTitle.innerText = "You placed " + player.rank + ". with " + player.score + " points";
                         }
                     }
                 }
