@@ -411,6 +411,10 @@ input[type="button"]:active,
     text-align: center;
 }
 
+.gameover-scoreboard-score {
+    margin-left: 1rem;
+}
+
 #restart-button {
     display: none;
 }
