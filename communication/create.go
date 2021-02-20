@@ -73,8 +73,8 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 	customWords, customWordsInvalid := parseCustomWords(r.Form.Get("custom_words"))
 	customWordChance, customWordChanceInvalid := parseCustomWordsChance(r.Form.Get("custom_words_chance"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := parseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
-	enableVotekick := r.Form.Get("enable_votekick") == "true"
-	publicLobby := r.Form.Get("public") == "true"
+	enableVotekick, enableVotekickInvalid := parseBoolean("enable votekick", r.Form.Get("enable_votekick"))
+	publicLobby, publicLobbyInvalid := parseBoolean("public", r.Form.Get("public"))
 
 	//Prevent resetting the form, since that would be annoying as hell.
 	pageData := CreatePageData{
@@ -112,6 +112,12 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 	}
 	if clientsPerIPLimitInvalid != nil {
 		pageData.Errors = append(pageData.Errors, clientsPerIPLimitInvalid.Error())
+	}
+	if enableVotekickInvalid != nil {
+		pageData.Errors = append(pageData.Errors, enableVotekickInvalid.Error())
+	}
+	if publicLobbyInvalid != nil {
+		pageData.Errors = append(pageData.Errors, publicLobbyInvalid.Error())
 	}
 
 	if len(pageData.Errors) != 0 {
@@ -277,4 +283,20 @@ func parseCustomWordsChance(value string) (int, error) {
 	}
 
 	return int(result), nil
+}
+
+func parseBoolean(valueName string, value string) (bool, error) {
+	if strings.EqualFold(value, "true") {
+		return true, nil
+	}
+
+	if strings.EqualFold(value, "false") {
+		return false, nil
+	}
+
+	if value == "" {
+		return false, nil
+	}
+
+	return false, fmt.Errorf("the %s value must be a boolean value ('true' or 'false)", valueName)
 }

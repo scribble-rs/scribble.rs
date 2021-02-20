@@ -7,7 +7,7 @@ import (
 func createLobbyWithDemoPlayers(playercount int) *Lobby {
 	owner := &Player{}
 	lobby := &Lobby{
-		owner:   owner,
+		Owner:   owner,
 		creator: owner,
 	}
 	for i := 0; i < playercount; i++ {

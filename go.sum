@@ -1,5 +1,3 @@
-github.com/Bios-Marcel/cmdp v0.0.0-20190623190758-6760aca2c54e h1:0mIenEIycuRSzIFsawubRbCF2ikRNFSzZeN3VcCRsw8=
-github.com/Bios-Marcel/cmdp v0.0.0-20190623190758-6760aca2c54e/go.mod h1:cn7xf68lOu3CA6FyLYXjn9I2YNb9Xa9ZHvXh2Gq9SHA=
 github.com/Bios-Marcel/discordemojimap/v2 v2.0.1 h1:SC265pvPWtSq0C80PtZi2X/cnJ4YjZg6b3W6ckH4NbI=
 github.com/Bios-Marcel/discordemojimap/v2 v2.0.1/go.mod h1:WO9F+XVWqw6TieAj/IzzA2eVlPfKk3sjDmZW86Sd/t4=
 github.com/agnivade/levenshtein v1.1.0 h1:n6qGwyHG61v3ABce1rPVZklEYRT8NFpCMrpZdBUbYGM=

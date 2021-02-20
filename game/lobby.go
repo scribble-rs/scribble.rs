@@ -8,12 +8,10 @@ import (
 	"math"
 	"math/rand"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
 
-	commands "github.com/Bios-Marcel/cmdp"
 	discordemojimap "github.com/Bios-Marcel/discordemojimap/v2"
 	"github.com/agnivade/levenshtein"
 	petname "github.com/dustinkirkland/golang-petname"
@@ -95,11 +93,7 @@ func HandleEvent(raw []byte, received *GameEvent, lobby *Lobby, player *Player) 
 			return fmt.Errorf("invalid data received: '%s'", received.Data)
 		}
 
-		if strings.HasPrefix(dataAsString, "!") {
-			handleCommand(dataAsString[1:], player, lobby)
-		} else {
-			handleMessage(dataAsString, player, lobby)
-		}
+		handleMessage(dataAsString, player, lobby)
 	} else if received.Type == "line" {
 		if lobby.canDraw(player) {
 			line := &LineEvent{}
@@ -184,7 +178,7 @@ func HandleEvent(raw []byte, received *GameEvent, lobby *Lobby, player *Player) 
 			handleKickEvent(lobby, player, toKickID)
 		}
 	} else if received.Type == "start" {
-		if lobby.Round == 0 && player == lobby.owner {
+		if lobby.Round == 0 && player == lobby.Owner {
 			//We are reseting each players score, since players could
 			//technically be player a second game after the last one
 			//has already ended.
@@ -391,11 +385,11 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 			}
 
 			//If the owner is kicked, we choose the next best person as the owner.
-			if lobby.owner == playerToKick {
+			if lobby.Owner == playerToKick {
 				for _, otherPlayer := range lobby.players {
 					potentialOwner := otherPlayer
 					if potentialOwner.Connected {
-						lobby.owner = potentialOwner
+						lobby.Owner = potentialOwner
 						TriggerUpdateEvent("owner-change", &OwnerChangeEvent{
 							PlayerID:   potentialOwner.ID,
 							PlayerName: potentialOwner.Name,
@@ -454,18 +448,6 @@ func calculateVotesNeededToKick(player *Player, lobby *Lobby) int {
 	return (connectedPlayerCount + 1) / 2
 }
 
-func handleCommand(commandString string, caller *Player, lobby *Lobby) {
-	command := commands.ParseCommand(commandString)
-	if len(command) >= 1 {
-		switch strings.ToLower(command[0]) {
-		case "setmp":
-			commandSetMP(caller, lobby, command)
-		case "help":
-			//TODO
-		}
-	}
-}
-
 func handleNameChangeEvent(caller *Player, lobby *Lobby, name string) {
 	newName := html.EscapeString(strings.TrimSpace(name))
 
@@ -487,34 +469,6 @@ func handleNameChangeEvent(caller *Player, lobby *Lobby, name string) {
 		PlayerID:   caller.ID,
 		PlayerName: newName,
 	}, lobby)
-}
-
-func commandSetMP(caller *Player, lobby *Lobby, args []string) {
-	if caller == lobby.owner {
-		if len(args) < 2 {
-			return
-		}
-
-		newMaxPlayersValue := strings.TrimSpace(args[1])
-		newMaxPlayersValueInt, err := strconv.ParseInt(newMaxPlayersValue, 10, 64)
-		if err == nil {
-			if int(newMaxPlayersValueInt) >= len(lobby.players) && newMaxPlayersValueInt <= LobbySettingBounds.MaxMaxPlayers && newMaxPlayersValueInt >= LobbySettingBounds.MinMaxPlayers {
-				lobby.MaxPlayers = int(newMaxPlayersValueInt)
-
-				WritePublicSystemMessage(lobby, fmt.Sprintf("MaxPlayers value has been changed to %d", lobby.MaxPlayers))
-			} else {
-				if len(lobby.players) > int(LobbySettingBounds.MinMaxPlayers) {
-					WriteAsJSON(caller, GameEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value should be between %d and %d.", len(lobby.players), LobbySettingBounds.MaxMaxPlayers)})
-				} else {
-					WriteAsJSON(caller, GameEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value should be between %d and %d.", LobbySettingBounds.MinMaxPlayers, LobbySettingBounds.MaxMaxPlayers)})
-				}
-			}
-		} else {
-			WriteAsJSON(caller, GameEvent{Type: "system-message", Data: "MaxPlayers value must be numeric."})
-		}
-	} else {
-		WriteAsJSON(caller, GameEvent{Type: "system-message", Data: "Only the lobby owner can change MaxPlayers setting."})
-	}
 }
 
 // advanceLobby will either start the game or jump over to the next turn.
@@ -779,9 +733,8 @@ type Rounds struct {
 // CreateLobby allows creating a lobby, optionally returning errors that
 // occurred during creation.
 func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit int, customWords []string, enableVotekick bool) (*Player, *Lobby, error) {
-	lobby := createLobby(drawingTime, rounds, maxPlayers, customWords, customWordChance, clientsPerIPLimit, enableVotekick)
+	lobby := createLobby(drawingTime, rounds, maxPlayers, customWords, customWordChance, clientsPerIPLimit, enableVotekick, publicLobby)
 	lobby.Wordpack = chosenLanguage
-	lobby.public = publicLobby
 
 	//Neccessary to correctly treat words from player, however, custom words might be treated incorrectly.
 	lobby.lowercaser = cases.Lower(language.Make(getLanguageIdentifier(chosenLanguage)))
@@ -796,7 +749,7 @@ func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTim
 	player := createPlayer(playerName)
 
 	lobby.players = append(lobby.players, player)
-	lobby.owner = player
+	lobby.Owner = player
 	lobby.creator = player
 
 	words, err := readWordList(lobby.lowercaser, chosenLanguage)
@@ -856,7 +809,7 @@ func generateReadyData(lobby *Lobby, player *Player) *Ready {
 
 		VotekickEnabled: lobby.EnableVotekick,
 		GameState:       lobby.state,
-		OwnerID:         lobby.owner.ID,
+		OwnerID:         lobby.Owner.ID,
 		Round:           lobby.Round,
 		MaxRound:        lobby.MaxRounds,
 		WordHints:       lobby.GetAvailableWordHints(player),

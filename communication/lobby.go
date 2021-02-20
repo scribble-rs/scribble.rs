@@ -113,6 +113,9 @@ var (
 // While unofficial clients will probably need all of these values, the
 // official webclient doesn't use all of them as of now.
 type LobbyData struct {
+	*game.SettingBounds
+	*game.EditableLobbySettings
+
 	LobbyID string `json:"lobbyId"`
 	//DrawingBoardBaseWidth is the internal canvas width and is needed for
 	//correctly up- / downscaling drawing instructions.
@@ -133,9 +136,11 @@ type LobbyData struct {
 	SuggestedBrushSizes [4]uint8 `json:"suggestedBrushSizes"`
 }
 
-func createLobbyData(lobbyID string) *LobbyData {
+func createLobbyData(lobby *game.Lobby) *LobbyData {
 	return &LobbyData{
-		LobbyID:                lobbyID,
+		SettingBounds:          game.LobbySettingBounds,
+		EditableLobbySettings:  lobby.EditableLobbySettings,
+		LobbyID:                lobby.ID,
 		DrawingBoardBaseWidth:  game.DrawingBoardBaseWidth,
 		DrawingBoardBaseHeight: game.DrawingBoardBaseHeight,
 		MinBrushSize:           game.MinBrushSize,
@@ -168,7 +173,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 
 	player := getPlayer(lobby, r)
 
-	pageData := createLobbyData(lobby.ID)
+	pageData := createLobbyData(lobby)
 
 	if player == nil {
 		if !lobby.HasFreePlayerSlot() {

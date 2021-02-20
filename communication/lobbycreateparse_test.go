@@ -204,3 +204,34 @@ func Test_parseCustomWordChance(t *testing.T) {
 		})
 	}
 }
+
+func Test_parseBoolean(t *testing.T) {
+	tests := []struct {
+		name    string
+		value   string
+		want    bool
+		wantErr bool
+	}{
+		{"empty value", "", false, false},
+		{"space", " ", false, true},
+		{"garbage", "garbage", false, true},
+		{"true", "true", true, false},
+		{"true upper", "TRUE", true, false},
+		{"true mixed casing", "TruE", true, false},
+		{"false", "false", false, false},
+		{"false upper", "FALSE", false, false},
+		{"false mixed casing", "FalsE", false, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := parseBoolean("name", tt.value)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("parseBoolean() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("parseBoolean() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
