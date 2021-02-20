@@ -33,7 +33,8 @@ var (
 		MaxClientsPerIPLimit: 24,
 	}
 	SupportedLanguages = map[string]string{
-		"english": "English",
+		"english (GB)": "English (GB)",
+		"english (US)"; "English (US)",
 		"italian": "Italian",
 		"german":  "German",
 		"french":  "French",
