@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -110,6 +111,32 @@ func Test_getRandomWords(t *testing.T) {
 			}
 		}
 	})
+}
+
+func Test_regressionGetRandomWords_singleCustomWord(t *testing.T) {
+	lobby := &Lobby{
+		CurrentWord:       "",
+		CustomWordsChance: 99,
+		CustomWords:       []string{"custom"},
+	}
+
+	words := make([]string, 99, 99)
+	for i := 0; i < 99; i++ {
+		words = append(words, strconv.FormatInt(int64(i), 10))
+	}
+	lobby.words = words
+
+	var customWordFound bool
+	//Simply making sure we don't panic.
+	for i := 0; i < 100; i++ {
+		if GetRandomWords(1, lobby)[0] == "custom" {
+			customWordFound = true
+		}
+	}
+
+	if !customWordFound {
+		t.Error("Custom word wasn't found")
+	}
 }
 
 func Test_getRandomWordsReloading(t *testing.T) {
