@@ -14,7 +14,7 @@ import (
 	"unicode/utf8"
 
 	commands "github.com/Bios-Marcel/cmdp"
-	"github.com/Bios-Marcel/discordemojimap"
+	discordemojimap "github.com/Bios-Marcel/discordemojimap/v2"
 	"github.com/agnivade/levenshtein"
 	petname "github.com/dustinkirkland/golang-petname"
 	"github.com/kennygrant/sanitize"
