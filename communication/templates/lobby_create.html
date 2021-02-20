@@ -69,7 +69,11 @@
                     <textarea class="input-item" name="custom_words"
                     placeholder="Enter your additional words, separating them by commas">{{.CustomWords}}</textarea>
                     <b>Custom Words Chance</b>
-                    <input type="range" name="custom_words_chance" min="1" max="100" value="{{.CustomWordsChance}}">
+                    <div style="display: flex;">
+                        0%
+                        <input style="flex: 1;" type="range" name="custom_words_chance" min="1" max="100" value="{{.CustomWordsChance}}">
+                        100%
+                    </div>
                     <details class="advanced-section">
                         <summary>Advanced</summary>
                         <div class="input-container">

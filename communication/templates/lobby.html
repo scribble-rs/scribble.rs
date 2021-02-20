@@ -143,7 +143,12 @@
                                         <input id="lobby-settings-public" type="checkbox" name="public" value="true"
                                             {{if eq .Public true}}checked{{end}}/>
                                         <b>Custom Words Chance</b>
-                                        <input id="lobby-settings-custom-words-chance" type="range" name="custom_words_chance" min="1" max="100" value="{{.CustomWordsChance}}">
+                                        <div style="display: flex;">
+                                            0%
+                                            <input style="flex: 1;" id="lobby-settings-custom-words-chance" type="range" name="custom_words_chance" min="1" max="100" value="{{.CustomWordsChance}}">
+                                            100%
+                                        </div>
+                    
                                         <details class="advanced-section">
                                             <summary>Advanced</summary>
                                             <div class="input-container">
