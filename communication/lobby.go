@@ -113,6 +113,7 @@ var (
 // While unofficial clients will probably need all of these values, the
 // official webclient doesn't use all of them as of now.
 type LobbyData struct {
+	*BasePageConfig
 	*game.SettingBounds
 	*game.EditableLobbySettings
 
@@ -138,6 +139,7 @@ type LobbyData struct {
 
 func createLobbyData(lobby *game.Lobby) *LobbyData {
 	return &LobbyData{
+		BasePageConfig:         CurrentBasePageConfig,
 		SettingBounds:          game.LobbySettingBounds,
 		EditableLobbySettings:  lobby.EditableLobbySettings,
 		LobbyID:                lobby.ID,

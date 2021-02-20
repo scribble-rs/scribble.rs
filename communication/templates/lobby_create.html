@@ -5,9 +5,10 @@
 <head>
     <title>Scribble.rs</title>
     <meta charset="UTF-8"/>
-    <link rel="stylesheet" type="text/css" href="/resources/base.css"/>
-    <link rel="stylesheet" type="text/css" href="/resources/lobby_create.css"/>
-    <link rel="icon" type="image/png" href="/resources/favicon.png"/>
+    {{template "font-decl" .}}
+    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/base.css"/>
+    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/lobby_create.css"/>
+    <link rel="icon" type="image/png" href="{{.RootPath}}/resources/favicon.png"/>
 </head>
 
 <body>
@@ -45,7 +46,7 @@
                     </div>
 
                 {{end}}
-                <form id="lobby-create" class="input-container" action="/ssrCreateLobby" method="POST">
+                <form id="lobby-create" class="input-container" action="{{.RootPath}}/ssrCreateLobby" method="POST">
                     <b>Lobby-Language</b>
                     <select class="input-item" name="language" placeholder="Choose your language">
                         {{$language := .Language}}
@@ -135,7 +136,7 @@
 
     <span class="open-lobby-info">Currently active lobbies: {{.CurrentlyActiveLobbies}}</span>
 
-    {{template "footer"}}
+    {{template "footer" .}}
 </div>
 
 <script type="text/javascript">
@@ -157,7 +158,7 @@
     let maxClientsIPDetail = document.getElementById("max-clients-ip-detail");
 
     function onJoin() {
-        window.open("/ssrEnterLobby?lobby_id=" + selectedLobby, "_self");
+        window.open("{{.RootPath}}/ssrEnterLobby?lobby_id=" + selectedLobby, "_self");
     }
 
     function loadLobbyTable() {
@@ -169,7 +170,7 @@
             }
         }
 
-        fetch("/v1/lobby")
+        fetch("{{.RootPath}}/v1/lobby")
             .then((response) => {
                 return response.json();
             })

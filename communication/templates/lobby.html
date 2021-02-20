@@ -5,9 +5,10 @@
 <head>
     <title>Scribble.rs - Game</title>
     <meta charset="UTF-8"/>
-    <link rel="stylesheet" type="text/css" href="/resources/base.css"/>
-    <link rel="stylesheet" type="text/css" href="/resources/lobby.css"/>
-    <link rel="icon" type="image/png" href="/resources/favicon.png"/>
+    {{template "font-decl" .}}
+    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/base.css"/>
+    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/lobby.css"/>
+    <link rel="icon" type="image/png" href="{{.RootPath}}/resources/favicon.png"/>
 </head>
 
 <body>
@@ -29,17 +30,17 @@
 
                 <button onclick="showKickDialog()" class="dialog-button header-button"
                         alt="Votekick a player" title="Votekick a player">
-                    <img src="/resources/kick.png" class="header-button-image"/>
+                    <img src="{{.RootPath}}/resources/kick.png" class="header-button-image"/>
                 </button>
 
                 <button onclick="showNameChangeDialog()" class="dialog-button header-button"
                         alt="Change your name" title="Change your name">
-                    <img src="/resources/user.svg" class="header-button-image"/>
+                    <img src="{{.RootPath}}/resources/user.svg" class="header-button-image"/>
                 </button>
 
                 <button onclick="showLobbySettingsDialog()" class="dialog-button header-button"
                         alt="Change lobby settings" title="Change lobby settings">
-                    <img src="/resources/settings.svg" class="header-button-image"/>
+                    <img src="{{.RootPath}}/resources/settings.svg" class="header-button-image"/>
                 </button>
             </div>
             <div id="word-container" style="position:absolute;left: 50%; transform: translate(-50%, 0);"></div>
@@ -273,7 +274,7 @@
                                 onmousedown="document.getElementById('tool-type-fill').click()"
                                 onmouseup="document.getElementById('tool-type-fill').click()"
                                 class="line-width-button-content">
-                                <img alt="Fill" title="Fill tool" src="/resources/fill.svg" width="40px"
+                                <img alt="Fill" title="Fill tool" src="{{.RootPath}}/resources/fill.svg" width="40px"
                                     height="40px"/>
                             </div>
                         </label>
@@ -284,7 +285,7 @@
                                 onmousedown="document.getElementById('tool-type-rubber').click()"
                                 onmouseup="document.getElementById('tool-type-rubber').click()"
                                 class="line-width-button-content">
-                                <img alt="Rubber" title="Rubber tool" src="/resources/rubber.svg" width="40px"
+                                <img alt="Rubber" title="Rubber tool" src="{{.RootPath}}/resources/rubber.svg" width="40px"
                                     height="40px"/>
                             </div>
                         </label>
@@ -351,10 +352,10 @@
         </div>
     </div>
 
-    {{template "footer"}}
+    {{template "footer" .}}
 </div>
 
-<script type="text/javascript" src="/resources/floodfill.js"></script>
+<script type="text/javascript" src="{{.RootPath}}/resources/floodfill.js"></script>
 <script type="text/javascript">
     const reconnectDialog = document.getElementById("reconnect-dialog");
     let socketIsConnecting = false;
@@ -367,10 +368,10 @@
 
         if (location.protocol === 'https:') {
             console.log("Attempting secure socket connection on port " + location.port + "...");
-            socket = new WebSocket("wss://" + location.hostname + ":" + location.port + "/v1/ws?lobby_id={{.LobbyID}}");
+            socket = new WebSocket("wss://" + location.hostname + ":" + location.port + "{{.RootPath}}/v1/ws?lobby_id={{.LobbyID}}");
         } else {
             console.log("Attempting socket connection on port " + location.port + "...");
-            socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/v1/ws?lobby_id={{.LobbyID}}");
+            socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "{{.RootPath}}/v1/ws?lobby_id={{.LobbyID}}");
         }
 
         socket.onopen = () => {
@@ -501,7 +502,7 @@
     }
 
     function saveLobbySettings() {
-        fetch("/v1/lobby?" + new URLSearchParams({
+        fetch("{{.RootPath}}/v1/lobby?" + new URLSearchParams({
             lobby_id: '{{.LobbyID}}',
             public: document.getElementById("lobby-settings-public").value,
             enable_votekick: document.getElementById("lobby-settings-enable-votekick").value,
@@ -531,9 +532,9 @@
 
     function updateSoundIcon() {
         if (sound) {
-            soundToggleLabel.src = "/resources/sound.svg";
+            soundToggleLabel.src = "{{.RootPath}}/resources/sound.svg";
         } else {
-            soundToggleLabel.src = "/resources/no-sound.svg";
+            soundToggleLabel.src = "{{.RootPath}}/resources/no-sound.svg";
         }
     }
 
@@ -859,7 +860,7 @@
                 setUsernameLocally(parsed.data.playerName)
             }
         } else if (parsed.type === "correct-guess") {
-            playWav('/resources/plop.wav');
+            playWav('{{.RootPath}}/resources/plop.wav');
 
             if (parsed.data === ownID) {
                 applyMessage("correct-guess-message", "System", "You have correctly guessed the word.")
@@ -899,7 +900,7 @@
 
             //If a player doesn't choose, the dialog will still be up.
             wordDialog.style.visibility = "hidden";
-            playWav('/resources/end-turn.wav');
+            playWav('{{.RootPath}}/resources/end-turn.wav');
 
             clear(context);
 
@@ -920,7 +921,7 @@
 
             allowDrawing = false;
         } else if (parsed.type === "your-turn") {
-            playWav('/resources/your-turn.wav');
+            playWav('{{.RootPath}}/resources/your-turn.wav');
 
             promptWords(parsed.data[0], parsed.data[1], parsed.data[2]);
         } else if (parsed.type === "drawing") {

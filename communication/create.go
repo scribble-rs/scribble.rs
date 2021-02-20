@@ -26,6 +26,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 func createDefaultLobbyCreatePageData() *CreatePageData {
 	return &CreatePageData{
+		BasePageConfig:         CurrentBasePageConfig,
 		SettingBounds:          game.LobbySettingBounds,
 		Languages:              game.SupportedLanguages,
 		Public:                 "false",
@@ -42,6 +43,7 @@ func createDefaultLobbyCreatePageData() *CreatePageData {
 
 // CreatePageData defines all non-static data for the lobby create page.
 type CreatePageData struct {
+	*BasePageConfig
 	*game.SettingBounds
 	Errors                 []string
 	Languages              map[string]string
@@ -154,7 +156,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 	//We only add the lobby if we could do all necessary pre-steps successfully.
 	state.AddLobby(lobby)
 
-	http.Redirect(w, r, "/ssrEnterLobby?lobby_id="+lobby.ID, http.StatusFound)
+	http.Redirect(w, r, CurrentBasePageConfig.RootPath+"/ssrEnterLobby?lobby_id="+lobby.ID, http.StatusFound)
 }
 
 func parsePlayerName(value string) (string, error) {
