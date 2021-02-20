@@ -34,11 +34,11 @@ var (
 	}
 	SupportedLanguages = map[string]string{
 		"english_gb": "English (GB)",
-		"english_us": "English (US)",
-		"italian": "Italian",
-		"german":  "German",
-		"french":  "French",
-		"dutch":   "Dutch",
+		"english":    "English (US)",
+		"italian":    "Italian",
+		"german":     "German",
+		"french":     "French",
+		"dutch":      "Dutch",
 	}
 )
 
