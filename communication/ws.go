@@ -7,6 +7,7 @@ import (
 	"html"
 	"log"
 	"net/http"
+	"runtime/debug"
 	"strings"
 
 	"github.com/gorilla/websocket"
@@ -73,7 +74,7 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 	defer func() {
 		err := recover()
 		if err != nil {
-			log.Printf("Error occurred in wsListen.\n\tError: %s\n\tPlayer: %s(%s)\n", err, player.Name, player.ID)
+			log.Printf("Error occurred in wsListen.\n\tError: %s\n\tPlayer: %s(%s)\nStack %s\n", err, player.Name, player.ID, string(debug.Stack()))
 			game.OnDisconnected(lobby, player)
 		}
 	}()
