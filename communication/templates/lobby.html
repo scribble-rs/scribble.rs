@@ -732,7 +732,7 @@
     }
 
     function clearCanvasAndSendEvent() {
-        if (isDrawing) {
+        if (allowDrawing) {
             //Avoid unnecessary traffic back to us and handle the clear directly.
             clear(context);
             socket.send(JSON.stringify({
