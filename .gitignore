@@ -4,4 +4,5 @@ scribblers.exe
 scribble.rs
 scribble.rs.exe
 .vscode/
+.idea/
 playground/
