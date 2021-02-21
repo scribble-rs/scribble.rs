@@ -1218,11 +1218,12 @@
     function fill(context, x1, y1, color) {
         context.fillStyle = color;
         //There seems to be some bug where setting the tolerance to 0 causes a freeze when painting black on white.
-        return context.fillFlood(x1, y1, 1);
+        return context.fillFlood(x1, y1);
     }
 
     function fillAndSendEvent(context, x1, y1, color) {
         if (fill(context, x1, y1, color)) {
+            console.log("fill");
             let fillInstruction = {
                 type: "fill",
                 data: {
