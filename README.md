@@ -60,7 +60,6 @@ make build
 
 For Windows:
 ```shell
-go run github.com/gobuffalo/packr/v2/packr2
 go build -o scribblers .
 ```
 
@@ -74,7 +73,7 @@ port though.
 It should run on any system that go supports as a compilation target.
 
 This application uses go modules, therefore you need to make sure that you
-have go version `1.13` or higher.
+have go version `1.16` or higher.
 
 ## Docker
 
@@ -83,6 +82,9 @@ Alternatively there's a docker container:
 ```shell
 docker pull biosmarcel/scribble.rs
 ```
+
+The docker container is built from the master branch on every push, so it
+should always be up-to-date.
 
 ### Changing default port
 
@@ -109,12 +111,15 @@ There are many ways you can contribute:
 
 ## Donating
 
-If you can't or don't want to contribute in any of the ways listed above, you can always donate something to me.
+If you can't or don't want to contribute in any of the ways
+listed above, you can always donate something to the project.
 
 * PayPal: https://www.paypal.com/donate/?hosted_button_id=RZ7N8D95TXFEN
 * Liberapay: https://liberapay.com/biosmarcel/donate
 * Etherum: 0x49939106563a9de8a777Cf5394149423b1dFd970
 * XLM/Lumen: GDNCEW46OTDMXMSNVM4K7GNPIXNYT5BOZXVZ7M4QSRB6OB3BRM2VYDB5
+
+If there's a steady income stream I'd spend it on infrastructure and a domain ;)
 
 ## Credits
 

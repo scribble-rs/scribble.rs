@@ -7,13 +7,12 @@ import (
 	"log"
 	"math"
 	"math/rand"
-	"strconv"
+	"sort"
 	"strings"
 	"time"
 	"unicode/utf8"
 
-	commands "github.com/Bios-Marcel/cmdp"
-	"github.com/Bios-Marcel/discordemojimap"
+	discordemojimap "github.com/Bios-Marcel/discordemojimap/v2"
 	"github.com/agnivade/levenshtein"
 	petname "github.com/dustinkirkland/golang-petname"
 	"github.com/kennygrant/sanitize"
@@ -33,11 +32,12 @@ var (
 		MaxClientsPerIPLimit: 24,
 	}
 	SupportedLanguages = map[string]string{
-		"english": "English",
-		"italian": "Italian",
-		"german":  "German",
-		"french":  "French",
-		"dutch":   "Dutch",
+		"english_gb": "English (GB)",
+		"english":    "English (US)",
+		"italian":    "Italian",
+		"german":     "German",
+		"french":     "French",
+		"dutch":      "Dutch",
 	}
 )
 
@@ -46,6 +46,9 @@ const (
 	DrawingBoardBaseHeight = 900
 	MinBrushSize           = 8
 	MaxBrushSize           = 32
+
+	maxBaseScore      = 200
+	maxHintBonusScore = 60
 )
 
 // SettingBounds defines the lower and upper bounds for the user-specified
@@ -91,11 +94,7 @@ func HandleEvent(raw []byte, received *GameEvent, lobby *Lobby, player *Player) 
 			return fmt.Errorf("invalid data received: '%s'", received.Data)
 		}
 
-		if strings.HasPrefix(dataAsString, "!") {
-			handleCommand(dataAsString[1:], player, lobby)
-		} else {
-			handleMessage(dataAsString, player, lobby)
-		}
+		handleMessage(dataAsString, player, lobby)
 	} else if received.Type == "line" {
 		if lobby.canDraw(player) {
 			line := &LineEvent{}
@@ -108,10 +107,10 @@ func HandleEvent(raw []byte, received *GameEvent, lobby *Lobby, player *Player) 
 			//This will prevent clients from lagging due to too thick lines.
 			if line.Data.LineWidth > float32(MaxBrushSize) {
 				line.Data.LineWidth = MaxBrushSize
-				received.Data = line
+				received.Data = line.Data
 			} else if line.Data.LineWidth < float32(MinBrushSize) {
 				line.Data.LineWidth = MinBrushSize
-				received.Data = line
+				received.Data = line.Data
 			}
 
 			lobby.AppendLine(line)
@@ -180,7 +179,7 @@ func HandleEvent(raw []byte, received *GameEvent, lobby *Lobby, player *Player) 
 			handleKickEvent(lobby, player, toKickID)
 		}
 	} else if received.Type == "start" {
-		if lobby.Round == 0 && player == lobby.owner {
+		if lobby.Round == 0 && player == lobby.Owner {
 			//We are reseting each players score, since players could
 			//technically be player a second game after the last one
 			//has already ended.
@@ -199,7 +198,7 @@ func HandleEvent(raw []byte, received *GameEvent, lobby *Lobby, player *Player) 
 		if !isString {
 			return fmt.Errorf("invalid data in name-change event: %v", received.Data)
 		}
-		commandNick(player, lobby, newName)
+		handleNameChangeEvent(player, lobby, newName)
 	} else if received.Type == "request-drawing" {
 		WriteAsJSON(player, GameEvent{Type: "drawing", Data: lobby.currentDrawing})
 	} else if received.Type == "keep-alive" {
@@ -210,31 +209,32 @@ func HandleEvent(raw []byte, received *GameEvent, lobby *Lobby, player *Player) 
 	return nil
 }
 
-func handleMessage(input string, sender *Player, lobby *Lobby) {
-	trimmed := strings.TrimSpace(input)
-	if trimmed == "" {
+func handleMessage(message string, sender *Player, lobby *Lobby) {
+	trimmedMessage := strings.TrimSpace(message)
+	if trimmedMessage == "" {
 		return
 	}
 
 	if lobby.CurrentWord == "" {
-		sendMessageToAll(trimmed, sender, lobby)
+		sendMessageToAll(trimmedMessage, sender, lobby)
 		return
 	}
 
 	if sender.State == Drawing || sender.State == Standby {
-		sendMessageToAllNonGuessing(trimmed, sender, lobby)
+		sendMessageToAllNonGuessing(trimmedMessage, sender, lobby)
 	} else if sender.State == Guessing {
-		lowerCasedInput := lobby.lowercaser.String(trimmed)
+		lowerCasedInput := lobby.lowercaser.String(trimmedMessage)
 		currentWord := lobby.CurrentWord
 
-		normInput := removeAccents(lowerCasedInput)
-		normSearched := removeAccents(currentWord)
+		normInput := simplifyText(lowerCasedInput)
+		normSearched := simplifyText(currentWord)
 
 		if normSearched == normInput {
-			secondsLeft := lobby.RoundEndTime/1000 - time.Now().UTC().UnixNano()/1000000000
+			secondsLeft := int(lobby.RoundEndTime/1000 - time.Now().UTC().UnixNano()/1000000000)
 
-			sender.LastScore = int(math.Ceil(math.Pow(math.Max(float64(secondsLeft), 1), 1.3) * 2))
+			sender.LastScore = calculateGuesserScore(lobby.hintCount, lobby.hintsLeft, secondsLeft, lobby.DrawingTime)
 			sender.Score += sender.LastScore
+
 			lobby.scoreEarnedByGuessers += sender.LastScore
 			sender.State = Standby
 
@@ -249,15 +249,31 @@ func handleMessage(input string, sender *Player, lobby *Lobby) {
 				triggerPlayersUpdate(lobby)
 			}
 		} else if levenshtein.ComputeDistance(normInput, normSearched) == 1 {
-			WriteAsJSON(sender, GameEvent{Type: "close-guess", Data: trimmed})
+			WriteAsJSON(sender, GameEvent{Type: "close-guess", Data: trimmedMessage})
 			//In cases of a close guess, we still send the message to everyone.
 			//This allows other players to guess the word by watching what the
 			//other players are misstyping.
-			sendMessageToAll(trimmed, sender, lobby)
+			sendMessageToAll(trimmedMessage, sender, lobby)
 		} else {
-			sendMessageToAll(trimmed, sender, lobby)
+			sendMessageToAll(trimmedMessage, sender, lobby)
 		}
 	}
+}
+
+func calculateGuesserScore(hintCount, hintsLeft, secondsLeft, drawingTime int) int {
+	//The base score is based on the general time taken.
+	//The formula here represents an exponential decline based on the time taken.
+	//This way fast players get more points, however not a lot more.
+	//The bonus gained by guessing before hints are shown is therefore still somewhat relevant.
+	declineFactor := 1.0 / float64(drawingTime)
+	baseScore := int(maxBaseScore * math.Pow(1.0-declineFactor, float64(drawingTime-secondsLeft)))
+
+	//Every hint not shown, e.g. not needed, will give the player bonus points.
+	if hintCount < 1 {
+		return baseScore
+	}
+
+	return baseScore + hintsLeft*(maxHintBonusScore/hintCount)
 }
 
 func (lobby *Lobby) isAnyoneStillGuessing() bool {
@@ -271,25 +287,25 @@ func (lobby *Lobby) isAnyoneStillGuessing() bool {
 }
 
 func sendMessageToAll(message string, sender *Player, lobby *Lobby) {
-	escaped := html.EscapeString(discordemojimap.Replace(message))
+	messageEvent := GameEvent{Type: "message", Data: Message{
+		Author:   html.EscapeString(sender.Name),
+		AuthorID: sender.ID,
+		Content:  html.EscapeString(discordemojimap.Replace(message)),
+	}}
 	for _, target := range lobby.players {
-		WriteAsJSON(target, GameEvent{Type: "message", Data: Message{
-			Author:   html.EscapeString(sender.Name),
-			AuthorID: sender.ID,
-			Content:  escaped,
-		}})
+		WriteAsJSON(target, messageEvent)
 	}
 }
 
 func sendMessageToAllNonGuessing(message string, sender *Player, lobby *Lobby) {
-	escaped := html.EscapeString(discordemojimap.Replace(message))
+	messageEvent := GameEvent{Type: "non-guessing-player-message", Data: Message{
+		Author:   html.EscapeString(sender.Name),
+		AuthorID: sender.ID,
+		Content:  html.EscapeString(discordemojimap.Replace(message)),
+	}}
 	for _, target := range lobby.players {
 		if target.State != Guessing {
-			WriteAsJSON(target, GameEvent{Type: "non-guessing-player-message", Data: Message{
-				Author:   html.EscapeString(sender.Name),
-				AuthorID: sender.ID,
-				Content:  escaped,
-			}})
+			WriteAsJSON(target, messageEvent)
 		}
 	}
 }
@@ -370,11 +386,11 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 			}
 
 			//If the owner is kicked, we choose the next best person as the owner.
-			if lobby.owner == playerToKick {
+			if lobby.Owner == playerToKick {
 				for _, otherPlayer := range lobby.players {
 					potentialOwner := otherPlayer
 					if potentialOwner.Connected {
-						lobby.owner = potentialOwner
+						lobby.Owner = potentialOwner
 						TriggerUpdateEvent("owner-change", &OwnerChangeEvent{
 							PlayerID:   potentialOwner.ID,
 							PlayerName: potentialOwner.Name,
@@ -395,6 +411,11 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 }
 
 type OwnerChangeEvent struct {
+	PlayerID   string `json:"playerId"`
+	PlayerName string `json:"playerName"`
+}
+
+type NameChangeEvent struct {
 	PlayerID   string `json:"playerId"`
 	PlayerName string `json:"playerName"`
 }
@@ -428,63 +449,27 @@ func calculateVotesNeededToKick(player *Player, lobby *Lobby) int {
 	return (connectedPlayerCount + 1) / 2
 }
 
-func handleCommand(commandString string, caller *Player, lobby *Lobby) {
-	command := commands.ParseCommand(commandString)
-	if len(command) >= 1 {
-		switch strings.ToLower(command[0]) {
-		case "setmp":
-			commandSetMP(caller, lobby, command)
-		case "help":
-			//TODO
-		}
-	}
-}
-
-func commandNick(caller *Player, lobby *Lobby, name string) {
+func handleNameChangeEvent(caller *Player, lobby *Lobby, name string) {
 	newName := html.EscapeString(strings.TrimSpace(name))
 
 	//We don't want super-long names
-	if len(newName) > 30 {
-		newName = newName[:31]
+	if len(newName) > MaxPlayerNameLength {
+		newName = newName[:MaxPlayerNameLength+1]
 	}
 
+	oldName := caller.Name
 	if newName == "" {
 		caller.Name = GeneratePlayerName()
 	} else {
 		caller.Name = newName
 	}
 
-	fmt.Printf("%s is now %s\n", caller.Name, newName)
+	log.Printf("%s is now %s\n", oldName, newName)
 
-	triggerPlayersUpdate(lobby)
-}
-
-func commandSetMP(caller *Player, lobby *Lobby, args []string) {
-	if caller == lobby.owner {
-		if len(args) < 2 {
-			return
-		}
-
-		newMaxPlayersValue := strings.TrimSpace(args[1])
-		newMaxPlayersValueInt, err := strconv.ParseInt(newMaxPlayersValue, 10, 64)
-		if err == nil {
-			if int(newMaxPlayersValueInt) >= len(lobby.players) && newMaxPlayersValueInt <= LobbySettingBounds.MaxMaxPlayers && newMaxPlayersValueInt >= LobbySettingBounds.MinMaxPlayers {
-				lobby.MaxPlayers = int(newMaxPlayersValueInt)
-
-				WritePublicSystemMessage(lobby, fmt.Sprintf("MaxPlayers value has been changed to %d", lobby.MaxPlayers))
-			} else {
-				if len(lobby.players) > int(LobbySettingBounds.MinMaxPlayers) {
-					WriteAsJSON(caller, GameEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value should be between %d and %d.", len(lobby.players), LobbySettingBounds.MaxMaxPlayers)})
-				} else {
-					WriteAsJSON(caller, GameEvent{Type: "system-message", Data: fmt.Sprintf("MaxPlayers value should be between %d and %d.", LobbySettingBounds.MinMaxPlayers, LobbySettingBounds.MaxMaxPlayers)})
-				}
-			}
-		} else {
-			WriteAsJSON(caller, GameEvent{Type: "system-message", Data: "MaxPlayers value must be numeric."})
-		}
-	} else {
-		WriteAsJSON(caller, GameEvent{Type: "system-message", Data: "Only the lobby owner can change MaxPlayers setting."})
-	}
+	TriggerUpdateEvent("name-change", &NameChangeEvent{
+		PlayerID:   caller.ID,
+		PlayerName: newName,
+	}, lobby)
 }
 
 // advanceLobby will either start the game or jump over to the next turn.
@@ -497,11 +482,21 @@ func advanceLobby(lobby *Lobby) {
 	//The drawer can potentially be null if he's kicked, in that case we proceed with the round if anyone has already
 	drawer := lobby.drawer
 	if drawer != nil && lobby.scoreEarnedByGuessers > 0 {
-		averageScore := float64(lobby.scoreEarnedByGuessers) / float64(len(lobby.players)-1)
-		if averageScore > 0 {
-			drawer.LastScore = int(averageScore * 1.1)
-			drawer.Score += drawer.LastScore
+
+		//Average score, but minus one player, since the own score is 0 and doesn't count.
+		playerCount := lobby.GetConnectedPlayerCount()
+		//If the drawer isn't connected though, we mustn't subtract from the count.
+		if drawer.Connected {
+			playerCount--
 		}
+
+		var averageScore int
+		if playerCount > 0 {
+			averageScore = lobby.scoreEarnedByGuessers / playerCount
+		}
+
+		drawer.LastScore = averageScore
+		drawer.Score += drawer.LastScore
 	}
 
 	//We need this for the next-turn event, in order to allow the client
@@ -518,9 +513,6 @@ func advanceLobby(lobby *Lobby) {
 		if otherPlayer.State == Guessing {
 			otherPlayer.LastScore = 0
 		}
-	}
-
-	for _, otherPlayer := range lobby.players {
 		otherPlayer.State = Guessing
 		otherPlayer.votedForKick = make(map[string]bool)
 	}
@@ -659,21 +651,32 @@ type NextTurn struct {
 // recalculateRanks will assign each player his respective rank in the lobby
 // according to everyones current score. This will not trigger any events.
 func recalculateRanks(lobby *Lobby) {
-	for _, a := range lobby.players {
-		if !a.Connected {
+	sortedPlayers := make([]*Player, len(lobby.players))
+	copy(sortedPlayers, lobby.players)
+	sort.Slice(sortedPlayers, func(a, b int) bool {
+		return sortedPlayers[a].Score > sortedPlayers[b].Score
+	})
+
+	//We start at maxint32, since we want the first player to cause an
+	//increment of the the score, which will always happen this way, as
+	//no player can have a score this high.
+	lastScore := math.MaxInt32
+	var lastRank int
+	for _, player := range sortedPlayers {
+		if !player.Connected {
 			continue
 		}
-		playersThatAreHigher := 0
-		for _, b := range lobby.players {
-			if !b.Connected {
-				continue
-			}
-			if b.Score > a.Score {
-				playersThatAreHigher++
-			}
+
+		if player.Score < lastScore {
+			lastRank++
+			player.Rank = lastRank
+		} else {
+			//Since the players are already sorted from high to low, we only
+			//have the cases equal or higher.
+			player.Rank = lastRank
 		}
 
-		a.Rank = playersThatAreHigher + 1
+		lastScore = player.Score
 	}
 }
 
@@ -731,9 +734,8 @@ type Rounds struct {
 // CreateLobby allows creating a lobby, optionally returning errors that
 // occurred during creation.
 func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit int, customWords []string, enableVotekick bool) (*Player, *Lobby, error) {
-	lobby := createLobby(drawingTime, rounds, maxPlayers, customWords, customWordChance, clientsPerIPLimit, enableVotekick)
+	lobby := createLobby(drawingTime, rounds, maxPlayers, customWords, customWordChance, clientsPerIPLimit, enableVotekick, publicLobby)
 	lobby.Wordpack = chosenLanguage
-	lobby.public = publicLobby
 
 	//Neccessary to correctly treat words from player, however, custom words might be treated incorrectly.
 	lobby.lowercaser = cases.Lower(language.Make(getLanguageIdentifier(chosenLanguage)))
@@ -748,7 +750,7 @@ func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTim
 	player := createPlayer(playerName)
 
 	lobby.players = append(lobby.players, player)
-	lobby.owner = player
+	lobby.Owner = player
 	lobby.creator = player
 
 	words, err := readWordList(lobby.lowercaser, chosenLanguage)
@@ -808,7 +810,7 @@ func generateReadyData(lobby *Lobby, player *Player) *Ready {
 
 		VotekickEnabled: lobby.EnableVotekick,
 		GameState:       lobby.state,
-		OwnerID:         lobby.owner.ID,
+		OwnerID:         lobby.Owner.ID,
 		Round:           lobby.Round,
 		MaxRound:        lobby.MaxRounds,
 		WordHints:       lobby.GetAvailableWordHints(player),
@@ -829,6 +831,7 @@ func generateReadyData(lobby *Lobby, player *Player) *Ready {
 
 func OnConnected(lobby *Lobby, player *Player) {
 	player.Connected = true
+	recalculateRanks(lobby)
 	WriteAsJSON(player, GameEvent{Type: "ready", Data: generateReadyData(lobby, player)})
 
 	//This state is reached when the player refreshes before having chosen a word.
@@ -858,11 +861,15 @@ func OnDisconnected(lobby *Lobby, player *Player) {
 
 	updateRocketChat(lobby, player)
 
+	recalculateRanks(lobby)
 	if lobby.HasConnectedPlayers() {
 		triggerPlayersUpdate(lobby)
 	}
 }
 
+// GetAvailableWordHints returns a WordHint array depending on the players
+// game state, since people that are drawing or have already guessed correctly
+// can see all hints.
 func (lobby *Lobby) GetAvailableWordHints(player *Player) []*WordHint {
 	//The draw simple gets every character as a word-hint. We basically abuse
 	//the hints for displaying the word, instead of having yet another GUI
@@ -889,8 +896,11 @@ func (lobby *Lobby) canDraw(player *Player) bool {
 	return lobby.drawer == player && lobby.CurrentWord != ""
 }
 
-func removeAccents(s string) string {
-	return strings.
-		NewReplacer(" ", "", "-", "", "_", "").
+var connectionCharacterReplacer = strings.NewReplacer(" ", "", "-", "", "_", "")
+
+// simplifyText prepares the string for a more lax comparison of two words.
+// Spaces, dashes, underscores and accented characters are removed or replaced.
+func simplifyText(s string) string {
+	return connectionCharacterReplacer.
 		Replace(sanitize.Accents(s))
 }

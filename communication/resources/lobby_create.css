@@ -13,20 +13,6 @@
     padding: 1rem 3rem 1rem 3rem;
 }
 
-.input-container {
-    justify-content: center;
-    align-items: center;
-    display: inline-grid;
-    grid-template-columns: auto auto;
-    grid-column-gap: 20px;
-    grid-row-gap: 10px;
-}
-
-.advanced-section {
-    grid-column-start: 1;
-    grid-column-end: 3;
-}
-
 .input-item {
     width: inherit;
     min-width: 300px;

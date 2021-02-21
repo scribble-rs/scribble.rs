@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -13,7 +14,7 @@ func Test_readWordList(t *testing.T) {
 	t.Run("test invalid language file", func(t *testing.T) {
 		_, readError := readWordList(cases.Lower(language.English), "owO")
 		if readError == nil {
-			t.Errorf("Reading word list didn't return an error, even though the langauge doesn't exist.")
+			t.Errorf("Reading word list didn't return an error, even though the language doesn't exist.")
 		}
 	})
 
@@ -52,7 +53,10 @@ func Test_getRandomWords(t *testing.T) {
 	t.Run("Test getRandomWords with 3 words in list", func(t *testing.T) {
 		lobby := &Lobby{
 			CurrentWord: "",
-			words:       []string{"a", "b", "c"},
+			EditableLobbySettings: &EditableLobbySettings{
+				CustomWordsChance: 0,
+			},
+			words: []string{"a", "b", "c"},
 		}
 
 		randomWords := GetRandomWords(3, lobby)
@@ -65,10 +69,13 @@ func Test_getRandomWords(t *testing.T) {
 
 	t.Run("Test getRandomWords with 3 words in list and 3 more in custom word list, but with 0 chance", func(t *testing.T) {
 		lobby := &Lobby{
-			CurrentWord:       "",
-			words:             []string{"a", "b", "c"},
-			CustomWordsChance: 0,
-			CustomWords:       []string{"d", "e", "f"},
+			CurrentWord: "",
+			words:       []string{"a", "b", "c"},
+			EditableLobbySettings: &EditableLobbySettings{
+				CustomWordsChance: 0,
+			},
+
+			CustomWords: []string{"d", "e", "f"},
 		}
 
 		randomWords := GetRandomWords(3, lobby)
@@ -81,10 +88,12 @@ func Test_getRandomWords(t *testing.T) {
 
 	t.Run("Test getRandomWords with 3 words in list and 100% custom word chance, but without custom words", func(t *testing.T) {
 		lobby := &Lobby{
-			CurrentWord:       "",
-			words:             []string{"a", "b", "c"},
-			CustomWordsChance: 100,
-			CustomWords:       nil,
+			CurrentWord: "",
+			words:       []string{"a", "b", "c"},
+			EditableLobbySettings: &EditableLobbySettings{
+				CustomWordsChance: 100,
+			},
+			CustomWords: nil,
 		}
 
 		randomWords := GetRandomWords(3, lobby)
@@ -97,10 +106,12 @@ func Test_getRandomWords(t *testing.T) {
 
 	t.Run("Test getRandomWords with 3 words in list and 100% custom word chance, with 3 custom words", func(t *testing.T) {
 		lobby := &Lobby{
-			CurrentWord:       "",
-			words:             []string{"a", "b", "c"},
-			CustomWordsChance: 100,
-			CustomWords:       []string{"d", "e", "f"},
+			CurrentWord: "",
+			words:       []string{"a", "b", "c"},
+			EditableLobbySettings: &EditableLobbySettings{
+				CustomWordsChance: 100,
+			},
+			CustomWords: []string{"d", "e", "f"},
 		}
 
 		randomWords := GetRandomWords(3, lobby)
@@ -110,6 +121,34 @@ func Test_getRandomWords(t *testing.T) {
 			}
 		}
 	})
+}
+
+func Test_regressionGetRandomWords_singleCustomWord(t *testing.T) {
+	lobby := &Lobby{
+		CurrentWord: "",
+		EditableLobbySettings: &EditableLobbySettings{
+			CustomWordsChance: 99,
+		},
+		CustomWords: []string{"custom"},
+	}
+
+	words := make([]string, 99, 99)
+	for i := 0; i < 99; i++ {
+		words = append(words, strconv.FormatInt(int64(i), 10))
+	}
+	lobby.words = words
+
+	var customWordFound bool
+	//Simply making sure we don't panic.
+	for i := 0; i < 100; i++ {
+		if GetRandomWords(1, lobby)[0] == "custom" {
+			customWordFound = true
+		}
+	}
+
+	if !customWordFound {
+		t.Error("Custom word wasn't found")
+	}
 }
 
 func Test_getRandomWordsReloading(t *testing.T) {
@@ -122,9 +161,11 @@ func Test_getRandomWordsReloading(t *testing.T) {
 
 	t.Run("test reload with 3 words and 0 custom words and 0 chance", func(t2 *testing.T) {
 		lobby := &Lobby{
-			words:             wordList,
-			CustomWordsChance: 0,
-			CustomWords:       nil,
+			words: wordList,
+			EditableLobbySettings: &EditableLobbySettings{
+				CustomWordsChance: 0,
+			},
+			CustomWords: nil,
 		}
 
 		//Running this 10 times, expecting it to get 3 words each time, even
@@ -139,9 +180,11 @@ func Test_getRandomWordsReloading(t *testing.T) {
 
 	t.Run("test reload with 3 words and 0 custom words and 100 chance", func(t2 *testing.T) {
 		lobby := &Lobby{
-			words:             wordList,
-			CustomWordsChance: 100,
-			CustomWords:       nil,
+			words: wordList,
+			EditableLobbySettings: &EditableLobbySettings{
+				CustomWordsChance: 100,
+			},
+			CustomWords: nil,
 		}
 
 		//Running this 10 times, expecting it to get 3 words each time, even
@@ -156,9 +199,11 @@ func Test_getRandomWordsReloading(t *testing.T) {
 
 	t.Run("test reload with 3 words and 1 custom words and 0 chance", func(t2 *testing.T) {
 		lobby := &Lobby{
-			words:             wordList,
-			CustomWordsChance: 100,
-			CustomWords:       []string{"a"},
+			words: wordList,
+			EditableLobbySettings: &EditableLobbySettings{
+				CustomWordsChance: 100,
+			},
+			CustomWords: []string{"a"},
 		}
 
 		//Running this 10 times, expecting it to get 3 words each time, even

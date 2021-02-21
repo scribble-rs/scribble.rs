@@ -171,6 +171,13 @@
     padding: 0.5rem 1rem 0.5rem 1rem;
 }
 
+.button-center-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1em;
+}
+
 .dialog-button + .dialog-button {
     margin-left: 0.25rem;
 }
@@ -243,6 +250,7 @@ input[type="button"]:active,
     height: 50px;
     width: 50px;
     border: 0;
+    padding: 0;
     background-color: rgb(218, 218, 218);
 }
 
@@ -386,12 +394,12 @@ input[type="button"]:active,
     margin-top: 0.5rem;
 }
 
-.gameover-scoreboard-entry:last-child {
-    margin-bottom: 1rem;
+.gameover-scoreboard-entry-self {
+    font-weight: bold;
 }
 
-.gameover-scoreboard-entry:first-child {
-    font-weight: bold;
+.gameover-scoreboard-entry:last-child {
+    margin-bottom: 1rem;
 }
 
 .gameover-scoreboard-rank {
@@ -403,6 +411,10 @@ input[type="button"]:active,
     text-align: center;
 }
 
+.gameover-scoreboard-score {
+    margin-left: 1rem;
+}
+
 #restart-button {
     display: none;
 }
@@ -410,4 +422,8 @@ input[type="button"]:active,
 #reconnect-dialog {
     /* As this dialog is very important, it should always be on the top. */
     z-index: 100;
+}
+
+.namechange-field {
+    margin-right: 0.25rem;
 }

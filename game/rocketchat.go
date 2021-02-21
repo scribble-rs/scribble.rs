@@ -19,6 +19,7 @@ type rocketChatPayload struct {
 var (
 	rocketchatWebhook string
 	scribbleURL       string
+	rootPath          string
 
 	netTransport *http.Transport
 	netClient    *http.Client
@@ -27,6 +28,7 @@ var (
 func init() {
 	rocketchatWebhook, _ = os.LookupEnv("ROCKETCHAT_WEBHOOK")
 	scribbleURL, _ = os.LookupEnv("SCRIBBLE_URL")
+	rootPath, _ = os.LookupEnv("ROOT_PATH")
 
 	if rocketchatWebhook == "" || scribbleURL == "" {
 		//If one of these wasn't set up correctly, we needn't init the additional state.
@@ -73,7 +75,7 @@ func updateRocketChat(lobby *Lobby, player *Player) {
 	if count == 0 {
 		sendRocketChatMessage(fmt.Sprintf("%v has %v. The game has ended.", player.Name, action))
 	} else {
-		sendRocketChatMessage(fmt.Sprintf("%v has %v. There are %v players in the game. Join [here](%v/ssrEnterLobby?lobby_id=%v)", player.Name, action, count, scribbleURL, lobby.ID))
+		sendRocketChatMessage(fmt.Sprintf("%v has %v. There are %v players in the game. Join [here](%v%s/ssrEnterLobby?lobby_id=%v)", player.Name, action, count, scribbleURL, rootPath, lobby.ID))
 	}
 }
 

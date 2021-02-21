@@ -1,24 +1,28 @@
 package game
 
 import (
+	"embed"
+	"io"
 	"math/rand"
 	"strings"
 	"time"
 
-	"github.com/gobuffalo/packr/v2"
 	"golang.org/x/text/cases"
 )
 
 var (
 	wordListCache       = make(map[string][]string)
 	languageIdentifiers = map[string]string{
-		"english": "en",
-		"italian": "it",
-		"german":  "de",
-		"french":  "fr",
-		"dutch":   "nl",
+		"english_gb": "en_gb",
+		"english":    "en_us",
+		"italian":    "it",
+		"german":     "de",
+		"french":     "fr",
+		"dutch":      "nl",
 	}
-	wordBox = packr.New("words", "../resources/words")
+
+	//go:embed words/*
+	wordFS embed.FS
 )
 
 func getLanguageIdentifier(language string) string {
@@ -82,7 +86,19 @@ func readWordListInternal(
 // a panic before, however, this could enable a user to forcefully crash the
 // whole application.
 func readWordList(lowercaser cases.Caser, chosenLanguage string) ([]string, error) {
-	return readWordListInternal(lowercaser, chosenLanguage, wordBox.FindString)
+	return readWordListInternal(lowercaser, chosenLanguage, func(key string) (string, error) {
+		wordFile, wordErr := wordFS.Open("words/" + key)
+		if wordErr != nil {
+			return "", wordErr
+		}
+
+		wordBytes, readError := io.ReadAll(wordFile)
+		if readError != nil {
+			return "", readError
+		}
+
+		return string(wordBytes), nil
+	})
 }
 
 // GetRandomWords gets a custom amount of random words for the passed Lobby.
@@ -104,7 +120,7 @@ func GetRandomWords(wordCount int, lobby *Lobby) []string {
 
 		words := make([]string, 0, wordCount)
 		for i := 0; i <= wordCount; i++ {
-			if rand.Intn(100)+1 < lobby.CustomWordsChance {
+			if len(lobby.CustomWords) >= 1 && rand.Intn(100)+1 < lobby.CustomWordsChance {
 				words = append(words, popCustomWords(1, lobby)...)
 			} else {
 				words = append(words, popWordpackWords(1, lobby)...)

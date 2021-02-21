@@ -52,19 +52,19 @@ func getPlayer(lobby *game.Lobby, r *http.Request) *game.Player {
 // getPlayername either retrieves the playername from a cookie, the URL form
 // or generates a new random name if no name can be found.
 func getPlayername(r *http.Request) string {
+	parseError := r.ParseForm()
+	if parseError == nil {
+		username := html.EscapeString(strings.TrimSpace(r.Form.Get("username")))
+		if username != "" {
+			return trimDownTo(username, game.MaxPlayerNameLength)
+		}
+	}
+
 	usernameCookie, noCookieError := r.Cookie("username")
 	if noCookieError == nil {
 		username := html.EscapeString(strings.TrimSpace(usernameCookie.Value))
 		if username != "" {
-			return trimDownTo(username, 30)
-		}
-	}
-
-	parseError := r.ParseForm()
-	if parseError == nil {
-		username := r.Form.Get("username")
-		if username != "" {
-			return trimDownTo(username, 30)
+			return trimDownTo(username, game.MaxPlayerNameLength)
 		}
 	}
 
@@ -100,7 +100,7 @@ func GetPlayers(w http.ResponseWriter, r *http.Request) {
 }
 
 var (
-	//CanvasColor is the initialy / empty canvas colors value used for
+	//CanvasColor is the initially / empty canvas colors value used for
 	//Lobbydata objects.
 	CanvasColor = [3]uint8{255, 255, 255}
 	//SuggestedBrushSizes is suggested brush sizes value used for
@@ -113,6 +113,10 @@ var (
 // While unofficial clients will probably need all of these values, the
 // official webclient doesn't use all of them as of now.
 type LobbyData struct {
+	*BasePageConfig
+	*game.SettingBounds
+	*game.EditableLobbySettings
+
 	LobbyID string `json:"lobbyId"`
 	//DrawingBoardBaseWidth is the internal canvas width and is needed for
 	//correctly up- / downscaling drawing instructions.
@@ -128,14 +132,17 @@ type LobbyData struct {
 	//It's an array containing [R,G,B]
 	CanvasColor [3]uint8 `json:"canvasColor"`
 	//SuggestedBrushSizes are suggestions for the different brush sizes
-	//that the user can choose between. These brushes are guaranted to
+	//that the user can choose between. These brushes are guaranteed to
 	//be ordered from low to high and stay with the bounds.
 	SuggestedBrushSizes [4]uint8 `json:"suggestedBrushSizes"`
 }
 
-func createLobbyData(lobbyID string) *LobbyData {
+func createLobbyData(lobby *game.Lobby) *LobbyData {
 	return &LobbyData{
-		LobbyID:                lobbyID,
+		BasePageConfig:         CurrentBasePageConfig,
+		SettingBounds:          game.LobbySettingBounds,
+		EditableLobbySettings:  lobby.EditableLobbySettings,
+		LobbyID:                lobby.ID,
 		DrawingBoardBaseWidth:  game.DrawingBoardBaseWidth,
 		DrawingBoardBaseHeight: game.DrawingBoardBaseHeight,
 		MinBrushSize:           game.MinBrushSize,
@@ -168,7 +175,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 
 	player := getPlayer(lobby, r)
 
-	pageData := createLobbyData(lobby.ID)
+	pageData := createLobbyData(lobby)
 
 	if player == nil {
 		if !lobby.HasFreePlayerSlot() {
@@ -205,7 +212,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 		player.SetLastKnownAddress(getIPAddressFromRequest(r))
 	}
 
-	templateError := lobbyPage.ExecuteTemplate(w, "lobby.html", pageData)
+	templateError := pageTemplates.ExecuteTemplate(w, "lobby-page", pageData)
 	if templateError != nil {
 		panic(templateError)
 	}

@@ -1,0 +1,24 @@
+{{define "error-page"}}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Scribble.rs - Error</title>
+    <meta charset="UTF-8"/>
+    {{template "font-decl" .}}
+    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/base.css"/>
+    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/error.css"/>
+    <link rel="icon" type="image/png" href="{{.RootPath}}/resources/favicon.png"/>
+</head>
+
+<body>
+<div class="content-wrapper">
+    <h1 class="error-title">(◕︿◕✿)</h1>
+    <h2 class="error-message">{{.ErrorMessage}}</h2>
+    <a class="go-back" href="{{.RootPath}}/">Click here to get back to the Homepage</a>
+    {{template "footer" .}}
+</div>
+</body>
+
+</html>
+{{end}}
