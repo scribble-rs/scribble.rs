@@ -468,7 +468,7 @@ func handleNameChangeEvent(caller *Player, lobby *Lobby, name string) {
 
 	TriggerUpdateEvent("name-change", &NameChangeEvent{
 		PlayerID:   caller.ID,
-		PlayerName: newName,
+		PlayerName: caller.Name,
 	}, lobby)
 }
 
