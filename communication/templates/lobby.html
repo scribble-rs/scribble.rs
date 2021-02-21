@@ -18,8 +18,8 @@
     <div id="lobby">
         <span id="rounds"></span>
 
-        <div style="position: relative">
-            <div style="position: absolute">
+        <div style="display: flex;">
+            <div>
                 <!-- this button is basically behaving like a checkbox, but in order to
                 have a uniform look with the other buttons in the header, we are not using
                 a checkbox anymore. -->
@@ -28,14 +28,16 @@
                     <img id="sound-toggle-label" class="header-button-image"/>
                 </button>
 
-                <button onclick="showKickDialog()" class="dialog-button header-button"
-                        alt="Votekick a player" title="Votekick a player">
-                    <img src="{{.RootPath}}/resources/kick.png" class="header-button-image"/>
-                </button>
-
                 <button onclick="showNameChangeDialog()" class="dialog-button header-button"
                         alt="Change your name" title="Change your name">
                     <img src="{{.RootPath}}/resources/user.svg" class="header-button-image"/>
+                </button>
+            </div>
+            <div id="word-container" style="flex: 1; align-self: center; justify-content: baseline;"></div>
+            <div>
+                <button onclick="showKickDialog()" class="dialog-button header-button"
+                        alt="Votekick a player" title="Votekick a player">
+                    <img src="{{.RootPath}}/resources/kick.png" class="header-button-image"/>
                 </button>
 
                 <button onclick="showLobbySettingsDialog()" class="dialog-button header-button"
@@ -43,7 +45,6 @@
                     <img src="{{.RootPath}}/resources/settings.svg" class="header-button-image"/>
                 </button>
             </div>
-            <div id="word-container" style="position:absolute;left: 50%; transform: translate(-50%, 0);"></div>
         </div>
 
         <span id="time-left">Time Left: ∞</span>
