@@ -57,7 +57,7 @@
     flex: 1 1;
     margin: 0 1rem 0 1rem;
     padding: 1rem;
-    overflow: hidden;
+    overflow: auto;
 }
 
 /* display: block causes the element to be visible, since the default value is none */
@@ -110,6 +110,7 @@
     margin: 1rem;
     padding: 1rem;
     background-color: rgb(226, 226, 226);
+    overflow: auto;
 }
 
 .lobby-detail {
