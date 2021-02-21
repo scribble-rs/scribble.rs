@@ -1,6 +1,7 @@
 var floodfill = (function() {
 
     //Copyright(c) Max Irwin - 2011, 2015, 2016
+    //Repo: https://github.com/binarymax/floodfill.js
     //MIT License
 
     function floodfill(data,x,y,fillcolor,tolerance,width,height) {
@@ -133,9 +134,14 @@ var floodfill = (function() {
         var height = image.height;
 
         if(width>0 && height>0) {
-            fillUint8ClampedArray(data,x,y,color,tolerance,width,height);
-            ctx.putImageData(image,left,top);
+            const hasFilled = fillUint8ClampedArray(data,x,y,color,tolerance,width,height);
+            if (hasFilled) {
+                ctx.putImageData(image,left,top);
+            }
+            return hasFilled;
         }
+
+        return false;
     };
 
     if (typeof CanvasRenderingContext2D != 'undefined') {

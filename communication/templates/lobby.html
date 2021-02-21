@@ -1218,20 +1218,21 @@
     function fill(context, x1, y1, color) {
         context.fillStyle = color;
         //There seems to be some bug where setting the tolerance to 0 causes a freeze when painting black on white.
-        context.fillFlood(x1, y1, 1);
+        return context.fillFlood(x1, y1, 1);
     }
 
     function fillAndSendEvent(context, x1, y1, color) {
-        fill(context, x1, y1, color);
-        let fillInstruction = {
-            type: "fill",
-            data: {
-                x: x1 * scaleUpFactor(),
-                y: y1 * scaleUpFactor(),
-                color: color
-            },
-        };
-        socket.send(JSON.stringify(fillInstruction));
+        if (fill(context, x1, y1, color)) {
+            let fillInstruction = {
+                type: "fill",
+                data: {
+                    x: x1 * scaleUpFactor(),
+                    y: y1 * scaleUpFactor(),
+                    color: color
+                },
+            };
+            socket.send(JSON.stringify(fillInstruction));
+        }
     }
 
     function drawLineAndSendEvent(context, x1, y1, x2, y2, color, lineWidth) {
