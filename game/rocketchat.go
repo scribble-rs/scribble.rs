@@ -75,7 +75,7 @@ func updateRocketChat(lobby *Lobby, player *Player) {
 	if count == 0 {
 		sendRocketChatMessage(fmt.Sprintf("%v has %v. The game has ended.", player.Name, action))
 	} else {
-		sendRocketChatMessage(fmt.Sprintf("%v has %v. There are %v players in the game. Join [here](%v%s/ssrEnterLobby?lobby_id=%v)", player.Name, action, count, scribbleURL, rootPath, lobby.ID))
+		sendRocketChatMessage(fmt.Sprintf("%v has %v. There are %v players in the game. Join [here](%v%s/ssrEnterLobby?lobby_id=%v)", player.Name, action, count, scribbleURL, rootPath, lobby.LobbyID))
 	}
 }
 

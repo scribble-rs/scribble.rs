@@ -54,7 +54,7 @@ func GetLobby(id string) *game.Lobby {
 	defer createDeleteMutex.Unlock()
 
 	for _, l := range lobbies {
-		if l.ID == id {
+		if l.LobbyID == id {
 			return l
 		}
 	}
@@ -100,7 +100,7 @@ func RemoveLobby(id string) {
 func removeLobby(id string) {
 	indexToDelete := -1
 	for index, l := range lobbies {
-		if l.ID == id {
+		if l.LobbyID == id {
 			indexToDelete = index
 			break
 		}
@@ -114,5 +114,5 @@ func removeLobby(id string) {
 func removeLobbyByIndex(indexToDelete int) {
 	lobby := lobbies[indexToDelete]
 	lobbies = append(lobbies[:indexToDelete], lobbies[indexToDelete+1:]...)
-	log.Printf("Closing lobby %s. There are currently %d open lobbies left.\n", lobby.ID, len(lobbies))
+	log.Printf("Closing lobby %s. There are currently %d open lobbies left.\n", lobby.LobbyID, len(lobbies))
 }
