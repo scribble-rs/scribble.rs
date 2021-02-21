@@ -459,16 +459,15 @@ func handleNameChangeEvent(caller *Player, lobby *Lobby, name string) {
 
 	oldName := caller.Name
 	if newName == "" {
-		caller.Name = GeneratePlayerName()
-	} else {
-		caller.Name = newName
+		newName = GeneratePlayerName()
 	}
+	caller.Name = newName
 
 	log.Printf("%s is now %s\n", oldName, newName)
 
 	TriggerUpdateEvent("name-change", &NameChangeEvent{
 		PlayerID:   caller.ID,
-		PlayerName: caller.Name,
+		PlayerName: newName,
 	}, lobby)
 }
 
