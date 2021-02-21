@@ -167,12 +167,6 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//FIXME Temporary
-	if strings.Contains(userAgent, "iphone") || strings.Contains(userAgent, "android") {
-		userFacingError(w, "Sorry, mobile is currently not supported.")
-		return
-	}
-
 	player := getPlayer(lobby, r)
 
 	pageData := createLobbyData(lobby)
