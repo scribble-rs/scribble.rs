@@ -8,7 +8,7 @@ import (
 
 func TestCreateLobby(t *testing.T) {
 	data := createLobbyData(&game.Lobby{
-		ID: "TEST",
+		LobbyID: "TEST",
 	})
 
 	var previousSize uint8 = 0

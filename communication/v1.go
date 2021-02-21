@@ -14,7 +14,7 @@ import (
 
 // LobbyEntry is an API object for representing a join-able public lobby.
 type LobbyEntry struct {
-	ID              string `json:"id"`
+	LobbyID         string `json:"lobbyId"`
 	PlayerCount     int    `json:"playerCount"`
 	MaxPlayers      int    `json:"maxPlayers"`
 	Round           int    `json:"round"`
@@ -31,7 +31,7 @@ func publicLobbies(w http.ResponseWriter, r *http.Request) {
 	lobbyEntries := make([]*LobbyEntry, 0, len(lobbies))
 	for _, lobby := range lobbies {
 		lobbyEntries = append(lobbyEntries, &LobbyEntry{
-			ID:              lobby.ID,
+			LobbyID:         lobby.LobbyID,
 			PlayerCount:     lobby.GetOccupiedPlayerSlots(),
 			MaxPlayers:      lobby.MaxPlayers,
 			Round:           lobby.Round,
