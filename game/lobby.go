@@ -60,8 +60,8 @@ type SettingBounds struct {
 	MaxRounds            int64 `json:"maxRounds"`
 	MinMaxPlayers        int64 `json:"minMaxPlayers"`
 	MaxMaxPlayers        int64 `json:"maxMaxPlayers"`
-	MinClientsPerIPLimit int64 `json:"minClientsPerIPLimit"`
-	MaxClientsPerIPLimit int64 `json:"maxClientsPerIPLimit"`
+	MinClientsPerIPLimit int64 `json:"minClientsPerIpLimit"`
+	MaxClientsPerIPLimit int64 `json:"maxClientsPerIpLimit"`
 }
 
 // LineEvent is basically the same as GameEvent, but with a specific Data type.
