@@ -1,6 +1,0 @@
-github.com/bitly/go-simplejson v0.5.0 h1:6IH+V8/tVMab511d5bn4M7EwGXZf9Hj6i2xSwkNEM+Y=
-github.com/bitly/go-simplejson v0.5.0/go.mod h1:cXHtHw4XUPsvGaxgjIAn8PhEWG9NfngEKAMDJEczWVA=
-github.com/zieckey/gochart v0.0.0-20170321103903-03ae93442a96 h1:xsDEhagPeh+WPzXZDp9np9/2NzycHvQ4q1FPXGBkbNE=
-github.com/zieckey/gochart v0.0.0-20170321103903-03ae93442a96/go.mod h1:4XqduDMcZYH89W3hrHrieMuPDheynBDC0WcU5fqFlq4=
-github.com/zieckey/goini v0.0.0-20180118150432-0da17d361d26 h1:E0lEWrifmR0ACbGf5PLji1XbW6rtIXLHCXO/YOqi0AE=
-github.com/zieckey/goini v0.0.0-20180118150432-0da17d361d26/go.mod h1:TQpdgg7I9+PFIkatlx/dnZyZb4iZyCUx1HJj4rXi3+E=
