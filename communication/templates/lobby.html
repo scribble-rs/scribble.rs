@@ -1201,7 +1201,7 @@
 
     drawingBoard.onclick = function (e) {
         if (allowDrawing && e.button === 0) {
-            if (localTool === 2) {
+            if (localTool === fillBucket) {
                 fillAndSendEvent(context, e.offsetX, e.offsetY, localColor)
             } else {
                 drawLineAndSendEvent(context, e.offsetX, e.offsetY, e.offsetX, e.offsetY, localColor, localLineWidth);
@@ -1236,7 +1236,7 @@
     }
 
     function drawLineAndSendEvent(context, x1, y1, x2, y2, color, lineWidth) {
-        if (localTool === 1) {
+        if (localTool === rubber) {
             color = "#ffffff";
         }
 
