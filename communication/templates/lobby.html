@@ -1367,6 +1367,19 @@
         }));
     }, false);
 
+    //Mobileclients often show the URL bar and the system bar, which takes
+    //way too much space away if the keyboard is also visible. This causes
+    //mobile clients to not be able to see the full drawing, which is annoying.
+    //Therefore we ask the browser to fullscreen the page.
+    const isMobile = navigator.userAgent.toLowerCase().indexOf("mobile") != -1;
+    applyMessage("system-message", "logger", navigator.userAgent.toLowerCase()+" contains mobile: " + isMobile);
+    if (isMobile) {
+        //If we try to request fullscreen directly, the request most likely gets denied.
+        //Therefore we try fullscreening whenever the user uses the message input.
+        messageInput.addEventListener("click", function() {
+            document.body.requestFullscreen();
+        });
+    }
 </script>
 </body>
 
