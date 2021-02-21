@@ -26,18 +26,17 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 func createDefaultLobbyCreatePageData() *CreatePageData {
 	return &CreatePageData{
-		BasePageConfig:         CurrentBasePageConfig,
-		SettingBounds:          game.LobbySettingBounds,
-		Languages:              game.SupportedLanguages,
-		Public:                 "false",
-		DrawingTime:            "120",
-		Rounds:                 "4",
-		MaxPlayers:             "12",
-		CustomWordsChance:      "50",
-		ClientsPerIPLimit:      "1",
-		EnableVotekick:         "true",
-		Language:               "english",
-		CurrentlyActiveLobbies: state.GetActiveLobbyCount(),
+		BasePageConfig:    CurrentBasePageConfig,
+		SettingBounds:     game.LobbySettingBounds,
+		Languages:         game.SupportedLanguages,
+		Public:            "false",
+		DrawingTime:       "120",
+		Rounds:            "4",
+		MaxPlayers:        "12",
+		CustomWordsChance: "50",
+		ClientsPerIPLimit: "1",
+		EnableVotekick:    "true",
+		Language:          "english",
 	}
 }
 
@@ -45,18 +44,17 @@ func createDefaultLobbyCreatePageData() *CreatePageData {
 type CreatePageData struct {
 	*BasePageConfig
 	*game.SettingBounds
-	Errors                 []string
-	Languages              map[string]string
-	Public                 string
-	DrawingTime            string
-	Rounds                 string
-	MaxPlayers             string
-	CustomWords            string
-	CustomWordsChance      string
-	ClientsPerIPLimit      string
-	EnableVotekick         string
-	Language               string
-	CurrentlyActiveLobbies int
+	Errors            []string
+	Languages         map[string]string
+	Public            string
+	DrawingTime       string
+	Rounds            string
+	MaxPlayers        string
+	CustomWords       string
+	CustomWordsChance string
+	ClientsPerIPLimit string
+	EnableVotekick    string
+	Language          string
 }
 
 // ssrCreateLobby allows creating a lobby, optionally returning errors that
@@ -80,18 +78,17 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 
 	//Prevent resetting the form, since that would be annoying as hell.
 	pageData := CreatePageData{
-		SettingBounds:          game.LobbySettingBounds,
-		Languages:              game.SupportedLanguages,
-		Public:                 r.Form.Get("public"),
-		DrawingTime:            r.Form.Get("drawing_time"),
-		Rounds:                 r.Form.Get("rounds"),
-		MaxPlayers:             r.Form.Get("max_players"),
-		CustomWords:            r.Form.Get("custom_words"),
-		CustomWordsChance:      r.Form.Get("custom_words_chance"),
-		ClientsPerIPLimit:      r.Form.Get("clients_per_ip_limit"),
-		EnableVotekick:         r.Form.Get("enable_votekick"),
-		Language:               r.Form.Get("language"),
-		CurrentlyActiveLobbies: state.GetActiveLobbyCount(),
+		SettingBounds:     game.LobbySettingBounds,
+		Languages:         game.SupportedLanguages,
+		Public:            r.Form.Get("public"),
+		DrawingTime:       r.Form.Get("drawing_time"),
+		Rounds:            r.Form.Get("rounds"),
+		MaxPlayers:        r.Form.Get("max_players"),
+		CustomWords:       r.Form.Get("custom_words"),
+		CustomWordsChance: r.Form.Get("custom_words_chance"),
+		ClientsPerIPLimit: r.Form.Get("clients_per_ip_limit"),
+		EnableVotekick:    r.Form.Get("enable_votekick"),
+		Language:          r.Form.Get("language"),
 	}
 
 	if languageInvalid != nil {
