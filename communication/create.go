@@ -156,7 +156,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 	//We only add the lobby if we could do all necessary pre-steps successfully.
 	state.AddLobby(lobby)
 
-	http.Redirect(w, r, CurrentBasePageConfig.RootPath+"/ssrEnterLobby?lobby_id="+lobby.ID, http.StatusFound)
+	http.Redirect(w, r, CurrentBasePageConfig.RootPath+"/ssrEnterLobby?lobby_id="+lobby.LobbyID, http.StatusFound)
 }
 
 func parsePlayerName(value string) (string, error) {

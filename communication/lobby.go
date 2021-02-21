@@ -142,7 +142,7 @@ func createLobbyData(lobby *game.Lobby) *LobbyData {
 		BasePageConfig:         CurrentBasePageConfig,
 		SettingBounds:          game.LobbySettingBounds,
 		EditableLobbySettings:  lobby.EditableLobbySettings,
-		LobbyID:                lobby.ID,
+		LobbyID:                lobby.LobbyID,
 		DrawingBoardBaseWidth:  game.DrawingBoardBaseWidth,
 		DrawingBoardBaseHeight: game.DrawingBoardBaseHeight,
 		MinBrushSize:           game.MinBrushSize,

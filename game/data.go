@@ -16,7 +16,7 @@ const slotReservationTime = time.Minute * 5
 // FIXME Field visibilities should be changed in case we ever serialize this.
 type Lobby struct {
 	// ID uniquely identified the Lobby.
-	ID string
+	LobbyID string
 
 	*EditableLobbySettings
 
@@ -271,7 +271,7 @@ func createLobby(
 	publicLobby bool) *Lobby {
 
 	lobby := &Lobby{
-		ID:          uuid.Must(uuid.NewV4()).String(),
+		LobbyID:     uuid.Must(uuid.NewV4()).String(),
 		DrawingTime: drawingTime,
 		MaxRounds:   rounds,
 		EditableLobbySettings: &EditableLobbySettings{
