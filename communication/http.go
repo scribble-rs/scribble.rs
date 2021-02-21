@@ -15,7 +15,7 @@ type BasePageConfig struct {
 	// scribble.rs paths. For example if you host scribblers on painting.com
 	// but already host a different website, then your API paths might have to
 	// look like this: painting.com/scribblers/v1.
-	RootPath string
+	RootPath string `json:"rootPath"`
 }
 
 // ErrorPageData represents the data that error.html requires to be displayed.
