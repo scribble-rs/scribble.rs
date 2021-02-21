@@ -99,7 +99,7 @@ type EditableLobbySettings struct {
 	CustomWordsChance int `json:"customWordsChance"`
 	// ClientsPerIPLimit helps preventing griefing by reducing each player
 	// to one tab per IP address.
-	ClientsPerIPLimit int `json:"maxClientsPerIp"`
+	ClientsPerIPLimit int `json:"clientsPerIpLimit"`
 }
 
 type gameState string

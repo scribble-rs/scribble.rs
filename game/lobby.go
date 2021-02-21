@@ -54,14 +54,14 @@ const (
 // SettingBounds defines the lower and upper bounds for the user-specified
 // lobby creation input.
 type SettingBounds struct {
-	MinDrawingTime       int64
-	MaxDrawingTime       int64
-	MinRounds            int64
-	MaxRounds            int64
-	MinMaxPlayers        int64
-	MaxMaxPlayers        int64
-	MinClientsPerIPLimit int64
-	MaxClientsPerIPLimit int64
+	MinDrawingTime       int64 `json:"minDrawingTime"`
+	MaxDrawingTime       int64 `json:"maxDrawingTime"`
+	MinRounds            int64 `json:"minRounds"`
+	MaxRounds            int64 `json:"maxRounds"`
+	MinMaxPlayers        int64 `json:"minMaxPlayers"`
+	MaxMaxPlayers        int64 `json:"maxMaxPlayers"`
+	MinClientsPerIPLimit int64 `json:"minClientsPerIpLimit"`
+	MaxClientsPerIPLimit int64 `json:"maxClientsPerIpLimit"`
 }
 
 // LineEvent is basically the same as GameEvent, but with a specific Data type.
