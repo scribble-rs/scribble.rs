@@ -927,6 +927,7 @@
             }
 
             allowDrawing = false;
+            updateCursor();
         } else if (parsed.type === "your-turn") {
             playWav('{{.RootPath}}/resources/your-turn.wav');
 
@@ -987,6 +988,7 @@
         if (ready.wordHints && ready.wordHints.length) {
             applyWordHints(ready.wordHints)
         }
+        updateCursor();
     }
 
     function promptWords(wordOne, wordTwo, wordThree) {
