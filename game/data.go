@@ -16,21 +16,18 @@ const slotReservationTime = time.Minute * 5
 // FIXME Field visibilities should be changed in case we ever serialize this.
 type Lobby struct {
 	// ID uniquely identified the Lobby.
-	ID string
+	LobbyID string
+
+	*EditableLobbySettings
 
 	// DrawingTime is the amount of seconds that each player has available to
 	// finish their drawing.
 	DrawingTime int
 	// MaxRounds defines how many iterations a lobby does before the game ends.
 	// One iteration means every participant does one drawing.
-	MaxRounds int
-	// MaxPlayers defines the maximum amount of players in a single lobby.
-	MaxPlayers int
-	// CustomWords are additional words that will be used in addition to the
-	// predefined words.
+	MaxRounds   int
 	CustomWords []string
 	words       []string
-	public      bool
 
 	// players references all participants of the Lobby.
 	players []*Player
@@ -39,9 +36,9 @@ type Lobby struct {
 	state gameState
 	// drawer references the Player that is currently drawing.
 	drawer *Player
-	// owner references the Player that currently owns the lobby.
+	// Owner references the Player that currently owns the lobby.
 	// Meaning this player has rights to restart or change certain settings.
-	owner *Player
+	Owner *Player
 	// creator is the player that opened a lobby. Initially creator and owner
 	// are set to the same player. While the owner can change throughout the
 	// game, the creator can't.
@@ -70,20 +67,39 @@ type Lobby struct {
 
 	timeLeftTicker        *time.Ticker
 	scoreEarnedByGuessers int
-	CustomWordsChance     int
-	ClientsPerIPLimit     int
 	// currentDrawing represents the state of the current canvas. The elements
 	// consist of LineEvent and FillEvent. Please do not modify the contents
 	// of this array an only move AppendLine and AppendFill on the respective
 	// lobby object.
 	currentDrawing []interface{}
-	EnableVotekick bool
 
 	lowercaser cases.Caser
 
 	//LastPlayerDisconnectTime is used to know since when a lobby is empty, in case
 	//it is empty.
 	LastPlayerDisconnectTime *time.Time
+}
+
+// EditableLobbySettings represents all lobby settings that are editable by
+// the lobby owner after the lobby has already been opened.
+type EditableLobbySettings struct {
+	// MaxPlayers defines the maximum amount of players in a single lobby.
+	MaxPlayers int `json:"maxPlayers"`
+	// CustomWords are additional words that will be used in addition to the
+	// predefined words.
+	// Public defines whether the lobby is being broadcast to clients asking
+	// for available lobbies.
+	Public bool `json:"public"`
+	// EnableVotekick decides whether players are allowed to kick eachother
+	// by casting majority votes.
+	EnableVotekick bool `json:"enableVotekick"`
+	// CustomWordsChance determines the chance of each word being a custom
+	// word on the next word prompt. This needs to be an integer between
+	// 0 and 100. The value represents a percentage.
+	CustomWordsChance int `json:"customWordsChance"`
+	// ClientsPerIPLimit helps preventing griefing by reducing each player
+	// to one tab per IP address.
+	ClientsPerIPLimit int `json:"clientsPerIpLimit"`
 }
 
 type gameState string
@@ -251,19 +267,23 @@ func createLobby(
 	customWords []string,
 	customWordsChance int,
 	clientsPerIPLimit int,
-	enableVotekick bool) *Lobby {
+	enableVotekick bool,
+	publicLobby bool) *Lobby {
 
 	lobby := &Lobby{
-		ID:                uuid.Must(uuid.NewV4()).String(),
-		DrawingTime:       drawingTime,
-		MaxRounds:         rounds,
-		MaxPlayers:        maxPlayers,
-		CustomWords:       customWords,
-		CustomWordsChance: customWordsChance,
-		ClientsPerIPLimit: clientsPerIPLimit,
-		EnableVotekick:    enableVotekick,
-		currentDrawing:    make([]interface{}, 0, 0),
-		state:             unstarted,
+		LobbyID:     uuid.Must(uuid.NewV4()).String(),
+		DrawingTime: drawingTime,
+		MaxRounds:   rounds,
+		EditableLobbySettings: &EditableLobbySettings{
+			MaxPlayers:        maxPlayers,
+			CustomWordsChance: customWordsChance,
+			ClientsPerIPLimit: clientsPerIPLimit,
+			EnableVotekick:    enableVotekick,
+			Public:            publicLobby,
+		},
+		CustomWords:    customWords,
+		currentDrawing: make([]interface{}, 0, 0),
+		state:          unstarted,
 	}
 
 	if len(customWords) > 1 {
@@ -305,7 +325,7 @@ func (lobby *Lobby) HasConnectedPlayers() bool {
 }
 
 func (lobby *Lobby) IsPublic() bool {
-	return lobby.public
+	return lobby.Public
 }
 
 func (lobby *Lobby) GetPlayers() []*Player {

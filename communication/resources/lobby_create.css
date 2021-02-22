@@ -13,20 +13,6 @@
     padding: 1rem 3rem 1rem 3rem;
 }
 
-.input-container {
-    justify-content: center;
-    align-items: center;
-    display: inline-grid;
-    grid-template-columns: auto auto;
-    grid-column-gap: 20px;
-    grid-row-gap: 10px;
-}
-
-.advanced-section {
-    grid-column-start: 1;
-    grid-column-end: 3;
-}
-
 .input-item {
     width: inherit;
     min-width: 300px;
@@ -69,20 +55,14 @@
     border: none;
     background-color: white;
     flex: 1 1;
-    margin: 0 1rem 0 1rem;
+    margin: 0 1rem 1rem 1rem;
     padding: 1rem;
-    overflow: hidden;
+    overflow: auto;
 }
 
 /* display: block causes the element to be visible, since the default value is none */
 #create-lobby {
     display: block;
-}
-
-.open-lobby-info {
-    margin-top: 1em;
-    margin-bottom: 1em;
-    text-align: center;
 }
 
 .join-lobby-data {
@@ -124,6 +104,7 @@
     margin: 1rem;
     padding: 1rem;
     background-color: rgb(226, 226, 226);
+    overflow: auto;
 }
 
 .lobby-detail {

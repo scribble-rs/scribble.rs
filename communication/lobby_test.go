@@ -7,7 +7,9 @@ import (
 )
 
 func TestCreateLobby(t *testing.T) {
-	data := createLobbyData("TEST")
+	data := createLobbyData(&game.Lobby{
+		LobbyID: "TEST",
+	})
 
 	var previousSize uint8 = 0
 	for _, suggestedSize := range data.SuggestedBrushSizes {

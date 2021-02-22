@@ -5,9 +5,10 @@
 <head>
     <title>Scribble.rs</title>
     <meta charset="UTF-8"/>
-    <link rel="stylesheet" type="text/css" href="/resources/base.css"/>
-    <link rel="stylesheet" type="text/css" href="/resources/lobby_create.css"/>
-    <link rel="icon" type="image/png" href="/resources/favicon.png"/>
+    {{template "font-decl" .}}
+    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/base.css"/>
+    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/lobby_create.css"/>
+    <link rel="icon" type="image/png" href="{{.RootPath}}/resources/favicon.png"/>
 </head>
 
 <body>
@@ -45,7 +46,7 @@
                     </div>
 
                 {{end}}
-                <form id="lobby-create" class="input-container" action="/ssrCreateLobby" method="POST">
+                <form id="lobby-create" class="input-container" action="{{.RootPath}}/ssrCreateLobby" method="POST">
                     <b>Lobby-Language</b>
                     <select class="input-item" name="language" placeholder="Choose your language">
                         {{$language := .Language}}
@@ -69,7 +70,11 @@
                     <textarea class="input-item" name="custom_words"
                     placeholder="Enter your additional words, separating them by commas">{{.CustomWords}}</textarea>
                     <b>Custom Words Chance</b>
-                    <input type="range" name="custom_words_chance" min="1" max="100" value="{{.CustomWordsChance}}">
+                    <div style="display: flex;">
+                        0%
+                        <input style="flex: 1;" type="range" name="custom_words_chance" min="1" max="100" value="{{.CustomWordsChance}}">
+                        100%
+                    </div>
                     <details class="advanced-section">
                         <summary>Advanced</summary>
                         <div class="input-container">
@@ -129,9 +134,7 @@
         </div>
     </div>
 
-    <span class="open-lobby-info">Currently active lobbies: {{.CurrentlyActiveLobbies}}</span>
-
-    {{template "footer"}}
+    {{template "footer" .}}
 </div>
 
 <script type="text/javascript">
@@ -153,7 +156,7 @@
     let maxClientsIPDetail = document.getElementById("max-clients-ip-detail");
 
     function onJoin() {
-        window.open("/ssrEnterLobby?lobby_id=" + selectedLobby, "_self");
+        window.open("{{.RootPath}}/ssrEnterLobby?lobby_id=" + selectedLobby, "_self");
     }
 
     function loadLobbyTable() {
@@ -165,7 +168,7 @@
             }
         }
 
-        fetch("/v1/lobby")
+        fetch("{{.RootPath}}/v1/lobby")
             .then((response) => {
                 return response.json();
             })
@@ -200,7 +203,7 @@
                             row.setAttribute("selected", "false");
                         })
                         newRow.setAttribute("selected", "true");
-                        selectedLobby = lobby.id;
+                        selectedLobby = lobby.lobbyId;
                         showLobbyDetails(lobby);
                     };
                     newRow.addEventListener("click", clickHandler, false);
@@ -225,7 +228,7 @@
             drawingTimeDetail.innerText = lobby.drawingTime.toString();
             customWordsDetail.innerText = lobby.customWords ? "Yes" : "No";
             votekickingDetail.innerText = lobby.votekick ? "Yes" : "No";
-            maxClientsIPDetail.innerText = lobby.maxClientsPerIp ? "Yes" : "No";
+            maxClientsIPDetail.innerText = lobby.maxClientsPerIp;
             joinButton.disabled = false;
         }
     }

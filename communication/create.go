@@ -26,35 +26,35 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 func createDefaultLobbyCreatePageData() *CreatePageData {
 	return &CreatePageData{
-		SettingBounds:          game.LobbySettingBounds,
-		Languages:              game.SupportedLanguages,
-		Public:                 "false",
-		DrawingTime:            "120",
-		Rounds:                 "4",
-		MaxPlayers:             "12",
-		CustomWordsChance:      "50",
-		ClientsPerIPLimit:      "1",
-		EnableVotekick:         "true",
-		Language:               "english",
-		CurrentlyActiveLobbies: state.GetActiveLobbyCount(),
+		BasePageConfig:    CurrentBasePageConfig,
+		SettingBounds:     game.LobbySettingBounds,
+		Languages:         game.SupportedLanguages,
+		Public:            "false",
+		DrawingTime:       "120",
+		Rounds:            "4",
+		MaxPlayers:        "12",
+		CustomWordsChance: "50",
+		ClientsPerIPLimit: "1",
+		EnableVotekick:    "true",
+		Language:          "english",
 	}
 }
 
 // CreatePageData defines all non-static data for the lobby create page.
 type CreatePageData struct {
+	*BasePageConfig
 	*game.SettingBounds
-	Errors                 []string
-	Languages              map[string]string
-	Public                 string
-	DrawingTime            string
-	Rounds                 string
-	MaxPlayers             string
-	CustomWords            string
-	CustomWordsChance      string
-	ClientsPerIPLimit      string
-	EnableVotekick         string
-	Language               string
-	CurrentlyActiveLobbies int
+	Errors            []string
+	Languages         map[string]string
+	Public            string
+	DrawingTime       string
+	Rounds            string
+	MaxPlayers        string
+	CustomWords       string
+	CustomWordsChance string
+	ClientsPerIPLimit string
+	EnableVotekick    string
+	Language          string
 }
 
 // ssrCreateLobby allows creating a lobby, optionally returning errors that
@@ -73,23 +73,22 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 	customWords, customWordsInvalid := parseCustomWords(r.Form.Get("custom_words"))
 	customWordChance, customWordChanceInvalid := parseCustomWordsChance(r.Form.Get("custom_words_chance"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := parseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
-	enableVotekick := r.Form.Get("enable_votekick") == "true"
-	publicLobby := r.Form.Get("public") == "true"
+	enableVotekick, enableVotekickInvalid := parseBoolean("enable votekick", r.Form.Get("enable_votekick"))
+	publicLobby, publicLobbyInvalid := parseBoolean("public", r.Form.Get("public"))
 
 	//Prevent resetting the form, since that would be annoying as hell.
 	pageData := CreatePageData{
-		SettingBounds:          game.LobbySettingBounds,
-		Languages:              game.SupportedLanguages,
-		Public:                 r.Form.Get("public"),
-		DrawingTime:            r.Form.Get("drawing_time"),
-		Rounds:                 r.Form.Get("rounds"),
-		MaxPlayers:             r.Form.Get("max_players"),
-		CustomWords:            r.Form.Get("custom_words"),
-		CustomWordsChance:      r.Form.Get("custom_words_chance"),
-		ClientsPerIPLimit:      r.Form.Get("clients_per_ip_limit"),
-		EnableVotekick:         r.Form.Get("enable_votekick"),
-		Language:               r.Form.Get("language"),
-		CurrentlyActiveLobbies: state.GetActiveLobbyCount(),
+		SettingBounds:     game.LobbySettingBounds,
+		Languages:         game.SupportedLanguages,
+		Public:            r.Form.Get("public"),
+		DrawingTime:       r.Form.Get("drawing_time"),
+		Rounds:            r.Form.Get("rounds"),
+		MaxPlayers:        r.Form.Get("max_players"),
+		CustomWords:       r.Form.Get("custom_words"),
+		CustomWordsChance: r.Form.Get("custom_words_chance"),
+		ClientsPerIPLimit: r.Form.Get("clients_per_ip_limit"),
+		EnableVotekick:    r.Form.Get("enable_votekick"),
+		Language:          r.Form.Get("language"),
 	}
 
 	if languageInvalid != nil {
@@ -112,6 +111,12 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 	}
 	if clientsPerIPLimitInvalid != nil {
 		pageData.Errors = append(pageData.Errors, clientsPerIPLimitInvalid.Error())
+	}
+	if enableVotekickInvalid != nil {
+		pageData.Errors = append(pageData.Errors, enableVotekickInvalid.Error())
+	}
+	if publicLobbyInvalid != nil {
+		pageData.Errors = append(pageData.Errors, publicLobbyInvalid.Error())
 	}
 
 	if len(pageData.Errors) != 0 {
@@ -148,7 +153,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 	//We only add the lobby if we could do all necessary pre-steps successfully.
 	state.AddLobby(lobby)
 
-	http.Redirect(w, r, "/ssrEnterLobby?lobby_id="+lobby.ID, http.StatusFound)
+	http.Redirect(w, r, CurrentBasePageConfig.RootPath+"/ssrEnterLobby?lobby_id="+lobby.LobbyID, http.StatusFound)
 }
 
 func parsePlayerName(value string) (string, error) {
@@ -277,4 +282,20 @@ func parseCustomWordsChance(value string) (int, error) {
 	}
 
 	return int(result), nil
+}
+
+func parseBoolean(valueName string, value string) (bool, error) {
+	if strings.EqualFold(value, "true") {
+		return true, nil
+	}
+
+	if strings.EqualFold(value, "false") {
+		return false, nil
+	}
+
+	if value == "" {
+		return false, nil
+	}
+
+	return false, fmt.Errorf("the %s value must be a boolean value ('true' or 'false)", valueName)
 }

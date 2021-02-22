@@ -1,15 +1,3 @@
-@font-face {
-    font-family: 'Montserrat';
-    font-weight: normal;
-    src: local('Monserrat'), url(/resources/Montserrat-Regular.otf) format("opentype");
-}
-
-@font-face {
-    font-family: 'Montserrat';
-    font-weight: bold;
-    src: local('Monserrat Bold'), url(/resources/Montserrat-Bold.otf) format("opentype");
-}
-
 html, body {
     height: 100vh;
 }
@@ -83,4 +71,18 @@ ul {
     /* Little hack in order to hide the original components of the check/radio button */
     opacity: 0.0;
     position: absolute;
+}
+
+.input-container {
+    justify-content: center;
+    align-items: center;
+    display: inline-grid;
+    grid-template-columns: auto auto;
+    grid-column-gap: 20px;
+    grid-row-gap: 10px;
+}
+
+.advanced-section {
+    grid-column-start: 1;
+    grid-column-end: 3;
 }

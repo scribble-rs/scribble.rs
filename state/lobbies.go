@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	createDeleteMutex               = &sync.Mutex{}
-	lobbies           []*game.Lobby = nil
+	globalStateMutex               = &sync.Mutex{}
+	lobbies          []*game.Lobby = nil
 )
 
 func init() {
@@ -20,7 +20,7 @@ func init() {
 		for {
 			<-lobbyCleanupTicker.C
 
-			createDeleteMutex.Lock()
+			globalStateMutex.Lock()
 
 			for index := len(lobbies) - 1; index >= 0; index-- {
 				lobby := lobbies[index]
@@ -34,15 +34,15 @@ func init() {
 				}
 			}
 
-			createDeleteMutex.Unlock()
+			globalStateMutex.Unlock()
 		}
 	}()
 }
 
 // AddLobby adds a lobby to the instance, making it visible for GetLobby calls.
 func AddLobby(lobby *game.Lobby) {
-	createDeleteMutex.Lock()
-	defer createDeleteMutex.Unlock()
+	globalStateMutex.Lock()
+	defer globalStateMutex.Unlock()
 
 	lobbies = append(lobbies, lobby)
 }
@@ -50,11 +50,11 @@ func AddLobby(lobby *game.Lobby) {
 // GetLobby returns a Lobby that has a matching ID or no Lobby if none could
 // be found.
 func GetLobby(id string) *game.Lobby {
-	createDeleteMutex.Lock()
-	defer createDeleteMutex.Unlock()
+	globalStateMutex.Lock()
+	defer globalStateMutex.Unlock()
 
 	for _, l := range lobbies {
-		if l.ID == id {
+		if l.LobbyID == id {
 			return l
 		}
 	}
@@ -66,8 +66,8 @@ func GetLobby(id string) *game.Lobby {
 // both private and public lobbies and it doesn't matter whether the game is
 // already over, hasn't even started or is still ongoing.
 func GetActiveLobbyCount() int {
-	createDeleteMutex.Lock()
-	defer createDeleteMutex.Unlock()
+	globalStateMutex.Lock()
+	defer globalStateMutex.Unlock()
 
 	return len(lobbies)
 }
@@ -76,8 +76,8 @@ func GetActiveLobbyCount() int {
 // This implies that the lobbies can be found in the lobby browser ob the
 // homepage.
 func GetPublicLobbies() []*game.Lobby {
-	createDeleteMutex.Lock()
-	defer createDeleteMutex.Unlock()
+	globalStateMutex.Lock()
+	defer globalStateMutex.Unlock()
 
 	var publicLobbies []*game.Lobby
 	for _, lobby := range lobbies {
@@ -91,8 +91,8 @@ func GetPublicLobbies() []*game.Lobby {
 
 // RemoveLobby deletes a lobby, not allowing anyone to connect to it again.
 func RemoveLobby(id string) {
-	createDeleteMutex.Lock()
-	defer createDeleteMutex.Unlock()
+	globalStateMutex.Lock()
+	defer globalStateMutex.Unlock()
 
 	removeLobby(id)
 }
@@ -100,7 +100,7 @@ func RemoveLobby(id string) {
 func removeLobby(id string) {
 	indexToDelete := -1
 	for index, l := range lobbies {
-		if l.ID == id {
+		if l.LobbyID == id {
 			indexToDelete = index
 			break
 		}
@@ -114,5 +114,34 @@ func removeLobby(id string) {
 func removeLobbyByIndex(indexToDelete int) {
 	lobby := lobbies[indexToDelete]
 	lobbies = append(lobbies[:indexToDelete], lobbies[indexToDelete+1:]...)
-	log.Printf("Closing lobby %s. There are currently %d open lobbies left.\n", lobby.ID, len(lobbies))
+	log.Printf("Closing lobby %s. There are currently %d open lobbies left.\n", lobby.LobbyID, len(lobbies))
+}
+
+// PageStats represents dynamic information about the website.
+type PageStats struct {
+	ActiveLobbyCount        int    `json:"activeLobbyCount"`
+	PlayersCount            uint64 `json:"playersCount"`
+	OccupiedPlayerSlotCount uint64 `json:"occupiedPlayerSlotCount"`
+	ConnectedPlayersCount   uint64 `json:"connectedPlayersCount"`
+}
+
+// Stats delivers information about the state of the service. Currently this
+// is lobby and player counts.
+func Stats() *PageStats {
+	globalStateMutex.Lock()
+	defer globalStateMutex.Unlock()
+
+	var playerCount, occupiedPlayerSlotCount, connectedPlayerCount uint64
+	for _, lobby := range lobbies {
+		playerCount += uint64(len(lobby.GetPlayers()))
+		occupiedPlayerSlotCount += uint64(lobby.GetOccupiedPlayerSlots())
+		connectedPlayerCount += uint64(lobby.GetConnectedPlayerCount())
+	}
+
+	return &PageStats{
+		ActiveLobbyCount:        len(lobbies),
+		PlayersCount:            playerCount,
+		OccupiedPlayerSlotCount: occupiedPlayerSlotCount,
+		ConnectedPlayersCount:   connectedPlayerCount,
+	}
 }

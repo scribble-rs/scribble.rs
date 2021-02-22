@@ -4,6 +4,7 @@ import (
 	"embed"
 	"html/template"
 	"net/http"
+	"os"
 )
 
 var (
@@ -25,21 +26,29 @@ func init() {
 		panic(templateParseError)
 	}
 
+	rootPath, rootPathAvailable := os.LookupEnv("ROOT_PATH")
+	if rootPathAvailable && rootPath != "" {
+		CurrentBasePageConfig.RootPath = rootPath
+	}
+
 	setupRoutes()
 }
 
 func setupRoutes() {
 	//Endpoints for official webclient
-	http.Handle("/resources/", http.FileServer(http.FS(frontendResourcesFS)))
-	http.HandleFunc("/", homePage)
-	http.HandleFunc("/ssrEnterLobby", ssrEnterLobby)
-	http.HandleFunc("/ssrCreateLobby", ssrCreateLobby)
+	http.Handle(CurrentBasePageConfig.RootPath+"/resources/",
+		http.StripPrefix(CurrentBasePageConfig.RootPath,
+			http.FileServer(http.FS(frontendResourcesFS))))
+	http.HandleFunc(CurrentBasePageConfig.RootPath+"/", homePage)
+	http.HandleFunc(CurrentBasePageConfig.RootPath+"/ssrEnterLobby", ssrEnterLobby)
+	http.HandleFunc(CurrentBasePageConfig.RootPath+"/ssrCreateLobby", ssrCreateLobby)
 
+	http.HandleFunc(CurrentBasePageConfig.RootPath+"/v1/stats", stats)
 	//The websocket is shared between the public API and the official client
-	http.HandleFunc("/v1/ws", wsEndpoint)
+	http.HandleFunc(CurrentBasePageConfig.RootPath+"/v1/ws", wsEndpoint)
 
 	//These exist only for the public API. We version them in order to ensure
 	//backwards compatibility as far as possible.
-	http.HandleFunc("/v1/lobby", lobbyEndpoint)
-	http.HandleFunc("/v1/lobby/player", enterLobby)
+	http.HandleFunc(CurrentBasePageConfig.RootPath+"/v1/lobby", lobbyEndpoint)
+	http.HandleFunc(CurrentBasePageConfig.RootPath+"/v1/lobby/player", enterLobby)
 }

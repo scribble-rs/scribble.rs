@@ -2,6 +2,7 @@ package communication
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -13,7 +14,7 @@ import (
 
 // LobbyEntry is an API object for representing a join-able public lobby.
 type LobbyEntry struct {
-	ID              string `json:"id"`
+	LobbyID         string `json:"lobbyId"`
 	PlayerCount     int    `json:"playerCount"`
 	MaxPlayers      int    `json:"maxPlayers"`
 	Round           int    `json:"round"`
@@ -30,7 +31,7 @@ func publicLobbies(w http.ResponseWriter, r *http.Request) {
 	lobbyEntries := make([]*LobbyEntry, 0, len(lobbies))
 	for _, lobby := range lobbies {
 		lobbyEntries = append(lobbyEntries, &LobbyEntry{
-			ID:              lobby.ID,
+			LobbyID:         lobby.LobbyID,
 			PlayerCount:     lobby.GetOccupiedPlayerSlots(),
 			MaxPlayers:      lobby.MaxPlayers,
 			Round:           lobby.Round,
@@ -62,34 +63,40 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 	customWords, customWordsInvalid := parseCustomWords(r.Form.Get("custom_words"))
 	customWordChance, customWordChanceInvalid := parseCustomWordsChance(r.Form.Get("custom_words_chance"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := parseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
-	enableVotekick := r.Form.Get("enable_votekick") == "true"
-	publicLobby := r.Form.Get("public") == "true"
+	enableVotekick, enableVotekickInvalid := parseBoolean("enable votekick", r.Form.Get("enable_votekick"))
+	publicLobby, publicLobbyInvalid := parseBoolean("public", r.Form.Get("public"))
 
-	var errors []string
+	var requestErrors []string
 	if languageInvalid != nil {
-		errors = append(errors, languageInvalid.Error())
+		requestErrors = append(requestErrors, languageInvalid.Error())
 	}
 	if drawingTimeInvalid != nil {
-		errors = append(errors, drawingTimeInvalid.Error())
+		requestErrors = append(requestErrors, drawingTimeInvalid.Error())
 	}
 	if roundsInvalid != nil {
-		errors = append(errors, roundsInvalid.Error())
+		requestErrors = append(requestErrors, roundsInvalid.Error())
 	}
 	if maxPlayersInvalid != nil {
-		errors = append(errors, maxPlayersInvalid.Error())
+		requestErrors = append(requestErrors, maxPlayersInvalid.Error())
 	}
 	if customWordsInvalid != nil {
-		errors = append(errors, customWordsInvalid.Error())
+		requestErrors = append(requestErrors, customWordsInvalid.Error())
 	}
 	if customWordChanceInvalid != nil {
-		errors = append(errors, customWordChanceInvalid.Error())
+		requestErrors = append(requestErrors, customWordChanceInvalid.Error())
 	}
 	if clientsPerIPLimitInvalid != nil {
-		errors = append(errors, clientsPerIPLimitInvalid.Error())
+		requestErrors = append(requestErrors, clientsPerIPLimitInvalid.Error())
+	}
+	if enableVotekickInvalid != nil {
+		requestErrors = append(requestErrors, enableVotekickInvalid.Error())
+	}
+	if publicLobbyInvalid != nil {
+		requestErrors = append(requestErrors, publicLobbyInvalid.Error())
 	}
 
-	if len(errors) != 0 {
-		http.Error(w, strings.Join(errors, ";"), http.StatusBadRequest)
+	if len(requestErrors) != 0 {
+		http.Error(w, strings.Join(requestErrors, ";"), http.StatusBadRequest)
 		return
 	}
 
@@ -110,7 +117,7 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteStrictMode,
 	})
 
-	lobbyData := createLobbyData(lobby.ID)
+	lobbyData := createLobbyData(lobby)
 
 	encodingError := json.NewEncoder(w).Encode(lobbyData)
 	if encodingError != nil {
@@ -122,15 +129,8 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 }
 
 func enterLobby(w http.ResponseWriter, r *http.Request) {
-	lobby, err := getLobby(r)
-	if err != nil {
-		if err == errNoLobbyIDSupplied {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-		} else if err == errLobbyNotExistent {
-			http.Error(w, err.Error(), http.StatusNotFound)
-		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
+	lobby, success := getLobbyWithErrorHandling(w, r)
+	if !success {
 		return
 	}
 
@@ -168,7 +168,7 @@ func enterLobby(w http.ResponseWriter, r *http.Request) {
 		player.SetLastKnownAddress(getIPAddressFromRequest(r))
 	}
 
-	lobbyData := createLobbyData(lobby.ID)
+	lobbyData := createLobbyData(lobby)
 
 	encodingError := json.NewEncoder(w).Encode(lobbyData)
 	if encodingError != nil {
@@ -176,10 +176,118 @@ func enterLobby(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func editLobby(w http.ResponseWriter, r *http.Request) {
+	lobby, success := getLobbyWithErrorHandling(w, r)
+	if !success {
+		return
+	}
+
+	userSession := getUserSession(r)
+	if userSession == "" {
+		http.Error(w, "no usersession supplied", http.StatusBadRequest)
+		return
+	}
+
+	owner := lobby.Owner
+	if owner == nil || owner.GetUserSession() != userSession {
+		http.Error(w, "only the lobby owner can edit the lobby", http.StatusForbidden)
+		return
+	}
+
+	var requestErrors []string
+
+	//Uneditable properties
+	if r.Form.Get("custom_words") != "" {
+		requestErrors = append(requestErrors, "can't modify custom_words in existing lobby")
+	}
+	if r.Form.Get("language") != "" {
+		requestErrors = append(requestErrors, "can't modify language in existing lobby")
+	}
+	//FIXME Make editable. As of now, changing this would require an update event for clients.
+	if r.Form.Get("rounds") != "" {
+		requestErrors = append(requestErrors, "can't modify rounds in existing lobby")
+	}
+	//FIXME Make editable. As of now, making this editable mid-turn would break score calculation.
+	if r.Form.Get("drawing_time") != "" {
+		requestErrors = append(requestErrors, "can't modify drawing_time in existing lobby")
+	}
+
+	parseError := r.ParseForm()
+	if parseError != nil {
+		http.Error(w, fmt.Sprintf("error parsing from (%s)", parseError), http.StatusBadRequest)
+	}
+
+	//Editable properties
+	maxPlayers, maxPlayersInvalid := parseMaxPlayers(r.Form.Get("max_players"))
+	customWordChance, customWordChanceInvalid := parseCustomWordsChance(r.Form.Get("custom_words_chance"))
+	clientsPerIPLimit, clientsPerIPLimitInvalid := parseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
+	enableVotekick, enableVotekickInvalid := parseBoolean("enable votekick", r.Form.Get("enable_votekick"))
+	publicLobby, publicLobbyInvalid := parseBoolean("public", r.Form.Get("public"))
+
+	if maxPlayersInvalid != nil {
+		requestErrors = append(requestErrors, maxPlayersInvalid.Error())
+	}
+	if customWordChanceInvalid != nil {
+		requestErrors = append(requestErrors, customWordChanceInvalid.Error())
+	}
+	if clientsPerIPLimitInvalid != nil {
+		requestErrors = append(requestErrors, clientsPerIPLimitInvalid.Error())
+	}
+	if enableVotekickInvalid != nil {
+		requestErrors = append(requestErrors, enableVotekickInvalid.Error())
+	}
+	if publicLobbyInvalid != nil {
+		requestErrors = append(requestErrors, publicLobbyInvalid.Error())
+	}
+
+	if len(requestErrors) != 0 {
+		http.Error(w, strings.Join(requestErrors, ";"), http.StatusBadRequest)
+		return
+	}
+
+	//While changing maxClientsPerIP and maxPlayers to a value lower than
+	//is currently being used makes little sense, we'll allow it, as it doesn't
+	//really break anything.
+
+	lobby.MaxPlayers = maxPlayers
+	lobby.CustomWordsChance = customWordChance
+	lobby.ClientsPerIPLimit = clientsPerIPLimit
+	lobby.EnableVotekick = enableVotekick
+	lobby.Public = publicLobby
+
+	TriggerUpdateEvent("lobby-settings-changed", lobby.EditableLobbySettings, lobby)
+}
+
+func getLobbyWithErrorHandling(w http.ResponseWriter, r *http.Request) (*game.Lobby, bool) {
+	lobby, err := getLobby(r)
+	if err != nil {
+		if err == errNoLobbyIDSupplied {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		} else if err == errLobbyNotExistent {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+
+		return nil, false
+	}
+
+	return lobby, true
+}
+
 func lobbyEndpoint(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		publicLobbies(w, r)
-	} else {
+	} else if r.Method == http.MethodPatch {
+		editLobby(w, r)
+	} else if r.Method == http.MethodPost || r.Method == http.MethodPut {
 		createLobby(w, r)
+	} else {
+		http.Error(w, fmt.Sprintf("method %s not supported", r.Method), http.StatusMethodNotAllowed)
 	}
+}
+
+func stats(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(state.Stats())
 }
