@@ -209,6 +209,9 @@ input[type="button"]:active,
 .header-button-image {
     width: 1.7rem;
     height: 1.7rem;
+    /** Without these two, the button has too much height. */
+    display: inline-block; 
+    vertical-align: middle; 
 }
 
 .dot {

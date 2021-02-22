@@ -1,0 +1,17 @@
+{{/* A little hack so we need don't to have CSS templates and embed those directly. */}}
+{{/* The reason being that we need to be able to define the RootPath here. */}}
+{{define "font-decl"}}
+<style>
+@font-face {
+    font-family: 'Montserrat';
+    font-weight: normal;
+    src: local('Monserrat'), url({{.RootPath}}/resources/Montserrat-Regular.otf) format("opentype");
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    font-weight: bold;
+    src: local('Monserrat Bold'), url({{.RootPath}}/resources/Montserrat-Bold.otf) format("opentype");
+}
+</style>
+{{end}}

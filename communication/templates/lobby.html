@@ -5,9 +5,10 @@
 <head>
     <title>Scribble.rs - Game</title>
     <meta charset="UTF-8"/>
-    <link rel="stylesheet" type="text/css" href="/resources/base.css"/>
-    <link rel="stylesheet" type="text/css" href="/resources/lobby.css"/>
-    <link rel="icon" type="image/png" href="/resources/favicon.png"/>
+    {{template "font-decl" .}}
+    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/base.css"/>
+    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/lobby.css"/>
+    <link rel="icon" type="image/png" href="{{.RootPath}}/resources/favicon.png"/>
 </head>
 
 <body>
@@ -17,8 +18,8 @@
     <div id="lobby">
         <span id="rounds"></span>
 
-        <div style="position: relative">
-            <div style="position: absolute">
+        <div style="display: flex;">
+            <div>
                 <!-- this button is basically behaving like a checkbox, but in order to
                 have a uniform look with the other buttons in the header, we are not using
                 a checkbox anymore. -->
@@ -27,17 +28,23 @@
                     <img id="sound-toggle-label" class="header-button-image"/>
                 </button>
 
-                <button onclick="showKickDialog()" class="dialog-button header-button"
-                        alt="Votekick a player" title="Votekick a player">
-                    <img src="/resources/kick.png" class="header-button-image"/>
-                </button>
-
                 <button onclick="showNameChangeDialog()" class="dialog-button header-button"
                         alt="Change your name" title="Change your name">
-                    <img src="/resources/user.svg" class="header-button-image"/>
+                    <img src="{{.RootPath}}/resources/user.svg" class="header-button-image"/>
                 </button>
             </div>
-            <div id="word-container" style="position:absolute;left: 50%; transform: translate(-50%, 0);"></div>
+            <div id="word-container" style="flex: 1; align-self: center; justify-content: baseline;"></div>
+            <div>
+                <button onclick="showKickDialog()" class="dialog-button header-button"
+                        alt="Votekick a player" title="Votekick a player">
+                    <img src="{{.RootPath}}/resources/kick.png" class="header-button-image"/>
+                </button>
+
+                <button onclick="showLobbySettingsDialog()" class="dialog-button header-button"
+                        alt="Change lobby settings" title="Change lobby settings">
+                    <img src="{{.RootPath}}/resources/settings.svg" class="header-button-image"/>
+                </button>
+            </div>
         </div>
 
         <span id="time-left">Time Left: ∞</span>
@@ -133,6 +140,49 @@
                             </div>
                         </div>
                     </div>                    
+
+                    <div id="center-dialog-container">
+                        <div id="lobbysettings-dialog" class="center-dialog">
+                            <span class="dialog-title">Change the lobby settings</span>
+                            <div class="center-dialog-content">
+                                <div style="display: flex; flex-direction: column;">
+                                    <div class="input-container">
+                                        <b>Maximum Players</b>
+                                        <input id="lobby-settings-max-players" type="number" name="max_players" min="{{.MinMaxPlayers}}"
+                                        max="{{.MaxMaxPlayers}}" value="{{.MaxPlayers}}"/>
+                                        <b>Public Lobby</b>
+                                        <input id="lobby-settings-public" type="checkbox" name="public" value="true"
+                                            {{if eq .Public true}}checked{{end}}/>
+                                        <b>Custom Words Chance</b>
+                                        <div style="display: flex;">
+                                            0%
+                                            <input style="flex: 1;" id="lobby-settings-custom-words-chance" type="range" name="custom_words_chance" min="1" max="100" value="{{.CustomWordsChance}}">
+                                            100%
+                                        </div>
+                    
+                                        <details class="advanced-section">
+                                            <summary>Advanced</summary>
+                                            <div class="input-container">
+                                                <b>Players per IP Limit</b>
+                                                <input id="lobby-settings-clients-per-ip-limit" type="number"
+                                                name="clients_per_ip_limit" min="{{.MinClientsPerIPLimit}}"
+                                                max="{{.MaxClientsPerIPLimit}}" value="{{.ClientsPerIPLimit}}"/>
+                                                <b>Enable Votekick</b>
+                                                <input id="lobby-settings-enable-votekick" type="checkbox" name="enable_votekick" value="true"
+                                                {{if eq .EnableVotekick true}}checked{{end}}/>
+                                            </div>
+                                        </details>
+                                        <button class="dialog-button" onclick="saveLobbySettings()" style="grid-column-start: 1; grid-column-end: 3;">
+                                                Save settings
+                                        </button>
+                                    </div>
+                                    <div class="button-center-wrapper">
+                                        <button class="dialog-button" onclick="hideLobbySettingsDialog()">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <div id="center-dialog-container">
                         <div id="game-over-dialog" class="center-dialog">
@@ -234,7 +284,7 @@
                                 onmousedown="document.getElementById('tool-type-fill').click()"
                                 onmouseup="document.getElementById('tool-type-fill').click()"
                                 class="line-width-button-content">
-                                <img alt="Fill" title="Fill tool" src="/resources/fill.svg" width="40px"
+                                <img alt="Fill" title="Fill tool" src="{{.RootPath}}/resources/fill.svg" width="40px"
                                     height="40px"/>
                             </div>
                         </label>
@@ -245,7 +295,7 @@
                                 onmousedown="document.getElementById('tool-type-rubber').click()"
                                 onmouseup="document.getElementById('tool-type-rubber').click()"
                                 class="line-width-button-content">
-                                <img alt="Rubber" title="Rubber tool" src="/resources/rubber.svg" width="40px"
+                                <img alt="Rubber" title="Rubber tool" src="{{.RootPath}}/resources/rubber.svg" width="40px"
                                     height="40px"/>
                             </div>
                         </label>
@@ -307,15 +357,15 @@
         <div id="chat">
             <div id="message-container"></div>
             <form class="message-input-form" onsubmit="return sendMessage()">
-                <input id="message-input" type="text" autocomplete="off" placeholder="Type your message"/>
+                <input id="message-input" type="text" autocomplete="off" placeholder="Type your guesses and messages here"/>
             </form>
         </div>
     </div>
 
-    {{template "footer"}}
+    {{template "footer" .}}
 </div>
 
-<script type="text/javascript" src="/resources/floodfill.js"></script>
+<script type="text/javascript" src="{{.RootPath}}/resources/floodfill.js"></script>
 <script type="text/javascript">
     const reconnectDialog = document.getElementById("reconnect-dialog");
     let socketIsConnecting = false;
@@ -328,10 +378,10 @@
 
         if (location.protocol === 'https:') {
             console.log("Attempting secure socket connection on port " + location.port + "...");
-            socket = new WebSocket("wss://" + location.hostname + ":" + location.port + "/v1/ws?lobby_id={{.LobbyID}}");
+            socket = new WebSocket("wss://" + location.hostname + ":" + location.port + "{{.RootPath}}/v1/ws?lobby_id={{.LobbyID}}");
         } else {
             console.log("Attempting socket connection on port " + location.port + "...");
-            socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/v1/ws?lobby_id={{.LobbyID}}");
+            socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "{{.RootPath}}/v1/ws?lobby_id={{.LobbyID}}");
         }
 
         socket.onopen = () => {
@@ -389,6 +439,8 @@
     const namechangeFieldUnstartedDialog = document.getElementById("namechange-field-unstarted-dialog");
     const namechangeFieldStartDialog = document.getElementById("namechange-field-start-dialog");
     const namechangeField = document.getElementById("namechange-field");
+
+    const lobbySettingsDialog = document.getElementById("lobbysettings-dialog");
 
     const startDialog = document.getElementById("start-dialog");
     const gameOverDialog = document.getElementById("game-over-dialog");
@@ -453,6 +505,37 @@
         namechangeField.value = name;
     }
 
+    function showLobbySettingsDialog() {
+        lobbySettingsDialog.style.visibility = "visible";
+    }
+
+    function hideLobbySettingsDialog() {
+        lobbySettingsDialog.style.visibility = "hidden";        
+    }
+
+    function saveLobbySettings() {
+        fetch("{{.RootPath}}/v1/lobby?" + new URLSearchParams({
+            lobby_id: '{{.LobbyID}}',
+            public: document.getElementById("lobby-settings-public").value,
+            enable_votekick: document.getElementById("lobby-settings-enable-votekick").value,
+            max_players: document.getElementById("lobby-settings-max-players").value,
+            clients_per_ip_limit: document.getElementById("lobby-settings-clients-per-ip-limit").value,
+            custom_words_chance: document.getElementById("lobby-settings-custom-words-chance").value,
+        }), {
+            method: 'PATCH',    
+        })
+        .then(result => {
+            if (result.status === 200) {
+                hideLobbySettingsDialog();
+                alert("Lobby settings successfully saved.");
+            } else {
+                result.text().then(bodyText => {
+                    alert("Error saving lobby settings: \n\n - " + bodyText.replace(";","\n - "));
+                })
+            }
+        })
+    }
+
     function toggleSound() {
         sound = !sound;
         localStorage.setItem("sound", sound.toString());
@@ -461,9 +544,9 @@
 
     function updateSoundIcon() {
         if (sound) {
-            soundToggleLabel.src = "/resources/sound.svg";
+            soundToggleLabel.src = "{{.RootPath}}/resources/sound.svg";
         } else {
-            soundToggleLabel.src = "/resources/no-sound.svg";
+            soundToggleLabel.src = "{{.RootPath}}/resources/no-sound.svg";
         }
     }
 
@@ -662,11 +745,13 @@
     }
 
     function clearCanvasAndSendEvent() {
-        //Avoid unnecessary traffic back to us.
-        clear(context);
-        socket.send(JSON.stringify({
-            type: "clear-drawing-board"
-        }));
+        if (allowDrawing) {
+            //Avoid unnecessary traffic back to us and handle the clear directly.
+            clear(context);
+            socket.send(JSON.stringify({
+                type: "clear-drawing-board"
+            }));
+        }
     }
 
     const sendMessage = () => {
@@ -796,8 +881,16 @@
             }
         } else if (parsed.type === "update-players") {
             applyPlayers(parsed.data);
+        } else if (parsed.type === "name-change") {
+            const playernameSpan = document.getElementById("playername-" + parsed.data.playerId);
+            if (playernameSpan !== null) {
+                playernameSpan.innerText = parsed.data.playerName;
+            }
+            if (parsed.data.playerId === ownID) {
+                setUsernameLocally(parsed.data.playerName)
+            }
         } else if (parsed.type === "correct-guess") {
-            playWav('/resources/plop.wav');
+            playWav('{{.RootPath}}/resources/plop.wav');
 
             if (parsed.data === ownID) {
                 applyMessage("correct-guess-message", "System", "You have correctly guessed the word.")
@@ -839,7 +932,7 @@
 
             //If a player doesn't choose, the dialog will still be up.
             wordDialog.style.visibility = "hidden";
-            playWav('/resources/end-turn.wav');
+            playWav('{{.RootPath}}/resources/end-turn.wav');
 
             clear(context);
 
@@ -864,9 +957,8 @@
 
             allowDrawing = false;
         } else if (parsed.type === "your-turn") {
-            playWav('/resources/your-turn.wav');
+            playWav('{{.RootPath}}/resources/your-turn.wav');
             waitChooseDialog.style.visibility = "hidden";
-			
             promptWords(parsed.data[0], parsed.data[1], parsed.data[2]);
         } else if (parsed.type === "drawing") {
             applyDrawData(parsed.data);
@@ -883,6 +975,14 @@
             applyMessage("system-message", "System", parsed.data.playerName + " is the new lobby owner.");
         } else if (parsed.type === "drawer-kicked") {
             applyMessage("system-message", "System", "Since the kicked player has been drawing, none of you will get any points this round.");
+        } else if (parsed.type === "lobby-settings-changed") {
+            votekickEnabled = parsed.data.enableVotekick;
+            applyMessage("system-message", "System", "Lobby settings changed:<br/><br/>"
+            + "Public lobby: " + parsed.data.public + "<br/>"
+            + "Enable votekicking: " + parsed.data.enableVotekick + "<br/>"
+            + "Max players: " + parsed.data.maxPlayers + "<br/>"
+            + "Custom words chance: " + parsed.data.customWordsChance + "%<br/>"
+            + "Clients per IP limit: " + parsed.data.clientsPerIpLimit );
         }
     };
 
@@ -964,11 +1064,6 @@
                 return;
             }
 
-            //We simply abuse the player events to get our latest name, since there's no separate event for this.
-            if (player.id === ownID) {
-                setUsernameLocally(player.name);
-            }
-
             let stateStyleClass;
             if (player.state === "standby") {
                 stateStyleClass = 'player-done';
@@ -977,7 +1072,7 @@
             }
             let newPlayerElement = '<div class="player ' + stateStyleClass + '">' +
                 '<span class="rank">' + player.rank + '</span>' +
-                '<span class="playername';
+                '<span id="playername-' + player.id + '" class="playername';
             if (player.id === ownID) {
                 newPlayerElement += ' playername-self';
             }
@@ -1143,7 +1238,7 @@
 
     drawingBoard.onclick = function (e) {
         if (allowDrawing && e.button === 0) {
-            if (localTool === 2) {
+            if (localTool === fillBucket) {
                 fillAndSendEvent(context, e.offsetX, e.offsetY, localColor)
             } else {
                 drawLineAndSendEvent(context, e.offsetX, e.offsetY, e.offsetX, e.offsetY, localColor, localLineWidth);
@@ -1160,24 +1255,25 @@
     function fill(context, x1, y1, color) {
         context.fillStyle = color;
         //There seems to be some bug where setting the tolerance to 0 causes a freeze when painting black on white.
-        context.fillFlood(x1, y1, 1);
+        return context.fillFlood(x1, y1);
     }
 
     function fillAndSendEvent(context, x1, y1, color) {
-        fill(context, x1, y1, color);
-        let fillInstruction = {
-            type: "fill",
-            data: {
-                x: x1 * scaleUpFactor(),
-                y: y1 * scaleUpFactor(),
-                color: color
-            },
-        };
-        socket.send(JSON.stringify(fillInstruction));
+        if (fill(context, x1, y1, color)) {
+            let fillInstruction = {
+                type: "fill",
+                data: {
+                    x: x1 * scaleUpFactor(),
+                    y: y1 * scaleUpFactor(),
+                    color: color
+                },
+            };
+            socket.send(JSON.stringify(fillInstruction));
+        }
     }
 
     function drawLineAndSendEvent(context, x1, y1, x2, y2, color, lineWidth) {
-        if (localTool === 1) {
+        if (localTool === rubber) {
             color = "#ffffff";
         }
 

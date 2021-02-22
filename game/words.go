@@ -13,11 +13,12 @@ import (
 var (
 	wordListCache       = make(map[string][]string)
 	languageIdentifiers = map[string]string{
-		"english": "en",
-		"italian": "it",
-		"german":  "de",
-		"french":  "fr",
-		"dutch":   "nl",
+		"english_gb": "en_gb",
+		"english":    "en_us",
+		"italian":    "it",
+		"german":     "de",
+		"french":     "fr",
+		"dutch":      "nl",
 	}
 
 	//go:embed words/*
@@ -119,7 +120,7 @@ func GetRandomWords(wordCount int, lobby *Lobby) []string {
 
 		words := make([]string, 0, wordCount)
 		for i := 0; i <= wordCount; i++ {
-			if rand.Intn(100)+1 < lobby.CustomWordsChance {
+			if len(lobby.CustomWords) >= 1 && rand.Intn(100)+1 < lobby.CustomWordsChance {
 				words = append(words, popCustomWords(1, lobby)...)
 			} else {
 				words = append(words, popWordpackWords(1, lobby)...)
