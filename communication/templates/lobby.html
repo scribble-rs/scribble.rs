@@ -115,6 +115,15 @@
                     </div>
 
                     <div id="center-dialog-container">
+                        <div id="waitchoose-dialog" class="center-dialog">
+                            <span class="dialog-title">Waiting for selection</span>
+                            <div class="center-dialog-content">
+                                <span id="waitchoose-drawer"></span> is choosing a word.
+                            </div>
+                        </div>
+                    </div>                    
+
+                    <div id="center-dialog-container">
                         <div id="namechange-dialog" class="center-dialog">
                             <span class="dialog-title">Change your username</span>
                             <div class="center-dialog-content">
@@ -131,15 +140,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <div id="center-dialog-container">
-                        <div id="waitchoose-dialog" class="center-dialog">
-                            <span class="dialog-title">Waiting for selection</span>
-                            <div class="center-dialog-content">
-                                <span id="waitchoose-drawer"></span> is choosing a word.
-                            </div>
-                        </div>
-                    </div>                    
 
                     <div id="center-dialog-container">
                         <div id="lobbysettings-dialog" class="center-dialog">
@@ -790,7 +790,7 @@
             subtree: false
         });
 
-    let ownID, ownerID, ownName, drawerName;
+    let ownID, ownerID, ownName, drawerID, drawerName;
     let maxRounds = 0;
     let roundEndTime = 0;
     let votekickEnabled
@@ -888,6 +888,9 @@
             }
             if (parsed.data.playerId === ownID) {
                 setUsernameLocally(parsed.data.playerName)
+            }
+            if (parsed.data.playerId === drawerID) {
+                waitChooseDrawerSpan.innerHTML = parsed.data.playerName;
             }
         } else if (parsed.type === "correct-guess") {
             playWav('{{.RootPath}}/resources/plop.wav');
@@ -1084,6 +1087,7 @@
                 '<span class="last-turn-score">(Last turn: ' + player.lastScore + ')</span>' +
                 '</div>';
             if (player.state === "drawing") {
+                drawerID = player.id;
                 drawerName = player.name;
                 newPlayerElement += '<span>✏️</span>';
             } else if (player.state === "standby") {
