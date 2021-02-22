@@ -935,13 +935,11 @@
         } else if (parsed.type === "drawing") {
             applyDrawData(parsed.data);
         } else if (parsed.type === "kick-vote") {
-            if (parsed.data.playerId !== ownID) {
-                let kickMessage = "("+parsed.data.voteCount+"/"+parsed.data.requiredVoteCount+") players voted to kick "+parsed.data.playerName+".";
-                if (parsed.data.voteCount >= parsed.data.requiredVoteCount) {
-                    kickMessage += " Player has been kicked.";
-                }
-                applyMessage("system-message", "System", kickMessage);
+            let kickMessage = "("+parsed.data.voteCount+"/"+parsed.data.requiredVoteCount+") players voted to kick "+parsed.data.playerName+".";
+            if (parsed.data.voteCount >= parsed.data.requiredVoteCount) {
+                kickMessage += " Player has been kicked.";
             }
+            applyMessage("system-message", "System", kickMessage);
         } else if (parsed.type === "owner-change") {
             ownerID = parsed.data.playerId;
             applyMessage("system-message", "System", parsed.data.playerName + " is the new lobby owner.");
