@@ -286,3 +286,8 @@ func lobbyEndpoint(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("method %s not supported", r.Method), http.StatusMethodNotAllowed)
 	}
 }
+
+func stats(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(state.Stats())
+}
