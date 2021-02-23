@@ -430,3 +430,7 @@ input[type="button"]:active,
 .namechange-field {
     margin-right: 0.25rem;
 }
+
+#waitchoose-drawer {
+    font-weight: bold;
+}
