@@ -865,9 +865,6 @@
                 if (ready.wordHints === null) {
                     for (let i = 0; i < ready.players.length; i++) {
                         let player = ready.players[i];
-                        if (!player.connected) {
-                            continue;
-                        }
                         
                         // check if the actual player is not drawing
                         if ((player.id === ownID) && (player.state != "drawing")) {
