@@ -151,7 +151,7 @@
                                         <input id="lobby-settings-max-players" type="number" name="max_players" min="{{.MinMaxPlayers}}"
                                         max="{{.MaxMaxPlayers}}" value="{{.MaxPlayers}}"/>
                                         <b>Public Lobby</b>
-                                        <input id="lobby-settings-public" type="checkbox" name="public" value="true"
+                                        <input id="lobby-settings-public" type="checkbox" name="public"
                                             {{if eq .Public true}}checked{{end}}/>
                                         <b>Custom Words Chance</b>
                                         <div style="display: flex;">
@@ -168,7 +168,7 @@
                                                 name="clients_per_ip_limit" min="{{.MinClientsPerIPLimit}}"
                                                 max="{{.MaxClientsPerIPLimit}}" value="{{.ClientsPerIPLimit}}"/>
                                                 <b>Enable Votekick</b>
-                                                <input id="lobby-settings-enable-votekick" type="checkbox" name="enable_votekick" value="true"
+                                                <input id="lobby-settings-enable-votekick" type="checkbox" name="enable_votekick"
                                                 {{if eq .EnableVotekick true}}checked{{end}}/>
                                             </div>
                                         </details>
@@ -516,8 +516,8 @@
     function saveLobbySettings() {
         fetch("{{.RootPath}}/v1/lobby?" + new URLSearchParams({
             lobby_id: '{{.LobbyID}}',
-            public: document.getElementById("lobby-settings-public").value,
-            enable_votekick: document.getElementById("lobby-settings-enable-votekick").value,
+            public: document.getElementById("lobby-settings-public").checked,
+            enable_votekick: document.getElementById("lobby-settings-enable-votekick").checked,
             max_players: document.getElementById("lobby-settings-max-players").value,
             clients_per_ip_limit: document.getElementById("lobby-settings-clients-per-ip-limit").value,
             custom_words_chance: document.getElementById("lobby-settings-custom-words-chance").value,
