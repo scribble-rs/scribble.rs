@@ -97,7 +97,8 @@
     <div id="join-lobby" class="tab-content">
         <div class="join-lobby-data">
             <div class="table-wrapper-wrapper">
-                <button id="refresh-button" onclick="loadLobbyTable()">Refresh</button>
+	            <button id="quick-join-button" onclick="quickJoinLobby()">Quick Join</button>
+	            <button id="refresh-button" onclick="loadLobbyTable()">Refresh</button>
                 <div class="table-wrapper">
                     <table id="lobby-table">
                         <thead>
@@ -125,7 +126,7 @@
                 <span id="drawing-time-detail"></span>
                 <span class="lobby-detail">Custom Words:</span>
                 <span id="custom-words-detail"></span>
-                <span class="lobby-detail">Allow Votekicking:</span>
+                <span class="lobby-detail">Allow Vote-kicking:</span>
                 <span id="votekicking-detail"></span>
                 <span class="lobby-detail">Maximum Players per IP:</span>
                 <span id="max-clients-ip-detail"></span>
@@ -155,8 +156,21 @@
     let votekickingDetail = document.getElementById("votekicking-detail");
     let maxClientsIPDetail = document.getElementById("max-clients-ip-detail");
 
+    let lobbyLength;
+
     function onJoin() {
         window.open("{{.RootPath}}/ssrEnterLobby?lobby_id=" + selectedLobby, "_self");
+    }
+
+    function quickJoinLobby() {
+    	fetch("{{.RootPath}}/v1/lobby")
+		    .then((response) => {
+					return response.json()
+		    })
+	      .then((response) => {
+	      	let computedLobbyId = response[Math.floor(Math.random() * response.length)]['lobbyId']
+		      window.location = "{{.RootPath}}/ssrEnterLobby?lobby_id=" + computedLobbyId;
+	      });
     }
 
     function loadLobbyTable() {
@@ -176,6 +190,8 @@
                 //Initially remove all data and disable join button, as we don't know
                 //whether we'll have any data after fetching.
                 showLobbyDetails(null);
+
+                lobbyLength = data.length;
 
                 data.forEach(lobby => {
                     const wordpackCell = document.createElement("td");
