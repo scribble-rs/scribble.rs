@@ -34,7 +34,7 @@
                 </button>
             </div>
             <div id="word-container" style="flex: 1; align-self: center; justify-content: baseline;"></div>
-            <div>
+            <div id="owner-buttons" style="visibility: hidden;">
                 <button onclick="showKickDialog()" class="dialog-button header-button"
                         alt="Votekick a player" title="Votekick a player">
                     <img src="{{.RootPath}}/resources/kick.png" class="header-button-image"/>
@@ -440,6 +440,7 @@
     const namechangeFieldStartDialog = document.getElementById("namechange-field-start-dialog");
     const namechangeField = document.getElementById("namechange-field");
 
+    const ownerButtons = document.getElementById("owner-buttons");
     const lobbySettingsDialog = document.getElementById("lobbysettings-dialog");
 
     const startDialog = document.getElementById("start-dialog");
@@ -977,6 +978,7 @@
             applyMessage("system-message", "System", kickMessage);
         } else if (parsed.type === "owner-change") {
             ownerID = parsed.data.playerId;
+            updateOwnerButtonsVisibility();
             applyMessage("system-message", "System", parsed.data.playerName + " is the new lobby owner.");
         } else if (parsed.type === "drawer-kicked") {
             applyMessage("system-message", "System", "Since the kicked player has been drawing, none of you will get any points this round.");
@@ -1011,6 +1013,7 @@
         roundEndTime = ready.roundEndTime;
         votekickEnabled = ready.votekickEnabled;
         applyRounds(ready.round, ready.maxRounds);
+        updateOwnerButtonsVisibility();
 
         if (ready.players && ready.players.length) {
             applyPlayers(ready.players)
@@ -1022,6 +1025,14 @@
             applyWordHints(ready.wordHints)
         }
         updateCursor();
+    }
+
+    function updateOwnerButtonsVisibility() {
+        if (ownerID === ownID) {
+            ownerButtons.style.visibility = "visible";
+        } else {   
+            ownerButtons.style.visibility = "hidden";
+        }
     }
 
     function promptWords(wordOne, wordTwo, wordThree) {
