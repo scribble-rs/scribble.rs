@@ -1,0 +1,38 @@
+{{define "robot-page"}}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- Primary Meta Tags -->
+    <title>Scribble.rs - Join Lobby</title>
+    <meta name="title" content="Scribble.rs - Join Lobby">
+    <meta name="description" content="{{.MaxPlayers}} Players - {{.MaxRounds}} Rounds">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Scribble.rs - Join Lobby">
+    <meta property="og:description" content="{{.MaxPlayers}} Players - {{.MaxRounds}} Rounds">
+    <meta property="og:image" content="/resources/favicon.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Scribble.rs - Join Lobby">
+    <meta property="twitter:description" content="{{.MaxPlayers}} Players - {{.MaxRounds}} Rounds">
+    <meta property="twitter:image" content="/resources/favicon.png">
+    <link rel="stylesheet" type="text/css" href="/resources/base.css" />
+    <link rel="stylesheet" type="text/css" href="/resources/error.css" />
+    <link rel="icon" type="image/png" href="/resources/favicon.png" />
+</head>
+
+<body>
+    <div class="content-wrapper">
+        <h1 class="error-title">(◕︿◕✿)</h1>
+        <h2 class="error-message">You can NOT join the lobby with this browser.</h2>
+        <a class="go-back" href="/">Click here to get back to the Homepage</a>
+        {{template "footer"}}
+    </div>
+</body>
+
+</html>
+{{end}}
