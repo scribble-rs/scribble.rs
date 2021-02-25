@@ -1,16 +1,16 @@
 :root {
-		--neutral-background: #1c1913 !important;
-		--neutral-text: #ffffc7 !important;
-		--selection-background: #5b513f !important;
-		--selection-text: #ffffd8 !important;
+    --neutral-background: #1c1913 !important;
+    --neutral-text: #ffffc7 !important;
+    --selection-background: #5b513f !important;
+    --selection-text: #ffffd8 !important;
 }
 
 html, body {
-		height: 100vh;
+    height: 100vh;
 }
 
 body {
-		font-family: 'Montserrat', serif;
+    font-family: 'Montserrat', serif;
     background-color: antiquewhite;
     margin: 0;
 }
@@ -95,110 +95,110 @@ ul {
 }
 
 @media (prefers-color-scheme: dark) {
-		html, input, textarea, select, button {
-				background-color: #918165 !important;
-				color: rgb(255, 255, 215) !important;
-		}
+    html, input, textarea, select, button {
+        background-color: #918165 !important;
+        color: rgb(255, 255, 215) !important;
+    }
 
-		body { background-color: rgb(62, 55, 43) !important; }
+    body { background-color: rgb(62, 55, 43) !important; }
 
-		a {
-				color: #b4a07d !important;
-				text-decoration-color: initial !important;
-		}
-		a:link, a:visited { color: inherit !important; }
-		a:hover { text-decoration-color: initial !important; }
+    a {
+        color: #b4a07d !important;
+        text-decoration-color: initial !important;
+    }
+    a:link, a:visited { color: inherit !important; }
+    a:hover { text-decoration-color: initial !important; }
 
-		table { border-color: #796c54 !important; }
-		th { background-color: rgb(35, 31, 24) !important; }
-		tr:nth-child(2n) { background-color: rgb(64, 57, 44) !important; }
-		tr:hover { background-color: rgb(54, 48, 37) !important; }
-		tr[selected="true"] { background-color: rgb(59, 53, 41) !important; }
+    table { border-color: #796c54 !important; }
+    th { background-color: rgb(35, 31, 24) !important; }
+    tr:nth-child(2n) { background-color: rgb(64, 57, 44) !important; }
+    tr:hover { background-color: rgb(54, 48, 37) !important; }
+    tr[selected="true"] { background-color: rgb(59, 53, 41) !important; }
 
-		footer {
-				background-color: rgb(128, 114, 89) !important;
-				color: rgb(255, 255, 216) !important;
-		}
+    footer {
+        background-color: rgb(128, 114, 89) !important;
+        color: rgb(255, 255, 216) !important;
+    }
 
-		h1, h2 { color: rgb(227, 202, 157) !important;) }
+    h1, h2 { color: rgb(227, 202, 157) !important;) }
 
-		.noscript { border-bottom-color: rgb(177, 157, 123) !important; }
-		.content-container { background-color: rgb(43, 38, 29) !important; }
-		.error-list {
-				background-color: rgb(72, 64, 50) !important;
-				color: rgb(255, 255, 216) !important;
-		}
-		.tab-label {
-				background-color: rgb(51, 45, 35) !important;
-				border-bottom-color: rgb(92, 82, 64) !important;
-				outline-color: initial !important;
-		}
-		.tab-button:checked + .tab-label {
-				background-color: rgb(76, 68, 53) !important;
-				border-bottom-color: rgb(64, 57, 45) !important;
-		}
-		.tab-content {
-				border-color: initial !important;
-				background-color: rgb(35, 31, 24) !important;
-		}
-		.table-wrapper { border-color: rgb(121, 108, 84) !important; }
-		.lobby-details { background-color: rgb(58, 52, 40) !important; }
-		.vimvixen-hint {
-				background-color: #6c604b !important;
-				border-color: #e0c79b !important;
-				color: #ffffd8 !important;
-		}
+    .noscript { border-bottom-color: rgb(177, 157, 123) !important; }
+    .content-container { background-color: rgb(43, 38, 29) !important; }
+    .error-list {
+        background-color: rgb(72, 64, 50) !important;
+        color: rgb(255, 255, 216) !important;
+    }
+    .tab-label {
+        background-color: rgb(51, 45, 35) !important;
+        border-bottom-color: rgb(92, 82, 64) !important;
+        outline-color: initial !important;
+    }
+    .tab-button:checked + .tab-label {
+        background-color: rgb(76, 68, 53) !important;
+        border-bottom-color: rgb(64, 57, 45) !important;
+    }
+    .tab-content {
+        border-color: initial !important;
+        background-color: rgb(35, 31, 24) !important;
+    }
+    .table-wrapper { border-color: rgb(121, 108, 84) !important; }
+    .lobby-details { background-color: rgb(58, 52, 40) !important; }
+    .vimvixen-hint {
+        background-color: #6c604b !important;
+        border-color: #e0c79b !important;
+        color: #ffffd8 !important;
+    }
 
-		.guess-letter-underline { border-bottom-color: rgb(177, 157, 123) !important; }
-		#drawing-board { background-color: rgb(35, 31, 24) !important; }
-		.center-dialog { background-color: rgb(61, 54, 42) !important; }
-		#message-container { background-color: rgb(35, 31, 24) !important; }
-		.correct-guess-message { color: rgb(217, 193, 151) !important; }
-		.close-guess-message { color: rgb(255, 230, 179) !important; }
-		#message-input {
-				border-right-color: initial !important;
-				border-bottom-color: initial !important;
-				border-left-color: initial !important;
-				border-top-color: rgb(177, 157, 123) !important;
-		}
-		#message-input:focus {
-				outline-color: initial !important;
-				background-color: rgb(58, 51, 40) !important;
-		}
+    .guess-letter-underline { border-bottom-color: rgb(177, 157, 123) !important; }
+    #drawing-board { background-color: rgb(35, 31, 24) !important; }
+    .center-dialog { background-color: rgb(61, 54, 42) !important; }
+    #message-container { background-color: rgb(35, 31, 24) !important; }
+    .correct-guess-message { color: rgb(217, 193, 151) !important; }
+    .close-guess-message { color: rgb(255, 230, 179) !important; }
+    #message-input {
+        border-right-color: initial !important;
+        border-bottom-color: initial !important;
+        border-left-color: initial !important;
+        border-top-color: rgb(177, 157, 123) !important;
+    }
+    #message-input:focus {
+        outline-color: initial !important;
+        background-color: rgb(58, 51, 40) !important;
+    }
 
-		.dialog-title { color: rgb(198, 176, 137) !important; }
-		.dialog-button {
-				border-color: initial !important;
-				background-color: rgb(35, 31, 24) !important;
-		}
+    .dialog-title { color: rgb(198, 176, 137) !important; }
+    .dialog-button {
+        border-color: initial !important;
+        background-color: rgb(35, 31, 24) !important;
+    }
 
-		button:hover, input[type="button"]:hover, .line-width-button-content:hover,
-		#color-picker:hover { background-color: rgb(58, 51, 40) !important; }
-		button:active, input[type="button"]:active, #color-picker:active {
-				background-color: rgb(76, 67, 52) !important;
-		}
+    button:hover, input[type="button"]:hover, .line-width-button-content:hover,
+    #color-picker:hover { background-color: rgb(58, 51, 40) !important; }
+    button:active, input[type="button"]:active, #color-picker:active {
+        background-color: rgb(76, 67, 52) !important;
+    }
 
-		.header-button { background-color: transparent !important; }
-		.dot { background-color: rgb(0, 0, 0) !important; }
-		.line-width-button-content { background-color: rgb(65, 58, 45) !important; }
-		.line-width-button:checked + .line-width-button-content { background-color: rgb(76, 67, 52) !important; }
+    .header-button { background-color: transparent !important; }
+    .dot { background-color: rgb(0, 0, 0) !important; }
+    .line-width-button-content { background-color: rgb(65, 58, 45) !important; }
+    .line-width-button:checked + .line-width-button-content { background-color: rgb(76, 67, 52) !important; }
 
-		#color-picker {
-				border-color: initial !important;
-				background-color: rgb(65, 58, 45) !important;
-		}
+    #color-picker {
+        border-color: initial !important;
+        background-color: rgb(65, 58, 45) !important;
+    }
 
-		.canvas-button {
-				border-color: initial !important;
-				background-color: rgb(65, 58, 45) !important;
-		}
+    .canvas-button {
+        border-color: initial !important;
+        background-color: rgb(65, 58, 45) !important;
+    }
 
-		.color-button-container { border-color: rgb(121, 108, 84) !important; }
-		.color-button { border-color: initial !important; }
-		.system-message { color: rgb(125, 111, 87) !important; }
-		.player { background-color: rgb(43, 38, 30) !important; }
-		.player-done { background-color: rgb(184, 164, 128) !important; }
-		.last-turn-score { color: rgb(201, 179, 140) !important; }
-		.kick-player-button { border-color: initial !important; }
-		.gameover-scoreboard-entry { background-color: rgb(43, 38, 30) !important; }
+    .color-button-container { border-color: rgb(121, 108, 84) !important; }
+    .color-button { border-color: initial !important; }
+    .system-message { color: rgb(125, 111, 87) !important; }
+    .player { background-color: rgb(43, 38, 30) !important; }
+    .player-done { background-color: rgb(184, 164, 128) !important; }
+    .last-turn-score { color: rgb(201, 179, 140) !important; }
+    .kick-player-button { border-color: initial !important; }
+    .gameover-scoreboard-entry { background-color: rgb(43, 38, 30) !important; }
 }
