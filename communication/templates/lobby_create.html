@@ -201,13 +201,13 @@
                     let clickHandler = function () {
                         lobbyTableBody.childNodes.forEach(row => {
                             row.setAttribute("selected", "false");
-                        })
+                        });
                         newRow.setAttribute("selected", "true");
                         selectedLobby = lobby.lobbyId;
                         showLobbyDetails(lobby);
                     };
                     newRow.addEventListener("click", clickHandler, false);
-                })
+                });
             });
     }
 

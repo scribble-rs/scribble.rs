@@ -541,11 +541,13 @@
                 hideLobbySettingsDialog();
                 alert("Lobby settings successfully saved.");
             } else {
-                result.text().then(bodyText => {
-                    alert("Error saving lobby settings: \n\n - " + bodyText.replace(";","\n - "));
-                })
+                result
+                    .text()
+                    .then(bodyText => {
+                        alert("Error saving lobby settings: \n\n - " + bodyText.replace(";","\n - "));
+                    });
             }
-        })
+        });
     }
 
     function toggleSound() {
@@ -678,8 +680,10 @@
     }
 
     function hexToRgb(hex) {
-        return hex.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, (m, r, g, b) => '#' + r + r + g + g + b + b)
-            .substring(1).match(/.{2}/g)
+        return hex
+            .replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, (m, r, g, b) => '#' + r + r + g + g + b + b)
+            .substring(1)
+            .match(/.{2}/g)
             .map(x => parseInt(x, 16));
     }
 
@@ -724,7 +728,7 @@
             const hsp = Math.sqrt(
                 0.299 * (innerColor[0] * innerColor[0]) +
                 0.587 * (innerColor[1] * innerColor[1]) +
-                0.114 * (innerColor[2] * innerColor[2])
+                0.114 * (innerColor[2] * innerColor[2]);
             );
 
             if (hsp > 127.5) {
@@ -758,7 +762,7 @@
     function startGame() {
         socket.send(JSON.stringify({
             type: "start",
-        }))
+        }));
     }
 
     function clearCanvasAndSendEvent() {
@@ -812,7 +816,7 @@
     let round = 0;
     let rounds = 0;
     let roundEndTime = 0;
-    let votekickEnabled
+    let votekickEnabled;
     socket.onmessage = event => {
         let parsed = JSON.parse(event.data);
         if (parsed.type === "ready") {
@@ -903,7 +907,7 @@
                 playernameSpan.innerText = parsed.data.playerName;
             }
             if (parsed.data.playerId === ownID) {
-                setUsernameLocally(parsed.data.playerName)
+                setUsernameLocally(parsed.data.playerName);
             }
             if (parsed.data.playerId === drawerID) {
                 waitChooseDrawerSpan.innerHTML = parsed.data.playerName;
@@ -912,18 +916,18 @@
             playWav('{{.RootPath}}/resources/plop.wav');
 
             if (parsed.data === ownID) {
-                applyMessage("correct-guess-message", "System", "You have correctly guessed the word.")
+                applyMessage("correct-guess-message", "System", "You have correctly guessed the word.");
             } else {
                 for (let i = 0; i < cachedPlayers.length; i++) {
                     let player = cachedPlayers[i];
                     if (player.id === parsed.data) {
-                        applyMessage("correct-guess-message", "System", player.name + " correctly guessed the word.")
+                        applyMessage("correct-guess-message", "System", player.name + " correctly guessed the word.");
                         break;
                     }
                 }
             }
         } else if (parsed.type === "close-guess") {
-            applyMessage("close-guess-message", "System", "'"+ parsed.data + "'' is very close.")
+            applyMessage("close-guess-message", "System", "'"+ parsed.data + "'' is very close.");
         } else if (parsed.type === "update-wordhint") {
             // this event is (also) sent if the drawer has choosen a word, so we can hide the waitChooseDialog
             waitChooseDialog.style.visibility = "hidden";
@@ -939,7 +943,7 @@
         } else if (parsed.type === "fill") {
             fill(context, parsed.data.x * scaleDownFactor(), parsed.data.y * scaleDownFactor(), parsed.data.color);
         } else if (parsed.type === "clear-drawing-board") {
-            clear(context)
+            clear(context);
         } else if (parsed.type === "next-turn") {
             //As soon as a turn starts, the round should be ongoing, so we make
             //sure that all types of dialogs, that indicate the game isn't
@@ -1040,13 +1044,13 @@
         updateButtonVisibilities();
 
         if (ready.players && ready.players.length) {
-            applyPlayers(ready.players)
+            applyPlayers(ready.players);
         }
         if (ready.currentDrawing && ready.currentDrawing.length) {
-            applyDrawData(ready.currentDrawing)
+            applyDrawData(ready.currentDrawing);
         }
         if (ready.wordHints && ready.wordHints.length) {
-            applyWordHints(ready.wordHints)
+            applyWordHints(ready.wordHints);
         }
         updateCursor();
     }
@@ -1091,7 +1095,7 @@
 
     function applyMessage(styleClass, author, message) {
         if (messageContainer.childElementCount >= 100) {
-            messageContainer.removeChild(messageContainer.firstChild)
+            messageContainer.removeChild(messageContainer.firstChild);
         }
 
         messageContainer.innerHTML += `<div class="message ` + styleClass + `">
@@ -1172,7 +1176,7 @@
             } else if (drawElement.type === "line") {
                 drawLine(context, drawData.fromX * scaleDownFactor(), drawData.fromY * scaleDownFactor(), drawData.toX * scaleDownFactor(), drawData.toY * scaleDownFactor(), drawData.color, drawData.lineWidth * scaleDownFactor());
             } else {
-                console.log("Unknown draw element type: " + drawData.type)
+                console.log("Unknown draw element type: " + drawData.type);
             }
         });
     }
@@ -1287,7 +1291,7 @@
     drawingBoard.onclick = function (e) {
         if (allowDrawing && e.button === 0) {
             if (localTool === fillBucket) {
-                fillAndSendEvent(context, e.offsetX, e.offsetY, localColor)
+                fillAndSendEvent(context, e.offsetX, e.offsetY, localColor);
             } else {
                 drawLineAndSendEvent(context, e.offsetX, e.offsetY, e.offsetX, e.offsetY, localColor, localLineWidth);
             }
