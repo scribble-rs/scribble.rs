@@ -147,6 +147,12 @@
                             <div class="center-dialog-content">
                                 <div style="display: flex; flex-direction: column;">
                                     <div class="input-container">
+                                        <b>Drawing Time</b>
+                                        <input id="lobby-settings-drawing-time" class="input-item" type="number" name="drawing_time" min="{{.MinDrawingTime}}"
+                                        max="{{.MaxDrawingTime}}" value="{{.DrawingTime}}"/>
+                                        <b>Rounds</b>
+                                        <input id="lobby-settings-max-rounds" class="input-item" type="number" name="rounds" min="{{.MinRounds}}" max="{{.MaxRounds}}"
+                                        value="{{.Rounds}}"/>                    
                                         <b>Maximum Players</b>
                                         <input id="lobby-settings-max-players" type="number" name="max_players" min="{{.MinMaxPlayers}}"
                                         max="{{.MaxMaxPlayers}}" value="{{.MaxPlayers}}"/>
@@ -517,6 +523,8 @@
     function saveLobbySettings() {
         fetch("{{.RootPath}}/v1/lobby?" + new URLSearchParams({
             lobby_id: '{{.LobbyID}}',
+            drawing_time: document.getElementById("lobby-settings-drawing-time").value,
+            rounds: document.getElementById("lobby-settings-max-rounds").value,
             public: document.getElementById("lobby-settings-public").checked,
             enable_votekick: document.getElementById("lobby-settings-enable-votekick").checked,
             max_players: document.getElementById("lobby-settings-max-players").value,
@@ -798,7 +806,8 @@
         });
 
     let ownID, ownerID, ownName, drawerID, drawerName;
-    let maxRounds = 0;
+    let round = 0;
+    let rounds = 0;
     let roundEndTime = 0;
     let votekickEnabled
     socket.onmessage = event => {
@@ -943,8 +952,9 @@
 
             clear(context);
 
+            round = parsed.data.round;
             roundEndTime = parsed.data.roundEndTime;
-            applyRounds(parsed.data.round, maxRounds);
+            updateRoundsDisplay();
             applyPlayers(parsed.data.players);
 
             //Show additional dialog, that another user (drawer) is choosing a word
@@ -984,10 +994,14 @@
             applyMessage("system-message", "System", "Since the kicked player has been drawing, none of you will get any points this round.");
         } else if (parsed.type === "lobby-settings-changed") {
             votekickEnabled = parsed.data.enableVotekick;
+            rounds = parsed.data.rounds;
+            updateRoundsDisplay();
             applyMessage("system-message", "System", "Lobby settings changed:<br/><br/>"
+            + "Drawing time: " + parsed.data.drawingTime + "<br/>"
+            + "Rounds: " + parsed.data.rounds + "<br/>"
             + "Public lobby: " + parsed.data.public + "<br/>"
             + "Enable votekicking: " + parsed.data.enableVotekick + "<br/>"
-            + "Max players: " + parsed.data.maxPlayers + "<br/>"
+            + "^ers: " + parsed.data.maxPlayers + "<br/>"
             + "Custom words chance: " + parsed.data.customWordsChance + "%<br/>"
             + "Clients per IP limit: " + parsed.data.clientsPerIpLimit );
         }
@@ -1009,10 +1023,11 @@
         setUsernameLocally(ready.playerName);
         allowDrawing = ready.allowDrawing;
         ownID = ready.playerId;
-        maxRounds = ready.maxRounds;
+        round = ready.rounds;
+        rounds = ready.rounds;
         roundEndTime = ready.roundEndTime;
         votekickEnabled = ready.votekickEnabled;
-        applyRounds(ready.round, ready.maxRounds);
+        updateRoundsDisplay();
         updateOwnerButtonsVisibility();
 
         if (ready.players && ready.players.length) {
@@ -1112,8 +1127,8 @@
         });
     }
 
-    function applyRounds(round, maxRound) {
-        roundsSpan.innerText = 'Round ' + round + ' of ' + maxRound;
+    function updateRoundsDisplay() {
+        roundsSpan.innerText = 'Round ' + round + ' of ' + rounds;
     }
 
     function applyWordHints(wordHints) {

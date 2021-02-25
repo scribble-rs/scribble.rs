@@ -169,8 +169,6 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 
 	player := getPlayer(lobby, r)
 
-	pageData := createLobbyData(lobby)
-
 	if player == nil {
 		if !lobby.HasFreePlayerSlot() {
 			userFacingError(w, "Sorry, but the lobby is full.")
@@ -206,6 +204,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 		player.SetLastKnownAddress(getIPAddressFromRequest(r))
 	}
 
+	pageData := createLobbyData(lobby)
 	templateError := pageTemplates.ExecuteTemplate(w, "lobby-page", pageData)
 	if templateError != nil {
 		panic(templateError)

@@ -20,20 +20,19 @@ type Lobby struct {
 
 	*EditableLobbySettings
 
-	// DrawingTime is the amount of seconds that each player has available to
-	// finish their drawing.
-	DrawingTime int
-	// MaxRounds defines how many iterations a lobby does before the game ends.
-	// One iteration means every participant does one drawing.
-	MaxRounds   int
+	// DrawingTimeNew is the new value of the drawing time. If a round is
+	// already ongoing, we can't simply change the drawing time, as it would
+	// screw with the score calculation of the current turn.
+	DrawingTimeNew int
+
 	CustomWords []string
 	words       []string
 
 	// players references all participants of the Lobby.
 	players []*Player
 
-	// whether the game has started, is ongoing or already over.
-	state gameState
+	// Whether the game has started, is ongoing or already over.
+	State gameState
 	// drawer references the Player that is currently drawing.
 	drawer *Player
 	// Owner references the Player that currently owns the lobby.
@@ -56,7 +55,7 @@ type Lobby struct {
 	//for revelation.
 	hintCount int
 	// Round is the round that the Lobby is currently in. This is a number
-	// between 0 and MaxRounds. 0 indicates that it hasn't started yet.
+	// between 0 and Rounds. 0 indicates that it hasn't started yet.
 	Round int
 	// wordChoice represents the current choice of words present to the drawer.
 	wordChoice []string
@@ -100,14 +99,24 @@ type EditableLobbySettings struct {
 	// ClientsPerIPLimit helps preventing griefing by reducing each player
 	// to one tab per IP address.
 	ClientsPerIPLimit int `json:"clientsPerIpLimit"`
+	// DrawingTime is the amount of seconds that each player has available to
+	// finish their drawing.
+	DrawingTime int `json:"drawingTime"`
+	// Rounds defines how many iterations a lobby does before the game ends.
+	// One iteration means every participant does one drawing.
+	Rounds int `json:"rounds"`
 }
 
 type gameState string
 
 const (
-	unstarted gameState = "unstarted"
-	ongoing   gameState = "ongoing"
-	gameOver  gameState = "gameOver"
+	// Unstarted means the lobby has been opened but never started.
+	Unstarted gameState = "unstarted"
+	// Ongoing means the lobby has already been started.
+	Ongoing gameState = "ongoing"
+	// GameOver means that the lobby had been start, but the max round limit
+	// has already been reached.
+	GameOver gameState = "gameOver"
 )
 
 // WordHint describes a character of the word that is to be guessed, whether
@@ -271,10 +280,10 @@ func createLobby(
 	publicLobby bool) *Lobby {
 
 	lobby := &Lobby{
-		LobbyID:     uuid.Must(uuid.NewV4()).String(),
-		DrawingTime: drawingTime,
-		MaxRounds:   rounds,
+		LobbyID: uuid.Must(uuid.NewV4()).String(),
 		EditableLobbySettings: &EditableLobbySettings{
+			Rounds:            rounds,
+			DrawingTime:       drawingTime,
 			MaxPlayers:        maxPlayers,
 			CustomWordsChance: customWordsChance,
 			ClientsPerIPLimit: clientsPerIPLimit,
@@ -283,7 +292,7 @@ func createLobby(
 		},
 		CustomWords:    customWords,
 		currentDrawing: make([]interface{}, 0, 0),
-		state:          unstarted,
+		State:          Unstarted,
 	}
 
 	if len(customWords) > 1 {

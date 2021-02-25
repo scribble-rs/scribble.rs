@@ -181,7 +181,7 @@
                     const wordpackCell = document.createElement("td");
                     wordpackCell.innerText = lobby.wordpack;
                     const roundsCell = document.createElement("td");
-                    roundsCell.innerText = lobby.round + "/" + lobby.maxRounds;
+                    roundsCell.innerText = lobby.round + "/" + lobby.rounds;
                     const playersCell = document.createElement("td");
                     playersCell.innerText = lobby.playerCount + "/" + lobby.maxPlayers;
                     const drawingTimeCell = document.createElement("td");
@@ -223,7 +223,7 @@
             joinButton.disabled = true;
         } else {
             wordpackDetail.innerText = lobby.wordpack;
-            roundsDetail.innerText = lobby.round + "/" + lobby.maxRounds;
+            roundsDetail.innerText = lobby.round + "/" + lobby.rounds;
             playersDetail.innerText = lobby.playerCount + "/" + lobby.maxPlayers;
             drawingTimeDetail.innerText = lobby.drawingTime.toString();
             customWordsDetail.innerText = lobby.customWords ? "Yes" : "No";
