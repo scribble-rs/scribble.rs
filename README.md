@@ -22,6 +22,11 @@ quite annoying and caused some frustration.
 
 The site will not display any ads or share any data with third parties.
 
+## News and discussion
+
+We have a new blog over at https://scribble-rs.github.io. Over there, you can ready about some highlights and discuss about them in the comment section.
+The comment section is powered by utteranc.es, which means it'll use the blogs repository for comments and you can simply use your GitHub account for commenting.
+
 ## Play now
 
 Feel free to play on this instance
