@@ -34,13 +34,15 @@
                 </button>
             </div>
             <div id="word-container" style="flex: 1; align-self: center; justify-content: baseline;"></div>
-            <div id="owner-buttons" style="visibility: hidden;">
-                <button onclick="showKickDialog()" class="dialog-button header-button"
+            <div>
+                <button id="kick-button" style="display: none;"
+                        onclick="showKickDialog()" class="dialog-button header-button"
                         alt="Votekick a player" title="Votekick a player">
                     <img src="{{.RootPath}}/resources/kick.png" class="header-button-image"/>
                 </button>
 
-                <button onclick="showLobbySettingsDialog()" class="dialog-button header-button"
+                <button id="lobby-settings-button" style="display: none;"
+                        onclick="showLobbySettingsDialog()" class="dialog-button header-button"
                         alt="Change lobby settings" title="Change lobby settings">
                     <img src="{{.RootPath}}/resources/settings.svg" class="header-button-image"/>
                 </button>
@@ -446,7 +448,8 @@
     const namechangeFieldStartDialog = document.getElementById("namechange-field-start-dialog");
     const namechangeField = document.getElementById("namechange-field");
 
-    const ownerButtons = document.getElementById("owner-buttons");
+    const lobbySettingsButton= document.getElementById("lobby-settings-button");
+    const kickButton = document.getElementById("kick-button");
     const lobbySettingsDialog = document.getElementById("lobbysettings-dialog");
 
     const startDialog = document.getElementById("start-dialog");
@@ -993,7 +996,7 @@
             }
         } else if (parsed.type === "owner-change") {
             ownerID = parsed.data.playerId;
-            updateOwnerButtonsVisibility();
+            updateButtonVisibilities();
             applyMessage("system-message", "System", parsed.data.playerName + " is the new lobby owner.");
         } else if (parsed.type === "drawer-kicked") {
             applyMessage("system-message", "System", "Since the kicked player has been drawing, none of you will get any points this round.");
@@ -1001,6 +1004,7 @@
             votekickEnabled = parsed.data.enableVotekick;
             rounds = parsed.data.rounds;
             updateRoundsDisplay();
+            updateButtonVisibilities();
             applyMessage("system-message", "System", "Lobby settings changed:<br/><br/>"
             + "Drawing time: " + parsed.data.drawingTime + "<br/>"
             + "Rounds: " + parsed.data.rounds + "<br/>"
@@ -1033,7 +1037,7 @@
         roundEndTime = ready.roundEndTime;
         votekickEnabled = ready.votekickEnabled;
         updateRoundsDisplay();
-        updateOwnerButtonsVisibility();
+        updateButtonVisibilities();
 
         if (ready.players && ready.players.length) {
             applyPlayers(ready.players)
@@ -1047,11 +1051,17 @@
         updateCursor();
     }
 
-    function updateOwnerButtonsVisibility() {
+    function updateButtonVisibilities() {
         if (ownerID === ownID) {
-            ownerButtons.style.visibility = "visible";
+            lobbySettingsButton.style.display = "initial";
         } else {   
-            ownerButtons.style.visibility = "hidden";
+            lobbySettingsButton.style.display = "none";
+        }
+
+        if (votekickEnabled) {
+            kickButton.style.display = "initial";
+        } else {
+            kickButton.style.display = "none";
         }
     }
 
