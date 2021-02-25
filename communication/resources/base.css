@@ -143,11 +143,6 @@ ul {
     }
     .table-wrapper { border-color: rgb(121, 108, 84) !important; }
     .lobby-details { background-color: rgb(58, 52, 40) !important; }
-    .vimvixen-hint {
-        background-color: #6c604b !important;
-        border-color: #e0c79b !important;
-        color: #ffffd8 !important;
-    }
 
     .guess-letter-underline { border-bottom-color: rgb(177, 157, 123) !important; }
     #drawing-board { background-color: rgb(35, 31, 24) !important; }
