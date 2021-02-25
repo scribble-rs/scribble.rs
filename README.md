@@ -7,9 +7,6 @@
   <a href="https://codecov.io/gh/scribble-rs/scribble.rs">
     <img src="https://codecov.io/gh/scribble-rs/scribble.rs/branch/master/graph/badge.svg">
   </a>
-  <a href="https://discord.gg/3sntyCv">
-    <img src="https://img.shields.io/discord/693433417395732531.svg?logo=discord">
-  </a>
   <a href="https://liberapay.com/biosmarcel/donate">
     <img src="https://img.shields.io/liberapay/receives/biosmarcel.svg?logo=liberapay">
   </a>
@@ -92,12 +89,6 @@ The default port is `8080`. To override it, run:
 ```shell
 docker run -p <port-number>:<port-number> biosmarcel/scribble.rs --portHTTP=<port-number>
 ```
-
-## Discord
-
-While you can find a link to a discord server at the top, for personally
-reasons you won't find me on that server anymore, however, you can still reach
-me via E-Mail or even the issue section.
 
 ## Contributing
 
