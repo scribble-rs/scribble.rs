@@ -728,11 +728,6 @@ func triggerWordHintUpdate(lobby *Lobby) {
 	}, lobby)
 }
 
-type Rounds struct {
-	Round  int `json:"round"`
-	Rounds int `json:"rounds"`
-}
-
 // CreateLobby allows creating a lobby, optionally returning errors that
 // occurred during creation.
 func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit int, customWords []string, enableVotekick bool) (*Player, *Lobby, error) {
