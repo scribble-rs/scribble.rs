@@ -35,12 +35,14 @@
             </div>
             <div id="word-container" style="flex: 1; align-self: center; justify-content: baseline;"></div>
             <div>
-                <button onclick="showKickDialog()" class="dialog-button header-button"
+                <button id="kick-button" style="display: none;"
+                        onclick="showKickDialog()" class="dialog-button header-button"
                         alt="Votekick a player" title="Votekick a player">
                     <img src="{{.RootPath}}/resources/kick.png" class="header-button-image"/>
                 </button>
 
-                <button onclick="showLobbySettingsDialog()" class="dialog-button header-button"
+                <button id="lobby-settings-button" style="display: none;"
+                        onclick="showLobbySettingsDialog()" class="dialog-button header-button"
                         alt="Change lobby settings" title="Change lobby settings">
                     <img src="{{.RootPath}}/resources/settings.svg" class="header-button-image"/>
                 </button>
@@ -147,11 +149,17 @@
                             <div class="center-dialog-content">
                                 <div style="display: flex; flex-direction: column;">
                                     <div class="input-container">
+                                        <b>Drawing Time</b>
+                                        <input id="lobby-settings-drawing-time" class="input-item" type="number" name="drawing_time" min="{{.MinDrawingTime}}"
+                                        max="{{.MaxDrawingTime}}" value="{{.DrawingTime}}"/>
+                                        <b>Rounds</b>
+                                        <input id="lobby-settings-max-rounds" class="input-item" type="number" name="rounds" min="{{.MinRounds}}" max="{{.MaxRounds}}"
+                                        value="{{.Rounds}}"/>                    
                                         <b>Maximum Players</b>
                                         <input id="lobby-settings-max-players" type="number" name="max_players" min="{{.MinMaxPlayers}}"
                                         max="{{.MaxMaxPlayers}}" value="{{.MaxPlayers}}"/>
                                         <b>Public Lobby</b>
-                                        <input id="lobby-settings-public" type="checkbox" name="public" value="true"
+                                        <input id="lobby-settings-public" type="checkbox" name="public"
                                             {{if eq .Public true}}checked{{end}}/>
                                         <b>Custom Words Chance</b>
                                         <div style="display: flex;">
@@ -168,7 +176,7 @@
                                                 name="clients_per_ip_limit" min="{{.MinClientsPerIPLimit}}"
                                                 max="{{.MaxClientsPerIPLimit}}" value="{{.ClientsPerIPLimit}}"/>
                                                 <b>Enable Votekick</b>
-                                                <input id="lobby-settings-enable-votekick" type="checkbox" name="enable_votekick" value="true"
+                                                <input id="lobby-settings-enable-votekick" type="checkbox" name="enable_votekick"
                                                 {{if eq .EnableVotekick true}}checked{{end}}/>
                                             </div>
                                         </details>
@@ -440,6 +448,8 @@
     const namechangeFieldStartDialog = document.getElementById("namechange-field-start-dialog");
     const namechangeField = document.getElementById("namechange-field");
 
+    const lobbySettingsButton= document.getElementById("lobby-settings-button");
+    const kickButton = document.getElementById("kick-button");
     const lobbySettingsDialog = document.getElementById("lobbysettings-dialog");
 
     const startDialog = document.getElementById("start-dialog");
@@ -516,8 +526,10 @@
     function saveLobbySettings() {
         fetch("{{.RootPath}}/v1/lobby?" + new URLSearchParams({
             lobby_id: '{{.LobbyID}}',
-            public: document.getElementById("lobby-settings-public").value,
-            enable_votekick: document.getElementById("lobby-settings-enable-votekick").value,
+            drawing_time: document.getElementById("lobby-settings-drawing-time").value,
+            rounds: document.getElementById("lobby-settings-max-rounds").value,
+            public: document.getElementById("lobby-settings-public").checked,
+            enable_votekick: document.getElementById("lobby-settings-enable-votekick").checked,
             max_players: document.getElementById("lobby-settings-max-players").value,
             clients_per_ip_limit: document.getElementById("lobby-settings-clients-per-ip-limit").value,
             custom_words_chance: document.getElementById("lobby-settings-custom-words-chance").value,
@@ -529,11 +541,13 @@
                 hideLobbySettingsDialog();
                 alert("Lobby settings successfully saved.");
             } else {
-                result.text().then(bodyText => {
-                    alert("Error saving lobby settings: \n\n - " + bodyText.replace(";","\n - "));
-                })
+                result
+                    .text()
+                    .then(bodyText => {
+                        alert("Error saving lobby settings: \n\n - " + bodyText.replace(";","\n - "));
+                    });
             }
-        })
+        });
     }
 
     function toggleSound() {
@@ -666,8 +680,10 @@
     }
 
     function hexToRgb(hex) {
-        return hex.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, (m, r, g, b) => '#' + r + r + g + g + b + b)
-            .substring(1).match(/.{2}/g)
+        return hex
+            .replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, (m, r, g, b) => '#' + r + r + g + g + b + b)
+            .substring(1)
+            .match(/.{2}/g)
             .map(x => parseInt(x, 16));
     }
 
@@ -712,7 +728,7 @@
             const hsp = Math.sqrt(
                 0.299 * (innerColor[0] * innerColor[0]) +
                 0.587 * (innerColor[1] * innerColor[1]) +
-                0.114 * (innerColor[2] * innerColor[2])
+                0.114 * (innerColor[2] * innerColor[2]);
             );
 
             if (hsp > 127.5) {
@@ -746,7 +762,7 @@
     function startGame() {
         socket.send(JSON.stringify({
             type: "start",
-        }))
+        }));
     }
 
     function clearCanvasAndSendEvent() {
@@ -797,9 +813,10 @@
         });
 
     let ownID, ownerID, ownName, drawerID, drawerName;
-    let maxRounds = 0;
+    let round = 0;
+    let rounds = 0;
     let roundEndTime = 0;
-    let votekickEnabled
+    let votekickEnabled;
     socket.onmessage = event => {
         let parsed = JSON.parse(event.data);
         if (parsed.type === "ready") {
@@ -890,7 +907,7 @@
                 playernameSpan.innerText = parsed.data.playerName;
             }
             if (parsed.data.playerId === ownID) {
-                setUsernameLocally(parsed.data.playerName)
+                setUsernameLocally(parsed.data.playerName);
             }
             if (parsed.data.playerId === drawerID) {
                 waitChooseDrawerSpan.innerHTML = parsed.data.playerName;
@@ -899,18 +916,18 @@
             playWav('{{.RootPath}}/resources/plop.wav');
 
             if (parsed.data === ownID) {
-                applyMessage("correct-guess-message", "System", "You have correctly guessed the word.")
+                applyMessage("correct-guess-message", "System", "You have correctly guessed the word.");
             } else {
                 for (let i = 0; i < cachedPlayers.length; i++) {
                     let player = cachedPlayers[i];
                     if (player.id === parsed.data) {
-                        applyMessage("correct-guess-message", "System", player.name + " correctly guessed the word.")
+                        applyMessage("correct-guess-message", "System", player.name + " correctly guessed the word.");
                         break;
                     }
                 }
             }
         } else if (parsed.type === "close-guess") {
-            applyMessage("close-guess-message", "System", "'"+ parsed.data + "'' is very close.")
+            applyMessage("close-guess-message", "System", "'"+ parsed.data + "'' is very close.");
         } else if (parsed.type === "update-wordhint") {
             // this event is (also) sent if the drawer has choosen a word, so we can hide the waitChooseDialog
             waitChooseDialog.style.visibility = "hidden";
@@ -926,7 +943,7 @@
         } else if (parsed.type === "fill") {
             fill(context, parsed.data.x * scaleDownFactor(), parsed.data.y * scaleDownFactor(), parsed.data.color);
         } else if (parsed.type === "clear-drawing-board") {
-            clear(context)
+            clear(context);
         } else if (parsed.type === "next-turn") {
             //As soon as a turn starts, the round should be ongoing, so we make
             //sure that all types of dialogs, that indicate the game isn't
@@ -942,8 +959,9 @@
 
             clear(context);
 
+            round = parsed.data.round;
             roundEndTime = parsed.data.roundEndTime;
-            applyRounds(parsed.data.round, maxRounds);
+            updateRoundsDisplay();
             applyPlayers(parsed.data.players);
 
             //Show additional dialog, that another user (drawer) is choosing a word
@@ -970,19 +988,30 @@
         } else if (parsed.type === "drawing") {
             applyDrawData(parsed.data);
         } else if (parsed.type === "kick-vote") {
-            let kickMessage = "("+parsed.data.voteCount+"/"+parsed.data.requiredVoteCount+") players voted to kick "+parsed.data.playerName+".";
-            if (parsed.data.voteCount >= parsed.data.requiredVoteCount) {
-                kickMessage += " Player has been kicked.";
+            if (parsed.data.playerId === ownID && parsed.data.voteCount >= parsed.data.requiredVoteCount) {
+                alert("You have been kicked");
+                document.location.href="{{.RootPath}}/";
+            } else {
+                let kickMessage = "("+parsed.data.voteCount+"/"+parsed.data.requiredVoteCount+") players voted to kick "+parsed.data.playerName+".";
+                if (parsed.data.voteCount >= parsed.data.requiredVoteCount) {
+                    kickMessage += " Player has been kicked.";
+                }
+                applyMessage("system-message", "System", kickMessage);
             }
-            applyMessage("system-message", "System", kickMessage);
         } else if (parsed.type === "owner-change") {
             ownerID = parsed.data.playerId;
+            updateButtonVisibilities();
             applyMessage("system-message", "System", parsed.data.playerName + " is the new lobby owner.");
         } else if (parsed.type === "drawer-kicked") {
             applyMessage("system-message", "System", "Since the kicked player has been drawing, none of you will get any points this round.");
         } else if (parsed.type === "lobby-settings-changed") {
             votekickEnabled = parsed.data.enableVotekick;
+            rounds = parsed.data.rounds;
+            updateRoundsDisplay();
+            updateButtonVisibilities();
             applyMessage("system-message", "System", "Lobby settings changed:<br/><br/>"
+            + "Drawing time: " + parsed.data.drawingTime + "<br/>"
+            + "Rounds: " + parsed.data.rounds + "<br/>"
             + "Public lobby: " + parsed.data.public + "<br/>"
             + "Enable votekicking: " + parsed.data.enableVotekick + "<br/>"
             + "Max players: " + parsed.data.maxPlayers + "<br/>"
@@ -1007,21 +1036,37 @@
         setUsernameLocally(ready.playerName);
         allowDrawing = ready.allowDrawing;
         ownID = ready.playerId;
-        maxRounds = ready.maxRounds;
+        round = ready.rounds;
+        rounds = ready.rounds;
         roundEndTime = ready.roundEndTime;
         votekickEnabled = ready.votekickEnabled;
-        applyRounds(ready.round, ready.maxRounds);
+        updateRoundsDisplay();
+        updateButtonVisibilities();
 
         if (ready.players && ready.players.length) {
-            applyPlayers(ready.players)
+            applyPlayers(ready.players);
         }
         if (ready.currentDrawing && ready.currentDrawing.length) {
-            applyDrawData(ready.currentDrawing)
+            applyDrawData(ready.currentDrawing);
         }
         if (ready.wordHints && ready.wordHints.length) {
-            applyWordHints(ready.wordHints)
+            applyWordHints(ready.wordHints);
         }
         updateCursor();
+    }
+
+    function updateButtonVisibilities() {
+        if (ownerID === ownID) {
+            lobbySettingsButton.style.display = "initial";
+        } else {   
+            lobbySettingsButton.style.display = "none";
+        }
+
+        if (votekickEnabled) {
+            kickButton.style.display = "initial";
+        } else {
+            kickButton.style.display = "none";
+        }
     }
 
     function promptWords(wordOne, wordTwo, wordThree) {
@@ -1050,7 +1095,7 @@
 
     function applyMessage(styleClass, author, message) {
         if (messageContainer.childElementCount >= 100) {
-            messageContainer.removeChild(messageContainer.firstChild)
+            messageContainer.removeChild(messageContainer.firstChild);
         }
 
         messageContainer.innerHTML += `<div class="message ` + styleClass + `">
@@ -1101,8 +1146,8 @@
         });
     }
 
-    function applyRounds(round, maxRound) {
-        roundsSpan.innerText = 'Round ' + round + ' of ' + maxRound;
+    function updateRoundsDisplay() {
+        roundsSpan.innerText = 'Round ' + round + ' of ' + rounds;
     }
 
     function applyWordHints(wordHints) {
@@ -1131,7 +1176,7 @@
             } else if (drawElement.type === "line") {
                 drawLine(context, drawData.fromX * scaleDownFactor(), drawData.fromY * scaleDownFactor(), drawData.toX * scaleDownFactor(), drawData.toY * scaleDownFactor(), drawData.color, drawData.lineWidth * scaleDownFactor());
             } else {
-                console.log("Unknown draw element type: " + drawData.type)
+                console.log("Unknown draw element type: " + drawData.type);
             }
         });
     }
@@ -1246,7 +1291,7 @@
     drawingBoard.onclick = function (e) {
         if (allowDrawing && e.button === 0) {
             if (localTool === fillBucket) {
-                fillAndSendEvent(context, e.offsetX, e.offsetY, localColor)
+                fillAndSendEvent(context, e.offsetX, e.offsetY, localColor);
             } else {
                 drawLineAndSendEvent(context, e.offsetX, e.offsetY, e.offsetX, e.offsetY, localColor, localLineWidth);
             }

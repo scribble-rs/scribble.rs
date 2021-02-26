@@ -502,6 +502,9 @@ func advanceLobby(lobby *Lobby) {
 	//to know which word was previously supposed to be guessed.
 	previousWord := lobby.CurrentWord
 
+	if lobby.DrawingTimeNew != 0 {
+		lobby.DrawingTime = lobby.DrawingTimeNew
+	}
 	lobby.scoreEarnedByGuessers = 0
 	lobby.CurrentWord = ""
 	lobby.wordHints = nil
@@ -518,7 +521,7 @@ func advanceLobby(lobby *Lobby) {
 
 	newDrawer, roundOver := selectNextDrawer(lobby)
 	if roundOver {
-		if lobby.Round == lobby.MaxRounds {
+		if lobby.Round == lobby.Rounds {
 			endGame(lobby)
 			return
 		}
@@ -526,12 +529,12 @@ func advanceLobby(lobby *Lobby) {
 		lobby.Round++
 	}
 
-	firstTurn := lobby.state != ongoing
+	firstTurn := lobby.State != Ongoing
 
 	lobby.ClearDrawing()
 	lobby.drawer = newDrawer
 	lobby.drawer.State = Drawing
-	lobby.state = ongoing
+	lobby.State = Ongoing
 	lobby.wordChoice = GetRandomWords(3, lobby)
 
 	recalculateRanks(lobby)
@@ -562,7 +565,7 @@ func advanceLobby(lobby *Lobby) {
 func endGame(lobby *Lobby) {
 	lobby.drawer = nil
 	lobby.Round = 0
-	lobby.state = gameOver
+	lobby.State = GameOver
 
 	recalculateRanks(lobby)
 
@@ -725,11 +728,6 @@ func triggerWordHintUpdate(lobby *Lobby) {
 	}, lobby)
 }
 
-type Rounds struct {
-	Round     int `json:"round"`
-	MaxRounds int `json:"maxRounds"`
-}
-
 // CreateLobby allows creating a lobby, optionally returning errors that
 // occurred during creation.
 func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit int, customWords []string, enableVotekick bool) (*Player, *Lobby, error) {
@@ -794,7 +792,7 @@ type Ready struct {
 	GameState       gameState     `json:"gameState"`
 	OwnerID         string        `json:"ownerId"`
 	Round           int           `json:"round"`
-	MaxRound        int           `json:"maxRounds"`
+	Rounds          int           `json:"rounds"`
 	RoundEndTime    int           `json:"roundEndTime"`
 	WordHints       []*WordHint   `json:"wordHints"`
 	Players         []*Player     `json:"players"`
@@ -808,17 +806,17 @@ func generateReadyData(lobby *Lobby, player *Player) *Ready {
 		PlayerName:   player.Name,
 
 		VotekickEnabled: lobby.EnableVotekick,
-		GameState:       lobby.state,
+		GameState:       lobby.State,
 		OwnerID:         lobby.Owner.ID,
 		Round:           lobby.Round,
-		MaxRound:        lobby.MaxRounds,
+		Rounds:          lobby.Rounds,
 		WordHints:       lobby.GetAvailableWordHints(player),
 		Players:         lobby.players,
 		CurrentDrawing:  lobby.currentDrawing,
 	}
 
 	//Game over already
-	if lobby.state != ongoing {
+	if lobby.State != Ongoing {
 		//0 is interpreted as "no time left".
 		ready.RoundEndTime = 0
 	} else {

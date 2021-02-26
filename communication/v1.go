@@ -18,7 +18,7 @@ type LobbyEntry struct {
 	PlayerCount     int    `json:"playerCount"`
 	MaxPlayers      int    `json:"maxPlayers"`
 	Round           int    `json:"round"`
-	MaxRounds       int    `json:"maxRounds"`
+	Rounds          int    `json:"rounds"`
 	DrawingTime     int    `json:"drawingTime"`
 	CustomWords     bool   `json:"customWords"`
 	Votekick        bool   `json:"votekick"`
@@ -35,7 +35,7 @@ func publicLobbies(w http.ResponseWriter, r *http.Request) {
 			PlayerCount:     lobby.GetOccupiedPlayerSlots(),
 			MaxPlayers:      lobby.MaxPlayers,
 			Round:           lobby.Round,
-			MaxRounds:       lobby.MaxRounds,
+			Rounds:          lobby.Rounds,
 			DrawingTime:     lobby.DrawingTime,
 			CustomWords:     len(lobby.CustomWords) > 0,
 			Votekick:        lobby.EnableVotekick,
@@ -203,14 +203,6 @@ func editLobby(w http.ResponseWriter, r *http.Request) {
 	if r.Form.Get("language") != "" {
 		requestErrors = append(requestErrors, "can't modify language in existing lobby")
 	}
-	//FIXME Make editable. As of now, changing this would require an update event for clients.
-	if r.Form.Get("rounds") != "" {
-		requestErrors = append(requestErrors, "can't modify rounds in existing lobby")
-	}
-	//FIXME Make editable. As of now, making this editable mid-turn would break score calculation.
-	if r.Form.Get("drawing_time") != "" {
-		requestErrors = append(requestErrors, "can't modify drawing_time in existing lobby")
-	}
 
 	parseError := r.ParseForm()
 	if parseError != nil {
@@ -219,6 +211,8 @@ func editLobby(w http.ResponseWriter, r *http.Request) {
 
 	//Editable properties
 	maxPlayers, maxPlayersInvalid := parseMaxPlayers(r.Form.Get("max_players"))
+	drawingTime, drawingTimeInvalid := parseDrawingTime(r.Form.Get("drawing_time"))
+	rounds, roundsInvalid := parseRounds(r.Form.Get("rounds"))
 	customWordChance, customWordChanceInvalid := parseCustomWordsChance(r.Form.Get("custom_words_chance"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := parseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
 	enableVotekick, enableVotekickInvalid := parseBoolean("enable votekick", r.Form.Get("enable_votekick"))
@@ -226,6 +220,16 @@ func editLobby(w http.ResponseWriter, r *http.Request) {
 
 	if maxPlayersInvalid != nil {
 		requestErrors = append(requestErrors, maxPlayersInvalid.Error())
+	}
+	if drawingTimeInvalid != nil {
+		requestErrors = append(requestErrors, drawingTimeInvalid.Error())
+	}
+	if roundsInvalid != nil {
+		requestErrors = append(requestErrors, roundsInvalid.Error())
+	} else {
+		if rounds < lobby.Round {
+			requestErrors = append(requestErrors, fmt.Sprintf("rounds must be greater than or equal to the current round (%d)", lobby.Round))
+		}
 	}
 	if customWordChanceInvalid != nil {
 		requestErrors = append(requestErrors, customWordChanceInvalid.Error())
@@ -254,8 +258,17 @@ func editLobby(w http.ResponseWriter, r *http.Request) {
 	lobby.ClientsPerIPLimit = clientsPerIPLimit
 	lobby.EnableVotekick = enableVotekick
 	lobby.Public = publicLobby
+	lobby.Rounds = rounds
 
-	TriggerUpdateEvent("lobby-settings-changed", lobby.EditableLobbySettings, lobby)
+	if lobby.State == game.Ongoing {
+		lobby.DrawingTimeNew = drawingTime
+	} else {
+		lobby.DrawingTime = drawingTime
+	}
+
+	lobbySettingsCopy := *lobby.EditableLobbySettings
+	lobbySettingsCopy.DrawingTime = drawingTime
+	TriggerUpdateEvent("lobby-settings-changed", lobbySettingsCopy, lobby)
 }
 
 func getLobbyWithErrorHandling(w http.ResponseWriter, r *http.Request) (*game.Lobby, bool) {
