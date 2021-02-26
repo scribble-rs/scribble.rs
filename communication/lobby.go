@@ -135,6 +135,8 @@ type LobbyData struct {
 	//that the user can choose between. These brushes are guaranteed to
 	//be ordered from low to high and stay with the bounds.
 	SuggestedBrushSizes [4]uint8 `json:"suggestedBrushSizes"`
+	// For robot page
+	MaxRounds int `json:"maxRounds"`
 }
 
 func createLobbyData(lobby *game.Lobby) *LobbyData {
@@ -149,6 +151,7 @@ func createLobbyData(lobby *game.Lobby) *LobbyData {
 		MaxBrushSize:           game.MaxBrushSize,
 		CanvasColor:            CanvasColor,
 		SuggestedBrushSizes:    SuggestedBrushSizes,
+		MaxRounds:              lobby.MaxRounds,
 	}
 }
 
@@ -160,9 +163,11 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	pageData := createLobbyData(lobby)
+
 	userAgent := strings.ToLower(r.UserAgent())
 	if !(strings.Contains(userAgent, "gecko") || strings.Contains(userAgent, "chrome") || strings.Contains(userAgent, "opera") || strings.Contains(userAgent, "safari")) {
-		err := pageTemplates.ExecuteTemplate(w, "robot-page", lobby)
+		err := pageTemplates.ExecuteTemplate(w, "robot-page", pageData)
 		if err != nil {
 			panic(err)
 		}
@@ -170,8 +175,6 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 	}
 
 	player := getPlayer(lobby, r)
-
-	pageData := createLobbyData(lobby)
 
 	if player == nil {
 		if !lobby.HasFreePlayerSlot() {
