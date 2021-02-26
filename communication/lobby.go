@@ -151,7 +151,6 @@ func createLobbyData(lobby *game.Lobby) *LobbyData {
 		MaxBrushSize:           game.MaxBrushSize,
 		CanvasColor:            CanvasColor,
 		SuggestedBrushSizes:    SuggestedBrushSizes,
-		MaxRounds:              lobby.MaxRounds,
 	}
 }
 
@@ -163,11 +162,9 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pageData := createLobbyData(lobby)
-
 	userAgent := strings.ToLower(r.UserAgent())
 	if !(strings.Contains(userAgent, "gecko") || strings.Contains(userAgent, "chrome") || strings.Contains(userAgent, "opera") || strings.Contains(userAgent, "safari")) {
-		err := pageTemplates.ExecuteTemplate(w, "robot-page", pageData)
+		err := pageTemplates.ExecuteTemplate(w, "robot-page", createLobbyData(lobby))
 		if err != nil {
 			panic(err)
 		}
