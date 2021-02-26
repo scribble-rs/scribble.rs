@@ -135,8 +135,6 @@ type LobbyData struct {
 	//that the user can choose between. These brushes are guaranteed to
 	//be ordered from low to high and stay with the bounds.
 	SuggestedBrushSizes [4]uint8 `json:"suggestedBrushSizes"`
-	// For robot page
-	MaxRounds int `json:"maxRounds"`
 }
 
 func createLobbyData(lobby *game.Lobby) *LobbyData {
