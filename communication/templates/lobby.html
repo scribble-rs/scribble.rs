@@ -55,7 +55,7 @@
 
         <div id="drawing-board-wrapper">
             <div id="drawing-board-inner-wrapper">
-                <canvas id="drawing-board"></canvas>
+                <canvas id="drawing-board" ontouchstart="onTouchStart(event)" ontouchmove="onTouchMove(event)" ontouchend="onTouchEnd(event)"></canvas>
 
                 <!-- The so called "center dialogs" are divs that float above the canvas.
                 They are centered are always a fraction of the canvas size but never bigger.
@@ -1243,6 +1243,49 @@
 
     drawingBoard.ontouchend = onTouchEnd;
     drawingBoard.ontouchcancel = onTouchEnd;
+    
+    // Add two similar functions to add support for touch-screen computers
+    function onTouchStart(e) {
+        if (!isDrawing && allowDrawing) {
+            touchID = e.touches[0].identifier;
+
+            if (allowDrawing && localTool !== 2) {
+                
+                let clientRect = drawingBoard.getBoundingClientRect();
+                x = (e.touches[0].clientX - clientRect.left);
+                y = (e.touches[0].clientY - clientRect.top);
+
+                isDrawing = true;
+            }
+        }
+    };
+    
+    function onTouchMove(e) {
+        
+        e.preventDefault();
+
+        if (allowDrawing && isDrawing) {
+            
+            for (let i = e.changedTouches.length - 1; i >= 0; i--) {
+                if (e.changedTouches[i].identifier === touchID) {
+                    let touch = e.changedTouches[i];
+
+                    
+                    let clientRect = drawingBoard.getBoundingClientRect();
+                    let offsetX = (touch.clientX - clientRect.left);
+                    let offsetY = (touch.clientY - clientRect.top);
+
+                    
+                    drawLineAndSendEvent(context, x, y, offsetX, offsetY, localColor, localLineWidth);
+                    x = offsetX;
+                    y = offsetY;
+
+                    return;
+                }
+            }
+        }
+    };
+
 
     // Mouse input
     drawingBoard.onmousedown = function (e) {
