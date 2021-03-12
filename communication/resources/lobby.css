@@ -1,10 +1,40 @@
-#rounds {
-    font-size: 1.7rem;
-    flex: 1;
+#lobby-header {
+    grid-column-start: 1;
+    grid-column-end: 4;
+    grid-row: 1;
+
+    display:grid;
+    grid-template-columns: 15rem auto 18rem;
+    grid-gap: 5px;
+}
+
+#lobby-header-center-element {
+    display: flex;
+    /* Hack to remove extra space between buttons */
+    font-size: 0;
+}
+
+#round-container, #time-left {
+    font-size: 1.5rem;
+}
+
+#round-container {
+    display: flex;
+}
+
+#rounds::after {
+    content: ' of ';
+    white-space: pre;
 }
 
 #time-left {
-    font-size: 1.5rem;
+    display: flex;
+}
+
+#time-left-value {
+    min-width: 3rem;
+    width: 3rem;
+    margin-left: 0.5rem;
 }
 
 #word-container {
@@ -33,7 +63,7 @@
     padding: 5px;
     display: grid;
     grid-template-columns: 15rem auto 18rem;
-    grid-template-rows: min-content auto;
+    grid-template-rows: min-content min-content auto;
     grid-gap: 5px;
     flex: 1 1;
 }
@@ -45,8 +75,10 @@
 #drawing-board-wrapper {
     width: 100%;
     height: 0;
-    padding-bottom: 56.25%;
+    padding-top: 56.25%;
     position: relative;
+    grid-column: 2;
+    grid-row: 2;
 }
 
 #drawing-board-inner-wrapper {
@@ -100,9 +132,8 @@
 
 #chat {
     min-width: 15rem;
-    height: 100%;
-    display: grid;
-    grid-template-rows: auto fit-content(100%);
+    display: flex;
+    flex-direction: column;
     grid-column: 3;
     grid-row-start: 2;
     grid-row-end: 3;
@@ -113,10 +144,14 @@
     overflow-y: scroll;
     word-break: break-all;
     background-color: white;
+    flex: 1;
 }
 
 #word-container {
+    flex: 1;
+    justify-content: baseline;
     justify-items: center;
+    align-self: center; 
 }
 
 .chat-name {
@@ -288,11 +323,12 @@ input[type="button"]:active,
 }
 
 #toolbox {
-    position: absolute;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     margin-top: 10px;
+    grid-row: 3;
+    grid-column: 2;
 }
 
 .toolbox-group {
@@ -433,4 +469,67 @@ input[type="button"]:active,
 
 #waitchoose-drawer {
     font-weight: bold;
+}
+
+@media (orientation: portrait) {
+    #lobby {
+        grid-template-columns: auto auto;
+        grid-template-rows: min-content min-content min-content auto;
+    }
+
+    #lobby-header {
+        grid-template-columns: max-content auto max-content;
+
+        grid-column-start: 1;
+        grid-column-end: 3;
+        grid-row: 1;
+    }
+
+    #rounds::after {
+        content: '/';
+    }
+
+    #round-container, #time-left {
+        font-size: 1.2rem;
+    }
+
+    #time-left-value {
+        min-width: 2.4rem;
+        width: 2.4rem;
+    }    
+
+    .header-button-image {
+        width: 1.2rem;
+        height: 1.2rem;
+    }
+
+    .guess-letter {
+        font-size: 1.2rem;
+    }
+
+    #drawing-board-wrapper {
+        grid-column-start: 1;
+        grid-column-end: 3;
+        grid-row: 2;
+    }
+
+    #toolbox {
+        grid-row: 3;
+        grid-column-start: 1;
+        grid-column-end: 3;
+    }
+
+    #player-container {
+        grid-column: 1;
+        grid-row: 4;
+    }
+
+    #chat {
+        grid-column: 2;
+        grid-row: 4;
+    }
+
+    #message-container {
+        max-height: 5rem;
+    }
 }
