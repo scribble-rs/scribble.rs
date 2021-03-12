@@ -19,8 +19,7 @@ footer {
     justify-content: center;
     align-items: center;
     height: fit-content;
-    padding-top: 0.1rem;
-    padding-bottom: 0.1rem;
+    padding: 0.1rem;
     width: 100%;
     background-color: lightslategray;
     color: white;
