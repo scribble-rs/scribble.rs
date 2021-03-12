@@ -18,7 +18,9 @@ footer {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 2rem;
+    height: fit-content;
+    padding-top: 0.1rem;
+    padding-bottom: 0.1rem;
     width: 100%;
     background-color: lightslategray;
     color: white;
