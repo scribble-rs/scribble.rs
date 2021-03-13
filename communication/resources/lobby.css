@@ -329,11 +329,13 @@ input[type="button"]:active,
     margin-top: 10px;
     grid-row: 3;
     grid-column: 2;
+    height: min-content;
 }
 
 .toolbox-group {
     margin-bottom: 10px;
     margin-right: 10px;
+    align-self: flex-start;
 }
 
 .toolbox-group:last-child {
