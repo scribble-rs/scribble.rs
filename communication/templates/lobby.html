@@ -1207,7 +1207,7 @@
     // Touch input
     let touchID = 0;
 
-    drawingBoard.ontouchstart = function (e) {
+    function onTouchStart(e) {
         if (!isDrawing && allowDrawing) {
             touchID = e.touches[0].identifier;
 
@@ -1222,7 +1222,7 @@
         }
     };
 
-    drawingBoard.ontouchmove = function (e) {
+    function onTouchMove(e) {
         //FIXME Explanation? Does this prevent moving the page?
         e.preventDefault();
 
@@ -1260,9 +1260,11 @@
         }
     }
 
-    drawingBoard.ontouchend = onTouchEnd;
-    drawingBoard.ontouchcancel = onTouchEnd;
-
+    drawingBoard.addEventListener('touchend', onTouchEnd);
+    drawingBoard.addEventListener('touchcancel', onTouchEnd);
+    drawingBoard.addEventListener('touchstart', onTouchStart);
+    drawingBoard.addEventListener('touchmove', onTouchMove);
+    
     // Mouse input
     drawingBoard.onmousedown = function (e) {
         if (allowDrawing && e.button === 0 && localTool !== 2) {
