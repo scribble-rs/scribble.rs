@@ -131,7 +131,6 @@
 }
 
 #chat {
-    min-width: 15rem;
     display: flex;
     flex-direction: column;
     grid-column: 3;
@@ -475,7 +474,7 @@ input[type="button"]:active,
 
 @media (orientation: portrait), (max-aspect-ratio: 4/3) {
     #lobby {
-        grid-template-columns: auto auto;
+        grid-template-columns: 2fr 3fr;
         grid-template-rows: min-content min-content min-content auto;
     }
 
