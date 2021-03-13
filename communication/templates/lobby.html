@@ -55,7 +55,7 @@
 
         <div id="drawing-board-wrapper">
             <div id="drawing-board-inner-wrapper">
-                <canvas id="drawing-board" ontouchstart="onTouchStart(event)" ontouchmove="onTouchMove(event)" ontouchend="onTouchEnd(event)"></canvas>
+                <canvas id="drawing-board"></canvas>
 
                 <!-- The so called "center dialogs" are divs that float above the canvas.
                 They are centered are always a fraction of the canvas size but never bigger.
@@ -1241,11 +1241,11 @@
         }
     }
 
-    drawingBoard.ontouchend = onTouchEnd;
-    drawingBoard.ontouchcancel = onTouchEnd;
-    drawingBoard.ontouchstart = onTouchStart;
-    drawingBoard.ontouchmove = onTouchMove;
-
+    drawingBoard.addEventListener('touchend', onTouchEnd);
+    drawingBoard.addEventListener('touchcancel', onTouchEnd);
+    drawingBoard.addEventListener('touchstart', onTouchStart);
+    drawingBoard.addEventListener('touchmove', onTouchMove);
+    
     // Mouse input
     drawingBoard.onmousedown = function (e) {
         if (allowDrawing && e.button === 0 && localTool !== 2) {
