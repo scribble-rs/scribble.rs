@@ -473,7 +473,7 @@ input[type="button"]:active,
     font-weight: bold;
 }
 
-@media (orientation: portrait) {
+@media (orientation: portrait), (max-aspect-ratio: 4/3) {
     #lobby {
         grid-template-columns: auto auto;
         grid-template-rows: min-content min-content min-content auto;
