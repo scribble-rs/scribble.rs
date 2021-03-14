@@ -38,6 +38,10 @@
 }
 
 #word-container {
+    flex: 1;
+    justify-content: baseline;
+    justify-items: center;
+    align-self: center;
     text-align: center;
 }
 
@@ -54,10 +58,6 @@
 .guess-letter + .guess-letter {
     margin-left: 0.5rem;
 }
-
-/*
-
-*/
 
 #lobby {
     padding: 5px;
@@ -139,22 +139,14 @@
 }
 
 #message-container {
-    padding: 5px;
     overflow-y: scroll;
-    word-break: break-all;
     background-color: white;
     flex: 1;
 }
 
-#word-container {
-    flex: 1;
-    justify-content: baseline;
-    justify-items: center;
-    align-self: center; 
-}
-
 .chat-name {
     font-weight: bold;
+    padding-right: 0.2em;
 }
 
 .chat-name:after {
@@ -162,10 +154,16 @@
 }
 
 .correct-guess-message {
+    font-weight: bold;
+    color: rgb(38, 187, 38);
+}
+
+.non-guessing-player-message {
     color: rgb(38, 187, 38);
 }
 
 .close-guess-message {
+    font-weight: bold;
     color:rgb(25, 166, 166);
 }
 
@@ -176,13 +174,13 @@
 #message-input {
     flex: 1;
     border: 0;
-    border-top: 3px solid black;
-    padding: 5px;
+    padding: 10px;
+    margin-top: 5px
 }
 
 #message-input:focus {
     outline: none;
-    background-color: rgb(244, 183, 247);
+    background-color: rgb(250, 211, 252);
 }
 
 .dialog-title {
@@ -317,7 +315,17 @@ input[type="button"]:active,
     border: 0;
 }
 
+.message {
+    overflow-wrap: break-word;
+    padding: 0.3em 0.2em 0.2em 0.3em;
+}
+
+.message:nth-child(2n) {
+    background-color: rgb(240, 238, 238);
+}
+
 .system-message {
+    font-weight: bold;
     color: red;
 }
 

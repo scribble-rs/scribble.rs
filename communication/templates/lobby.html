@@ -934,28 +934,28 @@
             playWav('{{.RootPath}}/resources/plop.wav');
 
             if (parsed.data === ownID) {
-                applyMessage("correct-guess-message", "System", "You have correctly guessed the word.");
+                appendMessage("correct-guess-message", null, "You have correctly guessed the word.");
             } else {
                 for (let i = 0; i < cachedPlayers.length; i++) {
                     let player = cachedPlayers[i];
                     if (player.id === parsed.data) {
-                        applyMessage("correct-guess-message", "System", player.name + " correctly guessed the word.");
+                        appendMessage("correct-guess-message", null, player.name + " correctly guessed the word.");
                         break;
                     }
                 }
             }
         } else if (parsed.type === "close-guess") {
-            applyMessage("close-guess-message", "System", "'"+ parsed.data + "'' is very close.");
+            appendMessage("close-guess-message", null, "'"+ parsed.data + "' is very close.");
         } else if (parsed.type === "update-wordhint") {
             // this event is (also) sent if the drawer has choosen a word, so we can hide the waitChooseDialog
             waitChooseDialog.style.visibility = "hidden";
             applyWordHints(parsed.data);
         } else if (parsed.type === "message") {
-            applyMessage("", parsed.data.author, parsed.data.content);
+            appendMessage(null , parsed.data.author, parsed.data.content);
         } else if (parsed.type === "system-message") {
-            applyMessage("system-message", "System", parsed.data);
+            appendMessage("system-message", "System", parsed.data);
         } else if (parsed.type === "non-guessing-player-message") {
-            applyMessage("correct-guess-message", parsed.data.author, parsed.data.content);
+            appendMessage("non-guessing-player-message", parsed.data.author, parsed.data.content);
         } else if (parsed.type === "line") {
             drawLine(context, parsed.data.fromX * scaleDownFactor(), parsed.data.fromY * scaleDownFactor(), parsed.data.toX * scaleDownFactor(), parsed.data.toY * scaleDownFactor(), parsed.data.color, parsed.data.lineWidth * scaleDownFactor());
         } else if (parsed.type === "fill") {
@@ -991,9 +991,9 @@
 
             if (parsed.data.previousWord !== null) {
                 if (parsed.data.previousWord === "") {
-                    applyMessage("system-message", "System", "Round over. No word was chosen.");
+                    appendMessage("system-message", null, "Round over, no word was chosen.");
                 } else {
-                    applyMessage("system-message", "System", "Round over. Previous word was '"+parsed.data.previousWord+"'");
+                    appendMessage("system-message", null, "Round over, the word was '"+parsed.data.previousWord+"'.");
                 }
             }
 
@@ -1014,20 +1014,20 @@
                 if (parsed.data.voteCount >= parsed.data.requiredVoteCount) {
                     kickMessage += " Player has been kicked.";
                 }
-                applyMessage("system-message", "System", kickMessage);
+                appendMessage("system-message", "System", kickMessage);
             }
         } else if (parsed.type === "owner-change") {
             ownerID = parsed.data.playerId;
             updateButtonVisibilities();
-            applyMessage("system-message", "System", parsed.data.playerName + " is the new lobby owner.");
+            appendMessage("system-message", "System", parsed.data.playerName + " is the new lobby owner.");
         } else if (parsed.type === "drawer-kicked") {
-            applyMessage("system-message", "System", "Since the kicked player has been drawing, none of you will get any points this round.");
+            appendMessage("system-message", "System", "Since the kicked player has been drawing, none of you will get any points this round.");
         } else if (parsed.type === "lobby-settings-changed") {
             votekickEnabled = parsed.data.enableVotekick;
             rounds = parsed.data.rounds;
             updateRoundsDisplay();
             updateButtonVisibilities();
-            applyMessage("system-message", "System", "Lobby settings changed:<br/><br/>"
+            appendMessage("system-message", "System", "Lobby settings changed:<br/><br/>"
             + "Drawing time: " + parsed.data.drawingTime + "<br/>"
             + "Rounds: " + parsed.data.rounds + "<br/>"
             + "Public lobby: " + parsed.data.public + "<br/>"
@@ -1111,15 +1111,26 @@
         }
     }, 500);
 
-    function applyMessage(styleClass, author, message) {
+    //appendMessage adds a new message to the message container. If the
+    //message amount is too high, we cut off a part of the messages to
+    //prevent lagging and useless memory usage.
+    function appendMessage(styleClass, author, message) {
         if (messageContainer.childElementCount >= 100) {
             messageContainer.removeChild(messageContainer.firstChild);
         }
 
-        messageContainer.innerHTML += `<div class="message ` + styleClass + `">
-                            <span class="chat-name">` + author + `</span>
-                            <span class="message-content">` + message + `</span>
-                        </div>`;
+        let newMessage;
+        if (styleClass !== null && styleClass !== "") {
+            newMessage = '<div class="message ' + styleClass + '">';
+        } else {
+            newMessage = '<div class="message">';
+        }
+        if (author !== null && author !== "") {
+            newMessage += '<span class="chat-name">' + author + '</span>';
+        }
+        newMessage += '<span class="message-content">' + message + '</span></div>';
+
+        messageContainer.innerHTML += newMessage;
     }
 
     let cachedPlayers;
