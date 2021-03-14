@@ -77,8 +77,8 @@ ul {
     align-items: center;
     display: inline-grid;
     grid-template-columns: auto auto;
-    grid-column-gap: 20px;
-    grid-row-gap: 10px;
+    column-gap: 20px;
+    row-gap: 10px;
 }
 
 .advanced-section {

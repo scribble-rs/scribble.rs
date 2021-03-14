@@ -98,8 +98,8 @@
     display: grid;
     grid-template-columns: max-content auto;
     grid-template-rows: min-content min-content min-content min-content min-content min-content min-content minmax(min-content,4rem);
-    grid-column-gap: 2rem;
-    grid-row-gap: 1rem;
+    column-gap: 2rem;
+    row-gap: 1rem;
     flex: 2;
     margin: 1rem;
     padding: 1rem;
