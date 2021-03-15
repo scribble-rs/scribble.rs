@@ -362,7 +362,7 @@ input[type="button"]:active,
 }
 
 .player {
-    background-color: rgb(245, 245, 245);
+    background-color: rgb(255, 255, 255);
     padding: 0.2rem;
     display: grid;
     grid-template-columns: fit-content(100%) auto;
@@ -398,6 +398,12 @@ input[type="button"]:active,
     font-size: 1.5rem;
 }
 
+.playerscore-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
 .score-and-status {
     display: flex;
     flex-direction: row;
@@ -407,6 +413,7 @@ input[type="button"]:active,
 .last-turn-score {
     font-size: 0.8rem;
     color: lightslategray;
+    padding-left: 0.2rem;
 }
 
 #kick-dialog-players {
