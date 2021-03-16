@@ -3,7 +3,6 @@ package communication
 import (
 	"encoding/json"
 	"errors"
-	"html"
 	"net/http"
 	"strings"
 
@@ -54,7 +53,7 @@ func getPlayer(lobby *game.Lobby, r *http.Request) *game.Player {
 func getPlayername(r *http.Request) string {
 	parseError := r.ParseForm()
 	if parseError == nil {
-		username := html.EscapeString(strings.TrimSpace(r.Form.Get("username")))
+		username := strings.TrimSpace(r.Form.Get("username"))
 		if username != "" {
 			return trimDownTo(username, game.MaxPlayerNameLength)
 		}
@@ -62,7 +61,7 @@ func getPlayername(r *http.Request) string {
 
 	usernameCookie, noCookieError := r.Cookie("username")
 	if noCookieError == nil {
-		username := html.EscapeString(strings.TrimSpace(usernameCookie.Value))
+		username := strings.TrimSpace(usernameCookie.Value)
 		if username != "" {
 			return trimDownTo(username, game.MaxPlayerNameLength)
 		}

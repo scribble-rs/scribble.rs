@@ -499,7 +499,11 @@
             cachedPlayers.forEach(player => {
                 //Don't wanna allow kicking ourselves.
                 if (player.id !== ownID && player.connected) {
-                    kickDialogPlayers.innerHTML += '<button class="kick-player-button" onclick="onVotekickPlayer(\'' + player.id + '\')">' + player.name + '</button>';
+                    let kickButton = document.createElement("button");
+                    kickButton.classList.add("kick-player-button");
+                    kickButton.onclick = () => onVotekickPlayer(player.id);
+                    kickButton.innerText = player.name;
+                    kickDialogPlayers.appendChild(kickButton);
                 }
             });
 
@@ -915,7 +919,7 @@
                         // check if the actual player is not drawing
                         if ((player.id === ownID) && (player.state != "drawing")) {
                             //Show additional dialog, that another user (drawer) is choosing a word
-                            waitChooseDrawerSpan.innerHTML = drawerName;
+                            waitChooseDrawerSpan.innerText = drawerName;
                             waitChooseDialog.style.visibility = "visible";
                             break;
                         }
@@ -933,7 +937,7 @@
                 setUsernameLocally(parsed.data.playerName);
             }
             if (parsed.data.playerId === drawerID) {
-                waitChooseDrawerSpan.innerHTML = parsed.data.playerName;
+                waitChooseDrawerSpan.innerText = parsed.data.playerName;
             }
         } else if (parsed.type === "correct-guess") {
             playWav('{{.RootPath}}/resources/plop.wav');
@@ -988,7 +992,7 @@
             applyPlayers(parsed.data.players);
 
             //Show additional dialog, that another user (drawer) is choosing a word
-            waitChooseDrawerSpan.innerHTML = drawerName;
+            waitChooseDrawerSpan.innerText = drawerName;
             waitChooseDialog.style.visibility = "visible";
 
             //We clear this, since there's no word chosen right now.
@@ -1032,13 +1036,13 @@
             rounds = parsed.data.rounds;
             updateRoundsDisplay();
             updateButtonVisibilities();
-            appendMessage("system-message", "System", "Lobby settings changed:<br/><br/>"
-            + "Drawing time: " + parsed.data.drawingTime + "<br/>"
-            + "Rounds: " + parsed.data.rounds + "<br/>"
-            + "Public lobby: " + parsed.data.public + "<br/>"
-            + "Enable votekicking: " + parsed.data.enableVotekick + "<br/>"
-            + "Max players: " + parsed.data.maxPlayers + "<br/>"
-            + "Custom words chance: " + parsed.data.customWordsChance + "%<br/>"
+            appendMessage("system-message", "System", "Lobby settings changed:\n\n"
+            + "Drawing time: " + parsed.data.drawingTime + "\n"
+            + "Rounds: " + parsed.data.rounds + "\n"
+            + "Public lobby: " + parsed.data.public + "\n"
+            + "Enable votekicking: " + parsed.data.enableVotekick + "\n"
+            + "Max players: " + parsed.data.maxPlayers + "\n"
+            + "Custom words chance: " + parsed.data.customWordsChance + "%\n"
             + "Clients per IP limit: " + parsed.data.clientsPerIpLimit );
         }
     };

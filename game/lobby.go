@@ -3,7 +3,6 @@ package game
 import (
 	"encoding/json"
 	"fmt"
-	"html"
 	"log"
 	"math"
 	"math/rand"
@@ -288,9 +287,9 @@ func (lobby *Lobby) isAnyoneStillGuessing() bool {
 
 func sendMessageToAll(message string, sender *Player, lobby *Lobby) {
 	messageEvent := GameEvent{Type: "message", Data: Message{
-		Author:   html.EscapeString(sender.Name),
+		Author:   sender.Name,
 		AuthorID: sender.ID,
-		Content:  html.EscapeString(discordemojimap.Replace(message)),
+		Content:  discordemojimap.Replace(message),
 	}}
 	for _, target := range lobby.players {
 		WriteAsJSON(target, messageEvent)
@@ -299,9 +298,9 @@ func sendMessageToAll(message string, sender *Player, lobby *Lobby) {
 
 func sendMessageToAllNonGuessing(message string, sender *Player, lobby *Lobby) {
 	messageEvent := GameEvent{Type: "non-guessing-player-message", Data: Message{
-		Author:   html.EscapeString(sender.Name),
+		Author:   sender.Name,
 		AuthorID: sender.ID,
-		Content:  html.EscapeString(discordemojimap.Replace(message)),
+		Content:  discordemojimap.Replace(message),
 	}}
 	for _, target := range lobby.players {
 		if target.State != Guessing {
@@ -450,7 +449,7 @@ func calculateVotesNeededToKick(player *Player, lobby *Lobby) int {
 }
 
 func handleNameChangeEvent(caller *Player, lobby *Lobby, name string) {
-	newName := html.EscapeString(strings.TrimSpace(name))
+	newName := strings.TrimSpace(name)
 
 	//We don't want super-long names
 	if len(newName) > MaxPlayerNameLength {
