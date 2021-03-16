@@ -1144,34 +1144,54 @@
                 return;
             }
 
-            let stateStyleClass;
+            let playerDiv = document.createElement("div");
+
+            playerDiv.classList.add("player");
             if (player.state === "standby") {
-                stateStyleClass = 'player-done';
-            } else {
-                stateStyleClass = '';
+                playerDiv.classList.add("player-done");
             }
-            let newPlayerElement = '<div class="player ' + stateStyleClass + '">' +
-                '<span class="rank">' + player.rank + '</span>' +
-                '<span id="playername-' + player.id + '" class="playername';
+
+            let rankSpan = document.createElement("span");
+            rankSpan.classList.add("rank");
+            rankSpan.innerText = player.rank;
+            playerDiv.appendChild(rankSpan)
+
+            let playernameSpan = document.createElement("span");
+            playernameSpan.classList.add("playername");
+            playernameSpan.innerText = player.name;
+            playernameSpan.id = "playername-" + player.id;
             if (player.id === ownID) {
-                newPlayerElement += ' playername-self';
+                playernameSpan.classList.add("playername-self");
             }
-            newPlayerElement +=
-                '">' + player.name + '</span>' +
-                '<div class="score-and-status">' +
-                '<div class="playerscore-group">' +
-                '<span class="playerscore">' + player.score + '</span>' +
-                '<span class="last-turn-score">(Last turn: ' + player.lastScore + ')</span>' +
-                '</div>';
+            playerDiv.appendChild(playernameSpan);
+
+            let scoreAndStatusDiv = document.createElement("div");
+            scoreAndStatusDiv.classList.add("score-and-status");
+            playerDiv.appendChild(scoreAndStatusDiv);
+
+            let playerscoreDiv = document.createElement("div");
+            playerscoreDiv.classList.add("playerscore-group");
+            scoreAndStatusDiv.appendChild(playerscoreDiv);
+
+            let playerscoreSpan = document.createElement("span");
+            playerscoreSpan.classList.add("playerscore");
+            playerscoreSpan.innerText = player.score;
+            playerscoreDiv.appendChild(playerscoreSpan);
+
+            let lastPlayerscoreSpan = document.createElement("span");
+            lastPlayerscoreSpan.classList.add("last-turn-score");
+            lastPlayerscoreSpan.innerText = "(Last turn: " + player.lastScore + ")";
+            playerscoreDiv.appendChild(lastPlayerscoreSpan);
+            
             if (player.state === "drawing") {
                 drawerID = player.id;
                 drawerName = player.name;
-                newPlayerElement += '<span>✏️</span>';
+                scoreAndStatusDiv.appendChild(document.createTextNode("✏️"));
             } else if (player.state === "standby") {
-                newPlayerElement += '<span>✔️</span>';
+                scoreAndStatusDiv.appendChild(document.createTextNode("✔️"));
             }
-            newPlayerElement += '</div></div>';
-            playerContainer.innerHTML += newPlayerElement;
+
+            playerContainer.appendChild(playerDiv);
         });
     }
 
