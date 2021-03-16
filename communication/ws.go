@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"html"
 	"log"
 	"net/http"
 	"runtime/debug"
@@ -25,7 +24,6 @@ func init() {
 	game.TriggerUpdateEvent = TriggerUpdateEvent
 	game.SendDataToEveryoneExceptSender = SendDataToEveryoneExceptSender
 	game.WriteAsJSON = WriteAsJSON
-	game.WritePublicSystemMessage = WritePublicSystemMessage
 	game.TriggerUpdatePerPlayerEvent = TriggerUpdatePerPlayerEvent
 }
 
@@ -143,12 +141,4 @@ func WriteAsJSON(player *game.Player, object interface{}) error {
 	}
 
 	return socket.WriteJSON(object)
-}
-
-func WritePublicSystemMessage(lobby *game.Lobby, text string) {
-	systemMessageEvent := &game.GameEvent{Type: "system-message", Data: html.EscapeString(text)}
-	for _, otherPlayer := range lobby.GetPlayers() {
-		//In simple message events we ignore write failures.
-		WriteAsJSON(otherPlayer, systemMessageEvent)
-	}
 }

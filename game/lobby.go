@@ -712,7 +712,6 @@ var TriggerUpdatePerPlayerEvent func(eventType string, data func(*Player) interf
 var TriggerUpdateEvent func(eventType string, data interface{}, lobby *Lobby)
 var SendDataToEveryoneExceptSender func(sender *Player, lobby *Lobby, data interface{})
 var WriteAsJSON func(player *Player, object interface{}) error
-var WritePublicSystemMessage func(lobby *Lobby, text string)
 
 func triggerPlayersUpdate(lobby *Lobby) {
 	TriggerUpdateEvent("update-players", lobby.players, lobby)
