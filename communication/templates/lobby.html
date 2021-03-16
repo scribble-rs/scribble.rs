@@ -1119,18 +1119,25 @@
             messageContainer.removeChild(messageContainer.firstChild);
         }
 
-        let newMessage;
+        let newMessageDiv = document.createElement("div");
+        newMessageDiv.classList.add("message");
         if (styleClass !== null && styleClass !== "") {
-            newMessage = '<div class="message ' + styleClass + '">';
-        } else {
-            newMessage = '<div class="message">';
+            newMessageDiv.classList.add(styleClass);
         }
+        
         if (author !== null && author !== "") {
-            newMessage += '<span class="chat-name">' + author + '</span>';
+            let authorNameSpan = document.createElement("span");
+            authorNameSpan.classList.add("chat-name");
+            authorNameSpan.innerText = author;
+            newMessageDiv.appendChild(authorNameSpan);
         }
-        newMessage += '<span class="message-content">' + message + '</span></div>';
 
-        messageContainer.innerHTML += newMessage;
+        let messageSpan = document.createElement("span");
+        messageSpan.classList.add("message-content");
+        messageSpan.innerText = message;
+        newMessageDiv.appendChild(messageSpan);
+
+        messageContainer.appendChild(newMessageDiv);
     }
 
     let cachedPlayers;
