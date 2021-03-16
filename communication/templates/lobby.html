@@ -1124,7 +1124,7 @@
         if (styleClass !== null && styleClass !== "") {
             newMessageDiv.classList.add(styleClass);
         }
-        
+
         if (author !== null && author !== "") {
             let authorNameSpan = document.createElement("span");
             authorNameSpan.classList.add("chat-name");
@@ -1209,18 +1209,20 @@
 
     function applyWordHints(wordHints) {
         wordContainer.innerHTML = "";
-        //If no hint has been revealed
         wordHints.forEach(function (hint) {
+            let hintSpan = document.createElement("span");
+            hintSpan.classList.add("guess-letter");
             if (hint.character === 0) {
-                wordContainer.innerHTML += '<span class="guess-letter guess-letter-underline">&nbsp;</span>';
+                hintSpan.classList.add("guess-letter-underline");
+                hintSpan.innerHTML = "&nbsp;";
             } else {
-                let char = String.fromCharCode(hint.character);
                 if (hint.underline) {
-                    wordContainer.innerHTML += '<span class="guess-letter guess-letter-underline">' + char + '</span>'
-                } else {
-                    wordContainer.innerHTML += '<span class="guess-letter">' + char + '</span>';
+                    hintSpan.classList.add("guess-letter-underline");
                 }
+                hintSpan.innerText = String.fromCharCode(hint.character);
             }
+
+            wordContainer.appendChild(hintSpan);
         });
     }
 
