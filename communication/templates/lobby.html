@@ -409,17 +409,28 @@
             socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "{{.RootPath}}/v1/ws?lobby_id={{.LobbyID}}");
         }
 
+        socket.onerror = error => {
+            //Is not connected and we haven't yet said that we are done trying to
+            //connect, this means that we could never even establish a connection.
+            if (socket.readyState != 1 && socketIsConnecting) {
+                socketIsConnecting = false;
+                console.log("Error establishing connection: ", error);
+            } else {
+                console.log("Socket error: ", error)
+            }
+        };
+
         socket.onopen = () => {
             reconnectDialog.style.visibility = "hidden";
+            socketIsConnecting = false;
+
             socket.onclose = event => {
                 console.log("Socket Closed Connection: ", event);
                 console.log("Attempting to reestablish socket connection.");
                 reconnectDialog.style.visibility = "visible";
                 connectToWebsocket();
             };
-            socket.onerror = error => console.log("Socket Error: ", error);
 
-            socketIsConnecting = false;
             console.log("Successfully Connected");
         };
     }
