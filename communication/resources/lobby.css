@@ -333,7 +333,7 @@ input[type="button"]:active,
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    margin-top: 10px;
+    margin-top: 5px;
     grid-row: 3;
     grid-column: 2;
     height: min-content;
