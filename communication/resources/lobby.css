@@ -105,7 +105,7 @@
     z-index: 20;
 }
 
-#center-dialog-container {
+.center-dialog-container {
     display: flex;
     justify-content: center;
     align-items: center;
