@@ -84,9 +84,6 @@ var floodfill = (function() {
         var xi = Math.floor(x);
         var yi = Math.floor(y);
 
-        if (xi!==x) console.warn("x truncated from",x,"to",xi);
-        if (yi!==y) console.warn("y truncated from",y,"to",yi);
-
         return floodfill(data,xi,yi,color,width,height);
     };
 
