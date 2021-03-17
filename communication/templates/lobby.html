@@ -215,14 +215,6 @@
                             <button onclick="hideKickDialog()" class="dialog-button dialog-close-button">Close</button>
                         </div>
                     </div>
-
-                    <div class="center-dialog-container">
-                        <div id="reconnect-dialog" class="center-dialog">
-                            <span id="game-over-dialog-title" class="dialog-title">Connection lost!</span>
-                            <p>Attempting to reconnect ...</p>
-                            <p>Make sure your internet connection works.<br/>If the problem persists, contact the webmaster.</p>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -392,13 +384,14 @@
 
 <script type="text/javascript" src="{{.RootPath}}/resources/floodfill.js"></script>
 <script type="text/javascript">
-    const reconnectDialog = document.getElementById("reconnect-dialog");
     let socketIsConnecting = false;
+    let hasSocketEverConnected = false;
     let socket;
     function connectToWebsocket() {
         if (socketIsConnecting === true) {
             return;
         }
+
         socketIsConnecting = true;
 
         if (location.protocol === 'https:') {
@@ -412,7 +405,7 @@
         socket.onerror = error => {
             //Is not connected and we haven't yet said that we are done trying to
             //connect, this means that we could never even establish a connection.
-            if (socket.readyState != 1 && socketIsConnecting) {
+            if (socket.readyState != 1 && !hasSocketEverConnected) {
                 socketIsConnecting = false;
                 showTextDialog("connection-error-dialog", "Error connecting to server", 
                     "Scribble.rs couldn't establish a socket connection.\n\nWhile your internet "
@@ -425,18 +418,41 @@
         };
 
         socket.onopen = () => {
-            reconnectDialog.style.visibility = "hidden";
+            hideReconnectDialog();
+            hasSocketEverConnected = true;
             socketIsConnecting = false;
 
             socket.onclose = event => {
+                //We want to avoid handling the error multiple times and showing the incorrect dialogs.
+                socket.onerror = null;
+
                 console.log("Socket Closed Connection: ", event);
                 console.log("Attempting to reestablish socket connection.");
-                reconnectDialog.style.visibility = "visible";
+                showReconnectDialogIfNotShown();
                 connectToWebsocket();
             };
 
             console.log("Successfully Connected");
         };
+    }
+
+    const reconnectDialogId = "reconnect-dialog";
+    function showReconnectDialogIfNotShown() {
+        let previousReconnectDialog = document.getElementById("reconnect-dialog");
+
+        //Since the content is constant, there's no need to ever show two.
+        if (previousReconnectDialog === undefined || previousReconnectDialog === null) {
+            showTextDialog(reconnectDialogId, "Connection lost!",
+                "Attempting to reconnect ...\n\nMake sure your internet connection "
+                + "works.\nIf the problem persists, contact the webmaster.");
+        }
+    }
+
+    function hideReconnectDialog() {
+        let previousReconnectDialog = document.getElementById("reconnect-dialog");
+        if (previousReconnectDialog !== undefined && previousReconnectDialog !== null) {
+            centerDialogs.removeChild(previousReconnectDialog);
+        }
     }
 
     connectToWebsocket();
