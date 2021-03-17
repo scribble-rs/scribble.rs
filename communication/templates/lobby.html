@@ -406,7 +406,7 @@
             socket = new WebSocket("wss://" + location.hostname + ":" + location.port + "{{.RootPath}}/v1/ws?lobby_id={{.LobbyID}}");
         } else {
             console.log("Attempting socket connection on port " + location.port + "...");
-            socket = new WebSocket("ws://test" + location.hostname + ":" + location.port + "{{.RootPath}}/v1/ws?lobby_id={{.LobbyID}}");
+            socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "{{.RootPath}}/v1/ws?lobby_id={{.LobbyID}}");
         }
 
         socket.onerror = error => {
