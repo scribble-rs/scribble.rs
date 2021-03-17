@@ -406,7 +406,7 @@
             socket = new WebSocket("wss://" + location.hostname + ":" + location.port + "{{.RootPath}}/v1/ws?lobby_id={{.LobbyID}}");
         } else {
             console.log("Attempting socket connection on port " + location.port + "...");
-            socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "{{.RootPath}}/v1/ws?lobby_id={{.LobbyID}}");
+            socket = new WebSocket("ws://test" + location.hostname + ":" + location.port + "{{.RootPath}}/v1/ws?lobby_id={{.LobbyID}}");
         }
 
         socket.onerror = error => {
@@ -414,6 +414,10 @@
             //connect, this means that we could never even establish a connection.
             if (socket.readyState != 1 && socketIsConnecting) {
                 socketIsConnecting = false;
+                showTextDialog("connection-error-dialog", "Error connecting to server", 
+                    "Scribble.rs couldn't establish a socket connection.\n\nWhile your internet "
+                    + "connection seems to be working, either the\nserver or your firewall hasn't "
+                    + "been configured correctly.\n\nTo retry, reload the page.");
                 console.log("Error establishing connection: ", error);
             } else {
                 console.log("Socket error: ", error)
@@ -468,6 +472,8 @@
     const toolBox = document.getElementById("toolbox");
     const colorPicker = document.getElementById("color-picker");
 
+    const centerDialogs = document.getElementById("center-dialogs");
+
     const unstartedDialog = document.getElementById("unstarted-dialog");
     const waitChooseDialog = document.getElementById("waitchoose-dialog");
     const waitChooseDrawerSpan = document.getElementById("waitchoose-drawer");
@@ -496,6 +502,40 @@
     const soundToggleLabel = document.getElementById("sound-toggle-label");
     let sound = localStorage.getItem("sound") !== "false";
     updateSoundIcon();
+
+    function showTextDialog(id, title, message) {
+        let messageNode = document.createElement("span");
+        messageNode.innerText = message;
+        showDialog(id, title, messageNode);
+    }
+
+    function showDialog(id, title, contentNode) {
+        let newDialogContainer = document.createElement("div");
+        newDialogContainer.classList.add("center-dialog-container");
+        if (id !== null && id !== "") {
+            newDialogContainer.id = id + "-parent";
+        }
+
+        let newDialog = document.createElement("div");
+        newDialog.classList.add("center-dialog");
+        if (id !== null && id !== "") {
+            newDialog.id = id;
+        }
+        newDialogContainer.appendChild(newDialog);
+
+        let dialogTitle = document.createElement("span");
+        dialogTitle.classList.add("dialog-title");
+        dialogTitle.innerText = title;
+        newDialog.appendChild(dialogTitle);
+
+        let dialogContent = document.createElement("div");
+        dialogContent.classList.add("center-dialog-content");
+        dialogContent.appendChild(contentNode);
+        newDialog.appendChild(dialogContent);
+
+        newDialog.style.visibility = "visible";
+        centerDialogs.appendChild(newDialogContainer);
+    }
 
     function showKickDialog() {
         if (votekickEnabled !== true) {
