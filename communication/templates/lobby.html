@@ -14,7 +14,7 @@
 
 <body>
     <div class="content-wrapper">
-        <noscript><span class="noscript">This website requires JavaScript to run properly.</span></noscript>
+        <noscript><span class="noscript">{{.Translation.Get "requires-js"}}</span></noscript>
 
         <div id="lobby">
             <div id="lobby-header">
@@ -92,7 +92,7 @@
 
                         <div class="center-dialog-container">
                             <div id="start-dialog" class="center-dialog">
-                                <span class="dialog-title">Start the game</span>
+                                <span class="dialog-title">{{.Translation.Get "start-the-game"}}</span>
                                 <div class="center-dialog-content">
                                     <div style="display: flex; flex-direction: column;">
                                         Change your username:

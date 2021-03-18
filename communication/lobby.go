@@ -3,11 +3,14 @@ package communication
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"strings"
 
+	"github.com/scribble-rs/scribble.rs/communication/translations"
 	"github.com/scribble-rs/scribble.rs/game"
 	"github.com/scribble-rs/scribble.rs/state"
+	"golang.org/x/text/language"
 )
 
 var (
@@ -136,6 +139,12 @@ type LobbyData struct {
 	SuggestedBrushSizes [4]uint8 `json:"suggestedBrushSizes"`
 }
 
+type LobbyPageData struct {
+	*LobbyData
+
+	Translation translations.Translation
+}
+
 func createLobbyData(lobby *game.Lobby) *LobbyData {
 	return &LobbyData{
 		BasePageConfig:         CurrentBasePageConfig,
@@ -205,7 +214,26 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 		player.SetLastKnownAddress(getIPAddressFromRequest(r))
 	}
 
-	pageData := createLobbyData(lobby)
+	var translation translations.Translation
+	languageTags, _, languageParseError := language.ParseAcceptLanguage(r.Header.Get("Accept-Language"))
+	if languageParseError == nil && len(languageTags) > 0 {
+		fullLanguageIdentifier := strings.ToLower(languageTags[0].String())
+		log.Printf("Language: %s\n", fullLanguageIdentifier)
+		translation = translations.Get(fullLanguageIdentifier)
+		if translation == nil {
+			baseLanguageIdentifier, _ := languageTags[0].Base()
+			translation = translations.Get(strings.ToLower(baseLanguageIdentifier.String()))
+		}
+	}
+
+	if translation == nil {
+		translation = translations.DefaultTranslation
+	}
+
+	pageData := &LobbyPageData{
+		LobbyData:   createLobbyData(lobby),
+		Translation: translation,
+	}
 	templateError := pageTemplates.ExecuteTemplate(w, "lobby-page", pageData)
 	if templateError != nil {
 		panic(templateError)
