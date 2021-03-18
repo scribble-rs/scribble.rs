@@ -889,94 +889,13 @@
         let round = 0;
         let rounds = 0;
         let roundEndTime = 0;
+        let gameState = "unstarted";
         let votekickEnabled;
         socket.onmessage = event => {
             let parsed = JSON.parse(event.data);
             if (parsed.type === "ready") {
                 let ready = parsed.data;
                 handleReadyEvent(ready);
-                if (ready.gameState === "unstarted") {
-                    if (ownerID === ownID) {
-                        startDialog.style.visibility = "visible";
-                    } else {
-                        unstartedDialog.style.visibility = "visible";
-                    }
-                } else if (ready.gameState === "gameOver") {
-                    gameOverDialog.style.visibility = "visible";
-                    if (ownerID === ownID) {
-                        restartButton.style.display = "block";
-                    }
-
-                    gameOverScoreboard.innerHTML = "";
-
-                    //Copying array so we can sort.
-                    let players = cachedPlayers.slice();
-                    players.sort((a, b) => {
-                        return a.rank - b.rank;
-                    });
-
-                    //Show at least 2 players, but up to 5.
-                    const maxScoreboardSize = 5;
-
-                    for (let i = 0; i < players.length; i++) {
-                        let player = players[i];
-                        if (!player.connected) {
-                            continue;
-                        }
-
-                        const isSelf = player.id === ownID;
-
-                        //Even if we don't want to show a player-entry, we still need to iterate
-                        //over all players to handle the dialog titles.
-                        if (player.rank <= maxScoreboardSize) {
-                            let newScoreboardEntry = document.createElement("div");
-                            newScoreboardEntry.classList.add("gameover-scoreboard-entry");
-                            if (isSelf) {
-                                newScoreboardEntry.classList.add("gameover-scoreboard-entry-self");
-                            }
-
-                            let scoreboardRankDiv = document.createElement("div");
-                            scoreboardRankDiv.classList.add("gameover-scoreboard-rank");
-                            scoreboardRankDiv.innerText = player.rank;
-                            newScoreboardEntry.appendChild(scoreboardRankDiv);
-
-                            let scoreboardNameDiv = document.createElement("div");
-                            scoreboardNameDiv.classList.add("gameover-scoreboard-name");
-                            scoreboardNameDiv.innerText = player.name;
-                            newScoreboardEntry.appendChild(scoreboardNameDiv);
-
-                            let scoreboardScoreSpan = document.createElement("span");
-                            scoreboardScoreSpan.classList.add("gameover-scoreboard-score");
-                            scoreboardScoreSpan.innerText = player.score;
-                            newScoreboardEntry.appendChild(scoreboardScoreSpan);
-
-                            gameOverScoreboard.appendChild(newScoreboardEntry);
-                        }
-
-                        if (isSelf) {
-                            if (player.rank == 1) {
-                                gameOverDialogTitle.innerText = "Congratulations, you won!";
-                            } else {
-                                gameOverDialogTitle.innerText = "You placed " + player.rank + ". with " + player.score + " points";
-                            }
-                        }
-                    }
-                } else if (ready.gameState === "ongoing") {
-                    // The wordHints are empty if the round is not started (no word choosen)
-                    if (ready.wordHints === null) {
-                        for (let i = 0; i < ready.players.length; i++) {
-                            let player = ready.players[i];
-
-                            // check if the actual player is not drawing
-                            if ((player.id === ownID) && (player.state != "drawing")) {
-                                //Show additional dialog, that another user (drawer) is choosing a word
-                                waitChooseDrawerSpan.innerText = drawerName;
-                                waitChooseDialog.style.visibility = "visible";
-                                break;
-                            }
-                        }
-                    }
-                }
             } else if (parsed.type === "update-players") {
                 applyPlayers(parsed.data);
             } else if (parsed.type === "name-change") {
@@ -1117,6 +1036,7 @@
             round = ready.round;
             rounds = ready.rounds;
             roundEndTime = ready.roundEndTime;
+            gameState = ready.gameState;
             votekickEnabled = ready.votekickEnabled;
             updateRoundsDisplay();
             updateButtonVisibilities();
@@ -1131,6 +1051,89 @@
                 applyWordHints(ready.wordHints);
             }
             updateCursor();
+
+            if (ready.gameState === "unstarted") {
+                if (ownerID === ownID) {
+                    startDialog.style.visibility = "visible";
+                } else {
+                    unstartedDialog.style.visibility = "visible";
+                }
+            } else if (ready.gameState === "gameOver") {
+                gameOverDialog.style.visibility = "visible";
+                if (ownerID === ownID) {
+                    restartButton.style.display = "block";
+                }
+
+                gameOverScoreboard.innerHTML = "";
+
+                //Copying array so we can sort.
+                let players = cachedPlayers.slice();
+                players.sort((a, b) => {
+                    return a.rank - b.rank;
+                });
+
+                //Show at least 2 players, but up to 5.
+                const maxScoreboardSize = 5;
+
+                for (let i = 0; i < players.length; i++) {
+                    let player = players[i];
+                    if (!player.connected) {
+                        continue;
+                    }
+
+                    const isSelf = player.id === ownID;
+
+                    //Even if we don't want to show a player-entry, we still need to iterate
+                    //over all players to handle the dialog titles.
+                    if (player.rank <= maxScoreboardSize) {
+                        let newScoreboardEntry = document.createElement("div");
+                        newScoreboardEntry.classList.add("gameover-scoreboard-entry");
+                        if (isSelf) {
+                            newScoreboardEntry.classList.add("gameover-scoreboard-entry-self");
+                        }
+
+                        let scoreboardRankDiv = document.createElement("div");
+                        scoreboardRankDiv.classList.add("gameover-scoreboard-rank");
+                        scoreboardRankDiv.innerText = player.rank;
+                        newScoreboardEntry.appendChild(scoreboardRankDiv);
+
+                        let scoreboardNameDiv = document.createElement("div");
+                        scoreboardNameDiv.classList.add("gameover-scoreboard-name");
+                        scoreboardNameDiv.innerText = player.name;
+                        newScoreboardEntry.appendChild(scoreboardNameDiv);
+
+                        let scoreboardScoreSpan = document.createElement("span");
+                        scoreboardScoreSpan.classList.add("gameover-scoreboard-score");
+                        scoreboardScoreSpan.innerText = player.score;
+                        newScoreboardEntry.appendChild(scoreboardScoreSpan);
+
+                        gameOverScoreboard.appendChild(newScoreboardEntry);
+                    }
+
+                    if (isSelf) {
+                        if (player.rank == 1) {
+                            gameOverDialogTitle.innerText = "Congratulations, you won!";
+                        } else {
+                            gameOverDialogTitle.innerText = "You placed " + player.rank + ". with " + player.score + " points";
+                        }
+                    }
+                }
+            } else if (ready.gameState === "ongoing") {
+                // The wordHints are empty if the round is not started (no word choosen)
+                if (ready.wordHints === null) {
+                    for (let i = 0; i < ready.players.length; i++) {
+                        let player = ready.players[i];
+
+                        // check if the actual player is not drawing
+                        if ((player.id === ownID) && (player.state != "drawing")) {
+                            //Show additional dialog, that another user (drawer) is choosing a word
+                            waitChooseDrawerSpan.innerText = drawerName;
+                            waitChooseDialog.style.visibility = "visible";
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         function updateButtonVisibilities() {
@@ -1162,14 +1165,15 @@
             }
         }
 
+        const roundTimerUpdateInterval = 500;
         window.setInterval(() => {
-            if (roundEndTime >= 0) {
+            if (gameState === "ongoing") {
                 timeLeftValue.innerText = "" + Math.floor(roundEndTime / 1000);
-                roundEndTime -= 500;
+                roundEndTime -= roundTimerUpdateInterval;
             } else {
                 timeLeftValue.innerText = "∞";
             }
-        }, 500);
+        }, roundTimerUpdateInterval);
 
         //appendMessage adds a new message to the message container. If the
         //message amount is too high, we cut off a part of the messages to
