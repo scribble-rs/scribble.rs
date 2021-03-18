@@ -1422,8 +1422,8 @@
 
         function onGlobalMouseMove(event) {
             let clientRect = drawingBoard.getBoundingClientRect();
-            x = Math.min(clientRect.width - 1, Math.max(0, e.clientX - clientRect.left));
-            y = Math.min(clientRect.height - 1, Math.max(0, e.clientY - clientRect.top));
+            x = Math.min(clientRect.width - 1, Math.max(0, event.clientX - clientRect.left));
+            y = Math.min(clientRect.height - 1, Math.max(0, event.clientY - clientRect.top));
         }
 
         // This is executed even if the mouse is not above the browser anymore.
