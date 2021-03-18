@@ -668,13 +668,6 @@
         // Moving this here to extract the context after resizing
         const context = drawingBoard.getContext("2d");
 
-        function handleCanvasResize() {
-            //Resize canvas HTML element properly.
-            drawingBoard.width = drawingBoard.clientWidth;
-            drawingBoard.height = drawingBoard.clientHeight;
-            setLineWidth(localLineWidthUnscaled);
-        }
-
         function scaleUpFactor() {
             return baseWidth / drawingBoard.clientWidth;
         }
@@ -855,7 +848,7 @@
             }
         }
 
-        const sendMessage = () => {
+        function sendMessage() {
             socket.send(JSON.stringify({
                 type: "message",
                 data: messageInput.value
@@ -864,7 +857,7 @@
 
             // Necessary in order to keep the page from submitting.
             return false;
-        };
+        }
 
         function chooseWord(index) {
             socket.send(JSON.stringify({
@@ -1169,7 +1162,7 @@
             }
         }
 
-        window.setInterval(function () {
+        window.setInterval(() => {
             if (roundEndTime >= 0) {
                 timeLeftValue.innerText = "" + Math.floor(roundEndTime / 1000);
                 roundEndTime -= 500;
@@ -1212,7 +1205,7 @@
         function applyPlayers(players) {
             playerContainer.innerHTML = "";
             cachedPlayers = players;
-            players.forEach(function (player) {
+            players.forEach(player => {
                 //We don't wanna show the disconnected players.
                 if (!player.connected) {
                     return;
@@ -1276,7 +1269,7 @@
 
         function applyWordHints(wordHints) {
             wordContainer.innerHTML = "";
-            wordHints.forEach(function (hint) {
+            wordHints.forEach(hint => {
                 let hintSpan = document.createElement("span");
                 hintSpan.classList.add("guess-letter");
                 if (hint.character === 0) {
@@ -1295,49 +1288,51 @@
 
         function applyDrawData(drawElements) {
             clear(context);
-            drawElements.forEach(function (drawElement) {
-                let drawData = drawElement.data;
-                if (drawElement.type === "fill") {
-                    fill(context, drawData.x * scaleDownFactor(), drawData.y * scaleDownFactor(), drawData.color);
-                } else if (drawElement.type === "line") {
-                    drawLine(context, drawData.fromX * scaleDownFactor(), drawData.fromY * scaleDownFactor(), drawData.toX * scaleDownFactor(), drawData.toY * scaleDownFactor(), drawData.color, drawData.lineWidth * scaleDownFactor());
-                } else {
-                    console.log("Unknown draw element type: " + drawData.type);
-                }
-            });
+            drawElements
+                .forEach(drawElement => {
+                    let drawData = drawElement.data;
+                    if (drawElement.type === "fill") {
+                        fill(context, drawData.x * scaleDownFactor(), drawData.y * scaleDownFactor(), drawData.color);
+                    } else if (drawElement.type === "line") {
+                        drawLine(context, drawData.fromX * scaleDownFactor(),
+                            drawData.fromY * scaleDownFactor(), drawData.toX * scaleDownFactor(),
+                            drawData.toY * scaleDownFactor(), drawData.color, drawData.lineWidth * scaleDownFactor());
+                    } else {
+                        console.log("Unknown draw element type: " + drawData.type);
+                    }
+                });
         }
 
         let isDrawing = false;
         let x = 0;
         let y = 0;
 
-        // Touch input
         let touchID = 0;
 
-        function onTouchStart(e) {
+        function onTouchStart(event) {
             if (!isDrawing && allowDrawing) {
-                touchID = e.touches[0].identifier;
+                touchID = event.touches[0].identifier;
 
                 if (allowDrawing && localTool !== 2) {
                     // calculate the offset coordinates based on client touch position and drawing board client origin
                     let clientRect = drawingBoard.getBoundingClientRect();
-                    x = (e.touches[0].clientX - clientRect.left);
-                    y = (e.touches[0].clientY - clientRect.top);
+                    x = (event.touches[0].clientX - clientRect.left);
+                    y = (event.touches[0].clientY - clientRect.top);
 
                     isDrawing = true;
                 }
             }
-        };
+        }
 
-        function onTouchMove(e) {
-            //FIXME Explanation? Does this prevent moving the page?
-            e.preventDefault();
+        function onTouchMove(event) {
+            // Prevent moving, scrolling or zooming the page
+            event.preventDefault();
 
             if (allowDrawing && isDrawing) {
                 // find touch with correct ID
-                for (let i = e.changedTouches.length - 1; i >= 0; i--) {
-                    if (e.changedTouches[i].identifier === touchID) {
-                        let touch = e.changedTouches[i];
+                for (let i = event.changedTouches.length - 1; i >= 0; i--) {
+                    if (event.changedTouches[i].identifier === touchID) {
+                        let touch = event.changedTouches[i];
 
                         // calculate the offset coordinates based on client touch position and drawing board client origin
                         let clientRect = drawingBoard.getBoundingClientRect();
@@ -1353,13 +1348,13 @@
                     }
                 }
             }
-        };
+        }
 
-        function onTouchEnd(e) {
+        function onTouchEnd(event) {
             if (isDrawing) {
                 // find touch with correct ID
-                for (let i = e.changedTouches.length - 1; i >= 0; i--) {
-                    if (e.changedTouches[i].identifier === touchID) {
+                for (let i = event.changedTouches.length - 1; i >= 0; i--) {
+                    if (event.changedTouches[i].identifier === touchID) {
                         isDrawing = false;
                         return;
                     }
@@ -1372,32 +1367,24 @@
         drawingBoard.addEventListener('touchstart', onTouchStart);
         drawingBoard.addEventListener('touchmove', onTouchMove);
 
-        // Mouse input
-        drawingBoard.onmousedown = function (e) {
-            if (allowDrawing && e.button === 0 && localTool !== 2) {
+        function onMouseDown(event) {
+            if (allowDrawing && event.button === 0 && localTool !== 2) {
                 let clientRect = drawingBoard.getBoundingClientRect();
-                x = e.clientX - clientRect.left;
-                y = e.clientY - clientRect.top;
+                x = event.clientX - clientRect.left;
+                y = event.clientY - clientRect.top;
 
                 isDrawing = true;
             }
 
             return false;
-        };
+        }
 
-        // This is executed even if the mouse is not above the browser anymore.
-        window.onmouseup = function (e) {
-            if (isDrawing === true) {
-                isDrawing = false;
-            }
-        };
-
-        function mouseUpdate(e) {
-            if (allowDrawing && isDrawing === true && e.button === 0) {
+        function onMousePositionUpdate(event) {
+            if (allowDrawing && isDrawing === true && event.button === 0) {
                 // calculate the offset coordinates based on client mouse position and drawing board client origin
                 let clientRect = drawingBoard.getBoundingClientRect();
-                let offsetX = (e.clientX - clientRect.left);
-                let offsetY = (e.clientY - clientRect.top);
+                let offsetX = (event.clientX - clientRect.left);
+                let offsetY = (event.clientY - clientRect.top);
 
                 // drawing functions must check for context boundaries
                 drawLineAndSendEvent(context, x, y, offsetX, offsetY, localColor, localLineWidth);
@@ -1406,26 +1393,60 @@
             }
         }
 
-        drawingBoard.onmousemove = mouseUpdate;
-        drawingBoard.onmouseleave = mouseUpdate;
-
-        // necessary for mousemove to not use the previous exit coordinates.
-        window.onmousemove = function (e) {
-            let clientRect = drawingBoard.getBoundingClientRect();
-            x = Math.min(clientRect.width - 1, Math.max(0, e.clientX - clientRect.left));
-            y = Math.min(clientRect.height - 1, Math.max(0, e.clientY - clientRect.top));
-        };
-
-        drawingBoard.onclick = function (e) {
-            if (allowDrawing && e.button === 0) {
+        function onMouseClick(event) {
+            if (allowDrawing && event.button === 0) {
                 if (localTool === fillBucket) {
-                    fillAndSendEvent(context, e.offsetX, e.offsetY, localColor);
+                    fillAndSendEvent(context, event.offsetX, event.offsetY, localColor);
                 } else {
-                    drawLineAndSendEvent(context, e.offsetX, e.offsetY, e.offsetX, e.offsetY, localColor, localLineWidth);
+                    drawLineAndSendEvent(context, event.offsetX, event.offsetY,
+                        event.offsetX, event.offsetY, localColor, localLineWidth);
                 }
                 isDrawing = false;
             }
-        };
+        }
+
+        drawingBoard.addEventListener('mousedown', onMouseDown)
+        drawingBoard.addEventListener('mousemove', onMousePositionUpdate);
+        drawingBoard.addEventListener('mouseleave', onMousePositionUpdate);
+        drawingBoard.addEventListener('click', onMouseClick);
+
+        function onGlobalMouseUp(event) {
+            if (isDrawing === true) {
+                isDrawing = false;
+            }
+        }
+
+        function onGlobalMouseMove(event) {
+            let clientRect = drawingBoard.getBoundingClientRect();
+            x = Math.min(clientRect.width - 1, Math.max(0, e.clientX - clientRect.left));
+            y = Math.min(clientRect.height - 1, Math.max(0, e.clientY - clientRect.top));
+        }
+
+        // This is executed even if the mouse is not above the browser anymore.
+        window.addEventListener('mouseup', onGlobalMouseUp);
+        // necessary for mousemove to not use the previous exit coordinates.
+        window.addEventListener('mousemove', onGlobalMouseMove);
+
+        function handleCanvasResize() {
+            //Resize canvas HTML element properly.
+            drawingBoard.width = drawingBoard.clientWidth;
+            drawingBoard.height = drawingBoard.clientHeight;
+            setLineWidth(localLineWidthUnscaled);
+        }
+
+        //Call intially to correct initial state
+        handleCanvasResize();
+
+        window.addEventListener("resize", () => {
+            handleCanvasResize();
+            //Since the canvas gets cleared, we request the drawing again.
+            //Saving it locally would be wasteful and might slow down some
+            //clients due to a lot of memory allocation.
+            socket.send(JSON.stringify({
+                type: "request-drawing",
+            }));
+        }, false);
+
 
         function clear(context) {
             context.fillStyle = "#FFFFFF";
@@ -1570,19 +1591,6 @@
             imageData.data[offset + 2] = color[2];
             imageData.data[offset + 3] = color[3];
         }
-
-        //Call intially to correct initial state
-        handleCanvasResize();
-        window.addEventListener("resize", () => {
-            handleCanvasResize();
-            //Since the canvas gets cleared, we request the drawing again.
-            //Saving it locally would be wasteful and might slow down some
-            //clients due to a lot of memory allocation.
-            socket.send(JSON.stringify({
-                type: "request-drawing",
-            }));
-        }, false);
-
     </script>
 </body>
 
