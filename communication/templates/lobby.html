@@ -483,9 +483,7 @@
     const maxRoundSpan = document.getElementById("max-rounds");
     const timeLeftValue = document.getElementById("time-left-value");
     const drawingBoard = document.getElementById("drawing-board");
-    const chat = document.getElementById("chat");
 
-    const toolBox = document.getElementById("toolbox");
     const colorPicker = document.getElementById("color-picker");
 
     const centerDialogs = document.getElementById("center-dialogs");
@@ -565,11 +563,11 @@
             cachedPlayers.forEach(player => {
                 //Don't wanna allow kicking ourselves.
                 if (player.id !== ownID && player.connected) {
-                    let kickButton = document.createElement("button");
-                    kickButton.classList.add("kick-player-button");
-                    kickButton.onclick = () => onVotekickPlayer(player.id);
-                    kickButton.innerText = player.name;
-                    kickDialogPlayers.appendChild(kickButton);
+                    let playerKickEntry = document.createElement("button");
+                    playerKickEntry.classList.add("kick-player-button");
+                    playerKickEntry.onclick = () => onVotekickPlayer(player.id);
+                    playerKickEntry.innerText = player.name;
+                    kickDialogPlayers.appendChild(playerKickEntry);
                 }
             });
 
