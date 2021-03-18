@@ -446,7 +446,7 @@
 
         const reconnectDialogId = "reconnect-dialog";
         function showReconnectDialogIfNotShown() {
-            let previousReconnectDialog = document.getElementById("reconnect-dialog");
+            let previousReconnectDialog = document.getElementById(reconnectDialogId);
 
             //Since the content is constant, there's no need to ever show two.
             if (previousReconnectDialog === undefined || previousReconnectDialog === null) {
@@ -457,7 +457,7 @@
         }
 
         function hideReconnectDialog() {
-            let previousReconnectDialog = document.getElementById("reconnect-dialog");
+            let previousReconnectDialog = document.getElementById(reconnectDialogId);
             if (previousReconnectDialog !== undefined && previousReconnectDialog !== null) {
                 centerDialogs.removeChild(previousReconnectDialog);
             }
