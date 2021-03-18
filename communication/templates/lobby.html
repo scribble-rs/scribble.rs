@@ -757,9 +757,8 @@
         updateCursor();
     }
 
-    //We accept the following formats:
-    //#RRGGBB,RRGGBB,#rgb,rgb
-    let hexColorsRegex = /#?([a-f\d]{1,2})([a-f\d]{1,2})([a-f\d]{1,2})/i;
+    //We accept both #RRGGBB and RRGGBB. Both are treated case insensitive.
+    let hexColorsRegex = /#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})/i;
     function hexToRgb(hexString) {
         let match = hexString.match(hexColorsRegex)
         return [parseInt(match[1], 16), parseInt(match[2], 16), parseInt(match[3], 16)];
