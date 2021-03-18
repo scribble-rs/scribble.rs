@@ -320,47 +320,47 @@
                 </label>
             </div>
             <div class="pencil-sizes-container toolbox-group">
-                <label for="size8">
-                    <input id="size8" class="custom-check-or-radio line-width-button" onchange="setLineWidth(8)"
+                <label for="size-8-button">
+                    <input id="size-8-button" class="custom-check-or-radio line-width-button" onchange="setLineWidth(8)"
                             type="radio" name="line-width" checked>
                     <div
-                        onmousedown="document.getElementById('size8').click()"
-                        onmouseup="document.getElementById('size8').click()"
+                        onmousedown="document.getElementById('size-8-button').click()"
+                        onmouseup="document.getElementById('size-8-button').click()"
                         class="line-width-button-content">
-                        <div id="size-8-button" class="dot"></div>
+                        <div class="dot" style="width: 8px; height: 8px"></div>
                     </div>
                 </label>
-                <label for="size16">
-                    <input id="size16" class="custom-check-or-radio line-width-button"
+                <label for="size-16-button">
+                    <input id="size-16-button" class="custom-check-or-radio line-width-button"
                             onchange="setLineWidth(16)"
                             type="radio" name="line-width">
                     <div
-                        onmousedown="document.getElementById('size16').click()"
-                        onmouseup="document.getElementById('size16').click()"
+                        onmousedown="document.getElementById('size-16-button').click()"
+                        onmouseup="document.getElementById('size-16-button').click()"
                         class="line-width-button-content">
-                        <div id="size-16-button" class="dot"></div>
+                        <div class="dot" style="width: 16px; height: 16px"></div>
                     </div>
                 </label>
-                <label for="size24">
-                    <input id="size24" class="custom-check-or-radio line-width-button"
+                <label for="size-24-button">
+                    <input id="size-24-button" class="custom-check-or-radio line-width-button"
                             onchange="setLineWidth(24)"
                             type="radio" name="line-width">
                         <div
-                            onmousedown="document.getElementById('size24').click()"
-                            onmouseup="document.getElementById('size24').click()"
+                            onmousedown="document.getElementById('size-24-button').click()"
+                            onmouseup="document.getElementById('size-24-button').click()"
                             class="line-width-button-content">
-                            <div id="size-24-button" class="dot"></div>
+                            <div class="dot" style="width: 24px; height: 24px"></div>
                     </div>
                 </label>
-                <label for="size32">
-                    <input id="size32" class="custom-check-or-radio line-width-button"
+                <label for="size-32-button">
+                    <input id="size-32-button" class="custom-check-or-radio line-width-button"
                             onchange="setLineWidth(32)"
                             type="radio" name="line-width">
                         <div
-                            onmousedown="document.getElementById('size32').click()"
-                            onmouseup="document.getElementById('size32').click()"
+                            onmousedown="document.getElementById('size-32-button').click()"
+                            onmouseup="document.getElementById('size-32-button').click()"
                             class="line-width-button-content">
-                        <div id="size-32-button" class="dot"></div>
+                            <div class="dot" style="width: 32px; height: 32px"></div>
                     </div>
                 </label>
             </div>
@@ -695,14 +695,6 @@
     let sizeButton16 = document.getElementById("size-16-button");
     let sizeButton24 = document.getElementById("size-24-button");
     let sizeButton32 = document.getElementById("size-32-button");
-    sizeButton8.style.width = "8px";
-    sizeButton8.style.height = "8px";
-    sizeButton16.style.width = "16px";
-    sizeButton16.style.height = "16px";
-    sizeButton24.style.width = "24px";
-    sizeButton24.style.height = "24px";
-    sizeButton32.style.width = "32px";
-    sizeButton32.style.height = "32px";
 
     let toolButtonPen = document.getElementById("tool-type-pencil");
     let toolButtonRubber = document.getElementById("tool-type-rubber");
@@ -722,6 +714,8 @@
     } else if (sizeButton32.checked) {
         setLineWidth(32);
     }
+
+    console.log("Checked: " + sizeButton32.checked)
 
     if (toolButtonPen.checked) {
         chooseTool(pen);
