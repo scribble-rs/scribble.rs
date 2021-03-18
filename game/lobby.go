@@ -333,7 +333,7 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 		playerToKick := lobby.players[toKick]
 		if !playerToKick.Connected {
 			//TODO Send error event
-			WriteAsJSON(player, GameEvent{Type: "system-message", Data: fmt.Sprintf("You can't kick a disconnected player.")})
+			WriteAsJSON(player, GameEvent{Type: "system-message", Data: "You can't kick a disconnected player."})
 			return
 		}
 
