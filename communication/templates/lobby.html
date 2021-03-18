@@ -1081,7 +1081,7 @@
         } else if (parsed.type === "kick-vote") {
             if (parsed.data.playerId === ownID && parsed.data.voteCount >= parsed.data.requiredVoteCount) {
                 alert("You have been kicked");
-                document.location.href="{{.RootPath}}/";
+                document.location.href = "{{.RootPath}}/";
             } else {
                 let kickMessage = "("+parsed.data.voteCount+"/"+parsed.data.requiredVoteCount+") players voted to kick "+parsed.data.playerName+".";
                 if (parsed.data.voteCount >= parsed.data.requiredVoteCount) {
