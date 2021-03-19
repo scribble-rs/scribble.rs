@@ -1,11 +1,11 @@
 package translations
 
-func init() {
-	var translation Translation = make(map[string]string)
-	translation["start-the-game"] = "Starte das Spiel"
-	translation["requires-js"] = "Diese Website benötigt JavaScript um korrekt zu funktionieren."
+func initGermanTranslation() {
+	translation := createTranslation()
 
-	DefaultTranslation = translation
-	translations["de"] = translation
-	translations["de-DE"] = translation
+	translation.Put("start-the-game", "Starte das Spiel")
+	translation.Put("requires-js", "Diese Website benötigt JavaScript um korrekt zu funktionieren.")
+
+	RegisterTranslation("de", translation)
+	RegisterTranslation("de-DE", translation)
 }

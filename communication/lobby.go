@@ -3,7 +3,6 @@ package communication
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"net/http"
 	"strings"
 
@@ -218,11 +217,10 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 	languageTags, _, languageParseError := language.ParseAcceptLanguage(r.Header.Get("Accept-Language"))
 	if languageParseError == nil && len(languageTags) > 0 {
 		fullLanguageIdentifier := strings.ToLower(languageTags[0].String())
-		log.Printf("Language: %s\n", fullLanguageIdentifier)
-		translation = translations.Get(fullLanguageIdentifier)
+		translation = translations.GetLanguage(fullLanguageIdentifier)
 		if translation == nil {
 			baseLanguageIdentifier, _ := languageTags[0].Base()
-			translation = translations.Get(strings.ToLower(baseLanguageIdentifier.String()))
+			translation = translations.GetLanguage(strings.ToLower(baseLanguageIdentifier.String()))
 		}
 	}
 
