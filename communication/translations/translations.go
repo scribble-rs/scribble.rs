@@ -2,6 +2,7 @@ package translations
 
 import (
 	"fmt"
+	"strings"
 )
 
 // init initializes all localization packs. Each new package has to be added
@@ -45,6 +46,14 @@ func (translation Translation) Put(key, value string) {
 	_, avail := translation[key]
 	if avail {
 		panic(fmt.Sprintf("Duplicate key '%s'", key))
+	}
+
+	if len(strings.TrimSpace(key)) != len(key) {
+		panic(fmt.Sprintf("Language key '%s' contains leading or trailing whitespace", key))
+	}
+
+	if len(strings.TrimSpace(value)) != len(value) {
+		panic(fmt.Sprintf("Language key '%s' value contains leading or trailing whitespace", value))
 	}
 
 	translation[key] = value
