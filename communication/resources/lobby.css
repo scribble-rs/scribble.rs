@@ -23,8 +23,7 @@
 }
 
 #rounds::after {
-    content: ' of ';
-    white-space: pre;
+    content: '/';
 }
 
 #time-left {
@@ -499,10 +498,6 @@ input[type="button"]:active,
         grid-column-start: 1;
         grid-column-end: 3;
         grid-row: 1;
-    }
-
-    #rounds::after {
-        content: '/';
     }
 
     #round-container, #time-left {
