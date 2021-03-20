@@ -105,6 +105,10 @@ func readWordList(lowercaser cases.Caser, chosenLanguage string) ([]string, erro
 // The words will be chosen from the custom words and the default
 // dictionary, depending on the settings specified by the lobbies creator.
 func GetRandomWords(wordCount int, lobby *Lobby) []string {
+	return getRandomWordsCustomRng(wordCount, lobby, func() int { return rand.Intn(100) + 1 })
+}
+
+func getRandomWordsCustomRng(wordCount int, lobby *Lobby, rng func() int) []string {
 	if lobby.CustomWordsChance > 0 && len(lobby.CustomWords) > 0 {
 		//Always get custom words
 		if lobby.CustomWordsChance == 100 {
@@ -120,7 +124,7 @@ func GetRandomWords(wordCount int, lobby *Lobby) []string {
 
 		words := make([]string, 0, wordCount)
 		for i := 0; i <= wordCount; i++ {
-			if len(lobby.CustomWords) >= 1 && rand.Intn(100)+1 < lobby.CustomWordsChance {
+			if len(lobby.CustomWords) >= 1 && rng() <= lobby.CustomWordsChance {
 				words = append(words, popCustomWords(1, lobby)...)
 			} else {
 				words = append(words, popWordpackWords(1, lobby)...)

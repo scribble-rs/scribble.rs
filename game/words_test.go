@@ -138,16 +138,18 @@ func Test_regressionGetRandomWords_singleCustomWord(t *testing.T) {
 	}
 	lobby.words = words
 
-	var customWordFound bool
-	//Simply making sure we don't panic.
-	for i := 0; i < 100; i++ {
-		if GetRandomWords(1, lobby)[0] == "custom" {
-			customWordFound = true
-		}
+	// The implementation detail is, that the chance has to be smaller than
+	// or equal to our random number. So the only number possible to return
+	// our only custom word, is 1.
+	if getRandomWordsCustomRng(1, lobby, func() int { return 1 })[0] != "custom" {
+		t.Error("Custom should've been found, but wasn't.")
 	}
 
-	if !customWordFound {
-		t.Error("Custom word wasn't found")
+	//Now furthermore, we expect 2 - 100 to give us non-custom words and not panic.
+	for i := 2; i <= 100; i++ {
+		if getRandomWordsCustomRng(1, lobby, func() int { return i })[0] == "custom" {
+			t.Error("Custom word was found but shouldn't have.")
+		}
 	}
 }
 
