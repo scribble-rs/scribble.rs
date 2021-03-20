@@ -714,8 +714,6 @@
             setLineWidth(32);
         }
 
-        console.log("Checked: " + sizeButton32.checked)
-
         if (toolButtonPen.checked) {
             chooseTool(pen);
         } else if (toolButtonFill.checked) {
@@ -956,6 +954,7 @@
 
                 clear(context);
 
+                gameState = "ongoing";
                 round = parsed.data.round;
                 roundEndTime = parsed.data.roundEndTime;
                 updateRoundsDisplay();
@@ -1167,7 +1166,8 @@
 
         const roundTimerUpdateInterval = 500;
         window.setInterval(() => {
-            if (gameState === "ongoing") {
+            console.log(gameState);
+            if (gameState === "ongoing" && roundEndTime > 0) {
                 timeLeftValue.innerText = "" + Math.floor(roundEndTime / 1000);
                 roundEndTime -= roundTimerUpdateInterval;
             } else {
