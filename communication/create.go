@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/scribble-rs/scribble.rs/communication/translations"
 	"github.com/scribble-rs/scribble.rs/game"
 	"github.com/scribble-rs/scribble.rs/state"
 	"golang.org/x/text/cases"
@@ -18,14 +19,19 @@ import (
 // homePage servers the default page for scribble.rs, which is the page to
 // create a new lobby.
 func homePage(w http.ResponseWriter, r *http.Request) {
-	err := pageTemplates.ExecuteTemplate(w, "lobby-create-page", createDefaultLobbyCreatePageData())
+	translation, locale := determineTranslation(r)
+	createPageData := createDefaultLobbyCreatePageData()
+	createPageData.Translation = translation
+	createPageData.Locale = locale
+
+	err := pageTemplates.ExecuteTemplate(w, "lobby-create-page", createPageData)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
-func createDefaultLobbyCreatePageData() *CreatePageData {
-	return &CreatePageData{
+func createDefaultLobbyCreatePageData() *LobbyCreatePageData {
+	return &LobbyCreatePageData{
 		BasePageConfig:    CurrentBasePageConfig,
 		SettingBounds:     game.LobbySettingBounds,
 		Languages:         game.SupportedLanguages,
@@ -40,10 +46,12 @@ func createDefaultLobbyCreatePageData() *CreatePageData {
 	}
 }
 
-// CreatePageData defines all non-static data for the lobby create page.
-type CreatePageData struct {
+// LobbyCreatePageData defines all non-static data for the lobby create page.
+type LobbyCreatePageData struct {
 	*BasePageConfig
 	*game.SettingBounds
+	Translation       translations.Translation
+	Locale            string
 	Errors            []string
 	Languages         map[string]string
 	Public            string
@@ -77,7 +85,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 	publicLobby, publicLobbyInvalid := parseBoolean("public", r.Form.Get("public"))
 
 	//Prevent resetting the form, since that would be annoying as hell.
-	pageData := CreatePageData{
+	pageData := LobbyCreatePageData{
 		BasePageConfig:    CurrentBasePageConfig,
 		SettingBounds:     game.LobbySettingBounds,
 		Languages:         game.SupportedLanguages,
@@ -119,6 +127,10 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 	if publicLobbyInvalid != nil {
 		pageData.Errors = append(pageData.Errors, publicLobbyInvalid.Error())
 	}
+
+	translation, locale := determineTranslation(r)
+	pageData.Translation = translation
+	pageData.Locale = locale
 
 	if len(pageData.Errors) != 0 {
 		err := pageTemplates.ExecuteTemplate(w, "lobby-create-page", pageData)

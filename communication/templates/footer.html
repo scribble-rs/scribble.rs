@@ -1,9 +1,9 @@
 {{define "footer"}}
 <footer>
-    <a class="footer-item" href="https://github.com/scribble-rs/scribble.rs" target="_blank">Source Code</a>
-    <a class="footer-item" href="https://github.com/scribble-rs/scribble.rs/wiki" target="_blank">Help</a>
-    <a class="footer-item" href="mailto:marceloschr@googlemail.com" target="_blank">Contact</a>
-    <a class="footer-item" href="https://github.com/scribble-rs/scribble.rs/issues/new" target="_blank">Submit Feedback</a>
-    <a class="footer-item" href="{{.RootPath}}/v1/stats" target="_blank">Stats</a>
+    <a class="footer-item" href="https://github.com/scribble-rs/scribble.rs" target="_blank">{{.Translation.Get "source-code"}}</a>
+    <a class="footer-item" href="https://github.com/scribble-rs/scribble.rs/wiki" target="_blank">{{.Translation.Get "help"}}</a>
+    <a class="footer-item" href="mailto:marceloschr@googlemail.com" target="_blank">{{.Translation.Get "contact"}}</a>
+    <a class="footer-item" href="https://github.com/scribble-rs/scribble.rs/issues/new" target="_blank">{{.Translation.Get "submit-feedback"}}</a>
+    <a class="footer-item" href="{{.RootPath}}/v1/stats" target="_blank">{{.Translation.Get "stats"}}</a>
 </footer>
 {{end}}

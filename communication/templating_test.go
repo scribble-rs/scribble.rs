@@ -52,9 +52,12 @@ func Test_templateRobotPage(t *testing.T) {
 }
 
 func Test_templateLobbyCreatePage(t *testing.T) {
+	createPageData := createDefaultLobbyCreatePageData()
+	createPageData.Translation = translations.DefaultTranslation
+
 	var buffer bytes.Buffer
 	templatingError := pageTemplates.ExecuteTemplate(&buffer,
-		"lobby-create-page", createDefaultLobbyCreatePageData())
+		"lobby-create-page", createPageData)
 	if templatingError != nil {
 		t.Errorf("Error templating: %s", templatingError)
 	}

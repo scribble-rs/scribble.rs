@@ -142,6 +142,7 @@ type LobbyPageData struct {
 	*LobbyData
 
 	Translation translations.Translation
+	Locale      string
 }
 
 func createLobbyData(lobby *game.Lobby) *LobbyData {
@@ -213,29 +214,40 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 		player.SetLastKnownAddress(getIPAddressFromRequest(r))
 	}
 
-	var translation translations.Translation
-	languageTags, _, languageParseError := language.ParseAcceptLanguage(r.Header.Get("Accept-Language"))
-	if languageParseError == nil && len(languageTags) > 0 {
-		fullLanguageIdentifier := strings.ToLower(languageTags[0].String())
-		translation = translations.GetLanguage(fullLanguageIdentifier)
-		if translation == nil {
-			baseLanguageIdentifier, _ := languageTags[0].Base()
-			translation = translations.GetLanguage(strings.ToLower(baseLanguageIdentifier.String()))
-		}
-	}
-
-	if translation == nil {
-		translation = translations.DefaultTranslation
-	}
+	translation, locale := determineTranslation(r)
 
 	pageData := &LobbyPageData{
 		LobbyData:   createLobbyData(lobby),
 		Translation: translation,
+		Locale:      locale,
 	}
 	templateError := pageTemplates.ExecuteTemplate(w, "lobby-page", pageData)
 	if templateError != nil {
 		panic(templateError)
 	}
+}
+
+func determineTranslation(r *http.Request) (translations.Translation, string) {
+	var translation translations.Translation
+
+	languageTags, _, languageParseError := language.ParseAcceptLanguage(r.Header.Get("Accept-Language"))
+	if languageParseError == nil && len(languageTags) > 0 {
+		locale := languageTags[0]
+		fullLocaleIdentifier := locale.String()
+		fullLanguageIdentifier := strings.ToLower(fullLocaleIdentifier)
+		translation = translations.GetLanguage(fullLanguageIdentifier)
+		if translation != nil {
+			return translation, fullLocaleIdentifier
+		}
+
+		baseLanguageIdentifier, _ := locale.Base()
+		translation = translations.GetLanguage(strings.ToLower(baseLanguageIdentifier.String()))
+		if translation != nil {
+			return translation, baseLanguageIdentifier.String()
+		}
+	}
+
+	return translations.DefaultTranslation, "en-US"
 }
 
 func getIPAddressFromRequest(r *http.Request) string {

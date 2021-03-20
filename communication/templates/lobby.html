@@ -1,6 +1,6 @@
 {{define "lobby-page"}}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{.Locale}}">
 
 <head>
     <title>Scribble.rs - Game</title>
@@ -19,7 +19,7 @@
         <div id="lobby">
             <div id="lobby-header">
                 <div id="round-container">
-                    <span>Round&nbsp;</span>
+                    <span>{{.Translation.Get "round"}}&nbsp;</span>
                     <span id="rounds"></span>
                     <span id="max-rounds"></span>
                 </div>
@@ -29,31 +29,34 @@
                         <!-- this button is basically behaving like a checkbox, but in order to
                     have a uniform look with the other buttons in the header, we are not using
                     a checkbox anymore. -->
-                        <button onclick="toggleSound()" class="dialog-button header-button" alt="Toggle soundeffects"
-                            title="Toggle soundeffects">
+                        <button onclick="toggleSound()" class="dialog-button header-button"
+                            alt="{{.Translation.Get "toggle-soundeffects"}}"
+                            title="{{.Translation.Get "toggle-soundeffects"}}">
                             <img id="sound-toggle-label" class="header-button-image" />
                         </button>
                         <button onclick="showNameChangeDialog()" class="dialog-button header-button"
-                            alt="Change your name" title="Change your name">
+                            alt="{{.Translation.Get "change-your-name"}}"
+                            title="{{.Translation.Get "change-your-name"}}">
                             <img src="{{.RootPath}}/resources/user.svg" class="header-button-image" />
                         </button>
                     </div>
                     <div id="word-container"></div>
                     <div>
                         <button id="kick-button" style="display: none;" onclick="showKickDialog()"
-                            class="dialog-button header-button" alt="Votekick a player" title="Votekick a player">
+                            class="dialog-button header-button" alt="{{.Translation.Get "votekick-a-player"}}"
+                            title="{{.Translation.Get "votekick-a-player"}}">
                             <img src="{{.RootPath}}/resources/kick.png" class="header-button-image" />
                         </button>
                         <button id="lobby-settings-button" style="display: none;" onclick="showLobbySettingsDialog()"
-                            class="dialog-button header-button" alt="Change lobby settings"
-                            title="Change lobby settings">
+                            class="dialog-button header-button" alt="{{.Translation.Get "change-lobby-settings"}}"
+                            title="{{.Translation.Get "change-lobby-settings"}}">
                             <img src="{{.RootPath}}/resources/settings.svg" class="header-button-image" />
                         </button>
                     </div>
                 </div>
 
                 <div id="time-left">
-                    Time Left:
+                    {{.Translation.Get "time-left"}}:
                     <div id="time-left-value">∞</div>
                 </div>
             </div>
@@ -73,18 +76,15 @@
                     <div id="center-dialogs">
                         <div class="center-dialog-container">
                             <div id="word-dialog" class="center-dialog">
-                                <span class="dialog-title">Choose a word</span>
+                                <span class="dialog-title">{{.Translation.Get "choose-a-word"}}</span>
                                 <div class="center-dialog-content">
                                     <div class="word-button-container">
                                         <button id="word-button-zero" class="dialog-button"
-                                            onclick="chooseWord(0)">Placeholder
-                                        </button>
+                                            onclick="chooseWord(0)"></button>
                                         <button id="word-button-one" class="dialog-button"
-                                            onclick="chooseWord(1)">Placeholder
-                                        </button>
+                                            onclick="chooseWord(1)"></button>
                                         <button id="word-button-two" class="dialog-button"
-                                            onclick="chooseWord(2)">Placeholder
-                                        </button>
+                                            onclick="chooseWord(2)"></button>
                                     </div>
                                 </div>
                             </div>
@@ -95,17 +95,17 @@
                                 <span class="dialog-title">{{.Translation.Get "start-the-game"}}</span>
                                 <div class="center-dialog-content">
                                     <div style="display: flex; flex-direction: column;">
-                                        Change your username:
+                                        {{.Translation.Get "change-your-name"}}:
                                         <div style="display: flex; flex-direction: row;">
                                             <input class="namechange-field" type="text"
                                                 id="namechange-field-start-dialog"></input>
                                             <button class="dialog-button"
-                                                onclick="changeName(document.getElementById('namechange-field-start-dialog').value)">Change</button>
-                                            <button class="dialog-button" onclick="changeName('')">Randomize</button>
+                                                onclick="changeName(document.getElementById('namechange-field-start-dialog').value)">{{.Translation.Get "change"}}</button>
+                                            <button class="dialog-button" onclick="changeName('')">{{.Translation.Get "randomize"}}</button>
                                         </div>
                                     </div>
                                     <div class="button-center-wrapper">
-                                        <button class="dialog-button" onclick="startGame()">Start</button>
+                                        <button class="dialog-button" onclick="startGame()">{{.Translation.Get "start"}}</button>
                                     </div>
                                 </div>
                             </div>
@@ -113,17 +113,17 @@
 
                         <div class="center-dialog-container">
                             <div id="unstarted-dialog" class="center-dialog">
-                                <span class="dialog-title">Game hasn't started</span>
+                                <span class="dialog-title">{{.Translation.Get "game-not-started-title"}}</span>
                                 <div class="center-dialog-content">
                                     <div style="display: flex; flex-direction: column;">
-                                        Please wait for your lobby host to start the game.<br /><br />
-                                        Change your username:
+                                        <p>{{.Translation.Get "waiting-for-host-to-start"}}</p>
+                                        {{.Translation.Get "change-your-name"}}:
                                         <div style="display: flex; flex-direction: row;">
                                             <input class="namechange-field" type="text"
                                                 id="namechange-field-unstarted-dialog"></input>
                                             <button class="dialog-button"
-                                                onclick="changeName(document.getElementById('namechange-field-unstarted-dialog').value)">Change</button>
-                                            <button class="dialog-button" onclick="changeName('')">Randomize</button>
+                                                onclick="changeName(document.getElementById('namechange-field-unstarted-dialog').value)">{{.Translation.Get "change"}}</button>
+                                            <button class="dialog-button" onclick="changeName('')">{{.Translation.Get "randomize"}}</button>
                                         </div>
                                     </div>
                                 </div>
@@ -132,27 +132,27 @@
 
                         <div class="center-dialog-container">
                             <div id="waitchoose-dialog" class="center-dialog">
-                                <span class="dialog-title">Waiting for selection</span>
+                                <span class="dialog-title">{{.Translation.Get "waiting-for-word-selection"}}</span>
                                 <div class="center-dialog-content">
-                                    <span id="waitchoose-drawer"></span> is choosing a word.
+                                    <span id="waitchoose-drawer"></span> {{.Translation.Get "is-choosing-word"}}
                                 </div>
                             </div>
                         </div>
 
                         <div class="center-dialog-container">
                             <div id="namechange-dialog" class="center-dialog">
-                                <span class="dialog-title">Change your username</span>
+                                <span class="dialog-title">{{.Translation.Get "change-your-name"}}</span>
                                 <div class="center-dialog-content">
                                     <div style="display: flex; flex-direction: column;">
                                         <div style="display: flex; flex-direction: row;">
                                             <input class="namechange-field" type="text" id="namechange-field"></input>
                                             <button class="dialog-button"
-                                                onclick="changeName(document.getElementById('namechange-field').value)">Change</button>
-                                            <button class="dialog-button" onclick="changeName('')">Randomize</button>
+                                                onclick="changeName(document.getElementById('namechange-field').value)">{{.Translation.Get "change"}}</button>
+                                            <button class="dialog-button" onclick="changeName('')">{{.Translation.Get "randomize"}}</button>
                                         </div>
                                         <div class="button-center-wrapper">
                                             <button class="dialog-button"
-                                                onclick="hideNameChangeDialog()">Close</button>
+                                                onclick="hideNameChangeDialog()">{{.Translation.Get "close"}}</button>
                                         </div>
                                     </div>
                                 </div>
@@ -161,26 +161,26 @@
 
                         <div class="center-dialog-container">
                             <div id="lobbysettings-dialog" class="center-dialog">
-                                <span class="dialog-title">Change the lobby settings</span>
+                                <span class="dialog-title">{{.Translation.Get "change-lobby-settings"}}</span>
                                 <div class="center-dialog-content">
                                     <div style="display: flex; flex-direction: column;">
                                         <div class="input-container">
-                                            <b>Drawing Time</b>
+                                            <b>{{.Translation.Get "drawing-time-setting"}}</b>
                                             <input id="lobby-settings-drawing-time" class="input-item" type="number"
                                                 name="drawing_time" min="{{.MinDrawingTime}}" max="{{.MaxDrawingTime}}"
                                                 value="{{.DrawingTime}}" />
-                                            <b>Rounds</b>
+                                            <b>{{.Translation.Get "rounds-setting"}}</b>
                                             <input id="lobby-settings-max-rounds" class="input-item" type="number"
                                                 name="rounds" min="{{.MinRounds}}" max="{{.MaxRounds}}"
                                                 value="{{.Rounds}}" />
-                                            <b>Maximum Players</b>
+                                            <b>{{.Translation.Get "max-players-setting"}}</b>
                                             <input id="lobby-settings-max-players" type="number" name="max_players"
                                                 min="{{.MinMaxPlayers}}" max="{{.MaxMaxPlayers}}"
                                                 value="{{.MaxPlayers}}" />
-                                            <b>Public Lobby</b>
+                                            <b>{{.Translation.Get "public-lobby-setting"}}</b>
                                             <input id="lobby-settings-public" type="checkbox" name="public" {{if eq
                                                 .Public true}}checked{{end}} />
-                                            <b>Custom Words Chance</b>
+                                            <b>{{.Translation.Get "custom-words-chance-setting"}}</b>
                                             <div style="display: flex;">
                                                 0%
                                                 <input style="flex: 1;" id="lobby-settings-custom-words-chance"
@@ -190,14 +190,14 @@
                                             </div>
 
                                             <details class="advanced-section">
-                                                <summary>Advanced</summary>
+                                                <summary>{{.Translation.Get "advanced-settings"}}</summary>
                                                 <div class="input-container">
-                                                    <b>Players per IP Limit</b>
+                                                    <b>{{.Translation.Get "players-per-ip-limit-setting"}}</b>
                                                     <input id="lobby-settings-clients-per-ip-limit" type="number"
                                                         name="clients_per_ip_limit" min="{{.MinClientsPerIPLimit}}"
                                                         max="{{.MaxClientsPerIPLimit}}"
                                                         value="{{.ClientsPerIPLimit}}" />
-                                                    <b>Enable Votekick</b>
+                                                    <b>{{.Translation.Get "enable-votekick-setting"}}</b>
                                                     <input id="lobby-settings-enable-votekick" type="checkbox"
                                                         name="enable_votekick" {{if eq .EnableVotekick
                                                         true}}checked{{end}} />
@@ -205,12 +205,12 @@
                                             </details>
                                             <button class="dialog-button" onclick="saveLobbySettings()"
                                                 style="grid-column-start: 1; grid-column-end: 3;">
-                                                Save settings
+                                                {{.Translation.Get "save-settings"}}
                                             </button>
                                         </div>
                                         <div class="button-center-wrapper">
                                             <button class="dialog-button"
-                                                onclick="hideLobbySettingsDialog()">Close</button>
+                                                onclick="hideLobbySettingsDialog()">{{.Translation.Get "close"}}</button>
                                         </div>
                                     </div>
                                 </div>
@@ -227,10 +227,10 @@
 
                         <div class="center-dialog-container">
                             <div id="kick-dialog" class="center-dialog">
-                                <span class="dialog-title">Vote to kick a player</span>
+                                <span class="dialog-title">{{.Translation.Get "votekick-a-player"}}</span>
                                 <div id="kick-dialog-players"></div>
                                 <button onclick="hideKickDialog()"
-                                    class="dialog-button dialog-close-button">Close</button>
+                                    class="dialog-button dialog-close-button">{{.Translation.Get "close"}}</button>
                             </div>
                         </div>
                     </div>
@@ -238,9 +238,10 @@
             </div>
 
             <div id="toolbox">
-                <input class="toolbox-group" type="color" id="color-picker" onchange="setColor()" value="#000000"
-                    alt="Current color (Click to change)" title="Current color (Click to change)">
-                <div class="color-button-container toolbox-group">
+                <input id="color-picker" class="toolbox-group" type="color" onchange="setColor()" value="#000000"
+                    alt="{{.Translation.Get "change-active-color"}}" title="{{.Translation.Get "change-active-color"}}">
+                <div class="color-button-container toolbox-group"
+                    alt="{{.Translation.Get "change-active-color"}}" title="{{.Translation.Get "change-active-color"}}">
                     <!-- These buttons use !important for their color in order
                 to prevent hover and active colors to appear. -->
                     <div class="color-button-row">
@@ -310,7 +311,8 @@
                         <div onmousedown="document.getElementById('tool-type-pencil').click()"
                             onmouseup="document.getElementById('tool-type-pencil').click()"
                             class="line-width-button-content">
-                            <span id="tool-type-pencil-button" style="font-size: 2rem;">✏️</span>
+                            <span title="{{.Translation.Get "use-pencil"}}" alt="{{.Translation.Get "use-pencil"}}"
+                                id="tool-type-pencil-button" style="font-size: 2rem;">✏️</span>
                         </div>
                     </label>
                     <label for="tool-type-fill">
@@ -319,8 +321,8 @@
                         <div onmousedown="document.getElementById('tool-type-fill').click()"
                             onmouseup="document.getElementById('tool-type-fill').click()"
                             class="line-width-button-content">
-                            <img alt="Fill" title="Fill tool" src="{{.RootPath}}/resources/fill.svg" width="40px"
-                                height="40px" />
+                            <img alt="{{.Translation.Get "use-fill-bucket"}}" title="{{.Translation.Get "use-fill-bucket"}}"
+                                src="{{.RootPath}}/resources/fill.svg" width="40px" height="40px" />
                         </div>
                     </label>
                     <label for="tool-type-rubber">
@@ -329,8 +331,8 @@
                         <div onmousedown="document.getElementById('tool-type-rubber').click()"
                             onmouseup="document.getElementById('tool-type-rubber').click()"
                             class="line-width-button-content">
-                            <img alt="Rubber" title="Rubber tool" src="{{.RootPath}}/resources/rubber.svg" width="40px"
-                                height="40px" />
+                            <img alt="{{.Translation.Get "use-eraser"}}" title="{{.Translation.Get "use-eraser"}}"
+                                src="{{.RootPath}}/resources/rubber.svg" width="40px" height="40px" />
                         </div>
                     </label>
                 </div>
@@ -340,7 +342,9 @@
                             onchange="setLineWidth(8)" type="radio" name="line-width" checked>
                         <div onmousedown="document.getElementById('size-8-button').click()"
                             onmouseup="document.getElementById('size-8-button').click()"
-                            class="line-width-button-content">
+                            class="line-width-button-content"
+                            alt="{{printf (.Translation.Get "change-pencil-size-to") "8"}}"
+                            title="{{printf (.Translation.Get "change-pencil-size-to") "8"}}">
                             <div class="dot" style="width: 8px; height: 8px"></div>
                         </div>
                     </label>
@@ -349,7 +353,9 @@
                             onchange="setLineWidth(16)" type="radio" name="line-width">
                         <div onmousedown="document.getElementById('size-16-button').click()"
                             onmouseup="document.getElementById('size-16-button').click()"
-                            class="line-width-button-content">
+                            class="line-width-button-content"
+                            alt="{{printf (.Translation.Get "change-pencil-size-to") "16"}}"
+                            title="{{printf (.Translation.Get "change-pencil-size-to") "16"}}">
                             <div class="dot" style="width: 16px; height: 16px"></div>
                         </div>
                     </label>
@@ -358,7 +364,9 @@
                             onchange="setLineWidth(24)" type="radio" name="line-width">
                         <div onmousedown="document.getElementById('size-24-button').click()"
                             onmouseup="document.getElementById('size-24-button').click()"
-                            class="line-width-button-content">
+                            class="line-width-button-content"
+                            alt="{{printf (.Translation.Get "change-pencil-size-to") "24"}}"
+                            title="{{printf (.Translation.Get "change-pencil-size-to") "24"}}">
                             <div class="dot" style="width: 24px; height: 24px"></div>
                         </div>
                     </label>
@@ -367,14 +375,16 @@
                             onchange="setLineWidth(32)" type="radio" name="line-width">
                         <div onmousedown="document.getElementById('size-32-button').click()"
                             onmouseup="document.getElementById('size-32-button').click()"
-                            class="line-width-button-content">
+                            class="line-width-button-content"
+                            alt="{{printf (.Translation.Get "change-pencil-size-to") "32"}}"
+                            title="{{printf (.Translation.Get "change-pencil-size-to") "32"}}">
                             <div class="dot" style="width: 32px; height: 32px"></div>
                         </div>
                     </label>
                 </div>
                 <!--We won't make this button easier to click, as there's no going back. -->
                 <button class="canvas-button toolbox-group" style="font-size: 2rem;" onclick="clearCanvasAndSendEvent()"
-                    alt="Clear the canvas" title="Clear the canvas">🗑
+                    alt="{{.Translation.Get "clear-canvas"}}" title="{{.Translation.Get "clear-canvas"}}">🗑
                 </button>
             </div>
 
@@ -382,7 +392,7 @@
                 <div id="message-container"></div>
                 <form class="message-input-form" onsubmit="return sendMessage()">
                     <input id="message-input" type="text" autocomplete="off"
-                        placeholder="Type your guesses and messages here" />
+                        placeholder="{{.Translation.Get "message-input-placeholder"}}" />
                 </form>
             </div>
         </div>
@@ -392,6 +402,10 @@
 
     <script type="text/javascript" src="{{.RootPath}}/resources/floodfill.js"></script>
     <script type="text/javascript">
+        String.prototype.format = function() {
+            return [...arguments].reduce((p,c) => p.replace(/%s/,c), this);
+        };
+
         let socketIsConnecting = false;
         let hasSocketEverConnected = false;
         let socket;
@@ -402,7 +416,7 @@
 
             socketIsConnecting = true;
 
-            if (location.protocol === 'https:') {
+            if (location.protocol === "https:") {
                 console.log("Attempting secure socket connection on port " + location.port + "...");
                 socket = new WebSocket("wss://" + location.hostname + ":" + location.port + "{{.RootPath}}/v1/ws?lobby_id={{.LobbyID}}");
             } else {
@@ -415,10 +429,9 @@
                 //connect, this means that we could never even establish a connection.
                 if (socket.readyState != 1 && !hasSocketEverConnected) {
                     socketIsConnecting = false;
-                    showTextDialog("connection-error-dialog", "Error connecting to server",
-                        "Scribble.rs couldn't establish a socket connection.\n\nWhile your internet "
-                        + "connection seems to be working, either the\nserver or your firewall hasn't "
-                        + "been configured correctly.\n\nTo retry, reload the page.");
+                    showTextDialog("connection-error-dialog", 
+                    '{{.Translation.Get "error-connecting"}}',
+                    '{{.Translation.Get "error-connecting-text"}}');
                     console.log("Error establishing connection: ", error);
                 } else {
                     console.log("Socket error: ", error)
@@ -452,9 +465,8 @@
 
             //Since the content is constant, there's no need to ever show two.
             if (previousReconnectDialog === undefined || previousReconnectDialog === null) {
-                showTextDialog(reconnectDialogId, "Connection lost!",
-                    "Attempting to reconnect ...\n\nMake sure your internet connection "
-                    + "works.\nIf the problem persists, contact the webmaster.");
+                showTextDialog(reconnectDialogId, '{{.Translation.Get "connection-lost"}}',
+                    '{{.Translation.Get "connection-lost-text"}}' );
             }
         }
 
@@ -563,6 +575,9 @@
 
         function showKickDialog() {
             if (votekickEnabled !== true) {
+                //Should never show, as this method should never be called anyways.
+                //Anyways, in case of a bug or forcefully calling this, we still
+                //intend to inform the user.
                 alert("Votekicking isn't enabled in this lobby.");
                 return;
             }
@@ -635,7 +650,6 @@
                 .then(result => {
                     if (result.status === 200) {
                         hideLobbySettingsDialog();
-                        alert("Lobby settings successfully saved.");
                     } else {
                         result
                             .text()
@@ -663,8 +677,8 @@
         //The drawing board has a base size. This base size results in a certain ratio
         //that the actual canvas has to be resized accordingly too. This is needed
         //since not every client has the same screensize.
-        let baseWidth = {{.DrawingBoardBaseWidth }};
-        let baseHeight = {{.DrawingBoardBaseHeight }};
+        let baseWidth = {{.DrawingBoardBaseWidth}};
+        let baseHeight = {{.DrawingBoardBaseHeight}};
         let boardRatio = baseWidth / baseHeight;
 
         // Moving this here to extract the context after resizing
@@ -891,6 +905,7 @@
         let roundEndTime = 0;
         let gameState = "unstarted";
         let votekickEnabled;
+
         function registerMessageHandler(targetSocket) {
             targetSocket.onmessage = event => {
                 let parsed = JSON.parse(event.data);
@@ -914,18 +929,18 @@
                     playWav('{{.RootPath}}/resources/plop.wav');
 
                     if (parsed.data === ownID) {
-                        appendMessage("correct-guess-message", null, "You have correctly guessed the word.");
+                        appendMessage("correct-guess-message", null, '{{.Translation.Get "correct-guess"}}');
                     } else {
                         for (let i = 0; i < cachedPlayers.length; i++) {
                             let player = cachedPlayers[i];
                             if (player.id === parsed.data) {
-                                appendMessage("correct-guess-message", null, player.name + " correctly guessed the word.");
+                                appendMessage("correct-guess-message", null, '{{.Translation.Get "correct-guess-other-player"}}'.format(player.name));
                                 break;
                             }
                         }
                     }
                 } else if (parsed.type === "close-guess") {
-                    appendMessage("close-guess-message", null, "'" + parsed.data + "' is very close.");
+                    appendMessage("close-guess-message", null, '{{.Translation.Get "close-guess"}}'.format(parsed.data));
                 } else if (parsed.type === "update-wordhint") {
                     // this event is (also) sent if the drawer has choosen a word, so we can hide the waitChooseDialog
                     waitChooseDialog.style.visibility = "hidden";
@@ -933,7 +948,7 @@
                 } else if (parsed.type === "message") {
                     appendMessage(null, parsed.data.author, parsed.data.content);
                 } else if (parsed.type === "system-message") {
-                    appendMessage("system-message", "System", parsed.data);
+                    appendMessage("system-message", '{{.Translation.Get "system"}}', parsed.data);
                 } else if (parsed.type === "non-guessing-player-message") {
                     appendMessage("non-guessing-player-message", parsed.data.author, parsed.data.content);
                 } else if (parsed.type === "line") {
@@ -972,12 +987,11 @@
 
                     if (parsed.data.previousWord !== null) {
                         if (parsed.data.previousWord === "") {
-                            appendMessage("system-message", null, "Round over, no word was chosen.");
+                            appendMessage("system-message", null, '{{.Translation.Get "round-over"}}');
                         } else {
-                            appendMessage("system-message", null, "Round over, the word was '" + parsed.data.previousWord + "'.");
+                            appendMessage("system-message", null, '{{.Translation.Get "round-over-no-word"}}'.format(parsed.data.previousWord));
                         }
                     }
-
                     allowDrawing = false;
                     updateCursor();
                 } else if (parsed.type === "your-turn") {
@@ -988,37 +1002,37 @@
                     applyDrawData(parsed.data);
                 } else if (parsed.type === "kick-vote") {
                     if (parsed.data.playerId === ownID && parsed.data.voteCount >= parsed.data.requiredVoteCount) {
-                        alert("You have been kicked");
+                        alert('{{.Translation.Get "self-kicked"}}');
                         document.location.href = "{{.RootPath}}/";
                     } else {
-                        let kickMessage = "(" + parsed.data.voteCount + "/" + parsed.data.requiredVoteCount + ") players voted to kick " + parsed.data.playerName + ".";
+                        let kickMessage = '{{.Translation.Get "kick-vote"}}'.format(parsed.data.voteCount, parsed.data.requiredVoteCount, parsed.data.playerName);
                         if (parsed.data.voteCount >= parsed.data.requiredVoteCount) {
-                            kickMessage += " Player has been kicked.";
+                            kickMessage += ' {{.Translation.Get "player-kicked"}}';
                         }
-                        appendMessage("system-message", "System", kickMessage);
+                        appendMessage("system-message", '{{.Translation.Get "system"}}', kickMessage);
                     }
                 } else if (parsed.type === "owner-change") {
                     ownerID = parsed.data.playerId;
                     updateButtonVisibilities();
-                    appendMessage("system-message", "System", parsed.data.playerName + " is the new lobby owner.");
+                    appendMessage("system-message", '{{.Translation.Get "system"}}', '{{.Translation.Get "owner-change"}}'.format(parsed.data.playerName));
                 } else if (parsed.type === "drawer-kicked") {
-                    appendMessage("system-message", "System", "Since the kicked player has been drawing, none of you will get any points this round.");
+                    appendMessage("system-message", '{{.Translation.Get "system"}}', '{{.Translation.Get "drawer-kicked"}}');
                 } else if (parsed.type === "lobby-settings-changed") {
                     votekickEnabled = parsed.data.enableVotekick;
                     rounds = parsed.data.rounds;
                     updateRoundsDisplay();
                     updateButtonVisibilities();
-                    appendMessage("system-message", "System", "Lobby settings changed:\n\n"
-                        + "Drawing time: " + parsed.data.drawingTime + "\n"
-                        + "Rounds: " + parsed.data.rounds + "\n"
-                        + "Public lobby: " + parsed.data.public + "\n"
-                        + "Enable votekicking: " + parsed.data.enableVotekick + "\n"
-                        + "Max players: " + parsed.data.maxPlayers + "\n"
-                        + "Custom words chance: " + parsed.data.customWordsChance + "%\n"
-                        + "Clients per IP limit: " + parsed.data.clientsPerIpLimit);
+                    appendMessage("system-message", '{{.Translation.Get "system"}}', '{{.Translation.Get "lobby-settings-changed"}}\n\n'
+                        + '{{.Translation.Get "drawing-time-setting"}}: ' + parsed.data.drawingTime + "\n"
+                        + '{{.Translation.Get "rounds-setting"}}: ' + parsed.data.rounds + "\n"
+                        + '{{.Translation.Get "public-lobby-setting"}}: ' + parsed.data.public + "\n"
+                        + '{{.Translation.Get "enable-votekick-setting"}}: ' + parsed.data.enableVotekick + "\n"
+                        + '{{.Translation.Get "max-players-setting"}}: ' + parsed.data.maxPlayers + "\n"
+                        + '{{.Translation.Get "custom-words-chance-setting"}}: ' + parsed.data.customWordsChance + "%\n"
+                        + '{{.Translation.Get "players-per-ip-limit-setting"}}: ' + parsed.data.clientsPerIpLimit);
                 }
-            };
-        }
+            }
+        };
 
         function getPlayer(playerID) {
             for (let i = 0; i < cachedPlayers.length; i++) {
@@ -1115,9 +1129,10 @@
 
                     if (isSelf) {
                         if (player.rank == 1) {
-                            gameOverDialogTitle.innerText = "Congratulations, you won!";
+                            gameOverDialogTitle.innerText = '{{.Translation.Get "game-over-win"}}';
                         } else {
-                            gameOverDialogTitle.innerText = "You placed " + player.rank + ". with " + player.score + " points";
+                            
+                            gameOverDialogTitle.innerText = '{{.Translation.Get "game-over"}}'.format(player.rank, player.score);
                         }
                     }
                 }
@@ -1254,7 +1269,7 @@
 
                 let lastPlayerscoreSpan = document.createElement("span");
                 lastPlayerscoreSpan.classList.add("last-turn-score");
-                lastPlayerscoreSpan.innerText = "(Last turn: " + player.lastScore + ")";
+                lastPlayerscoreSpan.innerText = '{{.Translation.Get "last-turn"}}'.format(player.lastScore);
                 playerscoreDiv.appendChild(lastPlayerscoreSpan);
 
                 if (player.state === "drawing") {

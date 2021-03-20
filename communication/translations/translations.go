@@ -40,9 +40,9 @@ func (translation Translation) Get(key string) string {
 	panic(fmt.Sprintf("no translation value available for key '%s'", key))
 }
 
-// Put adds a new key to the translation. If the key already exists, the
+// put adds a new key to the translation. If the key already exists, the
 // server panics. This happens on startup, therefore it's safe.
-func (translation Translation) Put(key, value string) {
+func (translation Translation) put(key, value string) {
 	_, avail := translation[key]
 	if avail {
 		panic(fmt.Sprintf("Duplicate key '%s'", key))
