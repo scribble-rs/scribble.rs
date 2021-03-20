@@ -1166,7 +1166,6 @@
 
         const roundTimerUpdateInterval = 500;
         window.setInterval(() => {
-            console.log(gameState);
             if (gameState === "ongoing" && roundEndTime > 0) {
                 timeLeftValue.innerText = "" + Math.floor(roundEndTime / 1000);
                 roundEndTime -= roundTimerUpdateInterval;
