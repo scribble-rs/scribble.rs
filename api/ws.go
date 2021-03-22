@@ -1,4 +1,4 @@
-package communication
+package api
 
 import (
 	"encoding/json"
@@ -28,7 +28,7 @@ func init() {
 }
 
 func wsEndpoint(w http.ResponseWriter, r *http.Request) {
-	lobby, lobbyError := getLobby(r)
+	lobby, lobbyError := GetLobby(r)
 	if lobbyError != nil {
 		http.Error(w, lobbyError.Error(), http.StatusNotFound)
 		return
@@ -36,7 +36,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 
 	//This issue can happen if you illegally request a websocket connection without ever having had
 	//a usersession or your client having deleted the usersession cookie.
-	sessionCookie := getUserSession(r)
+	sessionCookie := GetUserSession(r)
 	if sessionCookie == "" {
 		http.Error(w, "you don't have access to this lobby;usersession not set", http.StatusUnauthorized)
 		return

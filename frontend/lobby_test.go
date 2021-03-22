@@ -1,13 +1,14 @@
-package communication
+package frontend
 
 import (
 	"testing"
 
+	"github.com/scribble-rs/scribble.rs/api"
 	"github.com/scribble-rs/scribble.rs/game"
 )
 
 func TestCreateLobby(t *testing.T) {
-	data := createLobbyData(&game.Lobby{
+	data := api.CreateLobbyData(&game.Lobby{
 		LobbyID: "TEST",
 	})
 

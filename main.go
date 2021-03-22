@@ -2,13 +2,16 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"math/rand"
+	"net/http"
 	"os"
 	"strconv"
 	"time"
 
-	"github.com/scribble-rs/scribble.rs/communication"
+	"github.com/scribble-rs/scribble.rs/api"
+	"github.com/scribble-rs/scribble.rs/frontend"
 )
 
 func main() {
@@ -45,6 +48,8 @@ func main() {
 
 	log.Println("Started.")
 
-	//If this ever fails, it will return and print a fatal logger message
-	log.Fatal(communication.Serve(portHTTP))
+	api.SetupRoutes()
+	frontend.SetupRoutes()
+
+	http.ListenAndServe(fmt.Sprintf(":%d", portHTTP), nil)
 }

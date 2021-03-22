@@ -1,4 +1,4 @@
-package communication
+package api
 
 import (
 	"reflect"

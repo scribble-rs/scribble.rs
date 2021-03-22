@@ -1,19 +1,20 @@
-package communication
+package frontend
 
 import (
 	"bytes"
 	"testing"
 
-	"github.com/scribble-rs/scribble.rs/communication/translations"
+	"github.com/scribble-rs/scribble.rs/api"
 	"github.com/scribble-rs/scribble.rs/game"
+	"github.com/scribble-rs/scribble.rs/translations"
 )
 
 func Test_templateLobbyPage(t *testing.T) {
 	var buffer bytes.Buffer
 	templatingError := pageTemplates.ExecuteTemplate(&buffer,
 		"lobby-page", &LobbyPageData{
-			LobbyData: &LobbyData{
-				BasePageConfig:        CurrentBasePageConfig,
+			LobbyData: &api.LobbyData{
+				BasePageConfig:        api.CurrentBasePageConfig,
 				EditableLobbySettings: &game.EditableLobbySettings{},
 				SettingBounds:         game.LobbySettingBounds,
 			},
@@ -28,7 +29,7 @@ func Test_templateErrorPage(t *testing.T) {
 	var buffer bytes.Buffer
 	templatingError := pageTemplates.ExecuteTemplate(&buffer,
 		"error-page", &ErrorPageData{
-			BasePageConfig: CurrentBasePageConfig,
+			BasePageConfig: api.CurrentBasePageConfig,
 			ErrorMessage:   "KEK",
 		})
 	if templatingError != nil {
@@ -39,8 +40,8 @@ func Test_templateErrorPage(t *testing.T) {
 func Test_templateRobotPage(t *testing.T) {
 	var buffer bytes.Buffer
 	templatingError := pageTemplates.ExecuteTemplate(&buffer,
-		"robot-page", &LobbyData{
-			BasePageConfig: CurrentBasePageConfig,
+		"robot-page", &api.LobbyData{
+			BasePageConfig: api.CurrentBasePageConfig,
 			EditableLobbySettings: &game.EditableLobbySettings{
 				MaxPlayers: 12,
 				Rounds:     4,

@@ -1,7 +1,8 @@
-package communication
+package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -11,6 +12,11 @@ import (
 )
 
 //This file contains the API methods for the public API
+
+var (
+	ErrNoLobbyIDSupplied = errors.New("please supply a lobby id via the 'lobby_id' query parameter")
+	ErrLobbyNotExistent  = errors.New("the requested lobby doesn't exist")
+)
 
 // LobbyEntry is an API object for representing a join-able public lobby.
 type LobbyEntry struct {
@@ -100,14 +106,14 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var playerName = getPlayername(r)
+	var playerName = GetPlayername(r)
 	player, lobby, createError := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
 	if createError != nil {
 		http.Error(w, createError.Error(), http.StatusBadRequest)
 		return
 	}
 
-	player.SetLastKnownAddress(getIPAddressFromRequest(r))
+	player.SetLastKnownAddress(GetIPAddressFromRequest(r))
 
 	// Use the players generated usersession and pass it as a cookie.
 	http.SetCookie(w, &http.Cookie{
@@ -117,7 +123,7 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteStrictMode,
 	})
 
-	lobbyData := createLobbyData(lobby)
+	lobbyData := CreateLobbyData(lobby)
 
 	encodingError := json.NewEncoder(w).Encode(lobbyData)
 	if encodingError != nil {
@@ -134,7 +140,7 @@ func enterLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	player := getPlayer(lobby, r)
+	player := GetPlayer(lobby, r)
 
 	if player == nil {
 		if !lobby.HasFreePlayerSlot() {
@@ -143,7 +149,7 @@ func enterLobby(w http.ResponseWriter, r *http.Request) {
 		}
 
 		var clientsWithSameIP int
-		requestAddress := getIPAddressFromRequest(r)
+		requestAddress := GetIPAddressFromRequest(r)
 		for _, otherPlayer := range lobby.GetPlayers() {
 			if otherPlayer.GetLastKnownAddress() == requestAddress {
 				clientsWithSameIP++
@@ -154,8 +160,8 @@ func enterLobby(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		newPlayer := lobby.JoinPlayer(getPlayername(r))
-		newPlayer.SetLastKnownAddress(getIPAddressFromRequest(r))
+		newPlayer := lobby.JoinPlayer(GetPlayername(r))
+		newPlayer.SetLastKnownAddress(GetIPAddressFromRequest(r))
 
 		// Use the players generated usersession and pass it as a cookie.
 		http.SetCookie(w, &http.Cookie{
@@ -165,10 +171,10 @@ func enterLobby(w http.ResponseWriter, r *http.Request) {
 			SameSite: http.SameSiteStrictMode,
 		})
 	} else {
-		player.SetLastKnownAddress(getIPAddressFromRequest(r))
+		player.SetLastKnownAddress(GetIPAddressFromRequest(r))
 	}
 
-	lobbyData := createLobbyData(lobby)
+	lobbyData := CreateLobbyData(lobby)
 
 	encodingError := json.NewEncoder(w).Encode(lobbyData)
 	if encodingError != nil {
@@ -182,7 +188,7 @@ func editLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userSession := getUserSession(r)
+	userSession := GetUserSession(r)
 	if userSession == "" {
 		http.Error(w, "no usersession supplied", http.StatusBadRequest)
 		return
@@ -272,11 +278,11 @@ func editLobby(w http.ResponseWriter, r *http.Request) {
 }
 
 func getLobbyWithErrorHandling(w http.ResponseWriter, r *http.Request) (*game.Lobby, bool) {
-	lobby, err := getLobby(r)
+	lobby, err := GetLobby(r)
 	if err != nil {
-		if err == errNoLobbyIDSupplied {
+		if err == ErrNoLobbyIDSupplied {
 			http.Error(w, err.Error(), http.StatusBadRequest)
-		} else if err == errLobbyNotExistent {
+		} else if err == ErrLobbyNotExistent {
 			http.Error(w, err.Error(), http.StatusNotFound)
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -303,4 +309,130 @@ func lobbyEndpoint(w http.ResponseWriter, r *http.Request) {
 func stats(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(state.Stats())
+}
+
+// GetLobby extracts the lobby_id field from an HTTP request and searches
+// the corresponding lobby. If the loby doesn't exist, or no ID has been
+// supplied, we return an error.
+func GetLobby(r *http.Request) (*game.Lobby, error) {
+	lobbyID := r.URL.Query().Get("lobby_id")
+	if lobbyID == "" {
+		return nil, ErrNoLobbyIDSupplied
+	}
+
+	lobby := state.GetLobby(lobbyID)
+
+	if lobby == nil {
+		return nil, ErrLobbyNotExistent
+	}
+
+	return lobby, nil
+}
+
+var (
+	//CanvasColor is the initially / empty canvas colors value used for
+	//Lobbydata objects.
+	CanvasColor = [3]uint8{255, 255, 255}
+	//SuggestedBrushSizes is suggested brush sizes value used for
+	//Lobbydata objects. A unit test makes sure these values are ordered
+	//and within the specified bounds.
+	SuggestedBrushSizes = [4]uint8{8, 16, 24, 32}
+)
+
+// LobbyData is the data necessary for correctly configuring a lobby.
+// While unofficial clients will probably need all of these values, the
+// official webclient doesn't use all of them as of now.
+type LobbyData struct {
+	*BasePageConfig
+	*game.SettingBounds
+	*game.EditableLobbySettings
+
+	LobbyID string `json:"lobbyId"`
+	//DrawingBoardBaseWidth is the internal canvas width and is needed for
+	//correctly up- / downscaling drawing instructions.
+	DrawingBoardBaseWidth int `json:"drawingBoardBaseWidth"`
+	//DrawingBoardBaseHeight is the internal canvas height and is needed for
+	//correctly up- / downscaling drawing instructions.
+	DrawingBoardBaseHeight int `json:"drawingBoardBaseHeight"`
+	//MinBrushSize is the minimum amount of pixels the brush can draw in.
+	MinBrushSize int `json:"minBrushSize"`
+	//MaxBrushSize is the maximum amount of pixels the brush can draw in.
+	MaxBrushSize int `json:"maxBrushSize"`
+	//CanvasColor is the initial (empty) color of the canvas.
+	//It's an array containing [R,G,B]
+	CanvasColor [3]uint8 `json:"canvasColor"`
+	//SuggestedBrushSizes are suggestions for the different brush sizes
+	//that the user can choose between. These brushes are guaranteed to
+	//be ordered from low to high and stay with the bounds.
+	SuggestedBrushSizes [4]uint8 `json:"suggestedBrushSizes"`
+}
+
+// CreateLobbyData creates a ready to use LobbyData object containing data
+// from the passed Lobby.
+func CreateLobbyData(lobby *game.Lobby) *LobbyData {
+	return &LobbyData{
+		BasePageConfig:         CurrentBasePageConfig,
+		SettingBounds:          game.LobbySettingBounds,
+		EditableLobbySettings:  lobby.EditableLobbySettings,
+		LobbyID:                lobby.LobbyID,
+		DrawingBoardBaseWidth:  game.DrawingBoardBaseWidth,
+		DrawingBoardBaseHeight: game.DrawingBoardBaseHeight,
+		MinBrushSize:           game.MinBrushSize,
+		MaxBrushSize:           game.MaxBrushSize,
+		CanvasColor:            CanvasColor,
+		SuggestedBrushSizes:    SuggestedBrushSizes,
+	}
+}
+
+// GetUserSession accesses the usersession from an HTTP request and
+// returns the session. The session can either be in the cookie or in
+// the header. If no session can be found, an empty string is returned.
+func GetUserSession(r *http.Request) string {
+	sessionCookie, noCookieError := r.Cookie("usersession")
+	if noCookieError == nil && sessionCookie.Value != "" {
+		return sessionCookie.Value
+	}
+
+	session, ok := r.Header["Usersession"]
+	if ok {
+		return session[0]
+	}
+
+	return ""
+}
+
+// GetPlayer returns the player object that matches the usersession in the
+// supplied HTTP request and lobby. If no user session is set, we return nil.
+func GetPlayer(lobby *game.Lobby, r *http.Request) *game.Player {
+	return lobby.GetPlayer(GetUserSession(r))
+}
+
+// GetPlayername either retrieves the playername from a cookie, the URL form
+// or generates a new random name if no name can be found.
+func GetPlayername(r *http.Request) string {
+	parseError := r.ParseForm()
+	if parseError == nil {
+		username := strings.TrimSpace(r.Form.Get("username"))
+		if username != "" {
+			return trimDownTo(username, game.MaxPlayerNameLength)
+		}
+	}
+
+	usernameCookie, noCookieError := r.Cookie("username")
+	if noCookieError == nil {
+		username := strings.TrimSpace(usernameCookie.Value)
+		if username != "" {
+			return trimDownTo(username, game.MaxPlayerNameLength)
+		}
+	}
+
+	return game.GeneratePlayerName()
+}
+
+func trimDownTo(text string, size int) string {
+	if len(text) <= size {
+		return text
+	}
+
+	return text[:size]
 }

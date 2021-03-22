@@ -1,4 +1,4 @@
-package communication
+package frontend
 
 import (
 	"errors"
@@ -7,9 +7,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/scribble-rs/scribble.rs/communication/translations"
+	"github.com/scribble-rs/scribble.rs/api"
 	"github.com/scribble-rs/scribble.rs/game"
 	"github.com/scribble-rs/scribble.rs/state"
+	"github.com/scribble-rs/scribble.rs/translations"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
@@ -32,7 +33,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 func createDefaultLobbyCreatePageData() *LobbyCreatePageData {
 	return &LobbyCreatePageData{
-		BasePageConfig:    CurrentBasePageConfig,
+		BasePageConfig:    api.CurrentBasePageConfig,
 		SettingBounds:     game.LobbySettingBounds,
 		Languages:         game.SupportedLanguages,
 		Public:            "false",
@@ -48,7 +49,7 @@ func createDefaultLobbyCreatePageData() *LobbyCreatePageData {
 
 // LobbyCreatePageData defines all non-static data for the lobby create page.
 type LobbyCreatePageData struct {
-	*BasePageConfig
+	*api.BasePageConfig
 	*game.SettingBounds
 	Translation       translations.Translation
 	Locale            string
@@ -86,7 +87,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 
 	//Prevent resetting the form, since that would be annoying as hell.
 	pageData := LobbyCreatePageData{
-		BasePageConfig:    CurrentBasePageConfig,
+		BasePageConfig:    api.CurrentBasePageConfig,
 		SettingBounds:     game.LobbySettingBounds,
 		Languages:         game.SupportedLanguages,
 		Public:            r.Form.Get("public"),
@@ -140,7 +141,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var playerName = getPlayername(r)
+	var playerName = api.GetPlayername(r)
 
 	player, lobby, createError := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
 	if createError != nil {
@@ -153,7 +154,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	player.SetLastKnownAddress(getIPAddressFromRequest(r))
+	player.SetLastKnownAddress(api.GetIPAddressFromRequest(r))
 
 	// Use the players generated usersession and pass it as a cookie.
 	http.SetCookie(w, &http.Cookie{
@@ -166,20 +167,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 	//We only add the lobby if we could do all necessary pre-steps successfully.
 	state.AddLobby(lobby)
 
-	http.Redirect(w, r, CurrentBasePageConfig.RootPath+"/ssrEnterLobby?lobby_id="+lobby.LobbyID, http.StatusFound)
-}
-
-func parsePlayerName(value string) (string, error) {
-	trimmed := strings.TrimSpace(value)
-	if trimmed == "" {
-		return trimmed, errors.New("the player name must not be empty")
-	}
-
-	return trimmed, nil
-}
-
-func parsePassword(value string) (string, error) {
-	return value, nil
+	http.Redirect(w, r, api.CurrentBasePageConfig.RootPath+"/ssrEnterLobby?lobby_id="+lobby.LobbyID, http.StatusFound)
 }
 
 func parseLanguage(value string) (string, error) {
