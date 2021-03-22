@@ -78,6 +78,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 
 	//Prevent resetting the form, since that would be annoying as hell.
 	pageData := CreatePageData{
+		BasePageConfig:    CurrentBasePageConfig,
 		SettingBounds:     game.LobbySettingBounds,
 		Languages:         game.SupportedLanguages,
 		Public:            r.Form.Get("public"),
