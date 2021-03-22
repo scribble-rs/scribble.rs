@@ -7,7 +7,7 @@ func initGermanTranslation() {
 
 	translation.put("start-the-game", "Starte das Spiel")
 	translation.put("start", "Starten")
-	translation.put("game-not-started-title", "Spiel wurde nicht gestartet")
+	translation.put("game-not-started-title", "Warte auf Spielstart")
 	translation.put("waiting-for-host-to-start", "Bitte warte bis der Lobby Besitzer das Spiel startet.")
 
 	translation.put("last-turn", "(Letzter Zug: %s)")
