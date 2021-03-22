@@ -28,9 +28,11 @@ func Test_templateLobbyPage(t *testing.T) {
 func Test_templateErrorPage(t *testing.T) {
 	var buffer bytes.Buffer
 	templatingError := pageTemplates.ExecuteTemplate(&buffer,
-		"error-page", &ErrorPageData{
+		"error-page", &errorPageData{
 			BasePageConfig: api.CurrentBasePageConfig,
 			ErrorMessage:   "KEK",
+			Translation:    translations.DefaultTranslation,
+			Locale:         "en-US",
 		})
 	if templatingError != nil {
 		t.Errorf("Error templating: %s", templatingError)
@@ -40,12 +42,16 @@ func Test_templateErrorPage(t *testing.T) {
 func Test_templateRobotPage(t *testing.T) {
 	var buffer bytes.Buffer
 	templatingError := pageTemplates.ExecuteTemplate(&buffer,
-		"robot-page", &api.LobbyData{
-			BasePageConfig: api.CurrentBasePageConfig,
-			EditableLobbySettings: &game.EditableLobbySettings{
-				MaxPlayers: 12,
-				Rounds:     4,
+		"robot-page", &LobbyPageData{
+			LobbyData: &api.LobbyData{
+				BasePageConfig: api.CurrentBasePageConfig,
+				EditableLobbySettings: &game.EditableLobbySettings{
+					MaxPlayers: 12,
+					Rounds:     4,
+				},
 			},
+			Translation: translations.DefaultTranslation,
+			Locale:      "en-US",
 		})
 	if templatingError != nil {
 		t.Errorf("Error templating: %s", templatingError)
