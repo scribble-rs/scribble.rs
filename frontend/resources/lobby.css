@@ -16,18 +16,12 @@
 
 #round-container, #time-left {
     font-size: 1.5rem;
-}
-
-#round-container {
+    align-self: center;
     display: flex;
 }
 
 #rounds::after {
     content: '/';
-}
-
-#time-left {
-    display: flex;
 }
 
 #time-left-value {
