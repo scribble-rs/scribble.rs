@@ -3,6 +3,8 @@ package translations
 import (
 	"fmt"
 	"strings"
+
+	"golang.org/x/text/language"
 )
 
 // init initializes all localization packs. Each new package has to be added
@@ -61,29 +63,34 @@ func (translation Translation) put(key, value string) {
 
 // GetLanguage retrieves a translation pack or nil if the desired package
 // couldn't be found.
-func GetLanguage(language string) Translation {
-	return translationRegistry[language]
+func GetLanguage(locale string) Translation {
+	return translationRegistry[locale]
 }
 
 // RegisterTranslation makes adds a language to the registry and makes
 // it available via Get. If the language is already registered, the server
 // panics. This happens on startup, therefore it's safe.
-func RegisterTranslation(language string, translation Translation) {
-	_, avail := translationRegistry[language]
+func RegisterTranslation(locale string, translation Translation) {
+	//Make sure the locale is valid.
+	language.MustParse(locale)
+
+	localeLowercased := strings.ToLower(locale)
+
+	_, avail := translationRegistry[localeLowercased]
 	if avail {
-		panic(fmt.Sprintf("Language '%s' has been registered multiple times", language))
+		panic(fmt.Sprintf("Language '%s' has been registered multiple times", locale))
 	}
 
 	if DefaultTranslation != nil {
 		for key := range translation {
 			_, fallbackValueAvail := DefaultTranslation[key]
 			if !fallbackValueAvail {
-				panic(fmt.Sprintf("Language key '%s' in language '%s' has no default translation value in 'en_US'", key, language))
+				panic(fmt.Sprintf("Language key '%s' in language '%s' has no default translation value in 'en_US'", key, locale))
 			}
 		}
 	}
 
-	translationRegistry[language] = translation
+	translationRegistry[localeLowercased] = translation
 }
 
 func createTranslation() Translation {
