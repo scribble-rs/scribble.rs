@@ -132,9 +132,9 @@ func Test_regressionGetRandomWords_singleCustomWord(t *testing.T) {
 		CustomWords: []string{"custom"},
 	}
 
-	words := make([]string, 99, 99)
+	words := make([]string, 99)
 	for i := 0; i < 99; i++ {
-		words = append(words, strconv.FormatInt(int64(i), 10))
+		words[i] = strconv.FormatInt(int64(i), 10)
 	}
 	lobby.words = words
 

@@ -123,7 +123,7 @@ func getRandomWordsCustomRng(wordCount int, lobby *Lobby, rng func() int) []stri
 		}
 
 		words := make([]string, 0, wordCount)
-		for i := 0; i <= wordCount; i++ {
+		for i := 0; i < wordCount; i++ {
 			if len(lobby.CustomWords) >= 1 && rng() <= lobby.CustomWordsChance {
 				words = append(words, popCustomWords(1, lobby)...)
 			} else {
