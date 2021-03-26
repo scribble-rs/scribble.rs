@@ -68,170 +68,154 @@
                     <canvas id="drawing-board"></canvas>
 
                     <!-- The so called "center dialogs" are divs that float above the canvas.
-                They are centered are always a fraction of the canvas size but never bigger.
-                The "center-dialog-container" is basically like a "window" if you will and the
-                "center-dialog" is the window content. Depending on which dialog
-                we want to show, we show a different content. Technically there could be more
-                than one dialog visible at a time, but they'll be layered. -->
+                    They are are always both horizontally and vertically. They can bever be
+                    as big as the canvas and are usually closable, as long as it makes sense.
+                    The can be seen as a new "window" and prevent touch and pointer events
+                    from reaching the canvas. Technically there could be more than one dialog
+                    visible at a time, but they'll be layered and there's no rule as to how. -->
                     <div id="center-dialogs">
-                        <div class="center-dialog-container">
-                            <div id="word-dialog" class="center-dialog">
-                                <span class="dialog-title">{{.Translation.Get "choose-a-word"}}</span>
-                                <div class="center-dialog-content">
-                                    <div class="word-button-container">
-                                        <button id="word-button-zero" class="dialog-button"
-                                            onclick="chooseWord(0)"></button>
-                                        <button id="word-button-one" class="dialog-button"
-                                            onclick="chooseWord(1)"></button>
-                                        <button id="word-button-two" class="dialog-button"
-                                            onclick="chooseWord(2)"></button>
+                        <div id="word-dialog" class="center-dialog">
+                            <span class="dialog-title">{{.Translation.Get "choose-a-word"}}</span>
+                            <div class="center-dialog-content">
+                                <div class="word-button-container">
+                                    <button id="word-button-zero" class="dialog-button"
+                                        onclick="chooseWord(0)"></button>
+                                    <button id="word-button-one" class="dialog-button"
+                                        onclick="chooseWord(1)"></button>
+                                    <button id="word-button-two" class="dialog-button"
+                                        onclick="chooseWord(2)"></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="start-dialog" class="center-dialog">
+                            <span class="dialog-title">{{.Translation.Get "start-the-game"}}</span>
+                            <div class="center-dialog-content">
+                                <div style="display: flex; flex-direction: column;">
+                                    {{.Translation.Get "change-your-name"}}:
+                                    <div style="display: flex; flex-direction: row;">
+                                        <input class="namechange-field" type="text"
+                                            id="namechange-field-start-dialog"></input>
+                                        <button class="dialog-button"
+                                            onclick="changeName(document.getElementById('namechange-field-start-dialog').value)">{{.Translation.Get "change"}}</button>
+                                        <button class="dialog-button" onclick="changeName('')">{{.Translation.Get "randomize"}}</button>
+                                    </div>
+                                </div>
+                                <div class="button-center-wrapper">
+                                    <button class="dialog-button" onclick="startGame()">{{.Translation.Get "start"}}</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="unstarted-dialog" class="center-dialog">
+                            <span class="dialog-title">{{.Translation.Get "game-not-started-title"}}</span>
+                            <div class="center-dialog-content">
+                                <div style="display: flex; flex-direction: column;">
+                                    <p>{{.Translation.Get "waiting-for-host-to-start"}}</p>
+                                    {{.Translation.Get "change-your-name"}}:
+                                    <div style="display: flex; flex-direction: row;">
+                                        <input class="namechange-field" type="text"
+                                            id="namechange-field-unstarted-dialog"></input>
+                                        <button class="dialog-button"
+                                            onclick="changeName(document.getElementById('namechange-field-unstarted-dialog').value)">{{.Translation.Get "change"}}</button>
+                                        <button class="dialog-button" onclick="changeName('')">{{.Translation.Get "randomize"}}</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="center-dialog-container">
-                            <div id="start-dialog" class="center-dialog">
-                                <span class="dialog-title">{{.Translation.Get "start-the-game"}}</span>
-                                <div class="center-dialog-content">
-                                    <div style="display: flex; flex-direction: column;">
-                                        {{.Translation.Get "change-your-name"}}:
-                                        <div style="display: flex; flex-direction: row;">
-                                            <input class="namechange-field" type="text"
-                                                id="namechange-field-start-dialog"></input>
-                                            <button class="dialog-button"
-                                                onclick="changeName(document.getElementById('namechange-field-start-dialog').value)">{{.Translation.Get "change"}}</button>
-                                            <button class="dialog-button" onclick="changeName('')">{{.Translation.Get "randomize"}}</button>
-                                        </div>
+                        <div id="waitchoose-dialog" class="center-dialog">
+                            <span class="dialog-title">{{.Translation.Get "waiting-for-word-selection"}}</span>
+                            <div class="center-dialog-content">
+                                <span id="waitchoose-drawer"></span> {{.Translation.Get "is-choosing-word"}}
+                            </div>
+                        </div>
+
+                        <div id="namechange-dialog" class="center-dialog">
+                            <span class="dialog-title">{{.Translation.Get "change-your-name"}}</span>
+                            <div class="center-dialog-content">
+                                <div style="display: flex; flex-direction: column;">
+                                    <div style="display: flex; flex-direction: row;">
+                                        <input class="namechange-field" type="text" id="namechange-field"></input>
+                                        <button class="dialog-button"
+                                            onclick="changeName(document.getElementById('namechange-field').value)">{{.Translation.Get "change"}}</button>
+                                        <button class="dialog-button" onclick="changeName('')">{{.Translation.Get "randomize"}}</button>
                                     </div>
                                     <div class="button-center-wrapper">
-                                        <button class="dialog-button" onclick="startGame()">{{.Translation.Get "start"}}</button>
+                                        <button class="dialog-button"
+                                            onclick="hideNameChangeDialog()">{{.Translation.Get "close"}}</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="center-dialog-container">
-                            <div id="unstarted-dialog" class="center-dialog">
-                                <span class="dialog-title">{{.Translation.Get "game-not-started-title"}}</span>
-                                <div class="center-dialog-content">
-                                    <div style="display: flex; flex-direction: column;">
-                                        <p>{{.Translation.Get "waiting-for-host-to-start"}}</p>
-                                        {{.Translation.Get "change-your-name"}}:
-                                        <div style="display: flex; flex-direction: row;">
-                                            <input class="namechange-field" type="text"
-                                                id="namechange-field-unstarted-dialog"></input>
-                                            <button class="dialog-button"
-                                                onclick="changeName(document.getElementById('namechange-field-unstarted-dialog').value)">{{.Translation.Get "change"}}</button>
-                                            <button class="dialog-button" onclick="changeName('')">{{.Translation.Get "randomize"}}</button>
+                        <div id="lobbysettings-dialog" class="center-dialog">
+                            <span class="dialog-title">{{.Translation.Get "change-lobby-settings"}}</span>
+                            <div class="center-dialog-content">
+                                <div style="display: flex; flex-direction: column;">
+                                    <div class="input-container">
+                                        <b>{{.Translation.Get "drawing-time-setting"}}</b>
+                                        <input id="lobby-settings-drawing-time" class="input-item" type="number"
+                                            name="drawing_time" min="{{.MinDrawingTime}}" max="{{.MaxDrawingTime}}"
+                                            value="{{.DrawingTime}}" />
+                                        <b>{{.Translation.Get "rounds-setting"}}</b>
+                                        <input id="lobby-settings-max-rounds" class="input-item" type="number"
+                                            name="rounds" min="{{.MinRounds}}" max="{{.MaxRounds}}"
+                                            value="{{.Rounds}}" />
+                                        <b>{{.Translation.Get "max-players-setting"}}</b>
+                                        <input id="lobby-settings-max-players" type="number" name="max_players"
+                                            min="{{.MinMaxPlayers}}" max="{{.MaxMaxPlayers}}"
+                                            value="{{.MaxPlayers}}" />
+                                        <b>{{.Translation.Get "public-lobby-setting"}}</b>
+                                        <input id="lobby-settings-public" type="checkbox" name="public" {{if eq
+                                            .Public true}}checked{{end}} />
+                                        <b>{{.Translation.Get "custom-words-chance-setting"}}</b>
+                                        <div style="display: flex;">
+                                            0%
+                                            <input style="flex: 1;" id="lobby-settings-custom-words-chance"
+                                                type="range" name="custom_words_chance" min="1" max="100"
+                                                value="{{.CustomWordsChance}}">
+                                            100%
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="center-dialog-container">
-                            <div id="waitchoose-dialog" class="center-dialog">
-                                <span class="dialog-title">{{.Translation.Get "waiting-for-word-selection"}}</span>
-                                <div class="center-dialog-content">
-                                    <span id="waitchoose-drawer"></span> {{.Translation.Get "is-choosing-word"}}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="center-dialog-container">
-                            <div id="namechange-dialog" class="center-dialog">
-                                <span class="dialog-title">{{.Translation.Get "change-your-name"}}</span>
-                                <div class="center-dialog-content">
-                                    <div style="display: flex; flex-direction: column;">
-                                        <div style="display: flex; flex-direction: row;">
-                                            <input class="namechange-field" type="text" id="namechange-field"></input>
-                                            <button class="dialog-button"
-                                                onclick="changeName(document.getElementById('namechange-field').value)">{{.Translation.Get "change"}}</button>
-                                            <button class="dialog-button" onclick="changeName('')">{{.Translation.Get "randomize"}}</button>
-                                        </div>
-                                        <div class="button-center-wrapper">
-                                            <button class="dialog-button"
-                                                onclick="hideNameChangeDialog()">{{.Translation.Get "close"}}</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="center-dialog-container">
-                            <div id="lobbysettings-dialog" class="center-dialog">
-                                <span class="dialog-title">{{.Translation.Get "change-lobby-settings"}}</span>
-                                <div class="center-dialog-content">
-                                    <div style="display: flex; flex-direction: column;">
-                                        <div class="input-container">
-                                            <b>{{.Translation.Get "drawing-time-setting"}}</b>
-                                            <input id="lobby-settings-drawing-time" class="input-item" type="number"
-                                                name="drawing_time" min="{{.MinDrawingTime}}" max="{{.MaxDrawingTime}}"
-                                                value="{{.DrawingTime}}" />
-                                            <b>{{.Translation.Get "rounds-setting"}}</b>
-                                            <input id="lobby-settings-max-rounds" class="input-item" type="number"
-                                                name="rounds" min="{{.MinRounds}}" max="{{.MaxRounds}}"
-                                                value="{{.Rounds}}" />
-                                            <b>{{.Translation.Get "max-players-setting"}}</b>
-                                            <input id="lobby-settings-max-players" type="number" name="max_players"
-                                                min="{{.MinMaxPlayers}}" max="{{.MaxMaxPlayers}}"
-                                                value="{{.MaxPlayers}}" />
-                                            <b>{{.Translation.Get "public-lobby-setting"}}</b>
-                                            <input id="lobby-settings-public" type="checkbox" name="public" {{if eq
-                                                .Public true}}checked{{end}} />
-                                            <b>{{.Translation.Get "custom-words-chance-setting"}}</b>
-                                            <div style="display: flex;">
-                                                0%
-                                                <input style="flex: 1;" id="lobby-settings-custom-words-chance"
-                                                    type="range" name="custom_words_chance" min="1" max="100"
-                                                    value="{{.CustomWordsChance}}">
-                                                100%
+                                        <details class="advanced-section">
+                                            <summary>{{.Translation.Get "advanced-settings"}}</summary>
+                                            <div class="input-container">
+                                                <b>{{.Translation.Get "players-per-ip-limit-setting"}}</b>
+                                                <input id="lobby-settings-clients-per-ip-limit" type="number"
+                                                    name="clients_per_ip_limit" min="{{.MinClientsPerIPLimit}}"
+                                                    max="{{.MaxClientsPerIPLimit}}"
+                                                    value="{{.ClientsPerIPLimit}}" />
+                                                <b>{{.Translation.Get "enable-votekick-setting"}}</b>
+                                                <input id="lobby-settings-enable-votekick" type="checkbox"
+                                                    name="enable_votekick" {{if eq .EnableVotekick
+                                                    true}}checked{{end}} />
                                             </div>
-
-                                            <details class="advanced-section">
-                                                <summary>{{.Translation.Get "advanced-settings"}}</summary>
-                                                <div class="input-container">
-                                                    <b>{{.Translation.Get "players-per-ip-limit-setting"}}</b>
-                                                    <input id="lobby-settings-clients-per-ip-limit" type="number"
-                                                        name="clients_per_ip_limit" min="{{.MinClientsPerIPLimit}}"
-                                                        max="{{.MaxClientsPerIPLimit}}"
-                                                        value="{{.ClientsPerIPLimit}}" />
-                                                    <b>{{.Translation.Get "enable-votekick-setting"}}</b>
-                                                    <input id="lobby-settings-enable-votekick" type="checkbox"
-                                                        name="enable_votekick" {{if eq .EnableVotekick
-                                                        true}}checked{{end}} />
-                                                </div>
-                                            </details>
-                                            <button class="dialog-button" onclick="saveLobbySettings()"
-                                                style="grid-column-start: 1; grid-column-end: 3;">
-                                                {{.Translation.Get "save-settings"}}
-                                            </button>
-                                        </div>
-                                        <div class="button-center-wrapper">
-                                            <button class="dialog-button"
-                                                onclick="hideLobbySettingsDialog()">{{.Translation.Get "close"}}</button>
-                                        </div>
+                                        </details>
+                                        <button class="dialog-button" onclick="saveLobbySettings()"
+                                            style="grid-column-start: 1; grid-column-end: 3;">
+                                            {{.Translation.Get "save-settings"}}
+                                        </button>
+                                    </div>
+                                    <div class="button-center-wrapper">
+                                        <button class="dialog-button"
+                                            onclick="hideLobbySettingsDialog()">{{.Translation.Get "close"}}</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="center-dialog-container">
-                            <div id="game-over-dialog" class="center-dialog">
-                                <span id="game-over-dialog-title" class="dialog-title">Game over!</span>
-                                <div id="game-over-scoreboard"></div>
-                                <button id="restart-button" class="dialog-button" onclick="startGame()">Restart</button>
-                            </div>
+                        <div id="game-over-dialog" class="center-dialog">
+                            <span id="game-over-dialog-title" class="dialog-title">Game over!</span>
+                            <div id="game-over-scoreboard"></div>
+                            <button id="restart-button" class="dialog-button" onclick="startGame()">Restart</button>
                         </div>
 
-                        <div class="center-dialog-container">
-                            <div id="kick-dialog" class="center-dialog">
-                                <span class="dialog-title">{{.Translation.Get "votekick-a-player"}}</span>
-                                <div id="kick-dialog-players"></div>
-                                <button onclick="hideKickDialog()"
-                                    class="dialog-button dialog-close-button">{{.Translation.Get "close"}}</button>
-                            </div>
+                        <div id="kick-dialog" class="center-dialog">
+                            <span class="dialog-title">{{.Translation.Get "votekick-a-player"}}</span>
+                            <div id="kick-dialog-players"></div>
+                            <button onclick="hideKickDialog()"
+                                class="dialog-button dialog-close-button">{{.Translation.Get "close"}}</button>
                         </div>
                     </div>
                 </div>
@@ -546,18 +530,11 @@
         }
 
         function showDialog(id, title, contentNode) {
-            let newDialogContainer = document.createElement("div");
-            newDialogContainer.classList.add("center-dialog-container");
-            if (id !== null && id !== "") {
-                newDialogContainer.id = id + "-parent";
-            }
-
             let newDialog = document.createElement("div");
             newDialog.classList.add("center-dialog");
             if (id !== null && id !== "") {
                 newDialog.id = id;
             }
-            newDialogContainer.appendChild(newDialog);
 
             let dialogTitle = document.createElement("span");
             dialogTitle.classList.add("dialog-title");
@@ -570,7 +547,7 @@
             newDialog.appendChild(dialogContent);
 
             newDialog.style.visibility = "visible";
-            centerDialogs.appendChild(newDialogContainer);
+            centerDialogs.appendChild(newDialog);
         }
 
         function showKickDialog() {
