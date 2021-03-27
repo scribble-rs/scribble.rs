@@ -79,6 +79,10 @@ type FillEvent struct {
 	Data *Fill  `json:"data"`
 }
 
+// KickVote represents a players vote to kick another players. If the VoteCount
+// is as great or greater than the RequiredVoteCount, the event indicates a
+// successful kick vote. The voting is anonymous, meaning the voting player
+// won't be exposed.
 type KickVote struct {
 	PlayerID          string `json:"playerId"`
 	PlayerName        string `json:"playerName"`
@@ -200,10 +204,11 @@ func HandleEvent(raw []byte, received *GameEvent, lobby *Lobby, player *Player) 
 		handleNameChangeEvent(player, lobby, newName)
 	} else if received.Type == "request-drawing" {
 		WriteAsJSON(player, GameEvent{Type: "drawing", Data: lobby.currentDrawing})
-	} else if received.Type == "keep-alive" {
-		//This is a known dummy event in order to avoid accidental websocket
-		//connection closure. However, no action is required on the server.
 	}
+	/* else if received.Type == "keep-alive" {
+		This is a known dummy event in order to avoid accidental websocket
+		connection closure. However, no action is required on the server.
+	}*/
 
 	return nil
 }
