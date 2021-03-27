@@ -813,9 +813,8 @@ func generateReadyData(lobby *Lobby, player *Player) *Ready {
 		CurrentDrawing:  lobby.currentDrawing,
 	}
 
-	//Game over already
 	if lobby.State != Ongoing {
-		//0 is interpreted as "no time left".
+		//Clients should interpret 0 as "time over", unless the gamestate isn't "ongoing"
 		ready.RoundEndTime = 0
 	} else {
 		ready.RoundEndTime = int(lobby.RoundEndTime - getTimeAsMillis())
