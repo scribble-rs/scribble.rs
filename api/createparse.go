@@ -88,10 +88,10 @@ func ParseCustomWords(value string) ([]string, error) {
 		return nil, nil
 	}
 
+	lowercaser := cases.Lower(language.English)
 	result := strings.Split(trimmedValue, ",")
 	for index, item := range result {
-		cases.Lower(language.English)
-		trimmedItem := strings.ToLower(strings.TrimSpace(item))
+		trimmedItem := lowercaser.String(strings.TrimSpace(item))
 		if trimmedItem == "" {
 			return nil, errors.New("custom words must not be empty")
 		}
