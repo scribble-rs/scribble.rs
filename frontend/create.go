@@ -27,7 +27,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 func createDefaultLobbyCreatePageData() *LobbyCreatePageData {
 	return &LobbyCreatePageData{
-		BasePageConfig:    api.CurrentBasePageConfig,
+		BasePageConfig:    currentBasePageConfig,
 		SettingBounds:     game.LobbySettingBounds,
 		Languages:         game.SupportedLanguages,
 		Public:            "false",
@@ -43,7 +43,7 @@ func createDefaultLobbyCreatePageData() *LobbyCreatePageData {
 
 // LobbyCreatePageData defines all non-static data for the lobby create page.
 type LobbyCreatePageData struct {
-	*api.BasePageConfig
+	*BasePageConfig
 	*game.SettingBounds
 	Translation       translations.Translation
 	Locale            string
@@ -81,7 +81,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 
 	//Prevent resetting the form, since that would be annoying as hell.
 	pageData := LobbyCreatePageData{
-		BasePageConfig:    api.CurrentBasePageConfig,
+		BasePageConfig:    currentBasePageConfig,
 		SettingBounds:     game.LobbySettingBounds,
 		Languages:         game.SupportedLanguages,
 		Public:            r.Form.Get("public"),
@@ -161,5 +161,5 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 	//We only add the lobby if we could do all necessary pre-steps successfully.
 	state.AddLobby(lobby)
 
-	http.Redirect(w, r, api.CurrentBasePageConfig.RootPath+"/ssrEnterLobby?lobby_id="+lobby.LobbyID, http.StatusFound)
+	http.Redirect(w, r, currentBasePageConfig.RootPath+"/ssrEnterLobby?lobby_id="+lobby.LobbyID, http.StatusFound)
 }

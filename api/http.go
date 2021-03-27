@@ -6,17 +6,11 @@ import (
 	"strings"
 )
 
-var CurrentBasePageConfig = &BasePageConfig{}
-
-// BasePageConfig is data that all pages require to function correctly, no matter
-// whether error page or lobby page.
-type BasePageConfig struct {
-	// RootPath is the path directly after the domain and before the
-	// scribble.rs paths. For example if you host scribblers on painting.com
-	// but already host a different website, then your API paths might have to
-	// look like this: painting.com/scribblers/v1.
-	RootPath string `json:"rootPath"`
-}
+// RootPath is the path directly after the domain and before the
+// scribble.rs paths. For example if you host scribblers on painting.com
+// but already host a different website, then your API paths might have to
+// look like this: painting.com/scribblers/v1.
+var RootPath string
 
 //In this init hook we initialize all templates that could at some point
 //be needed during the server runtime. If any of the templates can't be
@@ -24,20 +18,20 @@ type BasePageConfig struct {
 func init() {
 	rootPath, rootPathAvailable := os.LookupEnv("ROOT_PATH")
 	if rootPathAvailable && rootPath != "" {
-		CurrentBasePageConfig.RootPath = rootPath
+		RootPath = rootPath
 	}
 }
 
 // SetupRoutes registers the /v1/ endpoints with the http package.
 func SetupRoutes() {
-	http.HandleFunc(CurrentBasePageConfig.RootPath+"/v1/stats", stats)
+	http.HandleFunc(RootPath+"/v1/stats", stats)
 	//The websocket is shared between the public API and the official client
-	http.HandleFunc(CurrentBasePageConfig.RootPath+"/v1/ws", wsEndpoint)
+	http.HandleFunc(RootPath+"/v1/ws", wsEndpoint)
 
 	//These exist only for the public API. We version them in order to ensure
 	//backwards compatibility as far as possible.
-	http.HandleFunc(CurrentBasePageConfig.RootPath+"/v1/lobby", lobbyEndpoint)
-	http.HandleFunc(CurrentBasePageConfig.RootPath+"/v1/lobby/player", enterLobby)
+	http.HandleFunc(RootPath+"/v1/lobby", lobbyEndpoint)
+	http.HandleFunc(RootPath+"/v1/lobby/player", enterLobby)
 }
 
 // remoteAddressToSimpleIP removes unnecessary clutter from the input,

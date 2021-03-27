@@ -31,10 +31,16 @@ func GetPlayers(w http.ResponseWriter, r *http.Request) {
 }
 
 type LobbyPageData struct {
+	*BasePageConfig
 	*api.LobbyData
 
 	Translation translations.Translation
 	Locale      string
+}
+
+type robotPageData struct {
+	*BasePageConfig
+	*api.LobbyData
 }
 
 // ssrEnterLobby opens a lobby, either opening it directly or asking for a lobby.
@@ -47,9 +53,12 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 
 	userAgent := strings.ToLower(r.UserAgent())
 	if !(strings.Contains(userAgent, "gecko") || strings.Contains(userAgent, "chrome") || strings.Contains(userAgent, "opera") || strings.Contains(userAgent, "safari")) {
-		err := pageTemplates.ExecuteTemplate(w, "robot-page", api.CreateLobbyData(lobby))
-		if err != nil {
-			panic(err)
+		templatingError := pageTemplates.ExecuteTemplate(w, "robot-page", &robotPageData{
+			BasePageConfig: currentBasePageConfig,
+			LobbyData:      api.CreateLobbyData(lobby),
+		})
+		if templatingError != nil {
+			http.Error(w, "error templating robot page", http.StatusInternalServerError)
 		}
 		return
 	}
@@ -94,9 +103,10 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 	translation, locale := determineTranslation(r)
 
 	pageData := &LobbyPageData{
-		LobbyData:   api.CreateLobbyData(lobby),
-		Translation: translation,
-		Locale:      locale,
+		BasePageConfig: currentBasePageConfig,
+		LobbyData:      api.CreateLobbyData(lobby),
+		Translation:    translation,
+		Locale:         locale,
 	}
 	templateError := pageTemplates.ExecuteTemplate(w, "lobby-page", pageData)
 	if templateError != nil {

@@ -13,8 +13,8 @@ func Test_templateLobbyPage(t *testing.T) {
 	var buffer bytes.Buffer
 	templatingError := pageTemplates.ExecuteTemplate(&buffer,
 		"lobby-page", &LobbyPageData{
+			BasePageConfig: currentBasePageConfig,
 			LobbyData: &api.LobbyData{
-				BasePageConfig:        api.CurrentBasePageConfig,
 				EditableLobbySettings: &game.EditableLobbySettings{},
 				SettingBounds:         game.LobbySettingBounds,
 			},
@@ -29,7 +29,7 @@ func Test_templateErrorPage(t *testing.T) {
 	var buffer bytes.Buffer
 	templatingError := pageTemplates.ExecuteTemplate(&buffer,
 		"error-page", &errorPageData{
-			BasePageConfig: api.CurrentBasePageConfig,
+			BasePageConfig: currentBasePageConfig,
 			ErrorMessage:   "KEK",
 			Translation:    translations.DefaultTranslation,
 			Locale:         "en-US",
@@ -43,8 +43,8 @@ func Test_templateRobotPage(t *testing.T) {
 	var buffer bytes.Buffer
 	templatingError := pageTemplates.ExecuteTemplate(&buffer,
 		"robot-page", &LobbyPageData{
+			BasePageConfig: currentBasePageConfig,
 			LobbyData: &api.LobbyData{
-				BasePageConfig: api.CurrentBasePageConfig,
 				EditableLobbySettings: &game.EditableLobbySettings{
 					MaxPlayers: 12,
 					Rounds:     4,
