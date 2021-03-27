@@ -20,39 +20,13 @@ func Test_parsePlayerName(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parsePlayerName(tt.value)
+			got, err := ParsePlayerName(tt.value)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parsePlayerName() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
 				t.Errorf("parsePlayerName() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_parsePassword(t *testing.T) {
-	tests := []struct {
-		name    string
-		value   string
-		want    string
-		wantErr bool
-	}{
-		{"empty password", "", "", false},
-		{"space as password", " ", " ", false},
-		{"word as password", "word", "word", false},
-		{"string with space in the middle", "Hello World", "Hello World", false},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := parsePassword(tt.value)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("parsePassword() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("parsePassword() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -75,7 +49,7 @@ func Test_parseDrawingTime(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseDrawingTime(tt.value)
+			got, err := ParseDrawingTime(tt.value)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parseDrawingTime() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -104,7 +78,7 @@ func Test_parseRounds(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseRounds(tt.value)
+			got, err := ParseRounds(tt.value)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parseRounds() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -133,7 +107,7 @@ func Test_parseMaxPlayers(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseMaxPlayers(tt.value)
+			got, err := ParseMaxPlayers(tt.value)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parseMaxPlayers() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -164,7 +138,7 @@ func Test_parseCustomWords(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseCustomWords(tt.value)
+			got, err := ParseCustomWords(tt.value)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parseCustomWords() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -193,7 +167,7 @@ func Test_parseCustomWordChance(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseCustomWordsChance(tt.value)
+			got, err := ParseCustomWordsChance(tt.value)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parseCustomWordsChance() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -224,7 +198,7 @@ func Test_parseBoolean(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseBoolean("name", tt.value)
+			got, err := ParseBoolean("name", tt.value)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parseBoolean() error = %v, wantErr %v", err, tt.wantErr)
 				return

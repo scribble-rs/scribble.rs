@@ -62,15 +62,15 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	language, languageInvalid := parseLanguage(r.Form.Get("language"))
-	drawingTime, drawingTimeInvalid := parseDrawingTime(r.Form.Get("drawing_time"))
-	rounds, roundsInvalid := parseRounds(r.Form.Get("rounds"))
-	maxPlayers, maxPlayersInvalid := parseMaxPlayers(r.Form.Get("max_players"))
-	customWords, customWordsInvalid := parseCustomWords(r.Form.Get("custom_words"))
-	customWordChance, customWordChanceInvalid := parseCustomWordsChance(r.Form.Get("custom_words_chance"))
-	clientsPerIPLimit, clientsPerIPLimitInvalid := parseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
-	enableVotekick, enableVotekickInvalid := parseBoolean("enable votekick", r.Form.Get("enable_votekick"))
-	publicLobby, publicLobbyInvalid := parseBoolean("public", r.Form.Get("public"))
+	language, languageInvalid := ParseLanguage(r.Form.Get("language"))
+	drawingTime, drawingTimeInvalid := ParseDrawingTime(r.Form.Get("drawing_time"))
+	rounds, roundsInvalid := ParseRounds(r.Form.Get("rounds"))
+	maxPlayers, maxPlayersInvalid := ParseMaxPlayers(r.Form.Get("max_players"))
+	customWords, customWordsInvalid := ParseCustomWords(r.Form.Get("custom_words"))
+	customWordChance, customWordChanceInvalid := ParseCustomWordsChance(r.Form.Get("custom_words_chance"))
+	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
+	enableVotekick, enableVotekickInvalid := ParseBoolean("enable votekick", r.Form.Get("enable_votekick"))
+	publicLobby, publicLobbyInvalid := ParseBoolean("public", r.Form.Get("public"))
 
 	var requestErrors []string
 	if languageInvalid != nil {
@@ -216,13 +216,13 @@ func editLobby(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Editable properties
-	maxPlayers, maxPlayersInvalid := parseMaxPlayers(r.Form.Get("max_players"))
-	drawingTime, drawingTimeInvalid := parseDrawingTime(r.Form.Get("drawing_time"))
-	rounds, roundsInvalid := parseRounds(r.Form.Get("rounds"))
-	customWordChance, customWordChanceInvalid := parseCustomWordsChance(r.Form.Get("custom_words_chance"))
-	clientsPerIPLimit, clientsPerIPLimitInvalid := parseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
-	enableVotekick, enableVotekickInvalid := parseBoolean("enable votekick", r.Form.Get("enable_votekick"))
-	publicLobby, publicLobbyInvalid := parseBoolean("public", r.Form.Get("public"))
+	maxPlayers, maxPlayersInvalid := ParseMaxPlayers(r.Form.Get("max_players"))
+	drawingTime, drawingTimeInvalid := ParseDrawingTime(r.Form.Get("drawing_time"))
+	rounds, roundsInvalid := ParseRounds(r.Form.Get("rounds"))
+	customWordChance, customWordChanceInvalid := ParseCustomWordsChance(r.Form.Get("custom_words_chance"))
+	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
+	enableVotekick, enableVotekickInvalid := ParseBoolean("enable votekick", r.Form.Get("enable_votekick"))
+	publicLobby, publicLobbyInvalid := ParseBoolean("public", r.Form.Get("public"))
 
 	if maxPlayersInvalid != nil {
 		requestErrors = append(requestErrors, maxPlayersInvalid.Error())

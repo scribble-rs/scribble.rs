@@ -1,18 +1,12 @@
 package frontend
 
 import (
-	"errors"
-	"fmt"
 	"net/http"
-	"strconv"
-	"strings"
 
 	"github.com/scribble-rs/scribble.rs/api"
 	"github.com/scribble-rs/scribble.rs/game"
 	"github.com/scribble-rs/scribble.rs/state"
 	"github.com/scribble-rs/scribble.rs/translations"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 //This file contains the API for the official web client.
@@ -75,15 +69,15 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	language, languageInvalid := parseLanguage(r.Form.Get("language"))
-	drawingTime, drawingTimeInvalid := parseDrawingTime(r.Form.Get("drawing_time"))
-	rounds, roundsInvalid := parseRounds(r.Form.Get("rounds"))
-	maxPlayers, maxPlayersInvalid := parseMaxPlayers(r.Form.Get("max_players"))
-	customWords, customWordsInvalid := parseCustomWords(r.Form.Get("custom_words"))
-	customWordChance, customWordChanceInvalid := parseCustomWordsChance(r.Form.Get("custom_words_chance"))
-	clientsPerIPLimit, clientsPerIPLimitInvalid := parseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
-	enableVotekick, enableVotekickInvalid := parseBoolean("enable votekick", r.Form.Get("enable_votekick"))
-	publicLobby, publicLobbyInvalid := parseBoolean("public", r.Form.Get("public"))
+	language, languageInvalid := api.ParseLanguage(r.Form.Get("language"))
+	drawingTime, drawingTimeInvalid := api.ParseDrawingTime(r.Form.Get("drawing_time"))
+	rounds, roundsInvalid := api.ParseRounds(r.Form.Get("rounds"))
+	maxPlayers, maxPlayersInvalid := api.ParseMaxPlayers(r.Form.Get("max_players"))
+	customWords, customWordsInvalid := api.ParseCustomWords(r.Form.Get("custom_words"))
+	customWordChance, customWordChanceInvalid := api.ParseCustomWordsChance(r.Form.Get("custom_words_chance"))
+	clientsPerIPLimit, clientsPerIPLimitInvalid := api.ParseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
+	enableVotekick, enableVotekickInvalid := api.ParseBoolean("enable votekick", r.Form.Get("enable_votekick"))
+	publicLobby, publicLobbyInvalid := api.ParseBoolean("public", r.Form.Get("public"))
 
 	//Prevent resetting the form, since that would be annoying as hell.
 	pageData := LobbyCreatePageData{
@@ -168,135 +162,4 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 	state.AddLobby(lobby)
 
 	http.Redirect(w, r, api.CurrentBasePageConfig.RootPath+"/ssrEnterLobby?lobby_id="+lobby.LobbyID, http.StatusFound)
-}
-
-func parseLanguage(value string) (string, error) {
-	toLower := strings.ToLower(strings.TrimSpace(value))
-	for languageKey := range game.SupportedLanguages {
-		if toLower == languageKey {
-			return languageKey, nil
-		}
-	}
-
-	return "", errors.New("the given language doesn't match any supported language")
-}
-
-func parseDrawingTime(value string) (int, error) {
-	result, parseErr := strconv.ParseInt(value, 10, 64)
-	if parseErr != nil {
-		return 0, errors.New("the drawing time must be numeric")
-	}
-
-	if result < game.LobbySettingBounds.MinDrawingTime {
-		return 0, fmt.Errorf("drawing time must not be smaller than %d", game.LobbySettingBounds.MinDrawingTime)
-	}
-
-	if result > game.LobbySettingBounds.MaxDrawingTime {
-		return 0, fmt.Errorf("drawing time must not be greater than %d", game.LobbySettingBounds.MaxDrawingTime)
-	}
-
-	return int(result), nil
-}
-
-func parseRounds(value string) (int, error) {
-	result, parseErr := strconv.ParseInt(value, 10, 64)
-	if parseErr != nil {
-		return 0, errors.New("the rounds amount must be numeric")
-	}
-
-	if result < game.LobbySettingBounds.MinRounds {
-		return 0, fmt.Errorf("rounds must not be smaller than %d", game.LobbySettingBounds.MinRounds)
-	}
-
-	if result > game.LobbySettingBounds.MaxRounds {
-		return 0, fmt.Errorf("rounds must not be greater than %d", game.LobbySettingBounds.MaxRounds)
-	}
-
-	return int(result), nil
-}
-
-func parseMaxPlayers(value string) (int, error) {
-	result, parseErr := strconv.ParseInt(value, 10, 64)
-	if parseErr != nil {
-		return 0, errors.New("the max players amount must be numeric")
-	}
-
-	if result < game.LobbySettingBounds.MinMaxPlayers {
-		return 0, fmt.Errorf("maximum players must not be smaller than %d", game.LobbySettingBounds.MinMaxPlayers)
-	}
-
-	if result > game.LobbySettingBounds.MaxMaxPlayers {
-		return 0, fmt.Errorf("maximum players must not be greater than %d", game.LobbySettingBounds.MaxMaxPlayers)
-	}
-
-	return int(result), nil
-}
-
-func parseCustomWords(value string) ([]string, error) {
-	trimmedValue := strings.TrimSpace(value)
-	if trimmedValue == "" {
-		return nil, nil
-	}
-
-	result := strings.Split(trimmedValue, ",")
-	for index, item := range result {
-		cases.Lower(language.English)
-		trimmedItem := strings.ToLower(strings.TrimSpace(item))
-		if trimmedItem == "" {
-			return nil, errors.New("custom words must not be empty")
-		}
-		result[index] = trimmedItem
-	}
-
-	return result, nil
-}
-
-func parseClientsPerIPLimit(value string) (int, error) {
-	result, parseErr := strconv.ParseInt(value, 10, 64)
-	if parseErr != nil {
-		return 0, errors.New("the clients per IP limit must be numeric")
-	}
-
-	if result < game.LobbySettingBounds.MinClientsPerIPLimit {
-		return 0, fmt.Errorf("the clients per IP limit must not be lower than %d", game.LobbySettingBounds.MinClientsPerIPLimit)
-	}
-
-	if result > game.LobbySettingBounds.MaxClientsPerIPLimit {
-		return 0, fmt.Errorf("the clients per IP limit must not be higher than %d", game.LobbySettingBounds.MaxClientsPerIPLimit)
-	}
-
-	return int(result), nil
-}
-
-func parseCustomWordsChance(value string) (int, error) {
-	result, parseErr := strconv.ParseInt(value, 10, 64)
-	if parseErr != nil {
-		return 0, errors.New("the custom word chance must be numeric")
-	}
-
-	if result < 0 {
-		return 0, errors.New("custom word chance must not be lower than 0")
-	}
-
-	if result > 100 {
-		return 0, errors.New("custom word chance must not be higher than 100")
-	}
-
-	return int(result), nil
-}
-
-func parseBoolean(valueName string, value string) (bool, error) {
-	if strings.EqualFold(value, "true") {
-		return true, nil
-	}
-
-	if strings.EqualFold(value, "false") {
-		return false, nil
-	}
-
-	if value == "" {
-		return false, nil
-	}
-
-	return false, fmt.Errorf("the %s value must be a boolean value ('true' or 'false)", valueName)
 }

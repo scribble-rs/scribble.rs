@@ -11,7 +11,7 @@ import (
 	"golang.org/x/text/language"
 )
 
-func parsePlayerName(value string) (string, error) {
+func ParsePlayerName(value string) (string, error) {
 	trimmed := strings.TrimSpace(value)
 	if trimmed == "" {
 		return trimmed, errors.New("the player name must not be empty")
@@ -20,11 +20,7 @@ func parsePlayerName(value string) (string, error) {
 	return trimmed, nil
 }
 
-func parsePassword(value string) (string, error) {
-	return value, nil
-}
-
-func parseLanguage(value string) (string, error) {
+func ParseLanguage(value string) (string, error) {
 	toLower := strings.ToLower(strings.TrimSpace(value))
 	for languageKey := range game.SupportedLanguages {
 		if toLower == languageKey {
@@ -35,7 +31,7 @@ func parseLanguage(value string) (string, error) {
 	return "", errors.New("the given language doesn't match any supported language")
 }
 
-func parseDrawingTime(value string) (int, error) {
+func ParseDrawingTime(value string) (int, error) {
 	result, parseErr := strconv.ParseInt(value, 10, 64)
 	if parseErr != nil {
 		return 0, errors.New("the drawing time must be numeric")
@@ -52,7 +48,7 @@ func parseDrawingTime(value string) (int, error) {
 	return int(result), nil
 }
 
-func parseRounds(value string) (int, error) {
+func ParseRounds(value string) (int, error) {
 	result, parseErr := strconv.ParseInt(value, 10, 64)
 	if parseErr != nil {
 		return 0, errors.New("the rounds amount must be numeric")
@@ -69,7 +65,7 @@ func parseRounds(value string) (int, error) {
 	return int(result), nil
 }
 
-func parseMaxPlayers(value string) (int, error) {
+func ParseMaxPlayers(value string) (int, error) {
 	result, parseErr := strconv.ParseInt(value, 10, 64)
 	if parseErr != nil {
 		return 0, errors.New("the max players amount must be numeric")
@@ -86,7 +82,7 @@ func parseMaxPlayers(value string) (int, error) {
 	return int(result), nil
 }
 
-func parseCustomWords(value string) ([]string, error) {
+func ParseCustomWords(value string) ([]string, error) {
 	trimmedValue := strings.TrimSpace(value)
 	if trimmedValue == "" {
 		return nil, nil
@@ -105,7 +101,7 @@ func parseCustomWords(value string) ([]string, error) {
 	return result, nil
 }
 
-func parseClientsPerIPLimit(value string) (int, error) {
+func ParseClientsPerIPLimit(value string) (int, error) {
 	result, parseErr := strconv.ParseInt(value, 10, 64)
 	if parseErr != nil {
 		return 0, errors.New("the clients per IP limit must be numeric")
@@ -122,7 +118,7 @@ func parseClientsPerIPLimit(value string) (int, error) {
 	return int(result), nil
 }
 
-func parseCustomWordsChance(value string) (int, error) {
+func ParseCustomWordsChance(value string) (int, error) {
 	result, parseErr := strconv.ParseInt(value, 10, 64)
 	if parseErr != nil {
 		return 0, errors.New("the custom word chance must be numeric")
@@ -139,7 +135,7 @@ func parseCustomWordsChance(value string) (int, error) {
 	return int(result), nil
 }
 
-func parseBoolean(valueName string, value string) (bool, error) {
+func ParseBoolean(valueName string, value string) (bool, error) {
 	if strings.EqualFold(value, "true") {
 		return true, nil
 	}
