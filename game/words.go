@@ -58,17 +58,7 @@ func readWordListInternal(
 			continue
 		}
 
-		//Since not all words use the tag system, we can just instantly return for words that don't use it.
-		lastIndexNumberSign := strings.LastIndex(word, "#")
-		if lastIndexNumberSign == -1 {
-			words = append(words, lowercaser.String(word))
-		} else {
-			//The "i" is the "impossible" tag, meaning the word was rated as undrawable / unguessable.
-			if "#i" == word[lastIndexNumberSign:] {
-				continue
-			}
-			words = append(words, lowercaser.String(word[:lastIndexNumberSign]))
-		}
+		words = append(words, lowercaser.String(word))
 	}
 
 	wordListCache[languageIdentifier] = words
