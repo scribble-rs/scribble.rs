@@ -35,38 +35,24 @@ func readWordListInternal(
 	wordlistSupplier func(string) (string, error)) ([]string, error) {
 
 	languageIdentifier := getLanguageIdentifier(chosenLanguage)
-	list, available := wordListCache[languageIdentifier]
-	if available {
-		copiedList := make([]string, len(list))
-		copy(copiedList, list)
-		shuffleWordList(copiedList)
-		return copiedList, nil
-	}
-
-	wordListFile, pkgerError := wordlistSupplier(languageIdentifier)
-	if pkgerError != nil {
-		return nil, pkgerError
-	}
-
-	tempWords := strings.Split(wordListFile, "\n")
-	var words []string
-	for _, word := range tempWords {
-		word = strings.TrimSpace(word)
-
-		//Newlines will just be empty strings
-		if word == "" {
-			continue
+	words, available := wordListCache[languageIdentifier]
+	if !available {
+		wordListFile, pkgerError := wordlistSupplier(languageIdentifier)
+		if pkgerError != nil {
+			return nil, pkgerError
 		}
 
-		words = append(words, lowercaser.String(word))
+		words = strings.Split(wordListFile, "\n")
+		for wordIndex, word := range words {
+			words[wordIndex] = lowercaser.String(word)
+		}
+		wordListCache[languageIdentifier] = words
 	}
 
-	wordListCache[languageIdentifier] = words
-
-	copiedList := make([]string, len(words))
-	copy(copiedList, words)
-	shuffleWordList(copiedList)
-	return copiedList, nil
+	shuffledWords := make([]string, len(words))
+	copy(shuffledWords, words)
+	shuffleWordList(shuffledWords)
+	return shuffledWords, nil
 }
 
 // readWordList reads the wordlist for the given language from the filesystem.

@@ -19,17 +19,18 @@ func Test_readWordList(t *testing.T) {
 	})
 
 	for language := range languageIdentifiers {
-		t.Run(fmt.Sprintf("Testing language file for %s", language), func(t *testing.T) {
-			//First run from box/drive
+		t.Run(fmt.Sprintf("Testing language file from embeded data for %s", language), func(t *testing.T) {
 			testWordList(language, t)
-			//Second run from in-memory cache
+		})
+		t.Run(fmt.Sprintf("Testing language file from in-memory cached data for %s", language), func(t *testing.T) {
 			testWordList(language, t)
 		})
 	}
 }
 
 func testWordList(chosenLanguage string, t *testing.T) {
-	words, readError := readWordList(cases.Lower(language.English), chosenLanguage)
+	lowercaser := cases.Lower(language.English)
+	words, readError := readWordList(lowercaser, chosenLanguage)
 	if readError != nil {
 		t.Errorf("Error reading language %s: %s", chosenLanguage, readError)
 	}
@@ -40,11 +41,17 @@ func testWordList(chosenLanguage string, t *testing.T) {
 
 	for _, word := range words {
 		if word == "" {
+			//We can't print the faulty line, since we are shuffling
+			//the words in order to avoid predictability.
 			t.Errorf("Wordlist for language %s contained empty word", chosenLanguage)
 		}
 
-		if strings.HasPrefix(word, " ") || strings.HasSuffix(word, " ") {
-			t.Errorf("Word has surrounding spaces: %s", word)
+		if strings.TrimSpace(word) != word {
+			t.Errorf("Word has surrounding whitespace characters: '%s'", word)
+		}
+
+		if lowercaser.String(word) != word {
+			t.Errorf("Word hasn't been lowercased: '%s'", word)
 		}
 	}
 }
