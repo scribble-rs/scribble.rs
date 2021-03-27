@@ -4,7 +4,7 @@ import (
 	"embed"
 	"io"
 	"math/rand"
-	"strings"
+	"regexp"
 	"time"
 
 	"golang.org/x/text/cases"
@@ -42,7 +42,9 @@ func readWordListInternal(
 			return nil, pkgerError
 		}
 
-		words = strings.Split(wordListFile, "\n")
+		//Due to people having git autoreplace newline characters, there
+		//might be unnecessary \r characters.
+		words = regexp.MustCompile("\r?\n").Split(wordListFile, -1)
 		for wordIndex, word := range words {
 			words[wordIndex] = lowercaser.String(word)
 		}
