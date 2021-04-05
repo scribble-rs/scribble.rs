@@ -7,6 +7,7 @@
   <a href="https://codecov.io/gh/scribble-rs/scribble.rs">
     <img src="https://codecov.io/gh/scribble-rs/scribble.rs/branch/master/graph/badge.svg">
   </a>
+<a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fscribble-rs%2Fscribble.rs?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Fscribble-rs%2Fscribble.rs.svg?type=shield"/></a>
   <a href="https://liberapay.com/biosmarcel/donate">
     <img src="https://img.shields.io/liberapay/receives/biosmarcel.svg?logo=liberapay">
   </a>
@@ -131,3 +132,7 @@ authors and feel like we've wronged you, please reach out.
 * Kicking Icon - [Kicking Icon #309402](https://icon-library.net/icon/kicking-icon-4.html)
 * Sound / No sound Icon - Made by Viktor Erikson (If this is you or you know who this is, send me a link to that persons Homepage)
 * Profile Icon - Made by [kumakamu](https://www.iconfinder.com/kumakamu)
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fscribble-rs%2Fscribble.rs.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fscribble-rs%2Fscribble.rs?ref=badge_large)
