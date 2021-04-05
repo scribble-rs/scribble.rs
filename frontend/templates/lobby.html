@@ -484,6 +484,7 @@
         const messageInput = document.getElementById("message-input");
         const playerContainer = document.getElementById("player-container");
         const wordContainer = document.getElementById("word-container");
+        const chat = document.getElementById("chat");
         const messageContainer = document.getElementById("message-container");
         const roundSpan = document.getElementById("rounds");
         const maxRoundSpan = document.getElementById("max-rounds");
@@ -1431,6 +1432,15 @@
             drawingBoard.width = drawingBoard.clientWidth;
             drawingBoard.height = drawingBoard.clientHeight;
             setLineWidth(localLineWidthUnscaled);
+
+            //Ugly workaround to fix https://github.com/scribble-rs/scribble.rs/issues/256
+            //Sadly I don't know how to do this with CSS.
+            //I've had the same workaround a while ago, but deleted it thinking it
+            //wasn't needed anymore, however, without this, the chat container will expand
+            //it's own parent, causing overflow-y to not take effect, since the parent has
+            //no height constraint.
+            //This workaround doesn't affect the portrait view.
+            chat.style.maxHeight = drawingBoard.clientHeight+"px";
         }
 
         //Call intially to correct initial state
