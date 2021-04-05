@@ -36,6 +36,8 @@ func publicLobbies(w http.ResponseWriter, r *http.Request) {
 	lobbies := state.GetPublicLobbies()
 	lobbyEntries := make([]*LobbyEntry, 0, len(lobbies))
 	for _, lobby := range lobbies {
+		//While one would expect locking the lobby here, it's not very
+		//important to get 100% consistent results here.
 		lobbyEntries = append(lobbyEntries, &LobbyEntry{
 			LobbyID:         lobby.LobbyID,
 			PlayerCount:     lobby.GetOccupiedPlayerSlots(),
@@ -140,41 +142,45 @@ func enterLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	player := GetPlayer(lobby, r)
+	var lobbyData *LobbyData
 
-	if player == nil {
-		if !lobby.HasFreePlayerSlot() {
-			http.Error(w, "lobby already full", http.StatusUnauthorized)
-			return
-		}
+	lobby.Synchronized(func() {
+		player := GetPlayer(lobby, r)
 
-		var clientsWithSameIP int
-		requestAddress := GetIPAddressFromRequest(r)
-		for _, otherPlayer := range lobby.GetPlayers() {
-			if otherPlayer.GetLastKnownAddress() == requestAddress {
-				clientsWithSameIP++
-				if clientsWithSameIP >= lobby.ClientsPerIPLimit {
-					http.Error(w, "maximum amount of newPlayer per IP reached", http.StatusUnauthorized)
-					return
+		if player == nil {
+			if !lobby.HasFreePlayerSlot() {
+				http.Error(w, "lobby already full", http.StatusUnauthorized)
+				return
+			}
+
+			var clientsWithSameIP int
+			requestAddress := GetIPAddressFromRequest(r)
+			for _, otherPlayer := range lobby.GetPlayers() {
+				if otherPlayer.GetLastKnownAddress() == requestAddress {
+					clientsWithSameIP++
+					if clientsWithSameIP >= lobby.ClientsPerIPLimit {
+						http.Error(w, "maximum amount of newPlayer per IP reached", http.StatusUnauthorized)
+						return
+					}
 				}
 			}
+
+			newPlayer := lobby.JoinPlayer(GetPlayername(r))
+			newPlayer.SetLastKnownAddress(GetIPAddressFromRequest(r))
+
+			// Use the players generated usersession and pass it as a cookie.
+			http.SetCookie(w, &http.Cookie{
+				Name:     "usersession",
+				Value:    newPlayer.GetUserSession(),
+				Path:     "/",
+				SameSite: http.SameSiteStrictMode,
+			})
+		} else {
+			player.SetLastKnownAddress(GetIPAddressFromRequest(r))
 		}
 
-		newPlayer := lobby.JoinPlayer(GetPlayername(r))
-		newPlayer.SetLastKnownAddress(GetIPAddressFromRequest(r))
-
-		// Use the players generated usersession and pass it as a cookie.
-		http.SetCookie(w, &http.Cookie{
-			Name:     "usersession",
-			Value:    newPlayer.GetUserSession(),
-			Path:     "/",
-			SameSite: http.SameSiteStrictMode,
-		})
-	} else {
-		player.SetLastKnownAddress(GetIPAddressFromRequest(r))
-	}
-
-	lobbyData := CreateLobbyData(lobby)
+		lobbyData = CreateLobbyData(lobby)
+	})
 
 	encodingError := json.NewEncoder(w).Encode(lobbyData)
 	if encodingError != nil {
@@ -183,20 +189,14 @@ func enterLobby(w http.ResponseWriter, r *http.Request) {
 }
 
 func editLobby(w http.ResponseWriter, r *http.Request) {
-	lobby, success := getLobbyWithErrorHandling(w, r)
-	if !success {
-		return
-	}
-
 	userSession := GetUserSession(r)
 	if userSession == "" {
 		http.Error(w, "no usersession supplied", http.StatusBadRequest)
 		return
 	}
 
-	owner := lobby.Owner
-	if owner == nil || owner.GetUserSession() != userSession {
-		http.Error(w, "only the lobby owner can edit the lobby", http.StatusForbidden)
+	lobby, success := getLobbyWithErrorHandling(w, r)
+	if !success {
 		return
 	}
 
@@ -224,6 +224,12 @@ func editLobby(w http.ResponseWriter, r *http.Request) {
 	enableVotekick, enableVotekickInvalid := ParseBoolean("enable votekick", r.Form.Get("enable_votekick"))
 	publicLobby, publicLobbyInvalid := ParseBoolean("public", r.Form.Get("public"))
 
+	owner := lobby.Owner
+	if owner == nil || owner.GetUserSession() != userSession {
+		http.Error(w, "only the lobby owner can edit the lobby", http.StatusForbidden)
+		return
+	}
+
 	if maxPlayersInvalid != nil {
 		requestErrors = append(requestErrors, maxPlayersInvalid.Error())
 	}
@@ -233,8 +239,9 @@ func editLobby(w http.ResponseWriter, r *http.Request) {
 	if roundsInvalid != nil {
 		requestErrors = append(requestErrors, roundsInvalid.Error())
 	} else {
-		if rounds < lobby.Round {
-			requestErrors = append(requestErrors, fmt.Sprintf("rounds must be greater than or equal to the current round (%d)", lobby.Round))
+		currentRound := lobby.Round
+		if rounds < currentRound {
+			requestErrors = append(requestErrors, fmt.Sprintf("rounds must be greater than or equal to the current round (%d)", currentRound))
 		}
 	}
 	if customWordChanceInvalid != nil {
@@ -255,26 +262,30 @@ func editLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//While changing maxClientsPerIP and maxPlayers to a value lower than
-	//is currently being used makes little sense, we'll allow it, as it doesn't
-	//really break anything.
+	//We synchronize as late as possible to avoid unnecessary lags.
+	//The previous code here isn't really prone to bugs due to lack of sync.
+	lobby.Synchronized(func() {
+		//While changing maxClientsPerIP and maxPlayers to a value lower than
+		//is currently being used makes little sense, we'll allow it, as it doesn't
+		//really break anything.
 
-	lobby.MaxPlayers = maxPlayers
-	lobby.CustomWordsChance = customWordChance
-	lobby.ClientsPerIPLimit = clientsPerIPLimit
-	lobby.EnableVotekick = enableVotekick
-	lobby.Public = publicLobby
-	lobby.Rounds = rounds
+		lobby.MaxPlayers = maxPlayers
+		lobby.CustomWordsChance = customWordChance
+		lobby.ClientsPerIPLimit = clientsPerIPLimit
+		lobby.EnableVotekick = enableVotekick
+		lobby.Public = publicLobby
+		lobby.Rounds = rounds
 
-	if lobby.State == game.Ongoing {
-		lobby.DrawingTimeNew = drawingTime
-	} else {
-		lobby.DrawingTime = drawingTime
-	}
+		if lobby.State == game.Ongoing {
+			lobby.DrawingTimeNew = drawingTime
+		} else {
+			lobby.DrawingTime = drawingTime
+		}
 
-	lobbySettingsCopy := *lobby.EditableLobbySettings
-	lobbySettingsCopy.DrawingTime = drawingTime
-	TriggerUpdateEvent("lobby-settings-changed", lobbySettingsCopy, lobby)
+		lobbySettingsCopy := *lobby.EditableLobbySettings
+		lobbySettingsCopy.DrawingTime = drawingTime
+		TriggerUpdateEvent("lobby-settings-changed", lobbySettingsCopy, lobby)
+	})
 }
 
 func getLobbyWithErrorHandling(w http.ResponseWriter, r *http.Request) (*game.Lobby, bool) {

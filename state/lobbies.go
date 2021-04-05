@@ -14,7 +14,7 @@ var (
 )
 
 func init() {
-	//Task to clean up lobbies.
+	//Task to clean up empty lobbies.
 	go func() {
 		lobbyCleanupTicker := time.NewTicker(90 * time.Second)
 		for {
@@ -117,8 +117,8 @@ func removeLobbyByIndex(indexToDelete int) {
 	log.Printf("Closing lobby %s. There are currently %d open lobbies left.\n", lobby.LobbyID, len(lobbies))
 }
 
-// PageStats represents dynamic information about the website.
-type PageStats struct {
+// pageStats represents dynamic information about the website.
+type pageStats struct {
 	ActiveLobbyCount        int    `json:"activeLobbyCount"`
 	PlayersCount            uint64 `json:"playersCount"`
 	OccupiedPlayerSlotCount uint64 `json:"occupiedPlayerSlotCount"`
@@ -127,18 +127,20 @@ type PageStats struct {
 
 // Stats delivers information about the state of the service. Currently this
 // is lobby and player counts.
-func Stats() *PageStats {
+func Stats() *pageStats {
 	globalStateMutex.Lock()
 	defer globalStateMutex.Unlock()
 
 	var playerCount, occupiedPlayerSlotCount, connectedPlayerCount uint64
+	//While one would expect locking the lobby here, it's not very
+	//important to get 100% consistent results here.
 	for _, lobby := range lobbies {
 		playerCount += uint64(len(lobby.GetPlayers()))
 		occupiedPlayerSlotCount += uint64(lobby.GetOccupiedPlayerSlots())
 		connectedPlayerCount += uint64(lobby.GetConnectedPlayerCount())
 	}
 
-	return &PageStats{
+	return &pageStats{
 		ActiveLobbyCount:        len(lobbies),
 		PlayersCount:            playerCount,
 		OccupiedPlayerSlotCount: occupiedPlayerSlotCount,

@@ -90,7 +90,10 @@ type KickVote struct {
 	RequiredVoteCount int    `json:"requiredVoteCount"`
 }
 
-func HandleEvent(raw []byte, received *GameEvent, lobby *Lobby, player *Player) error {
+func (lobby *Lobby) HandleEvent(raw []byte, received *GameEvent, player *Player) error {
+	lobby.mutex.Lock()
+	defer lobby.mutex.Unlock()
+
 	if received.Type == "message" {
 		dataAsString, isString := (received.Data).(string)
 		if !isString {
@@ -606,33 +609,31 @@ func roundTimerTicker(lobby *Lobby) {
 		if ticker == nil {
 			return
 		}
+		<-ticker.C
 
-		select {
-		case <-ticker.C:
-			currentTime := getTimeAsMillis()
-			if currentTime >= lobby.RoundEndTime {
-				go advanceLobby(lobby)
-			}
+		currentTime := getTimeAsMillis()
+		if currentTime >= lobby.RoundEndTime {
+			go advanceLobby(lobby)
+		}
 
-			if lobby.hintsLeft > 0 && lobby.wordHints != nil {
-				revealHintEveryXMilliseconds := int64(lobby.DrawingTime * 1000 / (lobby.hintCount + 1))
-				//If you have a drawingtime of 120 seconds and three hints, you
-				//want to reveal a hint every 40 seconds, so that the two hints
-				//are visible for at least a third of the time. //If the word
-				//was chosen at 60 seconds, we'll still reveal one hint
-				//instantly, as the time is already lower than 80.
-				revealHintAtXOrLower := revealHintEveryXMilliseconds * int64(lobby.hintsLeft)
-				timeLeft := lobby.RoundEndTime - currentTime
-				if timeLeft <= revealHintAtXOrLower {
-					lobby.hintsLeft--
+		if lobby.hintsLeft > 0 && lobby.wordHints != nil {
+			revealHintEveryXMilliseconds := int64(lobby.DrawingTime * 1000 / (lobby.hintCount + 1))
+			//If you have a drawingtime of 120 seconds and three hints, you
+			//want to reveal a hint every 40 seconds, so that the two hints
+			//are visible for at least a third of the time. //If the word
+			//was chosen at 60 seconds, we'll still reveal one hint
+			//instantly, as the time is already lower than 80.
+			revealHintAtXOrLower := revealHintEveryXMilliseconds * int64(lobby.hintsLeft)
+			timeLeft := lobby.RoundEndTime - currentTime
+			if timeLeft <= revealHintAtXOrLower {
+				lobby.hintsLeft--
 
-					for {
-						randomIndex := rand.Int() % len(lobby.wordHints)
-						if lobby.wordHints[randomIndex].Character == 0 {
-							lobby.wordHints[randomIndex].Character = []rune(lobby.CurrentWord)[randomIndex]
-							triggerWordHintUpdate(lobby)
-							break
-						}
+				for {
+					randomIndex := rand.Int() % len(lobby.wordHints)
+					if lobby.wordHints[randomIndex].Character == 0 {
+						lobby.wordHints[randomIndex].Character = []rune(lobby.CurrentWord)[randomIndex]
+						triggerWordHintUpdate(lobby)
+						break
 					}
 				}
 			}
@@ -828,12 +829,14 @@ func generateReadyData(lobby *Lobby, player *Player) *Ready {
 	return ready
 }
 
-func OnConnected(lobby *Lobby, player *Player) {
+func (lobby *Lobby) OnPlayerConnectUnsynchronized(player *Player) {
 	player.Connected = true
 	recalculateRanks(lobby)
 	WriteAsJSON(player, GameEvent{Type: "ready", Data: generateReadyData(lobby, player)})
 
-	//This state is reached when the player refreshes before having chosen a word.
+	//This state is reached if the player reconnects before having chosen a word.
+	//This can happen if the player refreshes his browser page or the socket
+	//loses connection and reconnects quickly.
 	if lobby.drawer == player && lobby.CurrentWord == "" {
 		WriteAsJSON(lobby.drawer, &GameEvent{Type: "your-turn", Data: lobby.wordChoice})
 	}
@@ -842,11 +845,14 @@ func OnConnected(lobby *Lobby, player *Player) {
 	triggerPlayersUpdate(lobby)
 }
 
-func OnDisconnected(lobby *Lobby, player *Player) {
+func (lobby *Lobby) OnPlayerDisconnect(player *Player) {
 	//We want to avoid calling the handler twice.
 	if player.ws == nil {
 		return
 	}
+
+	lobby.mutex.Lock()
+	defer lobby.mutex.Unlock()
 
 	log.Printf("Player %s(%s) disconnected.\n", player.Name, player.ID)
 	player.Connected = false
@@ -857,7 +863,7 @@ func OnDisconnected(lobby *Lobby, player *Player) {
 	lobby.LastPlayerDisconnectTime = &disconnectTime
 
 	recalculateRanks(lobby)
-	if lobby.HasConnectedPlayers() {
+	if lobby.hasConnectedPlayersInternal() {
 		triggerPlayersUpdate(lobby)
 	}
 }
@@ -881,7 +887,6 @@ func (lobby *Lobby) GetAvailableWordHints(player *Player) []*WordHint {
 func (lobby *Lobby) JoinPlayer(playerName string) *Player {
 	player := createPlayer(playerName)
 
-	//FIXME Make a dedicated method that uses a mutex?
 	lobby.players = append(lobby.players, player)
 
 	return player

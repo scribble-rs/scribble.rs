@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 
 	"golang.org/x/text/cases"
@@ -64,6 +65,7 @@ func Test_getRandomWords(t *testing.T) {
 				CustomWordsChance: 0,
 			},
 			words: []string{"a", "b", "c"},
+			mutex: &sync.Mutex{},
 		}
 
 		randomWords := GetRandomWords(3, lobby)
@@ -83,6 +85,7 @@ func Test_getRandomWords(t *testing.T) {
 			},
 
 			CustomWords: []string{"d", "e", "f"},
+			mutex:       &sync.Mutex{},
 		}
 
 		randomWords := GetRandomWords(3, lobby)
@@ -101,6 +104,7 @@ func Test_getRandomWords(t *testing.T) {
 				CustomWordsChance: 100,
 			},
 			CustomWords: nil,
+			mutex:       &sync.Mutex{},
 		}
 
 		randomWords := GetRandomWords(3, lobby)
@@ -119,6 +123,7 @@ func Test_getRandomWords(t *testing.T) {
 				CustomWordsChance: 100,
 			},
 			CustomWords: []string{"d", "e", "f"},
+			mutex:       &sync.Mutex{},
 		}
 
 		randomWords := GetRandomWords(3, lobby)
@@ -137,6 +142,7 @@ func Test_regressionGetRandomWords_singleCustomWord(t *testing.T) {
 			CustomWordsChance: 99,
 		},
 		CustomWords: []string{"custom"},
+		mutex:       &sync.Mutex{},
 	}
 
 	words := make([]string, 99)
@@ -175,6 +181,7 @@ func Test_getRandomWordsReloading(t *testing.T) {
 				CustomWordsChance: 0,
 			},
 			CustomWords: nil,
+			mutex:       &sync.Mutex{},
 		}
 
 		//Running this 10 times, expecting it to get 3 words each time, even
@@ -194,6 +201,7 @@ func Test_getRandomWordsReloading(t *testing.T) {
 				CustomWordsChance: 100,
 			},
 			CustomWords: nil,
+			mutex:       &sync.Mutex{},
 		}
 
 		//Running this 10 times, expecting it to get 3 words each time, even
@@ -213,6 +221,7 @@ func Test_getRandomWordsReloading(t *testing.T) {
 				CustomWordsChance: 100,
 			},
 			CustomWords: []string{"a"},
+			mutex:       &sync.Mutex{},
 		}
 
 		//Running this 10 times, expecting it to get 3 words each time, even

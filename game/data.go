@@ -77,6 +77,8 @@ type Lobby struct {
 	//LastPlayerDisconnectTime is used to know since when a lobby is empty, in case
 	//it is empty.
 	LastPlayerDisconnectTime *time.Time
+
+	mutex *sync.Mutex
 }
 
 // EditableLobbySettings represents all lobby settings that are editable by
@@ -237,7 +239,7 @@ func (lobby *Lobby) GetPlayer(userSession string) *Player {
 }
 
 func (lobby *Lobby) ClearDrawing() {
-	lobby.currentDrawing = make([]interface{}, 0, 0)
+	lobby.currentDrawing = make([]interface{}, 0)
 }
 
 // AppendLine adds a line direction to the current drawing. This exists in order
@@ -291,8 +293,9 @@ func createLobby(
 			Public:            publicLobby,
 		},
 		CustomWords:    customWords,
-		currentDrawing: make([]interface{}, 0, 0),
+		currentDrawing: make([]interface{}, 0),
 		State:          Unstarted,
+		mutex:          &sync.Mutex{},
 	}
 
 	if len(customWords) > 1 {
@@ -324,6 +327,13 @@ func (lobby *Lobby) GetConnectedPlayerCount() int {
 }
 
 func (lobby *Lobby) HasConnectedPlayers() bool {
+	lobby.mutex.Lock()
+	defer lobby.mutex.Unlock()
+
+	return lobby.hasConnectedPlayersInternal()
+}
+
+func (lobby *Lobby) hasConnectedPlayersInternal() bool {
 	for _, otherPlayer := range lobby.players {
 		if otherPlayer.Connected {
 			return true
@@ -377,4 +387,14 @@ func (lobby *Lobby) HasFreePlayerSlot() bool {
 	}
 
 	return lobby.GetOccupiedPlayerSlots() < lobby.MaxPlayers
+}
+
+// Synchronized allows running a function while keeping the lobby locked via
+// it's own mutex. This is useful in order to avoid having to relock a lobby
+// multiple times, which might cause unexpected inconsistencies.
+func (lobby *Lobby) Synchronized(logic func()) {
+	lobby.mutex.Lock()
+	defer lobby.mutex.Unlock()
+
+	logic()
 }

@@ -28,54 +28,59 @@ func init() {
 }
 
 func wsEndpoint(w http.ResponseWriter, r *http.Request) {
+	sessionCookie := GetUserSession(r)
+	if sessionCookie == "" {
+		//This issue can happen if you illegally request a websocket
+		//connection without ever having had a usersession or your
+		//client having deleted the usersession cookie.
+		http.Error(w, "you don't have access to this lobby;usersession not set", http.StatusUnauthorized)
+		return
+	}
+
 	lobby, lobbyError := GetLobby(r)
 	if lobbyError != nil {
 		http.Error(w, lobbyError.Error(), http.StatusNotFound)
 		return
 	}
 
-	//This issue can happen if you illegally request a websocket connection without ever having had
-	//a usersession or your client having deleted the usersession cookie.
-	sessionCookie := GetUserSession(r)
-	if sessionCookie == "" {
-		http.Error(w, "you don't have access to this lobby;usersession not set", http.StatusUnauthorized)
-		return
-	}
+	lobby.Synchronized(func() {
+		player := lobby.GetPlayer(sessionCookie)
+		if player == nil {
+			http.Error(w, "you don't have access to this lobby;usersession unknown", http.StatusUnauthorized)
+			return
+		}
 
-	player := lobby.GetPlayer(sessionCookie)
-	if player == nil {
-		http.Error(w, "you don't have access to this lobby;usersession invalid", http.StatusUnauthorized)
-		return
-	}
+		ws, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
-	ws, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+		log.Printf("%s(%s) has connected\n", player.Name, player.ID)
 
-	log.Printf("%s(%s) has connected\n", player.Name, player.ID)
+		player.SetWebsocket(ws)
+		lobby.OnPlayerConnectUnsynchronized(player)
 
-	player.SetWebsocket(ws)
-	game.OnConnected(lobby, player)
+		ws.SetCloseHandler(func(code int, text string) error {
+			lobby.OnPlayerDisconnect(player)
+			return nil
+		})
 
-	ws.SetCloseHandler(func(code int, text string) error {
-		game.OnDisconnected(lobby, player)
-		return nil
+		go wsListen(lobby, player, ws)
 	})
-
-	go wsListen(lobby, player, ws)
 }
 
 func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
-	//Workaround to prevent crash
+	//Workaround to prevent crash, since not all kind of
+	//disconnect errors are cleanly caught by gorilla websockets.
 	defer func() {
 		err := recover()
 		if err != nil {
 			log.Printf("Error occurred in wsListen.\n\tError: %s\n\tPlayer: %s(%s)\nStack %s\n", err, player.Name, player.ID, string(debug.Stack()))
-			game.OnDisconnected(lobby, player)
+			lobby.OnPlayerDisconnect(player)
 		}
 	}()
+
 	for {
 		messageType, data, err := socket.ReadMessage()
 		if err != nil {
@@ -83,12 +88,17 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 				//This happens when the server closes the connection. It will cause 1000 retries followed by a panic.
 				strings.Contains(err.Error(), "use of closed network connection") {
 				//Make sure that the sockethandler is called
-				game.OnDisconnected(lobby, player)
+				lobby.OnPlayerDisconnect(player)
+				//If the error is fatal, we stop listening for more messages.
 				return
 			}
 
 			log.Printf("Error reading from socket: %s\n", err)
-		} else if messageType == websocket.TextMessage {
+			//If the error doesn't seem fatal we attempt listening for more messages.
+			continue
+		}
+
+		if messageType == websocket.TextMessage {
 			received := &game.GameEvent{}
 			err := json.Unmarshal(data, received)
 			if err != nil {
@@ -100,7 +110,7 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 				continue
 			}
 
-			handleError := game.HandleEvent(data, received, lobby, player)
+			handleError := lobby.HandleEvent(data, received, player)
 			if handleError != nil {
 				log.Printf("Error handling event: %s\n", handleError)
 			}

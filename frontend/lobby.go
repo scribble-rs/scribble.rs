@@ -10,7 +10,7 @@ import (
 	"golang.org/x/text/language"
 )
 
-type LobbyPageData struct {
+type lobbyPageData struct {
 	*BasePageConfig
 	*api.LobbyData
 
@@ -43,51 +43,55 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	player := api.GetPlayer(lobby, r)
+	translation, locale := determineTranslation(r)
+	requestAddress := api.GetIPAddressFromRequest(r)
 
-	if player == nil {
-		if !lobby.HasFreePlayerSlot() {
-			userFacingError(w, "Sorry, but the lobby is full.")
-			return
-		}
+	var pageData *lobbyPageData
+	lobby.Synchronized(func() {
+		player := api.GetPlayer(lobby, r)
 
-		var clientsWithSameIP int
-		requestAddress := api.GetIPAddressFromRequest(r)
-		for _, otherPlayer := range lobby.GetPlayers() {
-			if otherPlayer.GetLastKnownAddress() == requestAddress {
-				clientsWithSameIP++
-				if clientsWithSameIP >= lobby.ClientsPerIPLimit {
-					userFacingError(w, "Sorry, but you have exceeded the maximum number of clients per IP.")
-					return
+		if player == nil {
+			if !lobby.HasFreePlayerSlot() {
+				userFacingError(w, "Sorry, but the lobby is full.")
+				return
+			}
+
+			var clientsWithSameIP int
+			for _, otherPlayer := range lobby.GetPlayers() {
+				if otherPlayer.GetLastKnownAddress() == requestAddress {
+					clientsWithSameIP++
+					if clientsWithSameIP >= lobby.ClientsPerIPLimit {
+						userFacingError(w, "Sorry, but you have exceeded the maximum number of clients per IP.")
+						return
+					}
 				}
 			}
+
+			newPlayer := lobby.JoinPlayer(api.GetPlayername(r))
+
+			// Use the players generated usersession and pass it as a cookie.
+			http.SetCookie(w, &http.Cookie{
+				Name:     "usersession",
+				Value:    newPlayer.GetUserSession(),
+				Path:     "/",
+				SameSite: http.SameSiteStrictMode,
+			})
+		} else {
+			if player.Connected && player.GetWebsocket() != nil {
+				userFacingError(w, "It appears you already have an open tab for this lobby.")
+				return
+			}
+			player.SetLastKnownAddress(requestAddress)
 		}
 
-		newPlayer := lobby.JoinPlayer(api.GetPlayername(r))
-
-		// Use the players generated usersession and pass it as a cookie.
-		http.SetCookie(w, &http.Cookie{
-			Name:     "usersession",
-			Value:    newPlayer.GetUserSession(),
-			Path:     "/",
-			SameSite: http.SameSiteStrictMode,
-		})
-	} else {
-		if player.Connected && player.GetWebsocket() != nil {
-			userFacingError(w, "It appears you already have an open tab for this lobby.")
-			return
+		pageData = &lobbyPageData{
+			BasePageConfig: currentBasePageConfig,
+			LobbyData:      api.CreateLobbyData(lobby),
+			Translation:    translation,
+			Locale:         locale,
 		}
-		player.SetLastKnownAddress(api.GetIPAddressFromRequest(r))
-	}
+	})
 
-	translation, locale := determineTranslation(r)
-
-	pageData := &LobbyPageData{
-		BasePageConfig: currentBasePageConfig,
-		LobbyData:      api.CreateLobbyData(lobby),
-		Translation:    translation,
-		Locale:         locale,
-	}
 	templateError := pageTemplates.ExecuteTemplate(w, "lobby-page", pageData)
 	if templateError != nil {
 		log.Printf("Error templating lobby: %s\n", templateError)

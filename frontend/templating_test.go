@@ -12,7 +12,7 @@ import (
 func Test_templateLobbyPage(t *testing.T) {
 	var buffer bytes.Buffer
 	templatingError := pageTemplates.ExecuteTemplate(&buffer,
-		"lobby-page", &LobbyPageData{
+		"lobby-page", &lobbyPageData{
 			BasePageConfig: currentBasePageConfig,
 			LobbyData: &api.LobbyData{
 				EditableLobbySettings: &game.EditableLobbySettings{},
@@ -42,7 +42,7 @@ func Test_templateErrorPage(t *testing.T) {
 func Test_templateRobotPage(t *testing.T) {
 	var buffer bytes.Buffer
 	templatingError := pageTemplates.ExecuteTemplate(&buffer,
-		"robot-page", &LobbyPageData{
+		"robot-page", &lobbyPageData{
 			BasePageConfig: currentBasePageConfig,
 			LobbyData: &api.LobbyData{
 				EditableLobbySettings: &game.EditableLobbySettings{

@@ -1,6 +1,7 @@
 package game
 
 import (
+	"sync"
 	"testing"
 )
 
@@ -9,6 +10,7 @@ func createLobbyWithDemoPlayers(playercount int) *Lobby {
 	lobby := &Lobby{
 		Owner:   owner,
 		creator: owner,
+		mutex:   &sync.Mutex{},
 	}
 	for i := 0; i < playercount; i++ {
 		lobby.players = append(lobby.players, &Player{
@@ -111,7 +113,9 @@ func Test_simplifyText(t *testing.T) {
 }
 
 func Test_recalculateRanks(t *testing.T) {
-	lobby := &Lobby{}
+	lobby := &Lobby{
+		mutex: &sync.Mutex{},
+	}
 	lobby.players = append(lobby.players, &Player{
 		ID:        "a",
 		Score:     1,
