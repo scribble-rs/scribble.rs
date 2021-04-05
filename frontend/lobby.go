@@ -1,7 +1,7 @@
 package frontend
 
 import (
-	"encoding/json"
+	"log"
 	"net/http"
 	"strings"
 
@@ -9,26 +9,6 @@ import (
 	"github.com/scribble-rs/scribble.rs/translations"
 	"golang.org/x/text/language"
 )
-
-// GetPlayers returns divs for all players in the lobby to the calling client.
-func GetPlayers(w http.ResponseWriter, r *http.Request) {
-	lobby, err := api.GetLobby(r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
-	}
-
-	if api.GetPlayer(lobby, r) == nil {
-		http.Error(w, "you aren't part of this lobby", http.StatusUnauthorized)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(lobby.GetPlayers())
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-}
 
 type LobbyPageData struct {
 	*BasePageConfig
@@ -110,7 +90,8 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 	}
 	templateError := pageTemplates.ExecuteTemplate(w, "lobby-page", pageData)
 	if templateError != nil {
-		panic(templateError)
+		log.Printf("Error templating lobby: %s\n", templateError)
+		http.Error(w, "error templating lobby", http.StatusInternalServerError)
 	}
 }
 
