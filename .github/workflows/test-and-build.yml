@@ -35,6 +35,9 @@ jobs:
   # We run builds for the three major platforms on the latest go
   # version, while the tests may run on older versions.
 
+  # Each artifact upload has a name specified, so we can avoid uploading
+  # all artifcats in one zip.
+
   build-linux:
     runs-on: ubuntu-latest
 
@@ -54,6 +57,7 @@ jobs:
     - name: Upload linux build artifact
       uses: actions/upload-artifact@v2
       with:
+        name: scribblers-linux-x64
         path: ./scribblers-linux-x64
 
   build-macos:
@@ -75,6 +79,7 @@ jobs:
     - name: Upload macos build artifact
       uses: actions/upload-artifact@v2
       with:
+        name: scribblers-macos-x64
         path: ./scribblers-macos-x64
 
   build-windows:
@@ -96,4 +101,5 @@ jobs:
     - name: Upload windows build artifact
       uses: actions/upload-artifact@v2
       with:
+        name: scribblers-x64.exe
         path: ./scribblers-x64.exe
