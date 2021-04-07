@@ -1,0 +1,93 @@
+name: Run tests, build artifacts and upload code coverage
+
+on: push
+
+jobs:
+
+  run-tests:
+    strategy:
+      matrix:
+        go-version: [1.16.x]
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go-version }}
+
+    - name: Run tests and write coverprofile
+      shell: bash
+      run: |
+        go test -race -coverprofile=profile.out -covermode=atomic ./...
+
+    - name: Upload testcoverage to codecov.io
+      if: github.ref == 'refs/heads/master' && matrix.platform == 'ubuntu-latest' && matrix.go-version == '1.16.x'
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./profile.out
+        fail_ci_if_error: true
+
+  # We run builds for the three major platforms on the latest go
+  # version, while the tests may run on older versions.
+
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16.x
+
+    - name: Build linux artifact
+      shell: bash
+      run: |
+        go build -o scribblers-linux-x64 .
+
+    - name: Upload linux build artifact
+      uses: actions/upload-artifact@v2
+      with:
+        path: ./scribblers-linux-x64
+
+  build-macos:
+    runs-on: macos-latest
+
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16.x
+
+    steps:
+    - name: Build macos artifact
+      shell: bash
+      run: |
+        go build -o scribblers-macos-x64 .
+
+    - name: Upload macos build artifact
+      uses: actions/upload-artifact@v2
+      with:
+        path: ./scribblers-macos-x64
+
+  build-windows:
+    runs-on: windows-latest
+
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16.x
+
+    steps:
+    - name: Build windows artifact
+      shell: cmd
+      run: |
+        go build -o scribblers-x64.exe .
+
+    - name: Upload windows build artifact
+      uses: actions/upload-artifact@v2
+      with:
+        path: ./scribblers-x64.exe
