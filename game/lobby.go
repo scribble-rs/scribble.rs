@@ -472,7 +472,9 @@ func calculateVotesNeededToKick(playerToKick *Player, lobby *Lobby) int {
 }
 
 func handleNameChangeEvent(caller *Player, lobby *Lobby, name string) {
-	newName := strings.TrimSpace(name)
+	//We trim and handle emojis beforehand to avoid taking this into account
+	//when checking the name length, so we don't cut off too much of the name.
+	newName := discordemojimap.Replace(strings.TrimSpace(name))
 
 	//We don't want super-long names
 	if len(newName) > MaxPlayerNameLength {
