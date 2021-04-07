@@ -182,7 +182,7 @@ func (lobby *Lobby) HandleEvent(raw []byte, received *GameEvent, player *Player)
 				return fmt.Errorf("invalid data in kick-vote event: %v", received.Data)
 			}
 
-			handleKickEvent(lobby, player, toKickID)
+			handleKickVoteEvent(lobby, player, toKickID)
 		}
 	} else if received.Type == "start" {
 		if lobby.Round == 0 && player == lobby.Owner {
@@ -317,7 +317,7 @@ func sendMessageToAllNonGuessing(message string, sender *Player, lobby *Lobby) {
 	}
 }
 
-func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
+func handleKickVoteEvent(lobby *Lobby, player *Player, toKickID string) {
 	//Kicking yourself isn't allowed
 	if toKickID == player.ID {
 		return
@@ -328,92 +328,107 @@ func handleKickEvent(lobby *Lobby, player *Player, toKickID string) {
 		return
 	}
 
-	toKick := -1
+	playerToKickIndex := -1
 	for index, otherPlayer := range lobby.players {
 		if otherPlayer.ID == toKickID {
-			toKick = index
+			playerToKickIndex = index
 			break
 		}
 	}
 
 	//If we haven't found the player, we can't kick them.
-	if toKick != -1 {
-		playerToKick := lobby.players[toKick]
-		if !playerToKick.Connected {
-			//TODO Send error event
-			WriteAsJSON(player, GameEvent{Type: "system-message", Data: "You can't kick a disconnected player."})
-			return
-		}
+	if playerToKickIndex == -1 {
+		return
+	}
 
-		player.votedForKick[toKickID] = true
-		var voteKickCount int
+	playerToKick := lobby.players[playerToKickIndex]
+
+	player.votedForKick[toKickID] = true
+	var voteKickCount int
+	for _, otherPlayer := range lobby.players {
+		if otherPlayer.Connected && otherPlayer.votedForKick[toKickID] {
+			voteKickCount++
+		}
+	}
+
+	votesRequired := calculateVotesNeededToKick(playerToKick, lobby)
+
+	kickEvent := &GameEvent{
+		Type: "kick-vote",
+		Data: &KickVote{
+			PlayerID:          playerToKick.ID,
+			PlayerName:        playerToKick.Name,
+			VoteCount:         voteKickCount,
+			RequiredVoteCount: votesRequired,
+		},
+	}
+
+	//We send the kick event to all players, since it was a valid vote.
+	for _, otherPlayer := range lobby.players {
+		WriteAsJSON(otherPlayer, kickEvent)
+	}
+
+	//If the valid vote also happens to be the last vote needed, we kick the player.
+	//Since we send the events to all players beforehand, the target player is automatically
+	//being noteified of his own kick.
+	if voteKickCount >= votesRequired {
+		kickPlayer(lobby, playerToKick, playerToKickIndex)
+	}
+}
+
+// kickPlayer kicks the given player from the lobby, updating the lobby
+// state and sending all necessary events.
+func kickPlayer(lobby *Lobby, playerToKick *Player, playerToKickIndex int) {
+	//Avoiding nilpointer in case playerToKick disconnects during this event unluckily.
+	playerToKickSocket := playerToKick.ws
+	if playerToKickSocket != nil {
+		disconnectError := playerToKickSocket.Close()
+		if disconnectError != nil {
+			log.Printf("Error disconnecting kicked player:\n\t%s\n", disconnectError)
+		}
+	}
+
+	//Since the player is already kicked, we first clean up the kicking information related to that player
+	for _, otherPlayer := range lobby.players {
+		delete(otherPlayer.votedForKick, playerToKick.ID)
+	}
+
+	lobby.players = append(lobby.players[:playerToKickIndex], lobby.players[playerToKickIndex+1:]...)
+
+	if lobby.drawer == playerToKick {
+		TriggerUpdateEvent("drawer-kicked", nil, lobby)
+		//Since the drawing person has been kicked, that probably means that he/she was trolling, therefore
+		//we redact everyones last earned score.
 		for _, otherPlayer := range lobby.players {
-			if otherPlayer.Connected && otherPlayer.votedForKick[toKickID] {
-				voteKickCount++
-			}
+			otherPlayer.Score -= otherPlayer.LastScore
+			otherPlayer.LastScore = 0
 		}
+		lobby.scoreEarnedByGuessers = 0
+		//We must absolutely not set lobby.drawer to nil, since this would cause the drawing order to be ruined.
+	}
 
-		votesNeeded := calculateVotesNeededToKick(playerToKick, lobby)
-
-		kickEvent := &GameEvent{
-			Type: "kick-vote",
-			Data: &KickVote{
-				PlayerID:          playerToKick.ID,
-				PlayerName:        playerToKick.Name,
-				VoteCount:         voteKickCount,
-				RequiredVoteCount: votesNeeded,
-			},
-		}
-
+	//If the owner is kicked, we choose the next best person as the owner.
+	if lobby.Owner == playerToKick {
 		for _, otherPlayer := range lobby.players {
-			WriteAsJSON(otherPlayer, kickEvent)
-		}
-
-		if voteKickCount >= votesNeeded {
-			//Since the player is already kicked, we first clean up the kicking information related to that player
-			for _, otherPlayer := range lobby.players {
-				delete(otherPlayer.votedForKick, toKickID)
-			}
-
-			if playerToKick.ws != nil {
-				playerToKick.ws.Close()
-			}
-			lobby.players = append(lobby.players[:toKick], lobby.players[toKick+1:]...)
-
-			if lobby.drawer == playerToKick {
-				TriggerUpdateEvent("drawer-kicked", nil, lobby)
-				//Since the drawing person has been kicked, that probably means that he/she was trolling, therefore
-				//we redact everyones last earned score.
-				for _, otherPlayer := range lobby.players {
-					otherPlayer.Score -= otherPlayer.LastScore
-					otherPlayer.LastScore = 0
-				}
-				lobby.scoreEarnedByGuessers = 0
-				//We must absolutely not set lobby.drawer to nil, since this would cause the drawing order to be ruined.
-			}
-
-			//If the owner is kicked, we choose the next best person as the owner.
-			if lobby.Owner == playerToKick {
-				for _, otherPlayer := range lobby.players {
-					potentialOwner := otherPlayer
-					if potentialOwner.Connected {
-						lobby.Owner = potentialOwner
-						TriggerUpdateEvent("owner-change", &OwnerChangeEvent{
-							PlayerID:   potentialOwner.ID,
-							PlayerName: potentialOwner.Name,
-						}, lobby)
-						break
-					}
-				}
-			}
-
-			recalculateRanks(lobby)
-			triggerPlayersUpdate(lobby)
-
-			if lobby.drawer == playerToKick || !lobby.isAnyoneStillGuessing() {
-				advanceLobby(lobby)
+			potentialOwner := otherPlayer
+			if potentialOwner.Connected {
+				lobby.Owner = potentialOwner
+				TriggerUpdateEvent("owner-change", &OwnerChangeEvent{
+					PlayerID:   potentialOwner.ID,
+					PlayerName: potentialOwner.Name,
+				}, lobby)
+				break
 			}
 		}
+	}
+
+	if lobby.drawer == playerToKick || !lobby.isAnyoneStillGuessing() {
+		advanceLobby(lobby)
+	} else {
+		//This isn't necessary in case we need to advanced the lobby, as it has
+		//to happen anyways and sending events twice would be wasteful.
+		recalculateRanks(lobby)
+		triggerPlayersUpdate(lobby)
 	}
 }
 
@@ -427,7 +442,7 @@ type NameChangeEvent struct {
 	PlayerName string `json:"playerName"`
 }
 
-func calculateVotesNeededToKick(player *Player, lobby *Lobby) int {
+func calculateVotesNeededToKick(playerToKick *Player, lobby *Lobby) int {
 	connectedPlayerCount := lobby.GetConnectedPlayerCount()
 
 	//If there are only two players, e.g. none of them should be able to
@@ -436,7 +451,7 @@ func calculateVotesNeededToKick(player *Player, lobby *Lobby) int {
 		return 2
 	}
 
-	if player == lobby.creator {
+	if playerToKick == lobby.creator {
 		//We don't want to allow people to kick the creator, as this could
 		//potentially annoy certain creators. For example a streamer playing
 		//a game with viewers could get trolled this way. Just one
