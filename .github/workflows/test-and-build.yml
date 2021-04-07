@@ -57,12 +57,12 @@ jobs:
   build-macos:
     runs-on: macos-latest
 
+    steps:
     - name: Install Go
       uses: actions/setup-go@v2
       with:
         go-version: 1.16.x
 
-    steps:
     - name: Build macos artifact
       shell: bash
       run: |
@@ -76,12 +76,12 @@ jobs:
   build-windows:
     runs-on: windows-latest
 
+    steps:
     - name: Install Go
       uses: actions/setup-go@v2
       with:
         go-version: 1.16.x
 
-    steps:
     - name: Build windows artifact
       shell: cmd
       run: |
