@@ -666,6 +666,19 @@
             return baseWidth / drawingBoard.clientWidth;
         }
 
+        //scalesUp the value using scaleUpFactor and reduces the precision.
+        //This makes sense since we absolutely don't need the precision and
+        //we'll reduce network traffic this way.
+        function scaelUpAndPrepareFloatForServer(value) {
+            //We reduce the precision in multiple steps, since we get a string
+            //as an intermediate result. The reason we don't want a string, is
+            //that unmarshalling on the backend won't work with strings for float
+            //values, unless explicitly specified, which however will cause it
+            //not to work without quotes. Example:
+            //  123.213476124918724 -> "123.21" -> 123.21
+            return parseFloat((scaleUpFactor() * value).toFixed(2));
+        }
+
         function scaleDownFactor() {
             return drawingBoard.clientWidth / baseWidth;
         }
@@ -1472,8 +1485,8 @@
                 let fillInstruction = {
                     type: "fill",
                     data: {
-                        x: x1 * scaleUpFactor(),
-                        y: y1 * scaleUpFactor(),
+                        x: scaelUpAndPrepareFloatForServer(x1),
+                        y: scaelUpAndPrepareFloatForServer(y1),
                         color: color
                     },
                 };
@@ -1491,12 +1504,12 @@
             let drawInstruction = {
                 type: "line",
                 data: {
-                    fromX: x1 * scaleUpFactor(),
-                    fromY: y1 * scaleUpFactor(),
-                    toX: x2 * scaleUpFactor(),
-                    toY: y2 * scaleUpFactor(),
+                    fromX: scaelUpAndPrepareFloatForServer(x1),
+                    fromY: scaelUpAndPrepareFloatForServer(y1),
+                    toX: scaelUpAndPrepareFloatForServer(x2),
+                    toY: scaelUpAndPrepareFloatForServer(y2),
                     color: color,
-                    lineWidth: lineWidth * scaleUpFactor(),
+                    lineWidth: scaelUpAndPrepareFloatForServer(lineWidth),
                 }
             };
             socket.send(JSON.stringify(drawInstruction));
