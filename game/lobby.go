@@ -489,10 +489,14 @@ func handleNameChangeEvent(caller *Player, lobby *Lobby, name string) {
 
 	log.Printf("%s is now %s\n", oldName, newName)
 
-	TriggerUpdateEvent("name-change", &NameChangeEvent{
-		PlayerID:   caller.ID,
-		PlayerName: newName,
-	}, lobby)
+	//We'll avoid sending the event in this case, as it's useless, but still log
+	//the event, as it might be useful to know that this happened.
+	if oldName != newName {
+		TriggerUpdateEvent("name-change", &NameChangeEvent{
+			PlayerID:   caller.ID,
+			PlayerName: newName,
+		}, lobby)
+	}
 }
 
 // advanceLobby will either start the game or jump over to the next turn.
