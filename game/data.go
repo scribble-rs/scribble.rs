@@ -2,9 +2,11 @@ package game
 
 import (
 	"math/rand"
+	"strings"
 	"sync"
 	"time"
 
+	discordemojimap "github.com/Bios-Marcel/discordemojimap/v2"
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/websocket"
 	"golang.org/x/text/cases"
@@ -258,7 +260,7 @@ func (lobby *Lobby) AppendFill(fill *FillEvent) {
 
 func createPlayer(name string) *Player {
 	return &Player{
-		Name:         name,
+		Name:         SanitizeName(name),
 		ID:           uuid.Must(uuid.NewV4()).String(),
 		userSession:  uuid.Must(uuid.NewV4()).String(),
 		Score:        0,
@@ -269,6 +271,25 @@ func createPlayer(name string) *Player {
 		State:        Guessing,
 		Connected:    false,
 	}
+}
+
+//SanitizeName removes invalid characters from the players name, resolves
+//emoji codes, limits the name length and generates a new name if necessary.
+func SanitizeName(name string) string {
+	//We trim and handle emojis beforehand to avoid taking this into account
+	//when checking the name length, so we don't cut off too much of the name.
+	newName := discordemojimap.Replace(strings.TrimSpace(name))
+
+	//We don't want super-long names
+	if len(newName) > MaxPlayerNameLength {
+		return newName[:MaxPlayerNameLength+1]
+	}
+
+	if newName != "" {
+		return newName
+	}
+
+	return generatePlayerName()
 }
 
 func createLobby(

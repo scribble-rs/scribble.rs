@@ -472,20 +472,8 @@ func calculateVotesNeededToKick(playerToKick *Player, lobby *Lobby) int {
 }
 
 func handleNameChangeEvent(caller *Player, lobby *Lobby, name string) {
-	//We trim and handle emojis beforehand to avoid taking this into account
-	//when checking the name length, so we don't cut off too much of the name.
-	newName := discordemojimap.Replace(strings.TrimSpace(name))
-
-	//We don't want super-long names
-	if len(newName) > MaxPlayerNameLength {
-		newName = newName[:MaxPlayerNameLength+1]
-	}
-
 	oldName := caller.Name
-	if newName == "" {
-		newName = GeneratePlayerName()
-	}
-	caller.Name = newName
+	newName := SanitizeName(name)
 
 	log.Printf("%s is now %s\n", oldName, newName)
 
@@ -785,10 +773,10 @@ func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTim
 	return player, lobby, nil
 }
 
-// GeneratePlayerName creates a new playername. A so called petname. It consists
+// generatePlayerName creates a new playername. A so called petname. It consists
 // of an adverb, an adjective and a animal name. The result can generally be
 // trusted to be sane.
-func GeneratePlayerName() string {
+func generatePlayerName() string {
 	adjective := strings.Title(petname.Adjective())
 	adverb := strings.Title(petname.Adverb())
 	name := strings.Title(petname.Name())

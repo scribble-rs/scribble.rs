@@ -416,32 +416,24 @@ func GetPlayer(lobby *game.Lobby, r *http.Request) *game.Player {
 	return lobby.GetPlayer(GetUserSession(r))
 }
 
-// GetPlayername either retrieves the playername from a cookie, the URL form
-// or generates a new random name if no name can be found.
+// GetPlayername either retrieves the playername from a cookie, the URL form.
+// If no preferred name can be found, we return an empty string.
 func GetPlayername(r *http.Request) string {
 	parseError := r.ParseForm()
 	if parseError == nil {
-		username := strings.TrimSpace(r.Form.Get("username"))
+		username := r.Form.Get("username")
 		if username != "" {
-			return trimDownTo(username, game.MaxPlayerNameLength)
+			return username
 		}
 	}
 
 	usernameCookie, noCookieError := r.Cookie("username")
 	if noCookieError == nil {
-		username := strings.TrimSpace(usernameCookie.Value)
+		username := usernameCookie.Value
 		if username != "" {
-			return trimDownTo(username, game.MaxPlayerNameLength)
+			return username
 		}
 	}
 
-	return game.GeneratePlayerName()
-}
-
-func trimDownTo(text string, size int) string {
-	if len(text) <= size {
-		return text
-	}
-
-	return text[:size]
+	return ""
 }
