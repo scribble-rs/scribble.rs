@@ -7,6 +7,13 @@ var floodfill = (function() {
     function floodfill(data,x,y,fillcolor,width,height) {
 
         var length = data.length;
+        var i = (x+y*width)*4;
+        var targetcolor = [data[i],data[i+1],data[i+2],data[i+3]];
+        if(!pixelCompare(i,targetcolor,fillcolor,data,length)) { return false; }
+
+        var e = i, w = i, me, mw, w2 = width*4;
+        var j;
+
         //Previously we used Array.push and Array.pop here. The method took between 70ms and 80ms
         //on a rather strong machine with a FULL HD monitor.
         //Observastions show that this stack grows up to 1_000_000 in this scenario.
@@ -18,14 +25,8 @@ var floodfill = (function() {
         //If the canvas size estimation is applied, this would be fine to upstream I guess.
         var Q = new Array(1500000);
         var nextQIndex = 0;
-        var i = (x+y*width)*4;
-        var e = i, w = i, me, mw, w2 = width*4;
-        var j;
-
-        var targetcolor = [data[i],data[i+1],data[i+2],data[i+3]];
-
-        if(!pixelCompare(i,targetcolor,fillcolor,data,length)) { return false; }
         Q[nextQIndex++] = i;
+
         while(nextQIndex > 0) {
             i = Q[--nextQIndex];
             if(pixelCompareAndSet(i,targetcolor,fillcolor,data,length)) {
