@@ -89,32 +89,9 @@ var floodfill = (function() {
         return floodfill(data,xi,yi,color,width,height);
     };
 
-    var getComputedColor = function(c) {
-        var temp = document.createElement("div");
-        var color = {r:0,g:0,b:0};
-        temp.style.color = c;
-        temp.style.display = "none";
-        document.body.appendChild(temp);
-        //Use native window.getComputedStyle to parse any CSS color pattern
-        var style = window.getComputedStyle(temp,null).color;
-        document.body.removeChild(temp);
-
-        var recol = /([\.\d]+)/g;
-        var vals  = style.match(recol);
-        if (vals && vals.length>2) {
-            //Coerce the string value into an rgba object
-            color.r = parseInt(vals[0])||0;
-            color.g = parseInt(vals[1])||0;
-            color.b = parseInt(vals[2])||0;
-        }
-        return color;
-    };
-
-    function fillContext(x,y) {
+    function fillContext(x,y,color) {
         var ctx = this;
 
-        //Gets the rgba color from the context fillStyle
-        var color = getComputedColor(this.fillStyle);
         var image = ctx.getImageData(0,0,ctx.canvas.width,ctx.canvas.height);
         var width = image.width;
         var height = image.height;
@@ -135,5 +112,4 @@ var floodfill = (function() {
     };
 
     return fillUint8ClampedArray;
-
 })();

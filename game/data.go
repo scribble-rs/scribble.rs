@@ -131,21 +131,28 @@ type WordHint struct {
 	Underline bool `json:"underline"`
 }
 
+// RGBColor represents a 24-bit color consisting of red, green and blue.
+type RGBColor struct {
+	R uint8 `json:"r"`
+	G uint8 `json:"g"`
+	B uint8 `json:"b"`
+}
+
 // Line is the struct that a client send when drawing
 type Line struct {
-	FromX     float32 `json:"fromX"`
-	FromY     float32 `json:"fromY"`
-	ToX       float32 `json:"toX"`
-	ToY       float32 `json:"toY"`
-	Color     string  `json:"color"`
-	LineWidth float32 `json:"lineWidth"`
+	FromX     float32  `json:"fromX"`
+	FromY     float32  `json:"fromY"`
+	ToX       float32  `json:"toX"`
+	ToY       float32  `json:"toY"`
+	Color     RGBColor `json:"color"`
+	LineWidth float32  `json:"lineWidth"`
 }
 
 // Fill represents the usage of the fill bucket.
 type Fill struct {
-	X     float32 `json:"x"`
-	Y     float32 `json:"y"`
-	Color string  `json:"color"`
+	X     float32  `json:"x"`
+	Y     float32  `json:"y"`
+	Color RGBColor `json:"color"`
 }
 
 // MaxPlayerNameLength defines how long a string can be at max when used

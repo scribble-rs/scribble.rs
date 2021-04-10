@@ -222,7 +222,7 @@
             </div>
 
             <div id="toolbox">
-                <input id="color-picker" class="toolbox-group" type="color" onchange="setColor()" value="#000000"
+                <input id="color-picker" class="toolbox-group" type="color" onchange="setColorFromColorPicker()" value="#000000"
                     alt="{{.Translation.Get "change-active-color"}}" title="{{.Translation.Get "change-active-color"}}">
                 <div class="color-button-container toolbox-group"
                     alt="{{.Translation.Get "change-active-color"}}" title="{{.Translation.Get "change-active-color"}}">
@@ -691,7 +691,6 @@
 
         //Initially, we require some values to avoid running into nullpointers
         //or undefined errors. The specific values don't really matter.
-        let localColor = "#000000";
         let localTool = pen;
         let localLineWidth = 8;
         let localLineWidthUnscaled = 8;
@@ -709,7 +708,8 @@
         //We use the states present in UI elements, since in case of
         //hitting F5(Refresh), the browser will not reset these states to the
         //initial values defined in the HTML.
-        localColor = colorPicker.value;
+        //The necessary cursor update implicitly happens with setLineWidth.
+        let localColor = hexStringToRgbColorObject(colorPicker.value);
 
         if (sizeButton8.checked) {
             setLineWidth(8);
@@ -729,13 +729,17 @@
             chooseTool(rubber);
         }
 
-        function setColor(value) {
-            if (value === undefined) {
-                localColor = colorPicker.value;
-            } else {
-                localColor = value;
-                colorPicker.value = value;
-            }
+        function setColorFromColorPicker() {
+            setColorWithoutUpdatingColorPicker(colorPicker.value);
+        }
+        
+        function setColor(color) {
+            colorPicker.value = color;
+            setColorWithoutUpdatingColorPicker(color);
+        }
+
+        function setColorWithoutUpdatingColorPicker(color) {
+            localColor = hexStringToRgbColorObject(color);
 
             if (localTool === rubber) {
                 //Hack to correct selection. Doesn't automatically trigger chooseTool(pen).
@@ -764,22 +768,35 @@
         }
 
         //We accept both #RRGGBB and RRGGBB. Both are treated case insensitive.
-        let hexColorsRegex = /#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})/i;
-        function hexToRgb(hexString) {
-            let match = hexString.match(hexColorsRegex)
-            return [parseInt(match[1], 16), parseInt(match[2], 16), parseInt(match[3], 16)];
+        function hexStringToRgbColorObject(hexString) {
+            const hexColorsRegex = /#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})/i;
+            const match = hexString.match(hexColorsRegex)
+            return {r: parseInt(match[1], 16), g: parseInt(match[2], 16), b: parseInt(match[3], 16)};
         }
+
+        function rgbColorObjectToHexString(color) {
+            return "#"
+                + numberTo16BitHexadecimal(color.r)
+                + numberTo16BitHexadecimal(color.g)
+                + numberTo16BitHexadecimal(color.b);
+        }
+        
+        function numberTo16BitHexadecimal(number) {
+            return Number(number).toString(16).padStart(2, "0");
+        }
+
+        const rubberColor = {r: 255, g: 255, b: 255};
 
         function updateCursor() {
             if (allowDrawing) {
                 if (localTool === rubber) {
-                    setCircleCursor("#FFFFFF", localLineWidth);
+                    setCircleCursor(rubberColor, localLineWidth);
                 } else if (localTool === fillBucket) {
-                    const { innerColor, outerColor } = getCursorColors(localColor);
+                    const outerColor = getComplementaryCursorColor(localColor);
                     drawingBoard.style.cursor = `url('data:image/svg+xml;utf8,`
                         + encodeURIComponent(
                             `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="32" width="32">`
-                            + generateSVGCircle(8, innerColor, outerColor)
+                            + generateSVGCircle(8, localColor, outerColor)
                             + `<path d="M8.583 22.081a4.913 5.083 0 0 0 1.449-3.618 4.437 4.59 0 0 1 4.433-4.585h2.022a.391.404 0 0 1 .276.69l-1.547 1.6a.391.404 0 0 0 0 .572l3.299 3.412a.391.404 0 0 1 .115.286v1.323a.977 1.011 0 0 1-.977 1.011.195.202 0 0 0-.195.202V25.4a1.368 1.415 0 0 1-2.736 0v-.606a.391.404 0 0 0-.782 0v2.628a1.368 1.415 0 0 1-2.736 0v-1.415a.391.404 0 0 0-.782 0v3.032a1.759 1.819 0 0 1-3.517 0V26.27a5.689 5.885 0 0 1 1.678-4.19zm4.966-.927a.782.809 0 0 0 1.563 0v-1.213a.782.809 0 0 0-1.563 0zm1.563 8.691a.977 1.011 0 1 0 1.95-.118 2.42 2.504 0 0 0-.69-1.422.387.401 0 0 0-.566 0 2.33 2.41 0 0 0-.693 1.54z" fill="#c4a2fc"/><path d="M14.988 15.596l5.529-5.721V8.218a2.345 2.426 0 0 1 4.689 0v2.975l5.586 5.778a1.174 1.215 0 0 1 0 1.715l-6.409 6.63a1.174 1.215 0 0 1-1.658 0l-7.738-8.004a1.172 1.213 0 0 1 .001-1.715zm9.437-7.378a1.563 1.617 0 0 0-3.126 0v.849l.098-.101a1.2 1.241 0 0 1 1.658 0l1.37 1.419zm-.346 2.951l-1.055 1.091 4.533 4.691 1.086-1.061zm-8.536 5.571l7.738 8.004a.391.404 0 0 0 .553 0l6.409-6.63a.391.404 0 0 0 0-.572l-1.046-1.078-1.376 1.347a.391.404 0 0 1-.545-.008l-5.08-5.255a.391.404 0 0 1 0-.572l1.331-1.377-1.024-1.059a.4.414 0 0 0-.553 0l-.651.673v3.74a1.172 1.213 0 1 1-.782 0V11.02l-4.975 5.148a.391.404 0 0 0 0 .572zm5.366-2.054a.391.404 0 1 0 .391.404.391.404 0 0 0-.391-.404z" fill="#151a6a"/></svg>`
                         )
                         + `') 4 4, auto`;
@@ -791,37 +808,22 @@
             }
         }
 
-        function getCursorColors(color) {
-            let innerColor;
-            let outerColor = "#FFFFFF";
-            if (color.startsWith("#")) {
-                innerColor = hexToRgb(color);
+        function getComplementaryCursorColor(innerColor) {
+            const hsp = Math.sqrt(
+                0.299 * (innerColor.r * innerColor.r) +
+                0.587 * (innerColor.g * innerColor.g) +
+                0.114 * (innerColor.b * innerColor.b)
+            );
 
-                const hsp = Math.sqrt(
-                    0.299 * (innerColor[0] * innerColor[0]) +
-                    0.587 * (innerColor[1] * innerColor[1]) +
-                    0.114 * (innerColor[2] * innerColor[2])
-                );
-
-                if (hsp > 127.5) {
-                    outerColor = "rgb(0,0,0)";
-                } else {
-                    outerColor = "rgb(255,255,255)";
-                }
-
-                innerColor = "rgb(" + innerColor[0] + "," + innerColor[1] + "," + innerColor[2] + ")";
-            } else {
-                innerColor = color;
+            if (hsp > 127.5) {
+                return {r: 0, g: 0, b: 0};
             }
 
-            return {
-                innerColor: innerColor,
-                outerColor: outerColor,
-            }
+            return  {r: 255, g: 255, b: 255};
         }
 
-        function setCircleCursor(color, size) {
-            const { innerColor, outerColor } = getCursorColors(color);
+        function setCircleCursor(innerColor, size) {
+            const outerColor = getComplementaryCursorColor(innerColor);
 
             let circleSize = size * scaleUpFactor();
             drawingBoard.style.cursor = `url('data:image/svg+xml;utf8,`
@@ -834,7 +836,9 @@
 
         function generateSVGCircle(circleSize, innerColor, outerColor) {
             let circleRadius = (circleSize / 2);
-            return `<circle cx="` + circleRadius + `" cy="` + circleRadius + `" r="` + circleRadius + `" style="fill: ` + innerColor + `; stroke: ` + outerColor + `;"/>`;
+            let innerColorCSS = "rgb(" + innerColor.r + "," + innerColor.g + "," + innerColor.b + ")";
+            let outerColorCSS = "rgb(" + outerColor.r + "," + outerColor.g + "," + outerColor.b + ")";
+            return `<circle cx="` + circleRadius + `" cy="` + circleRadius + `" r="` + circleRadius + `" style="fill: ` + innerColorCSS + `; stroke: ` + outerColorCSS + `;"/>`;
         }
 
         function startGame() {
@@ -945,7 +949,7 @@
                 } else if (parsed.type === "line") {
                     drawLine(context, parsed.data.fromX * scaleDownFactor(), parsed.data.fromY * scaleDownFactor(), parsed.data.toX * scaleDownFactor(), parsed.data.toY * scaleDownFactor(), parsed.data.color, parsed.data.lineWidth * scaleDownFactor());
                 } else if (parsed.type === "fill") {
-                    fill(context, parsed.data.x * scaleDownFactor(), parsed.data.y * scaleDownFactor(), parsed.data.color);
+                    context.fillFlood(parsed.data.x * scaleDownFactor(), parsed.data.y * scaleDownFactor(), parsed.data.color);
                 } else if (parsed.type === "clear-drawing-board") {
                     clear(context);
                 } else if (parsed.type === "next-turn") {
@@ -1305,7 +1309,7 @@
                 .forEach(drawElement => {
                     let drawData = drawElement.data;
                     if (drawElement.type === "fill") {
-                        fill(context, drawData.x * scaleDownFactor(), drawData.y * scaleDownFactor(), drawData.color);
+                        context.fillFlood(drawData.x * scaleDownFactor(), drawData.y * scaleDownFactor(), drawData.color);
                     } else if (drawElement.type === "line") {
                         drawLine(context, drawData.fromX * scaleDownFactor(),
                             drawData.fromY * scaleDownFactor(), drawData.toX * scaleDownFactor(),
@@ -1477,13 +1481,8 @@
             context.fillRect(0, 0, drawingBoard.width, drawingBoard.height);
         }
 
-        function fill(context, x, y, color) {
-            context.fillStyle = color;
-            return context.fillFlood(x, y);
-        }
-
         function fillAndSendEvent(context, x, y, color) {
-            if (fill(context, x, y, color)) {
+            if (context.fillFlood(x, y, color)) {
                 let fillInstruction = {
                     type: "fill",
                     data: {
@@ -1498,7 +1497,7 @@
 
         function drawLineAndSendEvent(context, x1, y1, x2, y2, color, lineWidth) {
             if (localTool === rubber) {
-                color = "#ffffff";
+                color = rubberColor;
             }
 
             drawLine(context, x1, y1, x2, y2, color, lineWidth);
@@ -1537,11 +1536,8 @@
                 return;
             }
 
-            color = hexToRgb(color);
-
             const circleMap = generateCircleMap(Math.floor(lineWidth / 2));
             const offset = Math.floor(circleMap.length / 2);
-
             const imageData = context.getImageData(left, top, right - left, bottom - top);
 
             for (let ix = 0; ix < circleMap.length; ix++) {
@@ -1594,7 +1590,6 @@
                     if (distanceToRadius > radius) {
                         circleData[x][y] = 0;
                     } else if (distanceToRadius < radius - 2) {
-                        //optimize for performance: fill circle only when mouse was not moved
                         circleData[x][y] = 2;
                     } else {
                         circleData[x][y] = 1;
@@ -1607,10 +1602,10 @@
 
         function setPixel(imageData, x, y, color) {
             const offset = (y * imageData.width + x) * 4;
-            imageData.data[offset] = color[0];
-            imageData.data[offset + 1] = color[1];
-            imageData.data[offset + 2] = color[2];
-            //We never want transparency.
+            imageData.data[offset] = color.r;
+            imageData.data[offset + 1] = color.g;
+            imageData.data[offset + 2] = color.b;
+            //We never want transparency, therefore alpha is always 255.
             imageData.data[offset + 3] = 255;
         }
     </script>
