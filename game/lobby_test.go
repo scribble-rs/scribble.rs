@@ -176,3 +176,23 @@ func Test_calculateGuesserScore(t *testing.T) {
 		lastDecline = newDecline
 	}
 }
+
+func Test_handleNameChangeEvent(t *testing.T) {
+	oldTriggerUpdateEvent := TriggerUpdateEvent
+	defer func() {
+		TriggerUpdateEvent = oldTriggerUpdateEvent
+	}()
+	TriggerUpdateEvent = func(eventType string, data interface{}, lobby *Lobby) {
+		//Dummy to pass test.
+	}
+
+	lobby := &Lobby{}
+	player := lobby.JoinPlayer("Kevin")
+
+	handleNameChangeEvent(player, lobby, "Jim")
+
+	expectedName := "Jim"
+	if player.Name != expectedName {
+		t.Errorf("playername didn't change; Expected %s, but was %s", expectedName, player.Name)
+	}
+}
