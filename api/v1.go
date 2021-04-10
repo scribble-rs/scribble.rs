@@ -343,7 +343,7 @@ func GetLobby(r *http.Request) (*game.Lobby, error) {
 var (
 	//CanvasColor is the initially / empty canvas colors value used for
 	//Lobbydata objects.
-	CanvasColor = [3]uint8{255, 255, 255}
+	CanvasColor = game.RGBColor{R: 255, G: 255, B: 255}
 	//SuggestedBrushSizes is suggested brush sizes value used for
 	//Lobbydata objects. A unit test makes sure these values are ordered
 	//and within the specified bounds.
@@ -368,9 +368,8 @@ type LobbyData struct {
 	MinBrushSize int `json:"minBrushSize"`
 	//MaxBrushSize is the maximum amount of pixels the brush can draw in.
 	MaxBrushSize int `json:"maxBrushSize"`
-	//CanvasColor is the initial (empty) color of the canvas.
-	//It's an array containing [R,G,B]
-	CanvasColor [3]uint8 `json:"canvasColor"`
+	//CanvasColor is the initially (empty) color of the canvas.
+	CanvasColor game.RGBColor `json:"canvasColor"`
 	//SuggestedBrushSizes are suggestions for the different brush sizes
 	//that the user can choose between. These brushes are guaranteed to
 	//be ordered from low to high and stay with the bounds.
