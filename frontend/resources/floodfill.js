@@ -14,16 +14,13 @@ var floodfill = (function() {
         var e = i, w = i, me, mw, w2 = width*4;
         var j;
 
-        //Previously we used Array.push and Array.pop here. The method took between 70ms and 80ms
-        //on a rather strong machine with a FULL HD monitor.
-        //Observastions show that this stack grows up to 1_000_000 in this scenario.
-        //Therefore we allocate even more than that upfront to avoid reallocation.
+        //Previously we used Array.push and Array.pop here, with which the method
+        //took between 70ms and 80ms on a rather strong machine with a FULL HD monitor.
+        //Since Q can never be required to be bigger than the amount of maximum
+        //pixels (width*height), we preallocate Q with that size. While not all of
+        //the space might be needed, this is cheaper than reallocating multiple times.
         //This improved the time from 70ms-80ms to 50ms-60ms.
-
-        //FIXME: Another optimization would be to take the canvas size into account and make estimations.
-        //This changes won't be upstreamed to the mainrepo yet, as they are very specific to our usecase.
-        //If the canvas size estimation is applied, this would be fine to upstream I guess.
-        var Q = new Array(1500000);
+        var Q = new Array(width*height);
         var nextQIndex = 0;
         Q[nextQIndex++] = i;
 
