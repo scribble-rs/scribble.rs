@@ -5,11 +5,24 @@ var floodfill = (function() {
     //MIT License
 
     function floodfill(data,x,y,fillcolor,width,height) {
-
         var length = data.length;
         var i = (x+y*width)*4;
-        var targetcolor = [data[i],data[i+1],data[i+2],data[i+3]];
-        if(!pixelCompare(i,targetcolor,fillcolor,data,length)) { return false; }
+
+        //Fill coordinates are out of bounds
+        if (i<0||i>=length) {
+            return false;
+        }
+
+        var targetcolor = [data[i],data[i+1],data[i+2]];
+
+        //We check whether the target pixel is already the desired color, since
+        //filling wouldn't change any of the pixels in this case.
+        if (
+            targetcolor[0] === fillcolor.r &&
+            targetcolor[1] === fillcolor.g &&
+            targetcolor[2] === fillcolor.b) {
+            return false;
+        }
 
         var e = i, w = i, me, mw, w2 = width*4;
         var j;
@@ -31,37 +44,28 @@ var floodfill = (function() {
                 w = i;
                 mw = Math.floor(i/w2)*w2; //left bound
                 me = mw+w2;               //right bound
-                while(mw<w && mw<(w-=4) && pixelCompareAndSet(w,targetcolor,fillcolor,data,length)); //go left until edge hit
-                while(me>e && me>(e+=4) && pixelCompareAndSet(e,targetcolor,fillcolor,data,length)); //go right until edge hit
+                while(mw<w && mw<(w-=4) && pixelCompareAndSet(w,targetcolor,fillcolor,data)); //go left until edge hit
+                while(me>e && me>(e+=4) && pixelCompareAndSet(e,targetcolor,fillcolor,data)); //go right until edge hit
                 for(j=w+4;j<e;j+=4) {
-                    if(j-w2>=0     && pixelCompare(j-w2,targetcolor,fillcolor,data,length)) Q[nextQIndex++]=j-w2; //queue y-1
-                    if(j+w2<length && pixelCompare(j+w2,targetcolor,fillcolor,data,length)) Q[nextQIndex++]=j+w2; //queue y+1
+                    if(j-w2>=0     && pixelCompare(j-w2,targetcolor,data)) Q[nextQIndex++]=j-w2; //queue y-1
+                    if(j+w2<length && pixelCompare(j+w2,targetcolor,data)) Q[nextQIndex++]=j+w2; //queue y+1
                 }
             }
         }
+
         return data;
     };
 
-    function pixelCompare(i,targetcolor,fillcolor,data,length) {
-        if (i<0||i>=length) return false; //out of bounds
-
-        if (
-            targetcolor[0] === fillcolor.r &&
-            targetcolor[1] === fillcolor.g &&
-            targetcolor[2] === fillcolor.b
-        ) return false; //target is same as fill
-
-        if (
+    function pixelCompare(i,targetcolor,data) {
+        return (
             targetcolor[0] === data[i] &&
             targetcolor[1] === data[i+1] &&
             targetcolor[2] === data[i+2]
-        ) return true; //target matches surface
-
-        return false; //no match
+        );
     };
 
-    function pixelCompareAndSet(i,targetcolor,fillcolor,data,length) {
-        if(pixelCompare(i,targetcolor,fillcolor,data,length)) {
+    function pixelCompareAndSet(i,targetcolor,fillcolor,data) {
+        if(pixelCompare(i,targetcolor,data)) {
             //fill the color
             data[i]   = fillcolor.r;
             data[i+1] = fillcolor.g;
@@ -106,28 +110,19 @@ var floodfill = (function() {
         return color;
     };
 
-    function fillContext(x,y,left,top,right,bottom) {
-        var ctx  = this;
+    function fillContext(x,y) {
+        var ctx = this;
 
         //Gets the rgba color from the context fillStyle
         var color = getComputedColor(this.fillStyle);
-
-        //Defaults and type checks for image boundaries
-        left     = (isNaN(left)) ? 0 : left;
-        top      = (isNaN(top)) ? 0 : top;
-        right    = (!isNaN(right)&&right) ? Math.min(Math.abs(right),ctx.canvas.width) : ctx.canvas.width;
-        bottom   = (!isNaN(bottom)&&bottom) ? Math.min(Math.abs(bottom),ctx.canvas.height) : ctx.canvas.height;
-
-        var image = ctx.getImageData(left,top,right,bottom);
-
-        var data = image.data;
+        var image = ctx.getImageData(0,0,ctx.canvas.width,ctx.canvas.height);
         var width = image.width;
         var height = image.height;
-
+        
         if(width>0 && height>0) {
-            const hasFilled = fillUint8ClampedArray(data,x,y,color,width,height);
+            const hasFilled = fillUint8ClampedArray(image.data,x,y,color,width,height);
             if (hasFilled) {
-                ctx.putImageData(image,left,top);
+                ctx.putImageData(image,0,0);
             }
             return hasFilled;
         }
