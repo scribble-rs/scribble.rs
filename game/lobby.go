@@ -480,6 +480,7 @@ func handleNameChangeEvent(caller *Player, lobby *Lobby, name string) {
 	//We'll avoid sending the event in this case, as it's useless, but still log
 	//the event, as it might be useful to know that this happened.
 	if oldName != newName {
+		caller.Name = newName
 		TriggerUpdateEvent("name-change", &NameChangeEvent{
 			PlayerID:   caller.ID,
 			PlayerName: newName,
