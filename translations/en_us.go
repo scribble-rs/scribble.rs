@@ -88,9 +88,9 @@ func initEnglishTranslation() Translation {
 	translation.put("system", "System")
 
 	translation.put("source-code", "Source Code")
-	translation.put("help", "Hilfe")
-	translation.put("contact", "Kontakt")
-	translation.put("submit-feedback", "Feedback einreichen")
+	translation.put("help", "Help")
+	translation.put("contact", "Contact")
+	translation.put("submit-feedback", "Submit Feedback")
 	translation.put("stats", "Status")
 
 	RegisterTranslation("en", translation)
