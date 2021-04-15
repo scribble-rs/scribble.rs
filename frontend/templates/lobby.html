@@ -953,6 +953,8 @@
                 } else if (parsed.type === "clear-drawing-board") {
                     clear(context);
                 } else if (parsed.type === "next-turn") {
+                    setRoundEndTime(parsed.data.roundEndTime);
+
                     //As soon as a turn starts, the round should be ongoing, so we make
                     //sure that all types of dialogs, that indicate the game isn't
                     //ongoing, are not visible anymore.
@@ -969,7 +971,6 @@
 
                     gameState = "ongoing";
                     round = parsed.data.round;
-                    roundEndTime = parsed.data.roundEndTime;
                     updateRoundsDisplay();
                     applyPlayers(parsed.data.players);
 
@@ -1040,14 +1041,30 @@
             return null;
         }
 
+        //In the initial implementation we used a timestamp to know when
+        //the round will end. The problem with that approach was that the
+        //clock on client and server was often not in sync. The second
+        //approach was to instead send milliseconds left and keep counting
+        //them down each 500 milliseconds. The problem with this approach, was
+        //that there could potentially be timing mistakes while counting down.
+        //What we do instead is use our local date, add the timeLeft to it and
+        //repeatdly recaculate the timeLeft using the roundEndTime and the
+        //current time. This way we won't have any calculation errors.
+        //
+        //FIXME The only leftover issue is that ping isn't taken into
+        //account, however, that's no biggie for now.
+        function setRoundEndTime(timeLeftMs) {
+            roundEndTime = Date.now()+timeLeftMs;
+        }
+
         function handleReadyEvent(ready) {
+            setRoundEndTime(ready.roundEndTime);
             ownerID = ready.ownerId;
             setUsernameLocally(ready.playerName);
             allowDrawing = ready.allowDrawing;
             ownID = ready.playerId;
             round = ready.round;
             rounds = ready.rounds;
-            roundEndTime = ready.roundEndTime;
             gameState = ready.gameState;
             votekickEnabled = ready.votekickEnabled;
             updateRoundsDisplay();
@@ -1178,15 +1195,15 @@
             }
         }
 
-        const roundTimerUpdateInterval = 500;
         window.setInterval(() => {
-            if (gameState === "ongoing" && roundEndTime > 0) {
-                timeLeftValue.innerText = "" + Math.floor(roundEndTime / 1000);
-                roundEndTime -= roundTimerUpdateInterval;
+            if (gameState === "ongoing") {
+                const msLeft = roundEndTime - Date.now();
+                const secondsLeft = Math.floor(msLeft / 1000);                
+                timeLeftValue.innerText = "" + secondsLeft
             } else {
                 timeLeftValue.innerText = "∞";
             }
-        }, roundTimerUpdateInterval);
+        }, 500);
 
         //appendMessage adds a new message to the message container. If the
         //message amount is too high, we cut off a part of the messages to
