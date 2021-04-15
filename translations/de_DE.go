@@ -14,9 +14,10 @@ func initGermanTranslation() {
 
 	translation.put("round", "Runde")
 	translation.put("toggle-soundeffects", "Sound ein- / ausschalten")
-	translation.put("change-your-name", "Benutzernamen ändern")
+	translation.put("change-your-name", "Benutzernamen editieren")
 	translation.put("randomize", "Zufälliger Name")
-	translation.put("change", "Ändern")
+	translation.put("apply", "Anwenden")
+	translation.put("save", "Speichern")
 	translation.put("votekick-a-player", "Stimme dafür ab, einen Spieler rauszuwerfen")
 	translation.put("time-left", "Zeit")
 

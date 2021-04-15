@@ -97,8 +97,7 @@
                                         <input class="namechange-field" type="text"
                                             id="namechange-field-start-dialog"></input>
                                         <button class="dialog-button"
-                                            onclick="changeName(document.getElementById('namechange-field-start-dialog').value)">{{.Translation.Get "change"}}</button>
-                                        <button class="dialog-button" onclick="changeName('')">{{.Translation.Get "randomize"}}</button>
+                                            onclick="changeName(document.getElementById('namechange-field-start-dialog').value)">{{.Translation.Get "apply"}}</button>
                                     </div>
                                 </div>
                                 <div class="button-center-wrapper">
@@ -117,8 +116,7 @@
                                         <input class="namechange-field" type="text"
                                             id="namechange-field-unstarted-dialog"></input>
                                         <button class="dialog-button"
-                                            onclick="changeName(document.getElementById('namechange-field-unstarted-dialog').value)">{{.Translation.Get "change"}}</button>
-                                        <button class="dialog-button" onclick="changeName('')">{{.Translation.Get "randomize"}}</button>
+                                            onclick="changeName(document.getElementById('namechange-field-unstarted-dialog').value)">{{.Translation.Get "apply"}}</button>
                                     </div>
                                 </div>
                             </div>
@@ -134,18 +132,14 @@
                         <div id="namechange-dialog" class="center-dialog">
                             <span class="dialog-title">{{.Translation.Get "change-your-name"}}</span>
                             <div class="center-dialog-content">
-                                <div style="display: flex; flex-direction: column;">
-                                    <div style="display: flex; flex-direction: row;">
-                                        <input class="namechange-field" type="text" id="namechange-field"></input>
-                                        <button class="dialog-button"
-                                            onclick="changeName(document.getElementById('namechange-field').value)">{{.Translation.Get "change"}}</button>
-                                        <button class="dialog-button" onclick="changeName('')">{{.Translation.Get "randomize"}}</button>
-                                    </div>
+                                <form onsubmit="changeName(document.getElementById('namechange-field').value);hideNameChangeDialog();return false">
+                                    <input class="namechange-field" type="text" id="namechange-field"></input>
                                     <div class="button-center-wrapper">
-                                        <button class="dialog-button"
+                                        <button class="dialog-button" type="submit">{{.Translation.Get "save"}}</button>
+                                        <button class="dialog-button" type="button"
                                             onclick="hideNameChangeDialog()">{{.Translation.Get "close"}}</button>
                                     </div>
-                                </div>
+                                </form>
                             </div>
                         </div>
 
@@ -584,6 +578,7 @@
 
         function showNameChangeDialog() {
             namechangeDialog.style.visibility = "visible";
+            namechangeField.focus();
         }
 
         function hideNameChangeDialog() {
@@ -591,10 +586,13 @@
         }
 
         function changeName(name) {
-            socket.send(JSON.stringify({
-                type: "name-change",
-                data: name,
-            }));
+            //Avoid unnecessary traffic.
+            if (name !== ownName) {
+                socket.send(JSON.stringify({
+                    type: "name-change",
+                    data: name,
+                }));
+            }
         }
 
         function setUsernameLocally(name) {

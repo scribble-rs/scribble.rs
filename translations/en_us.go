@@ -12,9 +12,10 @@ func initEnglishTranslation() Translation {
 
 	translation.put("round", "Round")
 	translation.put("toggle-soundeffects", "Toggle soundeffects")
-	translation.put("change-your-name", "Change your username")
+	translation.put("change-your-name", "Edit your username")
 	translation.put("randomize", "Randomize")
-	translation.put("change", "Change")
+	translation.put("apply", "Apply")
+	translation.put("save", "Save")
 	translation.put("votekick-a-player", "Vote to kick a player")
 	translation.put("time-left", "Time")
 
