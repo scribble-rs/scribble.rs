@@ -1,7 +1,6 @@
 package game
 
 import (
-	"math/rand"
 	"strings"
 	"sync"
 	"time"
@@ -81,6 +80,8 @@ type Lobby struct {
 	LastPlayerDisconnectTime *time.Time
 
 	mutex *sync.Mutex
+
+	WriteJSON func(player *Player, object interface{}) error
 }
 
 // EditableLobbySettings represents all lobby settings that are editable by
@@ -297,42 +298,6 @@ func SanitizeName(name string) string {
 	}
 
 	return generatePlayerName()
-}
-
-func createLobby(
-	drawingTime int,
-	rounds int,
-	maxPlayers int,
-	customWords []string,
-	customWordsChance int,
-	clientsPerIPLimit int,
-	enableVotekick bool,
-	publicLobby bool) *Lobby {
-
-	lobby := &Lobby{
-		LobbyID: uuid.Must(uuid.NewV4()).String(),
-		EditableLobbySettings: &EditableLobbySettings{
-			Rounds:            rounds,
-			DrawingTime:       drawingTime,
-			MaxPlayers:        maxPlayers,
-			CustomWordsChance: customWordsChance,
-			ClientsPerIPLimit: clientsPerIPLimit,
-			EnableVotekick:    enableVotekick,
-			Public:            publicLobby,
-		},
-		CustomWords:    customWords,
-		currentDrawing: make([]interface{}, 0),
-		State:          Unstarted,
-		mutex:          &sync.Mutex{},
-	}
-
-	if len(customWords) > 1 {
-		rand.Shuffle(len(lobby.CustomWords), func(i, j int) {
-			lobby.CustomWords[i], lobby.CustomWords[j] = lobby.CustomWords[j], lobby.CustomWords[i]
-		})
-	}
-
-	return lobby
 }
 
 // GameEvent contains an eventtype and optionally any data.

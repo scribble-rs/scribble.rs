@@ -148,6 +148,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	lobby.WriteJSON = api.WriteJSON
 	player.SetLastKnownAddress(api.GetIPAddressFromRequest(r))
 
 	// Use the players generated usersession and pass it as a cookie.

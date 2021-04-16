@@ -178,15 +178,11 @@ func Test_calculateGuesserScore(t *testing.T) {
 }
 
 func Test_handleNameChangeEvent(t *testing.T) {
-	oldTriggerUpdateEvent := TriggerUpdateEvent
-	defer func() {
-		TriggerUpdateEvent = oldTriggerUpdateEvent
-	}()
-	TriggerUpdateEvent = func(eventType string, data interface{}, lobby *Lobby) {
-		//Dummy to pass test.
-	}
-
 	lobby := &Lobby{}
+	lobby.WriteJSON = func(player *Player, object interface{}) error {
+		//Dummy to pass test.
+		return nil
+	}
 	player := lobby.JoinPlayer("Kevin")
 
 	handleNameChangeEvent(player, lobby, "Jim")

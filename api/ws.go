@@ -20,13 +20,6 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
-func init() {
-	game.TriggerUpdateEvent = TriggerUpdateEvent
-	game.SendDataToEveryoneExceptSender = SendDataToEveryoneExceptSender
-	game.WriteAsJSON = WriteAsJSON
-	game.TriggerUpdatePerPlayerEvent = TriggerUpdatePerPlayerEvent
-}
-
 func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	sessionCookie := GetUserSession(r)
 	if sessionCookie == "" {
@@ -103,7 +96,7 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 			err := json.Unmarshal(data, received)
 			if err != nil {
 				log.Printf("Error unmarshalling message: %s\n", err)
-				sendError := WriteAsJSON(player, game.GameEvent{Type: "system-message", Data: fmt.Sprintf("An error occurred trying to read your request, please report the error via GitHub: %s!", err)})
+				sendError := WriteJSON(player, game.GameEvent{Type: "system-message", Data: fmt.Sprintf("An error occurred trying to read your request, please report the error via GitHub: %s!", err)})
 				if sendError != nil {
 					log.Printf("Error sending errormessage: %s\n", sendError)
 				}
@@ -118,30 +111,9 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 	}
 }
 
-func SendDataToEveryoneExceptSender(sender *game.Player, lobby *game.Lobby, data interface{}) {
-	for _, otherPlayer := range lobby.GetPlayers() {
-		if otherPlayer != sender {
-			WriteAsJSON(otherPlayer, data)
-		}
-	}
-}
-
-func TriggerUpdateEvent(eventType string, data interface{}, lobby *game.Lobby) {
-	event := &game.GameEvent{Type: eventType, Data: data}
-	for _, otherPlayer := range lobby.GetPlayers() {
-		WriteAsJSON(otherPlayer, event)
-	}
-}
-
-func TriggerUpdatePerPlayerEvent(eventType string, data func(*game.Player) interface{}, lobby *game.Lobby) {
-	for _, otherPlayer := range lobby.GetPlayers() {
-		WriteAsJSON(otherPlayer, &game.GameEvent{Type: eventType, Data: data(otherPlayer)})
-	}
-}
-
-// WriteAsJSON marshals the given input into a JSON string and sends it to the
+// WriteJSON marshals the given input into a JSON string and sends it to the
 // player using the currently established websocket connection.
-func WriteAsJSON(player *game.Player, object interface{}) error {
+func WriteJSON(player *game.Player, object interface{}) error {
 	player.GetWebsocketMutex().Lock()
 	defer player.GetWebsocketMutex().Unlock()
 

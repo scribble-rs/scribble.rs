@@ -115,6 +115,7 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	lobby.WriteJSON = WriteJSON
 	player.SetLastKnownAddress(GetIPAddressFromRequest(r))
 
 	// Use the players generated usersession and pass it as a cookie.
@@ -284,7 +285,7 @@ func editLobby(w http.ResponseWriter, r *http.Request) {
 
 		lobbySettingsCopy := *lobby.EditableLobbySettings
 		lobbySettingsCopy.DrawingTime = drawingTime
-		TriggerUpdateEvent("lobby-settings-changed", lobbySettingsCopy, lobby)
+		lobby.TriggerUpdateEvent("lobby-settings-changed", lobbySettingsCopy)
 	})
 }
 
