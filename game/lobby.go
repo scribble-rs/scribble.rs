@@ -597,8 +597,8 @@ func endGame(lobby *Lobby) {
 }
 
 // selectNextDrawer returns the next person that's supposed to be drawing, but
-// doesn't tell the lobby yet. The boolean signals whether the current round is
-// over.
+// doesn't tell the lobby yet. The boolean signals whether the current round
+// is over.
 func selectNextDrawer(lobby *Lobby) (*Player, bool) {
 	for index, otherPlayer := range lobby.players {
 		if otherPlayer == lobby.drawer {
@@ -609,6 +609,10 @@ func selectNextDrawer(lobby *Lobby) (*Player, bool) {
 					return player, false
 				}
 			}
+
+			//No player below the current drawer has been found, therefore we
+			//fallback to our default logic at the bottom.
+			break
 		}
 	}
 
