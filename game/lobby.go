@@ -625,7 +625,9 @@ func roundTimerTicker(lobby *Lobby) {
 
 		currentTime := getTimeAsMillis()
 		if currentTime >= lobby.RoundEndTime {
-			go advanceLobby(lobby)
+			advanceLobby(lobby)
+			//Kill outer goroutine and therefore avoid executing hint logic.
+			break
 		}
 
 		if lobby.hintsLeft > 0 && lobby.wordHints != nil {
