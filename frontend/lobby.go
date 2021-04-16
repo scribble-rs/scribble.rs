@@ -92,10 +92,15 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 		}
 	})
 
-	templateError := pageTemplates.ExecuteTemplate(w, "lobby-page", pageData)
-	if templateError != nil {
-		log.Printf("Error templating lobby: %s\n", templateError)
-		http.Error(w, "error templating lobby", http.StatusInternalServerError)
+	//If the pagedata isn't initialized, it means the synchronized block has exited.
+	//In this case we don't want to tempalte the lobby, since an error has occurred
+	//and probably already has been handled.
+	if pageData != nil {
+		templateError := pageTemplates.ExecuteTemplate(w, "lobby-page", pageData)
+		if templateError != nil {
+			log.Printf("Error templating lobby: %s\n", templateError)
+			http.Error(w, "error templating lobby", http.StatusInternalServerError)
+		}
 	}
 }
 
