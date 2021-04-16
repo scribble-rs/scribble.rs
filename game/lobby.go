@@ -561,7 +561,7 @@ func advanceLobby(lobby *Lobby) {
 	//We use milliseconds for higher accuracy
 	lobby.RoundEndTime = time.Now().UTC().UnixNano()/1000000 + int64(lobby.DrawingTime)*1000
 	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
-	go roundTimerTicker(lobby)
+	go startTurnTimeTicker(lobby)
 
 	nextTurnEvent := &NextTurn{
 		Round:        lobby.Round,
@@ -615,7 +615,10 @@ func selectNextDrawer(lobby *Lobby) (*Player, bool) {
 	return lobby.players[0], true
 }
 
-func roundTimerTicker(lobby *Lobby) {
+// startTurnTimeTicker executes a loop that listens to the lobbies
+// timeLeftTicker and executes a tickLogic on each tick. This method
+// blocks until the turn ends.
+func startTurnTimeTicker(lobby *Lobby) {
 	for {
 		ticker := lobby.timeLeftTicker
 		if ticker == nil {
@@ -623,36 +626,50 @@ func roundTimerTicker(lobby *Lobby) {
 		}
 		<-ticker.C
 
-		currentTime := getTimeAsMillis()
-		if currentTime >= lobby.RoundEndTime {
-			advanceLobby(lobby)
-			//Kill outer goroutine and therefore avoid executing hint logic.
+		if !lobby.tickLogic() {
 			break
 		}
+	}
+}
 
-		if lobby.hintsLeft > 0 && lobby.wordHints != nil {
-			revealHintEveryXMilliseconds := int64(lobby.DrawingTime * 1000 / (lobby.hintCount + 1))
-			//If you have a drawingtime of 120 seconds and three hints, you
-			//want to reveal a hint every 40 seconds, so that the two hints
-			//are visible for at least a third of the time. //If the word
-			//was chosen at 60 seconds, we'll still reveal one hint
-			//instantly, as the time is already lower than 80.
-			revealHintAtXOrLower := revealHintEveryXMilliseconds * int64(lobby.hintsLeft)
-			timeLeft := lobby.RoundEndTime - currentTime
-			if timeLeft <= revealHintAtXOrLower {
-				lobby.hintsLeft--
+// tickLogic checks whether the lobby needs to proceed to the next round and
+// updates the available word hints if required. The return value indicates
+// whether additional ticks are necessary or not.
+func (lobby *Lobby) tickLogic() bool {
+	lobby.mutex.Lock()
+	defer lobby.mutex.Unlock()
 
-				for {
-					randomIndex := rand.Int() % len(lobby.wordHints)
-					if lobby.wordHints[randomIndex].Character == 0 {
-						lobby.wordHints[randomIndex].Character = []rune(lobby.CurrentWord)[randomIndex]
-						lobby.triggerWordHintUpdate()
-						break
-					}
+	currentTime := getTimeAsMillis()
+	if currentTime >= lobby.RoundEndTime {
+		advanceLobby(lobby)
+		//Kill outer goroutine and therefore avoid executing hint logic.
+		return false
+	}
+
+	if lobby.hintsLeft > 0 && lobby.wordHints != nil {
+		revealHintEveryXMilliseconds := int64(lobby.DrawingTime * 1000 / (lobby.hintCount + 1))
+		//If you have a drawingtime of 120 seconds and three hints, you
+		//want to reveal a hint every 40 seconds, so that the two hints
+		//are visible for at least a third of the time. //If the word
+		//was chosen at 60 seconds, we'll still reveal one hint
+		//instantly, as the time is already lower than 80.
+		revealHintAtXOrLower := revealHintEveryXMilliseconds * int64(lobby.hintsLeft)
+		timeLeft := lobby.RoundEndTime - currentTime
+		if timeLeft <= revealHintAtXOrLower {
+			lobby.hintsLeft--
+
+			for {
+				randomIndex := rand.Int() % len(lobby.wordHints)
+				if lobby.wordHints[randomIndex].Character == 0 {
+					lobby.wordHints[randomIndex].Character = []rune(lobby.CurrentWord)[randomIndex]
+					lobby.triggerWordHintUpdate()
+					break
 				}
 			}
 		}
 	}
+
+	return true
 }
 
 func getTimeAsMillis() int64 {
