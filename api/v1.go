@@ -183,9 +183,11 @@ func enterLobby(w http.ResponseWriter, r *http.Request) {
 		lobbyData = CreateLobbyData(lobby)
 	})
 
-	encodingError := json.NewEncoder(w).Encode(lobbyData)
-	if encodingError != nil {
-		http.Error(w, encodingError.Error(), http.StatusInternalServerError)
+	if lobbyData != nil {
+		encodingError := json.NewEncoder(w).Encode(lobbyData)
+		if encodingError != nil {
+			http.Error(w, encodingError.Error(), http.StatusInternalServerError)
+		}
 	}
 }
 
