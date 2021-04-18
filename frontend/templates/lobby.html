@@ -903,7 +903,10 @@
             targetSocket.onmessage = event => {
                 let parsed = JSON.parse(event.data);
                 if (parsed.type === "ready") {
+                    handleReadyEvent(parsed.data);
+                } else  if (parsed.type === "game-over") {
                     let ready = parsed.data;
+                    showRoundEndMessage(ready.previousWord);
                     handleReadyEvent(ready);
                 } else if (parsed.type === "update-players") {
                     applyPlayers(parsed.data);
@@ -979,13 +982,7 @@
                     //We clear this, since there's no word chosen right now.
                     wordContainer.innerHTML = "";
 
-                    if (parsed.data.previousWord !== null) {
-                        if (parsed.data.previousWord === "") {
-                            appendMessage("system-message", null, '{{.Translation.Get "round-over"}}');
-                        } else {
-                            appendMessage("system-message", null, '{{.Translation.Get "round-over-no-word"}}'.format(parsed.data.previousWord));
-                        }
-                    }
+                    showRoundEndMessage(parsed.data.previousWord);
                     allowDrawing = false;
                     updateCursor();
                 } else if (parsed.type === "your-turn") {
@@ -1027,6 +1024,19 @@
                 }
             }
         };
+
+        function showRoundEndMessage(previousWord) {
+            //Happens if there has been no previous round.
+            if (previousWord === null) {
+                return;
+            }
+
+            if (previousWord === "") {
+                appendMessage("system-message", null, '{{.Translation.Get "round-over"}}');
+            } else {
+                appendMessage("system-message", null, '{{.Translation.Get "round-over-no-word"}}'.format(previousWord));
+            }
+        }
 
         function getPlayer(playerID) {
             for (let i = 0; i < cachedPlayers.length; i++) {

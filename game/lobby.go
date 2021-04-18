@@ -581,6 +581,16 @@ func advanceLobby(lobby *Lobby) {
 	lobby.WriteJSON(lobby.drawer, &GameEvent{Type: "your-turn", Data: lobby.wordChoice})
 }
 
+// GameOverEvent is basically the ready event, but contains the last word.
+// This is required in order to show the last player the word, in case they
+// didn't manage to guess it in time. This is necessary since the last word
+// is usually part of the "next-turn" event, which we don't send, since the
+// game is over already.
+type GameOverEvent struct {
+	*Ready
+	PreviousWord string `json:"previousWord"`
+}
+
 func endGame(lobby *Lobby) {
 	lobby.drawer = nil
 	lobby.Round = 0
@@ -590,9 +600,11 @@ func endGame(lobby *Lobby) {
 
 	for _, player := range lobby.players {
 		lobby.WriteJSON(player, GameEvent{
-			Type: "ready",
-			Data: generateReadyData(lobby, player),
-		})
+			Type: "game-over",
+			Data: &GameOverEvent{
+				PreviousWord: lobby.CurrentWord,
+				Ready:        generateReadyData(lobby, player),
+			}})
 	}
 }
 
