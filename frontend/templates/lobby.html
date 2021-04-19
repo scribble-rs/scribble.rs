@@ -1348,21 +1348,18 @@
         let lastX = 0;
         let lastY = 0;
         
-        let isTouchDrawing = false;
-        let touchID = 0;
+        let touchID = null;
 
         function onTouchStart(event) {
-            if (!isTouchDrawing && allowDrawing) {
-                touchID = event.touches[0].identifier;
+            //We only allow a single touch
+            if (allowDrawing && touchID == null && localTool !== fillBucket) {
+                const touch = event.touches[0];
+                touchID = touch.identifier;
 
-                if (allowDrawing && localTool !== 2) {
-                    // calculate the offset coordinates based on client touch position and drawing board client origin
-                    let clientRect = drawingBoard.getBoundingClientRect();
-                    lastX = (event.touches[0].clientX - clientRect.left);
-                    lastY = (event.touches[0].clientY - clientRect.top);
-
-                    isTouchDrawing = true;
-                }
+                // calculate the offset coordinates based on client touch position and drawing board client origin
+                const clientRect = drawingBoard.getBoundingClientRect();
+                lastX = (touch.clientX - clientRect.left);
+                lastY = (touch.clientY - clientRect.top);
             }
         }
 
@@ -1370,16 +1367,15 @@
             // Prevent moving, scrolling or zooming the page
             event.preventDefault();
 
-            if (allowDrawing && isTouchDrawing) {
-                // find touch with correct ID
+            if (allowDrawing) {
                 for (let i = event.changedTouches.length - 1; i >= 0; i--) {
                     if (event.changedTouches[i].identifier === touchID) {
-                        let touch = event.changedTouches[i];
+                        const touch = event.changedTouches[i];
 
                         // calculate the offset coordinates based on client touch position and drawing board client origin
-                        let clientRect = drawingBoard.getBoundingClientRect();
-                        let offsetX = (touch.clientX - clientRect.left);
-                        let offsetY = (touch.clientY - clientRect.top);
+                        const clientRect = drawingBoard.getBoundingClientRect();
+                        const offsetX = (touch.clientX - clientRect.left);
+                        const offsetY = (touch.clientY - clientRect.top);
 
                         // drawing functions must check for context boundaries
                         drawLineAndSendEvent(context, lastX, lastY, offsetX, offsetY, localColor, localLineWidth);
@@ -1393,13 +1389,10 @@
         }
 
         function onTouchEnd(event) {
-            if (isTouchDrawing) {
-                // find touch with correct ID
-                for (let i = event.changedTouches.length - 1; i >= 0; i--) {
-                    if (event.changedTouches[i].identifier === touchID) {
-                        isTouchDrawing = false;
-                        return;
-                    }
+            for (let i = event.changedTouches.length - 1; i >= 0; i--) {
+                if (event.changedTouches[i].identifier === touchID) {
+                    touchID = null;
+                    return;
                 }
             }
         }
@@ -1411,7 +1404,7 @@
 
         function onMouseDown(event) {
             if (allowDrawing && event.buttons === 1 && localTool !== fillBucket) {
-                let clientRect = drawingBoard.getBoundingClientRect();
+                const clientRect = drawingBoard.getBoundingClientRect();
                 lastX = event.clientX - clientRect.left;
                 lastY = event.clientY - clientRect.top;
             }
@@ -1422,9 +1415,9 @@
             //Therefore we use event.buttons, which works differently.
             if (allowDrawing && event.buttons === 1 && localTool !== fillBucket) {
                 // calculate the offset coordinates based on client mouse position and drawing board client origin
-                let clientRect = drawingBoard.getBoundingClientRect();
-                let offsetX = (event.clientX - clientRect.left);
-                let offsetY = (event.clientY - clientRect.top);
+                const clientRect = drawingBoard.getBoundingClientRect();
+                const offsetX = (event.clientX - clientRect.left);
+                const offsetY = (event.clientY - clientRect.top);
 
                 // drawing functions must check for context boundaries
                 drawLineAndSendEvent(context, lastX, lastY, offsetX, offsetY, localColor, localLineWidth);
@@ -1453,7 +1446,7 @@
         drawingBoard.addEventListener('click', onMouseClick);
 
         function onGlobalMouseMove(event) {
-            let clientRect = drawingBoard.getBoundingClientRect();
+            const clientRect = drawingBoard.getBoundingClientRect();
             lastX = Math.min(clientRect.width - 1, Math.max(0, event.clientX - clientRect.left));
             lastY = Math.min(clientRect.height - 1, Math.max(0, event.clientY - clientRect.top));
         }
