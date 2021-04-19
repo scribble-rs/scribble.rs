@@ -1345,14 +1345,14 @@
                 });
         }
 
-        let isDrawing = false;
         let lastX = 0;
         let lastY = 0;
-
+        
+        let isTouchDrawing = false;
         let touchID = 0;
 
         function onTouchStart(event) {
-            if (!isDrawing && allowDrawing) {
+            if (!isTouchDrawing && allowDrawing) {
                 touchID = event.touches[0].identifier;
 
                 if (allowDrawing && localTool !== 2) {
@@ -1361,7 +1361,7 @@
                     lastX = (event.touches[0].clientX - clientRect.left);
                     lastY = (event.touches[0].clientY - clientRect.top);
 
-                    isDrawing = true;
+                    isTouchDrawing = true;
                 }
             }
         }
@@ -1370,7 +1370,7 @@
             // Prevent moving, scrolling or zooming the page
             event.preventDefault();
 
-            if (allowDrawing && isDrawing) {
+            if (allowDrawing && isTouchDrawing) {
                 // find touch with correct ID
                 for (let i = event.changedTouches.length - 1; i >= 0; i--) {
                     if (event.changedTouches[i].identifier === touchID) {
@@ -1393,11 +1393,11 @@
         }
 
         function onTouchEnd(event) {
-            if (isDrawing) {
+            if (isTouchDrawing) {
                 // find touch with correct ID
                 for (let i = event.changedTouches.length - 1; i >= 0; i--) {
                     if (event.changedTouches[i].identifier === touchID) {
-                        isDrawing = false;
+                        isTouchDrawing = false;
                         return;
                     }
                 }
@@ -1410,19 +1410,17 @@
         drawingBoard.addEventListener('touchmove', onTouchMove);
 
         function onMouseDown(event) {
-            if (allowDrawing && event.button === 0 && localTool !== 2) {
+            if (allowDrawing && event.buttons === 1 && localTool !== fillBucket) {
                 let clientRect = drawingBoard.getBoundingClientRect();
                 lastX = event.clientX - clientRect.left;
                 lastY = event.clientY - clientRect.top;
-
-                isDrawing = true;
             }
-
-            return false;
         }
 
-        function onMousePositionUpdate(event) {
-            if (allowDrawing && isDrawing === true && event.button === 0) {
+        function onMouseMove(event) {
+            //event.button === 0 could be wrong, as it can also be the uninitialized state.
+            //Therefore we use event.buttons, which works differently.
+            if (allowDrawing && event.buttons === 1 && localTool !== fillBucket) {
                 // calculate the offset coordinates based on client mouse position and drawing board client origin
                 let clientRect = drawingBoard.getBoundingClientRect();
                 let offsetX = (event.clientX - clientRect.left);
@@ -1436,6 +1434,9 @@
         }
 
         function onMouseClick(event) {
+            //event.buttons won't work here, since it's always 0. Since we
+            //have a click event, we can be sure that we actually had a button
+            //clicked and 0 won't be the uninitialized state.
             if (allowDrawing && event.button === 0) {
                 if (localTool === fillBucket) {
                     fillAndSendEvent(context, event.offsetX, event.offsetY, localColor);
@@ -1443,20 +1444,13 @@
                     drawLineAndSendEvent(context, event.offsetX, event.offsetY,
                         event.offsetX, event.offsetY, localColor, localLineWidth);
                 }
-                isDrawing = false;
             }
         }
 
         drawingBoard.addEventListener('mousedown', onMouseDown)
-        drawingBoard.addEventListener('mousemove', onMousePositionUpdate);
-        drawingBoard.addEventListener('mouseleave', onMousePositionUpdate);
+        drawingBoard.addEventListener('mousemove', onMouseMove);
+        drawingBoard.addEventListener('mouseleave', onMouseMove);
         drawingBoard.addEventListener('click', onMouseClick);
-
-        function onGlobalMouseUp(event) {
-            if (isDrawing === true) {
-                isDrawing = false;
-            }
-        }
 
         function onGlobalMouseMove(event) {
             let clientRect = drawingBoard.getBoundingClientRect();
@@ -1464,9 +1458,10 @@
             lastY = Math.min(clientRect.height - 1, Math.max(0, event.clientY - clientRect.top));
         }
 
-        // This is executed even if the mouse is not above the browser anymore.
-        window.addEventListener('mouseup', onGlobalMouseUp);
-        // necessary for mousemove to not use the previous exit coordinates.
+        //necessary for mousemove to not use the previous exit coordinates.
+        //If this is done via mouseleave and mouseenter of the
+        //drawingBoard, the lines will end too early on leave and start
+        //too late on exit.
         window.addEventListener('mousemove', onGlobalMouseMove);
 
         function handleCanvasResize() {
