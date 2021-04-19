@@ -44,7 +44,7 @@ var floodfill = (function() {
                 w = i;
                 mw = Math.floor(i/w2)*w2; //left bound
                 me = mw+w2;               //right bound
-                while(mw<w && mw<(w-=4) && pixelCompareAndSet(w,targetcolor,fillcolor,data)); //go left until edge hit
+                while(mw<w && mw<=(w-=4) && pixelCompareAndSet(w,targetcolor,fillcolor,data)); //go left until edge hit
                 while(me>e && me>(e+=4) && pixelCompareAndSet(e,targetcolor,fillcolor,data)); //go right until edge hit
                 for(j=w+4;j<e;j+=4) {
                     if(j-w2>=0     && pixelCompare(j-w2,targetcolor,data)) Q[nextQIndex++]=j-w2; //queue y-1
