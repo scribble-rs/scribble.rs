@@ -1206,7 +1206,7 @@
         window.setInterval(() => {
             if (gameState === "ongoing") {
                 const msLeft = roundEndTime - Date.now();
-                const secondsLeft = Math.floor(msLeft / 1000);                
+                const secondsLeft = Math.max(0, Math.floor(msLeft / 1000));
                 timeLeftValue.innerText = "" + secondsLeft
             } else {
                 timeLeftValue.innerText = "∞";
