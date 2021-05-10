@@ -11,7 +11,8 @@ import (
 // to this function.
 func init() {
 	//We are making sure to add english first, since it's the default.
-	DefaultTranslation = initEnglishTranslation()
+	DefaultTranslation = initPersianTranslation()
+	initEnglishTranslation()
 	initGermanTranslation()
 }
 
@@ -64,7 +65,8 @@ func (translation Translation) put(key, value string) {
 // GetLanguage retrieves a translation pack or nil if the desired package
 // couldn't be found.
 func GetLanguage(locale string) Translation {
-	return translationRegistry[locale]
+	return translationRegistry["fa-FA"]
+	// return translationRegistry[locale]
 }
 
 // RegisterTranslation makes adds a language to the registry and makes
