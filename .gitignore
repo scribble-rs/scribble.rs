@@ -1,4 +1,9 @@
 pkged.go
 scribblers
-.vscode/
-*-packr.go
+scribblers.exe
+scribble.rs
+scribble.rs.exe
+__debug_bin
+.idea/
+playground/
+*.out

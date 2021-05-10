@@ -1,0 +1,543 @@
+#lobby-header {
+    grid-column-start: 1;
+    grid-column-end: 4;
+    grid-row: 1;
+
+    display:grid;
+    grid-template-columns: 15rem auto 18rem;
+    grid-gap: 5px;
+}
+
+#lobby-header-center-element {
+    display: flex;
+    /* Hack to remove extra space between buttons */
+    font-size: 0;
+}
+
+#round-container, #time-left {
+    font-size: 1.5rem;
+    align-self: center;
+    display: flex;
+}
+
+#rounds::after {
+    content: '/';
+}
+
+#time-left-value {
+    min-width: 3rem;
+    width: 3rem;
+    margin-left: 0.5rem;
+}
+
+#word-container {
+    flex: 1;
+    justify-content: baseline;
+    justify-items: center;
+    align-self: center;
+    text-align: center;
+}
+
+.guess-letter-underline {
+    border-bottom: 0.3rem black solid;
+}
+
+.guess-letter {
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.guess-letter + .guess-letter {
+    margin-left: 0.5rem;
+}
+
+#lobby {
+    padding: 5px;
+    display: grid;
+    grid-template-columns: 15rem auto 18rem;
+    grid-template-rows: min-content min-content auto;
+    grid-gap: 5px;
+    flex: 1 1;
+}
+
+/*
+ * These two ensure that the drawing board has an aspect ratio of 16/9.
+ * Technically we could make this configurable by setting the padding via JS.
+ */
+#drawing-board-wrapper {
+    width: 100%;
+    height: 0;
+    padding-top: 56.25%;
+    position: relative;
+    grid-column: 2;
+    grid-row: 2;
+}
+
+#drawing-board-inner-wrapper {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+#drawing-board {
+    position: absolute;
+    background-color: white;
+    width: 100%;
+    height: 100%;
+    user-select: none;
+}
+
+#center-dialogs {
+    /* Without these two, drawing is impossible, since this container catches all events. */
+    pointer-events: none;
+    touch-action: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 20;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.center-dialog {
+    /* All dialogs are initially invisible. */
+    visibility: hidden;
+    /* Since the parent ignores all of those events, we need to
+    restore the handling, since our dialogs have buttons. */
+    pointer-events: all;
+    touch-action: auto;
+    /* Allows layering, since there can be more than one dialog. */
+    position: absolute;
+    /* A dialog should never fully hide the canvas. */
+    max-width: 80%;
+    max-height: 80%;
+    background-color: rgb(225, 221, 221);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#chat {
+    display: flex;
+    flex-direction: column;
+    grid-column: 3;
+    grid-row-start: 2;
+    grid-row-end: 3;
+}
+
+#message-container {
+    overflow-y: scroll;
+    background-color: white;
+    flex: 1;
+}
+
+.chat-name {
+    font-weight: bold;
+    padding-right: 0.2em;
+}
+
+.chat-name:after {
+    content: ":";
+}
+
+.correct-guess-message {
+    font-weight: bold;
+    color: rgb(38, 187, 38);
+}
+
+.non-guessing-player-message {
+    color: rgb(38, 187, 38);
+}
+
+.close-guess-message {
+    font-weight: bold;
+    color:rgb(25, 166, 166);
+}
+
+.message-input-form {
+    display: flex;
+}
+
+#message-input {
+    flex: 1;
+    border: 0;
+    padding: 10px;
+    margin-top: 5px
+}
+
+#message-input:focus {
+    outline: none;
+    background-color: rgb(250, 211, 252);
+}
+
+.dialog-title {
+    margin-bottom: 1rem;
+    font-size: 2.75rem;
+    font-weight: bold;
+    color: rgb(240, 105, 127);
+    text-align: center;
+}
+
+.word-button-container {
+    display: flex;
+    flex-direction: row;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.dialog-button {
+    border: none;
+    background-color: white;
+    padding: 0.5rem 1rem 0.5rem 1rem;
+}
+
+.button-center-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1em;
+}
+
+.dialog-button + .dialog-button {
+    margin-left: 0.25rem;
+}
+
+.dialog-close-button {
+    margin-top: 1rem;
+}
+
+button:hover,
+input[type="button"]:hover,
+.line-width-button-content:hover,
+#color-picker:hover {
+    /** Important insures it won't be prevented by a 'transparent' main color*/
+    background-color: rgb(244, 183, 247) !important;
+}
+
+button:active,
+input[type="button"]:active,
+#color-picker:active {
+    /** Important insures it won't be prevented by a 'transparent' main color*/
+    background-color: rgb(243, 132, 247) !important;
+}
+
+.header-button {
+    padding: 0.2rem;
+    background-color: transparent;
+    user-select: none;
+}
+
+.header-button-image {
+    width: 1.7rem;
+    height: 1.7rem;
+    /** Without these two, the button has too much height. */
+    display: inline-block; 
+    vertical-align: middle; 
+}
+
+.dot {
+    background-color: black;
+    border-radius: 50%;
+}
+
+.line-width-button + .line-width-button-content {
+    height: 50px;
+    width: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.line-width-button-content {
+    background-color: rgb(218, 218, 218);
+}
+
+.line-width-button:checked + .line-width-button-content {
+    background-color: rgb(243, 132, 247);
+}
+
+#color-picker {
+    border: 0;
+    background-color: rgb(218, 218, 218);
+    height: 50px;
+    width: 50px;
+    padding: 0;
+}
+
+@-moz-document url-prefix() {
+    #color-picker {
+        padding: 5px;
+    }
+}
+
+.canvas-button {
+    height: 50px;
+    width: 50px;
+    border: 0;
+    padding: 0;
+    background-color: rgb(218, 218, 218);
+}
+
+.canvas-button::-moz-focus-inner {
+    border: 0;
+}
+
+.color-button-container {
+    border: 1px solid gray;
+    display: flex;
+    flex-direction: column;
+    height: 48px;
+}
+
+.color-button-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.color-button {
+    height: 24px;
+    width: 24px;
+    border: 0;
+}
+
+.color-button::-moz-focus-inner {
+    border: 0;
+}
+
+.message {
+    overflow-wrap: break-word;
+    padding: 0.3em 0.2em 0.2em 0.3em;
+}
+
+.message:nth-child(2n) {
+    background-color: rgb(240, 238, 238);
+}
+
+.system-message {
+    font-weight: bold;
+    color: red;
+}
+
+#toolbox {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 5px;
+    grid-row: 3;
+    grid-column: 2;
+    height: min-content;
+    user-select: none;
+}
+
+.toolbox-group {
+    margin-bottom: 10px;
+    margin-right: 10px;
+    align-self: flex-start;
+}
+
+.toolbox-group:last-child {
+    margin-right: 0;
+}
+
+.pencil-sizes-container {
+    display: flex;
+}
+
+#player-container {
+    display: flex;
+    flex-direction: column;
+    grid-column: 1;
+    grid-row-start: 2;
+    grid-row-end: 3;
+}
+
+.player {
+    background-color: rgb(255, 255, 255);
+    padding: 0.2rem;
+    display: grid;
+    grid-template-columns: fit-content(100%) auto;
+    grid-template-rows: 1fr 1fr;
+}
+
+.player + .player {
+    margin-top: 5px;
+}
+
+.playername {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    flex: 1;
+}
+
+.playername-self {
+    font-weight: bold;
+}
+
+.player-done {
+    background-color: rgb(141, 224, 15);
+}
+
+.rank {
+    display: flex;
+    grid-row-start: 1;
+    grid-row-end: 3;
+    justify-content: center;
+    align-items: center;
+    width: 2.5rem;
+    font-size: 1.5rem;
+}
+
+.playerscore-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.score-and-status {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.last-turn-score {
+    font-size: 0.8rem;
+    color: lightslategray;
+    padding-left: 0.2rem;
+}
+
+#kick-dialog-players {
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.kick-player-button {
+    width: 100%;
+    border: none;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.kick-player-button + .kick-player-button {
+    margin-top: 0.5rem;
+}
+
+.game-over-scoreboard {
+    overflow-y: auto;
+}
+
+.gameover-scoreboard-entry {
+    font-size: 1.3rem;
+    padding: 0.3rem 1rem 0.3rem 1rem;
+    display: flex;
+    flex-direction: row;
+    background-color: rgb(245, 245, 245);
+}
+
+.gameover-scoreboard-entry + .gameover-scoreboard-entry {
+    margin-top: 0.5rem;
+}
+
+.gameover-scoreboard-entry-self {
+    font-weight: bold;
+}
+
+.gameover-scoreboard-entry:last-child {
+    margin-bottom: 1rem;
+}
+
+.gameover-scoreboard-rank {
+    margin-right: 1rem;
+}
+
+.gameover-scoreboard-name {
+    flex:1;
+    text-align: center;
+}
+
+.gameover-scoreboard-score {
+    margin-left: 1rem;
+}
+
+#restart-button {
+    display: none;
+}
+
+#reconnect-dialog {
+    /* As this dialog is very important, it should always be on the top. */
+    z-index: 100;
+}
+
+.namechange-field {
+    margin-right: 0.25rem;
+}
+
+#waitchoose-drawer {
+    font-weight: bold;
+}
+
+@media (orientation: portrait), (max-aspect-ratio: 4/3) {
+    #lobby {
+        grid-template-columns: 2fr 3fr;
+        grid-template-rows: min-content min-content min-content auto;
+    }
+
+    #lobby-header {
+        grid-template-columns: max-content auto max-content;
+
+        grid-column-start: 1;
+        grid-column-end: 3;
+        grid-row: 1;
+    }
+
+    #round-container, #time-left {
+        font-size: 1.2rem;
+    }
+
+    #time-left-value {
+        min-width: 2.4rem;
+        width: 2.4rem;
+    }    
+
+    .header-button-image {
+        width: 1.2rem;
+        height: 1.2rem;
+    }
+
+    .guess-letter {
+        font-size: 1.2rem;
+    }
+
+    #drawing-board-wrapper {
+        grid-column-start: 1;
+        grid-column-end: 3;
+        grid-row: 2;
+    }
+
+    #toolbox {
+        grid-row: 3;
+        grid-column-start: 1;
+        grid-column-end: 3;
+    }
+
+    #player-container {
+        grid-column: 1;
+        grid-row: 4;
+    }
+
+    #chat {
+        grid-column: 2;
+        grid-row: 4;
+    }
+
+    #message-container {
+        max-height: 5rem;
+    }
+}

@@ -1,0 +1,20 @@
+.error-title, .error-message {
+    display: block;
+}
+
+.error-title {
+    font-size: 13rem;
+}
+
+.error-message {
+    font-size: 4rem;
+    margin: 2vw;
+}
+
+.go-back, .go-back:link, .go-back:visited {
+    display: block;
+    font-size: 3rem;
+    color: rgb(248, 148, 164);
+    text-align: center;
+    flex: 1 1;
+}
