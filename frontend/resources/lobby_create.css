@@ -3,13 +3,14 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    opacity: 1;
     margin-top: 10px;
     margin-bottom: 10px;
 }
 
 .content-container {
     display: block;
-    background-color: rgb(250, 192, 202);
+    background-color: rgb(117, 166, 230);
     padding: 1rem 3rem 1rem 3rem;
 }
 
@@ -53,7 +54,7 @@
     flex-direction: column;
     display: none;
     border: none;
-    background-color: white;
+    background-color:rgba(255, 255, 255, 0.4);
     flex: 1 1;
     margin: 0 1rem 1rem 1rem;
     padding: 1rem;
@@ -83,6 +84,7 @@
 .table-wrapper {
     flex: 1;
     border: 1px solid slategray;
+    background-color: rgba(255, 255, 255, 0.5);
     overflow-y: scroll;
 }
 
