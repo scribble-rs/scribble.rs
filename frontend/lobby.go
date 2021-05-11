@@ -52,7 +52,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 
 		if player == nil {
 			if !lobby.HasFreePlayerSlot() {
-				userFacingError(w, "Sorry, but the lobby is full.")
+				userFacingError(w, "متاسفانه اتاق پر است.")
 				return
 			}
 
@@ -61,7 +61,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 				if otherPlayer.GetLastKnownAddress() == requestAddress {
 					clientsWithSameIP++
 					if clientsWithSameIP >= lobby.ClientsPerIPLimit {
-						userFacingError(w, "Sorry, but you have exceeded the maximum number of clients per IP.")
+						userFacingError(w, "حداکثر تعداد افرادی که با این آیپی میتواندد وارد شوند داخل بازی هستند")
 						return
 					}
 				}
@@ -78,7 +78,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 			})
 		} else {
 			if player.Connected && player.GetWebsocket() != nil {
-				userFacingError(w, "It appears you already have an open tab for this lobby.")
+				userFacingError(w, "شما در یک تب دیگه توی بازی هستید")
 				return
 			}
 			player.SetLastKnownAddress(requestAddress)

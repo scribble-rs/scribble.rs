@@ -10,7 +10,7 @@ func initPersianTranslation() Translation {
 	translation.put("game-not-started-title", "بازی شروع نشده")
 	translation.put("waiting-for-host-to-start", "لطفا منتظر بمانید بازی شروع شود")
 
-	translation.put("round", "راند")
+	translation.put("round", "دور")
 	translation.put("toggle-soundeffects", "قطع/وصل کردن صدا")
 	translation.put("change-your-name", "تغییر نام کاربری")
 	translation.put("randomize", "شانسی")
