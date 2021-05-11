@@ -48,6 +48,9 @@
 
                 {{end}}
                 <form id="lobby-create" class="input-container" action="{{.RootPath}}/ssrCreateLobby" method="POST">
+                    <b>{{.Translation.Get "username"}}</b>
+                    <input class="input-item" name="username" id="username-id"/>
+
                     <b>{{.Translation.Get "word-language"}}</b>
                     <select class="input-item" name="language" placeholder="Choose your language">
                         {{$language := .Language}}
@@ -140,6 +143,8 @@
 </div>
 
 <script type="text/javascript">
+    document.getElementById("username-id").value = localStorage.getItem("username");
+
     let lobbyTableLoaded = false;
     let lobbyTableBody = document.getElementById("lobby-table-body");
     let selectedLobby;

@@ -16,6 +16,7 @@ func initPersianTranslation() Translation {
 	translation.put("randomize", "شانسی")
 	translation.put("apply", "تایید")
 	translation.put("save", "ذخیره")
+	translation.put("username", "نام کاربری")
 	translation.put("votekick-a-player", "رای برای اخراج یک بازیکان")
 	translation.put("time-left", "زمان باقیمانده")
 

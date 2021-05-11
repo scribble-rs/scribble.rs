@@ -92,15 +92,7 @@
                         <div id="start-dialog" class="center-dialog">
                             <span class="dialog-title">{{.Translation.Get "start-the-game"}}</span>
                             <div class="center-dialog-content">
-                                <div style="display: flex; flex-direction: column;">
-                                    {{.Translation.Get "change-your-name"}}:
-                                    <div style="display: flex; flex-direction: row;">
-                                        <input class="namechange-field" type="text"
-                                            id="namechange-field-start-dialog"></input>
-                                        <button class="dialog-button"
-                                            onclick="changeName(document.getElementById('namechange-field-start-dialog').value)">{{.Translation.Get "apply"}}</button>
-                                    </div>
-                                </div>
+
                                 <div class="button-center-wrapper">
                                     <button class="dialog-button" onclick="startGame()">{{.Translation.Get "start"}}</button>
                                 </div>
@@ -203,7 +195,7 @@
                         <div id="game-over-dialog" class="center-dialog">
                             <span id="game-over-dialog-title" class="dialog-title">Game over!</span>
                             <div id="game-over-scoreboard"></div>
-                            <button id="restart-button" class="dialog-button" onclick="startGame()">Restart</button>
+                            <button id="restart-button" class="dialog-button" onclick="reStartGame()">شروع دوباره</button>
                         </div>
 
                         <div id="kick-dialog" class="center-dialog">
@@ -597,13 +589,12 @@
                     data: name,
                 }));
             }
-            document.cookie = "username=" + name
+            localStorage.setItem("username", name);
         }
 
         function setUsernameLocally(name) {
             ownName = name;
             namechangeFieldUnstartedDialog.value = name;
-            namechangeFieldStartDialog.value = name;
             namechangeField.value = name;
         }
 
@@ -845,6 +836,12 @@
         }
 
         function startGame() {
+            socket.send(JSON.stringify({
+                type: "start",
+            }));
+        }
+
+        function reStartGame(){
             socket.send(JSON.stringify({
                 type: "start",
             }));
