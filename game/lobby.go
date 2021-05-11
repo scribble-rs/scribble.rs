@@ -854,10 +854,8 @@ func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTim
 // of an adverb, an adjective and a animal name. The result can generally be
 // trusted to be sane.
 func generatePlayerName() string {
-	adjective := strings.Title(petname.Adjective())
-	adverb := strings.Title(petname.Adverb())
 	name := strings.Title(petname.Name())
-	return adverb + adjective + name
+	return name
 }
 
 // Message represents a message in the chatroom.

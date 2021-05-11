@@ -14,7 +14,7 @@ import (
 func ParsePlayerName(value string) (string, error) {
 	trimmed := strings.TrimSpace(value)
 	if trimmed == "" {
-		return trimmed, errors.New("the player name must not be empty")
+		return trimmed, errors.New("اسم بازیکن نمیتواند خالی باشد")
 	}
 
 	return trimmed, nil
