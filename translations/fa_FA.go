@@ -88,7 +88,7 @@ func initPersianTranslation() Translation {
 	translation.put("source-code", "سورس")
 	translation.put("help", "راهنما")
 	translation.put("contact", "تماس با ما")
-	translation.put("submit-feedback", "ثبت نظر")
+	translation.put("submit-feedback", "پیشنهاد یا گزارش باگ")
 	translation.put("stats", "استاتوس")
 
 	RegisterTranslation("fa", translation)

@@ -25,7 +25,8 @@ footer {
 }
 
 .footer-item + .footer-item {
-    margin-left: 1rem;
+    margin-left: 2px;
+    margin-right: 2px;
 }
 
 a {
