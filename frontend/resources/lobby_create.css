@@ -42,6 +42,8 @@
     outline: none;
     cursor: pointer;
     padding: 1rem;
+    text-align: center;
+    font-family: 'BTitr';
 }
 
 .tab-button:checked + .tab-label {
