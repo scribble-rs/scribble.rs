@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	NameGenerator "github.com/Ahmadrezadl/funny-name-generator"
 	"log"
 	"math/rand"
 	"net/http"
@@ -17,7 +18,7 @@ import (
 func main() {
 	portHTTPFlag := flag.Int("portHTTP", -1, "defines the port to be used for http mode")
 	flag.Parse()
-
+	NameGenerator.Randomize()
 	var portHTTP int
 	if *portHTTPFlag != -1 {
 		portHTTP = *portHTTPFlag

@@ -3,6 +3,7 @@ package game
 import (
 	"encoding/json"
 	"fmt"
+	NameGenerator "github.com/Ahmadrezadl/funny-name-generator"
 	"log"
 	"math"
 	"math/rand"
@@ -14,7 +15,6 @@ import (
 
 	discordemojimap "github.com/Bios-Marcel/discordemojimap/v2"
 	"github.com/agnivade/levenshtein"
-	petname "github.com/dustinkirkland/golang-petname"
 	"github.com/gofrs/uuid"
 	"github.com/kennygrant/sanitize"
 	"golang.org/x/text/cases"
@@ -854,7 +854,7 @@ func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTim
 // of an adverb, an adjective and a animal name. The result can generally be
 // trusted to be sane.
 func generatePlayerName() string {
-	name := strings.Title(petname.Name())
+	name := NameGenerator.PersianName()
 	return name
 }
 
