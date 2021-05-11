@@ -428,6 +428,13 @@
                 registerMessageHandler(socket);
 
                 console.log("Successfully Connected");
+                if(localStorage.getItem("username") !== null)
+                {
+                    socket.send(JSON.stringify({
+                        type: "name-change",
+                        data: localStorage.getItem("username"),
+                    }));
+                }
             };
         }
 
@@ -450,6 +457,8 @@
         }
 
         connectToWebsocket();
+
+
 
         //In order to avoid automatically canceling the socket connection, we keep
         //sending dummy events every 5 seconds. This was a problem on Heroku. If

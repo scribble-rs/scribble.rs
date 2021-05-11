@@ -9,6 +9,7 @@ body {
     background-image: url('background.png');
 }
 
+
 .content-wrapper {
     display: flex;
     flex-direction: column;

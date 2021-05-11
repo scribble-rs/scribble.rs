@@ -158,7 +158,7 @@ type Fill struct {
 
 // MaxPlayerNameLength defines how long a string can be at max when used
 // as the playername.
-const MaxPlayerNameLength int = 30
+const MaxPlayerNameLength int = 35
 
 // Player represents a participant in a Lobby.
 type Player struct {

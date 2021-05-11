@@ -25,6 +25,7 @@ type robotPageData struct {
 
 // ssrEnterLobby opens a lobby, either opening it directly or asking for a lobby.
 func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
+
 	lobby, err := api.GetLobby(r)
 	if err != nil {
 		userFacingError(w, err.Error())
@@ -32,6 +33,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userAgent := strings.ToLower(r.UserAgent())
+
 	if !(strings.Contains(userAgent, "gecko") || strings.Contains(userAgent, "chrome") || strings.Contains(userAgent, "opera") || strings.Contains(userAgent, "safari")) {
 		templatingError := pageTemplates.ExecuteTemplate(w, "robot-page", &robotPageData{
 			BasePageConfig: currentBasePageConfig,
@@ -67,8 +69,16 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 
-			newPlayer := lobby.JoinPlayer(api.GetPlayername(r))
+			name := api.GetPlayername(r)
+			usernameCookie, noCookieError := r.Cookie("username")
+			if noCookieError == nil {
+				username := usernameCookie.Value
+				if username != "" {
+					name = username
+				}
+			}
 
+			newPlayer := lobby.JoinPlayer(name)
 			// Use the players generated usersession and pass it as a cookie.
 			http.SetCookie(w, &http.Cookie{
 				Name:     "usersession",
