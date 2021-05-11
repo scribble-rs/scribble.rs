@@ -380,6 +380,7 @@
 
     <script type="text/javascript" src="{{.RootPath}}/resources/floodfill.js"></script>
     <script type="text/javascript">
+    
         String.prototype.format = function() {
             return [...arguments].reduce((p,c) => p.replace(/%s/,c), this);
         };
@@ -474,6 +475,8 @@
             socket.onclose = null;
             socket.close();
         };
+
+        
 
         const messageInput = document.getElementById("message-input");
         const playerContainer = document.getElementById("player-container");
@@ -1619,6 +1622,37 @@
             //We never want transparency, therefore alpha is always 255.
             imageData.data[offset + 3] = 255;
         }
+
+        let sizeSlot = 0;
+        function wheelSize(e) {
+            event.preventDefault();
+            sizeSlot += Math.min(Math.max(-1, e.deltaY), 1);
+            if (sizeSlot < 0) {
+                sizeSlot = 0;
+            } else if (sizeSlot > 3) {
+                sizeSlot = 3;
+            }
+
+            switch (sizeSlot) {
+                case 0:
+                    n = 8;
+                    break;
+                case 1:
+                    n = 16;
+                    break;
+                case 2:
+                    n = 24;
+                    break;
+                case 3:
+                    n = 32;
+                    break;
+            }
+
+            document.getElementById('size-' + n + '-button').checked = true;
+            setLineWidth(n);
+        }
+
+        drawingBoard.onwheel = wheelSize;
     </script>
 </body>
 
