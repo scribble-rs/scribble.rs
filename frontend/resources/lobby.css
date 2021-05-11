@@ -46,6 +46,7 @@
     font-family: monospace;
     font-weight: bold;
     font-size: 1.5rem;
+    margin-left: 3px;
 }
 
 .guess-letter + .guess-letter {

@@ -36,7 +36,7 @@ func initPersianTranslation() Translation {
 	translation.put("max-players-setting", "حداکثر تعداد بازیکنان")
 	translation.put("public-lobby-setting", "اتاق عمومی")
 	translation.put("custom-words", "کلمات خودی")
-	translation.put("custom-words-info", "کلمات خود را با , از هم جدا کنید")
+	translation.put("custom-words-info", "کلمات خود را با - (خط فاصله) از هم جدا کنید")
 	translation.put("custom-words-chance-setting", "شانس استفاده از کلمات خودی")
 	translation.put("players-per-ip-limit-setting", "تعداد بازیکن از آیپی یکسان")
 	translation.put("enable-votekick-setting", "قابلیت کیک کردن بازیکنان")

@@ -34,15 +34,15 @@ func ParseLanguage(value string) (string, error) {
 func ParseDrawingTime(value string) (int, error) {
 	result, parseErr := strconv.ParseInt(value, 10, 64)
 	if parseErr != nil {
-		return 0, errors.New("the drawing time must be numeric")
+		return 0, errors.New("زمان هر نقاشی باید یک عدد باشد")
 	}
 
 	if result < game.LobbySettingBounds.MinDrawingTime {
-		return 0, fmt.Errorf("drawing time must not be smaller than %d", game.LobbySettingBounds.MinDrawingTime)
+		return 0, fmt.Errorf("زمان هر نقاشی نباید از %d کمتر باشد.", game.LobbySettingBounds.MinDrawingTime)
 	}
 
 	if result > game.LobbySettingBounds.MaxDrawingTime {
-		return 0, fmt.Errorf("drawing time must not be greater than %d", game.LobbySettingBounds.MaxDrawingTime)
+		return 0, fmt.Errorf("زمان هر نقاشی نباید از %d بیشتر باشد", game.LobbySettingBounds.MaxDrawingTime)
 	}
 
 	return int(result), nil
@@ -51,15 +51,15 @@ func ParseDrawingTime(value string) (int, error) {
 func ParseRounds(value string) (int, error) {
 	result, parseErr := strconv.ParseInt(value, 10, 64)
 	if parseErr != nil {
-		return 0, errors.New("the rounds amount must be numeric")
+		return 0, errors.New("تعداد نوبت ها باید عدد باشد")
 	}
 
 	if result < game.LobbySettingBounds.MinRounds {
-		return 0, fmt.Errorf("rounds must not be smaller than %d", game.LobbySettingBounds.MinRounds)
+		return 0, fmt.Errorf("تعداد نوبت ها نمیتواند از %d کمتر باشد", game.LobbySettingBounds.MinRounds)
 	}
 
 	if result > game.LobbySettingBounds.MaxRounds {
-		return 0, fmt.Errorf("rounds must not be greater than %d", game.LobbySettingBounds.MaxRounds)
+		return 0, fmt.Errorf("تعداد نوبت ها نمیتواند از %d بیشتر باشد", game.LobbySettingBounds.MaxRounds)
 	}
 
 	return int(result), nil
@@ -68,15 +68,15 @@ func ParseRounds(value string) (int, error) {
 func ParseMaxPlayers(value string) (int, error) {
 	result, parseErr := strconv.ParseInt(value, 10, 64)
 	if parseErr != nil {
-		return 0, errors.New("the max players amount must be numeric")
+		return 0, errors.New("حداکثر تعداد بازیکنان باید عدد باشد")
 	}
 
 	if result < game.LobbySettingBounds.MinMaxPlayers {
-		return 0, fmt.Errorf("maximum players must not be smaller than %d", game.LobbySettingBounds.MinMaxPlayers)
+		return 0, fmt.Errorf("حداکثر تعداد بازیکنان نباید از %d کمتر باشد", game.LobbySettingBounds.MinMaxPlayers)
 	}
 
 	if result > game.LobbySettingBounds.MaxMaxPlayers {
-		return 0, fmt.Errorf("maximum players must not be greater than %d", game.LobbySettingBounds.MaxMaxPlayers)
+		return 0, fmt.Errorf("حداکثر تعداد بازیکنان نباید از %d بیشتر باشد", game.LobbySettingBounds.MaxMaxPlayers)
 	}
 
 	return int(result), nil
@@ -89,11 +89,11 @@ func ParseCustomWords(value string) ([]string, error) {
 	}
 
 	lowercaser := cases.Lower(language.English)
-	result := strings.Split(trimmedValue, ",")
+	result := strings.Split(trimmedValue, "-")
 	for index, item := range result {
 		trimmedItem := lowercaser.String(strings.TrimSpace(item))
 		if trimmedItem == "" {
-			return nil, errors.New("custom words must not be empty")
+			return nil, errors.New("هیچ کلمه خودی ای نباید بی حرف باشد")
 		}
 		result[index] = trimmedItem
 	}
