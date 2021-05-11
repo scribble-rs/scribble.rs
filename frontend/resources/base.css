@@ -6,6 +6,7 @@ body {
     font-family: 'Montserrat';
     background-color: antiquewhite;
     margin: 0;
+    background-image: url('background.png');
 }
 
 .content-wrapper {
