@@ -1610,6 +1610,31 @@
 
             return circleData;
         }
+        
+        let sizeSlot = 8;
+        function wheelSize(e) {
+            event.preventDefault();
+            sizeSlot += Math.min(Math.max(-1, e.deltaY), 1);
+            if (sizeSlot < 6) {
+                sizeSlot = 6;
+            } else if (sizeSlot > 32) {
+                sizeSlot = 32;
+            }
+
+            if(sizeSlot < 12)
+                n = 8
+            else if(sizeSlot < 20)
+                n = 16
+            else if(sizeSlot < 28)
+                n = 24
+            else
+                n = 32
+
+            document.getElementById('size-' + n + '-button').checked = true;
+            setLineWidth(sizeSlot);
+        }
+
+        drawingBoard.onwheel = wheelSize;
 
         function setPixel(imageData, x, y, color) {
             const offset = (y * imageData.width + x) * 4;
