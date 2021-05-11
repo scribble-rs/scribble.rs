@@ -39,6 +39,7 @@
                             title="{{.Translation.Get "change-your-name"}}">
                             <img src="{{.RootPath}}/resources/user.svg" class="header-button-image" />
                         </button>
+                        <input class="input-id" contenteditable="false" id="id_text" spellcheck="false" value="موستو بیار آی دی اتاقو ببینی" onclick="copyText()" onmouseenter="setId()" onmouseleave="setDefault()">
                     </div>
                     <div id="word-container"></div>
                     <div>
@@ -1623,7 +1624,7 @@
             imageData.data[offset + 3] = 255;
         }
 
-        let sizeSlot = 6;
+        let sizeSlot = 8;
         function wheelSize(e) {
             event.preventDefault();
             sizeSlot += Math.min(Math.max(-1, e.deltaY), 1);
@@ -1647,6 +1648,25 @@
         }
 
         drawingBoard.onwheel = wheelSize;
+
+        function copyText(){
+            var copyText = document.getElementById("id_text");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+            /* Copy the text inside the text field */
+            document.execCommand("copy");
+            copyText.value = "لینک کپی شد!"
+        }
+
+        function setId()
+        {
+            document.getElementById("id_text").value = window.location.href;
+        }
+
+        function setDefault()
+        {
+            document.getElementById("id_text").value = "موستو بیار اینجا لینک اتاقو ببینی"
+        }
     </script>
 </body>
 
