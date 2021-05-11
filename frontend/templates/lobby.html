@@ -1623,33 +1623,27 @@
             imageData.data[offset + 3] = 255;
         }
 
-        let sizeSlot = 0;
+        let sizeSlot = 6;
         function wheelSize(e) {
             event.preventDefault();
             sizeSlot += Math.min(Math.max(-1, e.deltaY), 1);
-            if (sizeSlot < 0) {
-                sizeSlot = 0;
-            } else if (sizeSlot > 3) {
-                sizeSlot = 3;
+            if (sizeSlot < 6) {
+                sizeSlot = 6;
+            } else if (sizeSlot > 32) {
+                sizeSlot = 32;
             }
 
-            switch (sizeSlot) {
-                case 0:
-                    n = 8;
-                    break;
-                case 1:
-                    n = 16;
-                    break;
-                case 2:
-                    n = 24;
-                    break;
-                case 3:
-                    n = 32;
-                    break;
-            }
+            if(sizeSlot < 12)
+                n = 8
+            else if(sizeSlot < 20)
+                n = 16
+            else if(sizeSlot < 28)
+                n = 24
+            else
+                n = 32
 
             document.getElementById('size-' + n + '-button').checked = true;
-            setLineWidth(n);
+            setLineWidth(sizeSlot);
         }
 
         drawingBoard.onwheel = wheelSize;
