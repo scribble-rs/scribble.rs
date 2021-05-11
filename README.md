@@ -1,133 +1,57 @@
-<h1 align="center">Scribble.rs</h1>
-
 <p align="center">
-  <a href="https://github.com/scribble-rs/scribble.rs/actions">
-    <img src="https://github.com/scribble-rs/scribble.rs/workflows/Run%20scribble-rs%20tests/badge.svg">
-  </a>
-  <a href="https://codecov.io/gh/scribble-rs/scribble.rs">
-    <img src="https://codecov.io/gh/scribble-rs/scribble.rs/branch/master/graph/badge.svg">
-  </a>
-  <a href="https://liberapay.com/biosmarcel/donate">
-    <img src="https://img.shields.io/liberapay/receives/biosmarcel.svg?logo=liberapay">
-  </a>
-  <a href="https://heroku.com/deploy?template=https://github.com/scribble-rs/scribble.rs/tree/master">
-    <img src="https://www.herokucdn.com/deploy/button.png">
-  </a>
+<img src="https://raw.githubusercontent.com/Ahmadrezadl/bekeshbekesh/master/frontend/resources/BekeshBekeshLogo.png">
 </p>
 
-Scribble.rs is an alternative to the web-based drawing game skribbl.io. My main
-problems with skribbl.io were the ads and the fact that a disconnect would
-cause you to lose your points. On top of that, the automatic word choice was
-quite annoying and caused some frustration.
+Play on this [Website](https://bekeshbekesh.herokuapp.com/)
 
-The site will not display any ads or share any data with third parties.
+> ممکنه سایت جواب درخواست هاتونو نده.
+> در این صورت کمی صبر کنید و دوباره تلاش کنید 
 
-## News and discussion
+بـکـش بـکـش یک بازی گروهی آنلاین اوپن سورس است.
+کسی که بهتر نقاشی بکشه و نقاشی بقیه رو حدس بزنه برنده ی این بازی میشه
 
-We have a new blog over at https://scribble-rs.github.io. Over there, you can read about some highlights and discuss them in the comment section.
-The comment section is powered by utteranc.es, which means it'll use the blogs repository for comments and you can simply use your GitHub account for commenting.
+**این بازی هیچ اطلاعاتی از شما نگه نمیدارد**
 
-## Play now
 
-Feel free to play on this instance
 
-* https://scribblers-official.herokuapp.com/
-  > Might not respond right-away, just wait some seconds / minutes, as it
-  > shuts down automatically when unused.
 
-### Hosting your own instance for free
 
-By using Heroku, you can deploy a temporary container that runs scribble.rs.
-The container will not have any cost and automatically suspend as soon as it
-stops receiving traffic for a while.
+## ران و بیلد کردن پروژه
 
-Simply create an account at https://id.heroku.com/login and then click this link:
-
-https://heroku.com/deploy?template=https://github.com/scribble-rs/scribble.rs/tree/master
-
-## Building / Running
-
-Run the following to build the application:
+با استفاده از کامند زیر پروژه را کلون کنید
 
 ```shell
-git clone https://github.com/scribble-rs/scribble.rs.git
+git clone https://github.com/Ahmadrezadl/bekeshbekesh.git
 cd scribble.rs
 ```
 
-For -nix systems:
+برای لینوکس با کامند زیر بیلد بگیرید
 ```shell
 # run `make` to see all available commands
 make build
 ```
 
-For Windows:
+برای ویندوز با کامد زیر بیلد بگیرید
 ```shell
-go build -o scribblers .
+go build -o bekeshbekesh.exe .
 ```
 
-This will produce a portable binary called `scribblers`. The binary doesn't
-have any dependencies and should run on every system as long as it has the
-same architecture and OS family as the system it was compiled on.
+حالا فایل باینری ساخته شده را اجرا کنید
 
-The default port will be `8080`. The parameter `portHTTP` allows changing the
-port though.
+پورت پیشفرض پروژه 8080 است
 
-It should run on any system that go supports as a compilation target.
+برای اجرای پروژه به گو نسخه `1.16` یا بالاتر نیاز دارید
 
-This application uses go modules, therefore you need to make sure that you
-have go version `1.16` or higher.
 
-## Docker
 
-Alternatively there's a docker container:
-
-```shell
-docker pull biosmarcel/scribble.rs
-```
-
-The docker container is built from the master branch on every push, so it
-should always be up-to-date.
-
-### Changing default port
-
-The default port is `8080`. To override it, run:
-```shell
-docker run -p <port-number>:<port-number> biosmarcel/scribble.rs --portHTTP=<port-number>
-```
-
-## Contributing
-
-There are many ways you can contribute:
-
-* Update / Add documentation in the wiki of the GitHub repository
-* Extend this README
-* Create feature requests and bug reports
-* Solve issues by creating Pull Requests
-* Tell your friends about the project
-
-## Donating
-
-If you can't or don't want to contribute in any of the ways
-listed above, you can always donate something to the project.
-
-* PayPal: https://www.paypal.com/donate/?hosted_button_id=RZ7N8D95TXFEN
-* Liberapay: https://liberapay.com/biosmarcel/donate
-* Etherum: 0x49939106563a9de8a777Cf5394149423b1dFd970
-* XLM/Lumen: GDNCEW46OTDMXMSNVM4K7GNPIXNYT5BOZXVZ7M4QSRB6OB3BRM2VYDB5
-
-If there's a steady income stream I'd spend it on infrastructure and a domain ;)
+##ویژگی ها نسبت به پروژه اصلی 
+* اضافه شدن قابلیت های بیشتر
+* تغییرات گرافیکی بهتر
+* فارسی سازی کامل
 
 ## Credits
 
-These resources are by people unrelated to the project, whilst not every of these
-resources requires attribution as per license, we'll do it either way ;)
-
-If you happen to find a mistake here, please make a PR. If you are one of the
-authors and feel like we've wronged you, please reach out.
-
-* Favicon - [Fredy Sujono](https://www.iconfinder.com/freud)
-* Rubber Icon - Made by [Pixel Buddha](https://www.flaticon.com/authors/pixel-buddha) from [flaticon.com](https://flaticon.com)
-* Fill Bucket Icon - Made by [inipagistudio](https://www.flaticon.com/authors/inipagistudio) from [flaticon.com](https://flaticon.com)
-* Kicking Icon - [Kicking Icon #309402](https://icon-library.net/icon/kicking-icon-4.html)
-* Sound / No sound Icon - Made by Viktor Erikson (If this is you or you know who this is, send me a link to that persons Homepage)
-* Profile Icon - Made by [kumakamu](https://www.iconfinder.com/kumakamu)
+* Main Project - [Scribble.rs](https://github.com/scribble-rs/scribble.rs/)
+* Game Background - [Skribbl.io](http://skribbl.io)
+* Name Generator - [Funny Name Generator](http://github.com/Ahmadrezadl/funny-name-generator)
+* Persian Words - [Persian HangMan Words](https://github.com/Ahmadrezadl/Persian-HangMan-Words)
