@@ -17,6 +17,7 @@
 
     <h1><img src="/resources/BekeshBekeshLogo.png" alt="بِکِش بِکِش"></h1>
 
+    
     <div class="tab-header">
         <label for="create-lobby-tab-button">
             <input id="create-lobby-tab-button" class="custom-check-or-radio tab-button"
@@ -102,6 +103,7 @@
                     <table id="lobby-table">
                         <thead>
                             <tr>
+                                <th>{{.Translation.Get "game-host"}}</th>
                                 <th>{{.Translation.Get "word-language"}}</th>
                                 <th>{{.Translation.Get "rounds-setting"}}</th>
                                 <th>{{.Translation.Get "players"}}</th>
@@ -178,6 +180,9 @@
                 showLobbyDetails(null);
 
                 data.forEach(lobby => {
+                    const host = document.createElement("td");
+                    host.innerText = lobby.Host;
+
                     const wordpackCell = document.createElement("td");
                     wordpackCell.innerText = lobby.wordpack;
                     const roundsCell = document.createElement("td");
@@ -190,6 +195,8 @@
                     customWordsCell.innerText = lobby.customWords ? '{{.Translation.Get "yes"}}' : '{{.Translation.Get "no"}}';
 
                     const newRow = document.createElement("tr");
+
+                    newRow.appendChild(host);
                     newRow.appendChild(wordpackCell);
                     newRow.appendChild(roundsCell);
                     newRow.appendChild(playersCell);

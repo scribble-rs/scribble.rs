@@ -344,6 +344,10 @@ func (lobby *Lobby) GetPlayers() []*Player {
 	return lobby.players
 }
 
+func (lobby *Lobby) getCreator() *Player {
+	return lobby.creator
+}
+
 // GetOccupiedPlayerSlots counts the available slots which can be taken by new
 // players. Whether a slot is available is determined by the player count and
 // whether a player is disconnect or furthermore how long they have been

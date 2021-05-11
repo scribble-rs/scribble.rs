@@ -10,7 +10,7 @@
 
 .content-container {
     display: block;
-    background-color: rgb(117, 166, 230);
+    background-color: white;
     padding: 1rem 3rem 1rem 3rem;
 }
 
@@ -30,10 +30,13 @@
     grid-column-end: 3;
 }
 
+
 .tab-header {
     display: grid;
     grid-template-columns: 1fr 1fr;
     margin: 0 1rem 0 1rem;
+    margin-left: 10%;
+    margin-right: 10%;
 }
 
 .tab-label {
@@ -61,6 +64,8 @@
     margin: 0 1rem 1rem 1rem;
     padding: 1rem;
     overflow: auto;
+    margin-left: 10%;
+    margin-right: 10%;
 }
 
 /* display: block causes the element to be visible, since the default value is none */

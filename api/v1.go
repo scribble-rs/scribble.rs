@@ -14,12 +14,13 @@ import (
 //This file contains the API methods for the public API
 
 var (
-	ErrNoLobbyIDSupplied = errors.New("please supply a lobby id via the 'lobby_id' query parameter")
-	ErrLobbyNotExistent  = errors.New("the requested lobby doesn't exist")
+	ErrNoLobbyIDSupplied = errors.New("اتاق مورد نظر پیدا نشد")
+	ErrLobbyNotExistent  = errors.New("اتاق مورد نظر پیدا نشد")
 )
 
 // LobbyEntry is an API object for representing a join-able public lobby.
 type LobbyEntry struct {
+	Host			string `json:"LobbyHost`
 	LobbyID         string `json:"lobbyId"`
 	PlayerCount     int    `json:"playerCount"`
 	MaxPlayers      int    `json:"maxPlayers"`
@@ -39,6 +40,7 @@ func publicLobbies(w http.ResponseWriter, r *http.Request) {
 		//While one would expect locking the lobby here, it's not very
 		//important to get 100% consistent results here.
 		lobbyEntries = append(lobbyEntries, &LobbyEntry{
+			Host:			 lobby.Owner.Name,
 			LobbyID:         lobby.LobbyID,
 			PlayerCount:     lobby.GetOccupiedPlayerSlots(),
 			MaxPlayers:      lobby.MaxPlayers,

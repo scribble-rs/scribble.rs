@@ -31,6 +31,7 @@ func initEnglishTranslation() Translation {
 	translation.put("lobby-settings-changed", "Lobby settings changed")
 	translation.put("advanced-settings", "Advanced settings")
 	translation.put("word-language", "Word-Language")
+	translation.put("game-host", "Game host")
 	translation.put("drawing-time-setting", "Drawing Time")
 	translation.put("rounds-setting", "Rounds")
 	translation.put("max-players-setting", "Maximum Players")
