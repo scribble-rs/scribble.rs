@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" href="{{.RootPath}}/resources/favicon.png" />
 </head>
 
-<body>
+<body style="background-image: url('{{.RootPath}}/resources/background.png');">
     <div class="content-wrapper">
         <noscript><span class="noscript">{{.Translation.Get "requires-js"}}</span></noscript>
 
@@ -62,7 +62,7 @@
                 </div>
             </div>
 
-            <div id="player-container"></div>
+            <div id="player-container" style="background-color: rgba(255,255,255,0.5)"></div>
 
             <div id="drawing-board-wrapper">
                 <div id="drawing-board-inner-wrapper">
