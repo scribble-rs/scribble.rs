@@ -25,7 +25,6 @@ type robotPageData struct {
 
 // ssrEnterLobby opens a lobby, either opening it directly or asking for a lobby.
 func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
-
 	lobby, err := api.GetLobby(r)
 	if err != nil {
 		userFacingError(w, err.Error())
@@ -69,6 +68,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 
+
 			name := api.GetPlayername(r)
 			usernameCookie, noCookieError := r.Cookie("username")
 			if noCookieError == nil {
@@ -101,6 +101,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 			Locale:         locale,
 		}
 	})
+
 
 	//If the pagedata isn't initialized, it means the synchronized block has exited.
 	//In this case we don't want to tempalte the lobby, since an error has occurred

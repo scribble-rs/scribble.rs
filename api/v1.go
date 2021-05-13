@@ -31,6 +31,7 @@ type LobbyEntry struct {
 	Votekick        bool   `json:"votekick"`
 	MaxClientsPerIP int    `json:"maxClientsPerIp"`
 	Wordpack        string `json:"wordpack"`
+	WordsPerRound   int    `json:"wordsPerRound"`
 }
 
 func publicLobbies(w http.ResponseWriter, r *http.Request) {
@@ -50,6 +51,7 @@ func publicLobbies(w http.ResponseWriter, r *http.Request) {
 			CustomWords:     len(lobby.CustomWords) > 0,
 			Votekick:        lobby.EnableVotekick,
 			MaxClientsPerIP: lobby.ClientsPerIPLimit,
+			WordsPerRound:   lobby.WordsPerRound,
 			Wordpack:        lobby.Wordpack,
 		})
 	}
@@ -233,15 +235,18 @@ func editLobby(w http.ResponseWriter, r *http.Request) {
 	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
 	enableVotekick, enableVotekickInvalid := ParseBoolean("enable votekick", r.Form.Get("enable_votekick"))
 	publicLobby, publicLobbyInvalid := ParseBoolean("public", r.Form.Get("public"))
-
+	wordsPerRound, wordsPerRoundInvalid := ParseWordsPerRound(r.Form.Get("words_per_round"))
 	owner := lobby.Owner
 	if owner == nil || owner.GetUserSession() != userSession {
-		http.Error(w, "only the lobby owner can edit the lobby", http.StatusForbidden)
+		http.Error(w, "فقط مدیر لابی میتواند تنظیماتش را تغییر دهد", http.StatusForbidden)
 		return
 	}
 
 	if maxPlayersInvalid != nil {
 		requestErrors = append(requestErrors, maxPlayersInvalid.Error())
+	}
+	if wordsPerRoundInvalid != nil {
+		requestErrors = append(requestErrors, wordsPerRoundInvalid.Error())
 	}
 	if drawingTimeInvalid != nil {
 		requestErrors = append(requestErrors, drawingTimeInvalid.Error())
@@ -285,6 +290,7 @@ func editLobby(w http.ResponseWriter, r *http.Request) {
 		lobby.EnableVotekick = enableVotekick
 		lobby.Public = publicLobby
 		lobby.Rounds = rounds
+		lobby.WordsPerRound = wordsPerRound
 
 		if lobby.State == game.Ongoing {
 			lobby.DrawingTimeNew = drawingTime

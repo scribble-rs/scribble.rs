@@ -172,6 +172,13 @@
                                         <details class="advanced-section">
                                             <summary>{{.Translation.Get "advanced-settings"}}</summary>
                                             <div class="input-container">
+                                                <b>{{.Translation.Get "words-per-round"}}</b>
+
+                                                <input id="lobby-settings-words-per-round" type="number"
+                                                       name="words-per-round" min="{{.MinWordsPerRound}}"
+                                                       max="{{.MaxWordsPerRound}}"
+                                                       value="3" />
+
                                                 <b>{{.Translation.Get "players-per-ip-limit-setting"}}</b>
                                                 <input id="lobby-settings-clients-per-ip-limit" type="number"
                                                     name="clients_per_ip_limit" min="{{.MinClientsPerIPLimit}}"
@@ -631,6 +638,7 @@
                 max_players: document.getElementById("lobby-settings-max-players").value,
                 clients_per_ip_limit: document.getElementById("lobby-settings-clients-per-ip-limit").value,
                 custom_words_chance: document.getElementById("lobby-settings-custom-words-chance").value,
+                words_per_round: document.getElementById("lobby-settings-words-per-round").value
             }), {
                 method: 'PATCH',
             })
@@ -1207,10 +1215,22 @@
 
         function promptWords(wordOne, wordTwo, wordThree, wordFour, wordFive) {
             wordButtonZero.textContent = wordOne;
-            wordButtonOne.textContent = wordTwo;
-            wordButtonTwo.textContent = wordThree;
-            wordButtonThree.textContent = wordFour;
-            wordButtonFour.textContent = wordFive;
+            if(wordTwo)
+                wordButtonOne.textContent = wordTwo;
+            else
+                wordButtonOne.hidden = true
+            if(wordThree)
+                wordButtonTwo.textContent = wordThree;
+            else
+                wordButtonTwo.hidden = true
+            if(wordFour)
+                wordButtonThree.textContent = wordFour;
+            else
+                wordButtonThree.hidden = true
+            if(wordFive)
+                wordButtonFour.textContent = wordFive;
+            else
+                wordButtonFour.hidden = true
             wordDialog.style.visibility = "visible";
         }
 
