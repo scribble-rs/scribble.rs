@@ -30,7 +30,10 @@ var (
 		MinMaxPlayers:        2,
 		MaxMaxPlayers:        24,
 		MinClientsPerIPLimit: 1,
+		WordsPerRound: 3,
 		MaxClientsPerIPLimit: 24,
+		MinWordsPerRound:     1,
+		MaxWordsPerRound:     5,
 	}
 	SupportedLanguages = map[string]string{
 		"فارسی": "فارسی",
@@ -64,6 +67,9 @@ type SettingBounds struct {
 	MaxMaxPlayers        int64 `json:"maxMaxPlayers"`
 	MinClientsPerIPLimit int64 `json:"minClientsPerIpLimit"`
 	MaxClientsPerIPLimit int64 `json:"maxClientsPerIpLimit"`
+	MinWordsPerRound     int64 `json:"minWordsPerRound"`
+	MaxWordsPerRound     int64 `json:"maxWordsPerRound"`
+	WordsPerRound        int64 `json:"wordsPerRound"`
 }
 
 // LineEvent is basically the same as GameEvent, but with a specific Data type.

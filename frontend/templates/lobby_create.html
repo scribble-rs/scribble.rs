@@ -82,6 +82,10 @@
                     <details class="advanced-section">
                         <summary>{{.Translation.Get "advanced-settings"}}</summary>
                         <div class="input-container">
+                            <b>{{.Translation.Get "words-per-round"}}</b>
+                            <input class="input-item" type="number" name="words-per-round" min="{{.MinWordsPerRound}}"
+                                   max="{{.MaxWordsPerRound}}" value="{{.WordsPerRound}}"/>
+
                             <b>{{.Translation.Get "players-per-ip-limit-setting"}}</b>
                             <input class="input-item" type="number" name="clients_per_ip_limit" min="{{.MinClientsPerIPLimit}}"
                             max="{{.MaxClientsPerIPLimit}}" value="{{.ClientsPerIPLimit}}"/>
