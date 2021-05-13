@@ -144,7 +144,7 @@
 }
 
 .chat-name:after {
-    content: ":";
+    content: ": ";
 }
 
 .correct-guess-message {
@@ -181,7 +181,7 @@
     margin-bottom: 1rem;
     font-size: 2.75rem;
     font-weight: bold;
-    color: rgb(240, 105, 127);
+    color: rgb(87, 60, 208);
     text-align: center;
 }
 
