@@ -162,7 +162,7 @@ func (lobby *Lobby) HandleEvent(raw []byte, received *GameEvent, player *Player)
 		}
 
 		drawer := lobby.drawer
-		if player == drawer && len(lobby.wordChoice) > 0 && chosenIndex >= 0 && chosenIndex <= 2 {
+		if player == drawer && len(lobby.wordChoice) > 0 && chosenIndex >= 0 && chosenIndex <= 4 {
 			lobby.CurrentWord = lobby.wordChoice[chosenIndex]
 
 			//Depending on how long the word is, a fixed amount of hints
@@ -561,7 +561,7 @@ func advanceLobby(lobby *Lobby) {
 	lobby.drawer = newDrawer
 	lobby.drawer.State = Drawing
 	lobby.State = Ongoing
-	lobby.wordChoice = GetRandomWords(3, lobby)
+	lobby.wordChoice = GetRandomWords(lobby.WordsPerRound, lobby)
 
 	recalculateRanks(lobby)
 
@@ -804,7 +804,7 @@ func (lobby *Lobby) triggerWordHintUpdate() {
 
 // CreateLobby creates a new lobby including the initial player (owner) and
 // optionally returns an error, if any occurred during creation.
-func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTime, rounds, maxPlayers, customWordsChance, clientsPerIPLimit int, customWords []string, enableVotekick bool) (*Player, *Lobby, error) {
+func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTime, rounds, maxPlayers, customWordsChance, clientsPerIPLimit int, customWords []string, enableVotekick bool, wordsPerRound int) (*Player, *Lobby, error) {
 	lobby := &Lobby{
 		LobbyID: uuid.Must(uuid.NewV4()).String(),
 		EditableLobbySettings: &EditableLobbySettings{
@@ -815,6 +815,7 @@ func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTim
 			ClientsPerIPLimit: clientsPerIPLimit,
 			EnableVotekick:    enableVotekick,
 			Public:            publicLobby,
+			WordsPerRound:     wordsPerRound,
 		},
 		CustomWords:    customWords,
 		currentDrawing: make([]interface{}, 0),

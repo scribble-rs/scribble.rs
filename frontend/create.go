@@ -38,6 +38,7 @@ func createDefaultLobbyCreatePageData() *LobbyCreatePageData {
 		ClientsPerIPLimit: "1",
 		EnableVotekick:    "true",
 		Language:          "فارسی",
+		WordsPerRound:     "3",
 	}
 }
 
@@ -58,6 +59,7 @@ type LobbyCreatePageData struct {
 	ClientsPerIPLimit string
 	EnableVotekick    string
 	Language          string
+	WordsPerRound     string
 }
 
 // ssrCreateLobby allows creating a lobby, optionally returning errors that
@@ -78,6 +80,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 	clientsPerIPLimit, clientsPerIPLimitInvalid := api.ParseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
 	enableVotekick, enableVotekickInvalid := api.ParseBoolean("enable votekick", r.Form.Get("enable_votekick"))
 	publicLobby, publicLobbyInvalid := api.ParseBoolean("public", r.Form.Get("public"))
+	wordsPerRound, wordsPerRoundInvalid := api.ParseWordsPerRound(r.Form.Get("words-per-round"))
 
 	//Prevent resetting the form, since that would be annoying as hell.
 	pageData := LobbyCreatePageData{
@@ -93,6 +96,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 		ClientsPerIPLimit: r.Form.Get("clients_per_ip_limit"),
 		EnableVotekick:    r.Form.Get("enable_votekick"),
 		Language:          r.Form.Get("language"),
+		WordsPerRound:     r.Form.Get("words-per-round"),
 	}
 
 	if languageInvalid != nil {
@@ -122,6 +126,9 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 	if publicLobbyInvalid != nil {
 		pageData.Errors = append(pageData.Errors, publicLobbyInvalid.Error())
 	}
+	if wordsPerRoundInvalid != nil {
+		pageData.Errors = append(pageData.Errors, wordsPerRoundInvalid.Error())
+	}
 
 	translation, locale := determineTranslation(r)
 	pageData.Translation = translation
@@ -137,7 +144,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 
 	var playerName = api.GetPlayername(r)
 
-	player, lobby, createError := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
+	player, lobby, createError := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick,wordsPerRound)
 	if createError != nil {
 		pageData.Errors = append(pageData.Errors, createError.Error())
 		templateError := pageTemplates.ExecuteTemplate(w, "lobby-create-page", pageData)

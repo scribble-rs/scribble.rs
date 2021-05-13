@@ -82,6 +82,23 @@ func ParseMaxPlayers(value string) (int, error) {
 	return int(result), nil
 }
 
+func ParseWordsPerRound(value string) (int, error) {
+	result, parseErr := strconv.ParseInt(value, 10, 64)
+	if parseErr != nil {
+		return 0, errors.New("تعداد کلمات هر نوبت باید عدد باشد")
+	}
+
+	if result < game.LobbySettingBounds.MinWordsPerRound {
+		return 0, fmt.Errorf("تعداد کلمات هر نوبت نباید از %d کمتر باشد", game.LobbySettingBounds.MinWordsPerRound)
+	}
+
+	if result > game.LobbySettingBounds.MaxWordsPerRound {
+		return 0, fmt.Errorf("تعداد کلمات هر نوبت نباید از %d بیشتر باشد", game.LobbySettingBounds.MaxWordsPerRound)
+	}
+
+	return int(result), nil
+}
+
 func ParseCustomWords(value string) ([]string, error) {
 	trimmedValue := strings.TrimSpace(value)
 	if trimmedValue == "" {

@@ -110,6 +110,8 @@ type EditableLobbySettings struct {
 	// Rounds defines how many iterations a lobby does before the game ends.
 	// One iteration means every participant does one drawing.
 	Rounds int `json:"rounds"`
+
+	WordsPerRound int `json:"words-per-round"`
 }
 
 type gameState string
