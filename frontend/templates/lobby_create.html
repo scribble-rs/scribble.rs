@@ -47,7 +47,7 @@
                     </div>
 
                 {{end}}
-                <form id="lobby-create" class="input-container" action="{{.RootPath}}/ssrCreateLobby" method="POST">
+                <form id="lobby-create" class="input-container" action="{{.RootPath}}/ssrCreateLobby" method="POST" onsubmit="return saveAndCreate()">
                     <b>{{.Translation.Get "username"}}</b>
                     <input class="input-item" name="username" id="username-id"/>
 
@@ -90,7 +90,7 @@
                             {{if eq .EnableVotekick "true"}}checked{{end}}/>
                         </div>
                     </details>
-                    <button type="submit" form="lobby-create" style="grid-column-start: 1; grid-column-end: 3;">
+                    <button id="create-lobby-submit" type="submit" form="lobby-create" style="grid-column-start: 1; grid-column-end: 3;">
                             {{.Translation.Get "create-lobby"}}
                     </button>
                 </form>
@@ -222,6 +222,13 @@
                     newRow.addEventListener("click", clickHandler, false);
                 });
             });
+    }
+
+
+
+    function saveAndCreate() {
+        localStorage.setItem("username", document.getElementById("username-id").value);
+        return true;
     }
 
     function showLobbyDetails(lobby) {
