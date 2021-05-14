@@ -29,7 +29,9 @@ func getLanguageIdentifier(language string) string {
 	return languageIdentifiers[language]
 }
 
-// readWordListInternal exists for testing purposes.
+// readWordListInternal exists for testing purposes, it allows passing a custom
+// wordListSupplier, in order to avoid having to write tests aggainst the
+// default language lists.
 func readWordListInternal(
 	lowercaser cases.Caser, chosenLanguage string,
 	wordlistSupplier func(string) (string, error)) ([]string, error) {
@@ -37,9 +39,9 @@ func readWordListInternal(
 	languageIdentifier := getLanguageIdentifier(chosenLanguage)
 	words, available := wordListCache[languageIdentifier]
 	if !available {
-		wordListFile, pkgerError := wordlistSupplier(languageIdentifier)
-		if pkgerError != nil {
-			return nil, pkgerError
+		wordListFile, supplierError := wordlistSupplier(languageIdentifier)
+		if supplierError != nil {
+			return nil, supplierError
 		}
 
 		//Due to people having git autoreplace newline characters, there
@@ -51,6 +53,7 @@ func readWordListInternal(
 		wordListCache[languageIdentifier] = words
 	}
 
+	//We don't shuffle the wordList directory, as the cache isn't threadsafe.
 	shuffledWords := make([]string, len(words))
 	copy(shuffledWords, words)
 	shuffleWordList(shuffledWords)
