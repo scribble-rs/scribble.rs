@@ -141,7 +141,6 @@ func popWordpackWords(wordCount int, lobby *Lobby) []string {
 			//deeper problem.
 			panic(readError)
 		}
-		shuffleWordList(lobby.words)
 	}
 	wordIndex := len(lobby.words) - wordCount
 	lastThreeWords := lobby.words[wordIndex:]
