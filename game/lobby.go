@@ -842,13 +842,6 @@ func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTim
 	lobby.Owner = player
 	lobby.creator = player
 
-	words, err := readWordList(lobby.lowercaser, chosenLanguage)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	lobby.words = words
-
 	return player, lobby, nil
 }
 
