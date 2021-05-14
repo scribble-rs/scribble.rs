@@ -38,7 +38,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 			LobbyData:      api.CreateLobbyData(lobby),
 		})
 		if templatingError != nil {
-			http.Error(w, "error templating robot page", http.StatusInternalServerError)
+			log.Printf("error templating robot page: %d\n", templatingError)
 		}
 		return
 	}
@@ -99,7 +99,6 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 		templateError := pageTemplates.ExecuteTemplate(w, "lobby-page", pageData)
 		if templateError != nil {
 			log.Printf("Error templating lobby: %s\n", templateError)
-			http.Error(w, "error templating lobby", http.StatusInternalServerError)
 		}
 	}
 }
