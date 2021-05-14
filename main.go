@@ -51,5 +51,5 @@ func main() {
 	api.SetupRoutes()
 	frontend.SetupRoutes()
 
-	http.ListenAndServe(fmt.Sprintf(":%d", portHTTP), nil)
+	log.Fatalln(http.ListenAndServe(fmt.Sprintf(":%d", portHTTP), nil))
 }
