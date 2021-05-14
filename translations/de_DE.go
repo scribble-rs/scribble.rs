@@ -18,6 +18,7 @@ func initGermanTranslation() {
 	translation.put("randomize", "Zufälliger Name")
 	translation.put("apply", "Anwenden")
 	translation.put("save", "Speichern")
+	translation.put("show-help", "Hilfe anzeigen")
 	translation.put("votekick-a-player", "Stimme dafür ab, einen Spieler rauszuwerfen")
 	translation.put("time-left", "Zeit")
 
