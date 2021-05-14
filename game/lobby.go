@@ -175,7 +175,16 @@ func (lobby *Lobby) HandleEvent(raw []byte, received *GameEvent, player *Player)
 			lobby.wordChoice = nil
 			lobby.wordHints = createWordHintFor(lobby.CurrentWord, false)
 			lobby.wordHintsShown = createWordHintFor(lobby.CurrentWord, true)
-			lobby.triggerWordHintUpdate()
+
+			wordHintData := &GameEvent{Type: "update-wordhint", Data: lobby.wordHints}
+			wordHintDataRevealed := &GameEvent{Type: "update-wordhint", Data: lobby.wordHints}
+			for _, otherPlayer := range lobby.GetPlayers() {
+				if otherPlayer.State == Guessing {
+					lobby.WriteJSON(otherPlayer, wordHintData)
+				} else {
+					lobby.WriteJSON(otherPlayer, wordHintDataRevealed)
+				}
+			}
 		}
 	} else if received.Type == "kick-vote" {
 		if lobby.EnableVotekick {
@@ -674,11 +683,19 @@ func (lobby *Lobby) tickLogic() bool {
 		if timeLeft <= revealHintAtXOrLower {
 			lobby.hintsLeft--
 
+			//We are trying til we find a yet unshown wordhint. Since we have
+			//thread safety and have already checked that there's a hint
+			//left, this loop can never spin forever.
 			for {
 				randomIndex := rand.Int() % len(lobby.wordHints)
 				if lobby.wordHints[randomIndex].Character == 0 {
 					lobby.wordHints[randomIndex].Character = []rune(lobby.CurrentWord)[randomIndex]
-					lobby.triggerWordHintUpdate()
+					wordHintData := &GameEvent{Type: "update-wordhint", Data: lobby.wordHints}
+					for _, otherPlayer := range lobby.GetPlayers() {
+						if otherPlayer.State == Guessing {
+							lobby.WriteJSON(otherPlayer, wordHintData)
+						}
+					}
 					break
 				}
 			}
@@ -776,24 +793,8 @@ func (lobby *Lobby) TriggerUpdateEvent(eventType string, data interface{}) {
 	}
 }
 
-func (lobby *Lobby) triggerUpdatePerPlayerEvent(eventType string, data func(*Player) interface{}) {
-	for _, otherPlayer := range lobby.GetPlayers() {
-		lobby.WriteJSON(otherPlayer, &GameEvent{Type: eventType, Data: data(otherPlayer)})
-	}
-}
-
 func (lobby *Lobby) triggerPlayersUpdate() {
 	lobby.TriggerUpdateEvent("update-players", lobby.players)
-}
-
-func (lobby *Lobby) triggerWordHintUpdate() {
-	if lobby.CurrentWord == "" {
-		return
-	}
-
-	lobby.triggerUpdatePerPlayerEvent("update-wordhint", func(player *Player) interface{} {
-		return lobby.GetAvailableWordHints(player)
-	})
 }
 
 // CreateLobby creates a new lobby including the initial player (owner) and
