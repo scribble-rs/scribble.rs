@@ -483,7 +483,17 @@ input[type="button"]:active,
     font-weight: bold;
 }
 
-@media (orientation: portrait), (max-aspect-ratio: 4/3) {
+@media only screen
+  and (min-device-width: 375px)
+  and (max-device-width: 812px)
+  and (orientation: landscape)
+  and (display-mode: fullscreen) {
+      html {
+          font-size: 0.8rem;
+      }
+}
+
+@media only screen and (orientation: portrait), (max-aspect-ratio: 4/3) {
     #lobby {
         grid-template-columns: 2fr 3fr;
         grid-template-rows: min-content min-content min-content auto;

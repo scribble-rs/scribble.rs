@@ -39,6 +39,11 @@
                             title="{{.Translation.Get "change-your-name"}}">
                             <img src="{{.RootPath}}/resources/user.svg" class="header-button-image" />
                         </button>
+                        <button onclick="toggleFullscreen()" class="dialog-button header-button"
+                            alt="{{.Translation.Get "toggle-fullscreen"}}"
+                            title="{{.Translation.Get "toggle-fullscreen"}}">
+                            <img src="{{.RootPath}}/resources/fullscreen.svg" class="header-button-image" />
+                        </button>
                     </div>
                     <div id="word-container"></div>
                     <div>
@@ -648,6 +653,14 @@
             namechangeFieldUnstartedDialog.value = name;
             namechangeFieldStartDialog.value = name;
             namechangeField.value = name;
+        }
+
+        function toggleFullscreen() {
+            if (document.fullscreen) {
+                document.exitFullscreen();
+            } else {
+                document.body.requestFullscreen();
+            }
         }
 
         function showLobbySettingsDialog() {

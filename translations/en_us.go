@@ -16,6 +16,7 @@ func initEnglishTranslation() Translation {
 	translation.put("randomize", "Randomize")
 	translation.put("apply", "Apply")
 	translation.put("save", "Save")
+	translation.put("toggle-fullscreen", "Toggle fullscreen")
 	translation.put("show-help", "Show help")
 	translation.put("votekick-a-player", "Vote to kick a player")
 	translation.put("time-left", "Time")

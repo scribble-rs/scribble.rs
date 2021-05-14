@@ -8,6 +8,10 @@ body {
     margin: 0;
 }
 
+body, body::backdrop, body:fullscreen {
+    background-color: antiquewhite;;
+}
+
 .content-wrapper {
     display: flex;
     flex-direction: column;
