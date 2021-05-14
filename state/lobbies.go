@@ -14,7 +14,12 @@ var (
 )
 
 func init() {
-	//Task to clean up empty lobbies.
+	//Task to clean up empty lobbies. An empty lobby is a lobby where all
+	//players have been disconnected for a certain timeframe. This avoids
+	//deleting lobbies when the creator of a lobby accidentally reconnects
+	//or needs to refresh. Another scenario might be where the server loses
+	//it's connection to all players temporarily. While unlikely, we'll be
+	//able to preserve lobbies this way.
 	go func() {
 		lobbyCleanupTicker := time.NewTicker(90 * time.Second)
 		for {
