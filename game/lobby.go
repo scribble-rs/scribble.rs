@@ -722,6 +722,8 @@ type NextTurn struct {
 // recalculateRanks will assign each player his respective rank in the lobby
 // according to everyones current score. This will not trigger any events.
 func recalculateRanks(lobby *Lobby) {
+	//We don't directly sort the players, since the order determines in which
+	//order the players will have to draw.
 	sortedPlayers := make([]*Player, len(lobby.players))
 	copy(sortedPlayers, lobby.players)
 	sort.Slice(sortedPlayers, func(a, b int) bool {
@@ -741,13 +743,12 @@ func recalculateRanks(lobby *Lobby) {
 		if player.Score < lastScore {
 			lastRank++
 			player.Rank = lastRank
+			lastScore = player.Score
 		} else {
 			//Since the players are already sorted from high to low, we only
-			//have the cases equal or higher.
+			//have the cases higher or equal.
 			player.Rank = lastRank
 		}
-
-		lastScore = player.Score
 	}
 }
 
