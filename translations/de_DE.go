@@ -75,8 +75,16 @@ func initGermanTranslation() {
 			"Internet zu funktionieren, aber entweder wurden der Server oder \ndeine Firewall falsch konfiguriert.\n\n"+
 			"Versuche die Seite neu zu laden.")
 
+	//Help dialog
+	translation.put("controls", "Steuerung")
+	translation.put("pencil", "Stift")
+	translation.put("eraser", "Radiergummi")
+	translation.put("fill-bucket", "Fülleimer")
+	translation.put("switch-tools-intro", "Zwischen den Werkzeugen kannst du mit Tastaturkürzel wechseln")
+	translation.put("switch-pencil-sizes", "Die Stiftgröße kannst du mit den Tasten %s bis %s verändern.")
+
 	//Generic words
-	//As "close" in "closing the window"
+	//"close" as in "closing the window"
 	translation.put("close", "Schließen")
 	translation.put("no", "Nein")
 	translation.put("yes", "Ja")

@@ -131,3 +131,4 @@ authors and feel like we've wronged you, please reach out.
 * Kicking Icon - [Kicking Icon #309402](https://icon-library.net/icon/kicking-icon-4.html)
 * Sound / No sound Icon - Made by Viktor Erikson (If this is you or you know who this is, send me a link to that persons Homepage)
 * Profile Icon - Made by [kumakamu](https://www.iconfinder.com/kumakamu)
+* [Help Icon](https://www.iconfinder.com/icons/211675/help_icon) - Made by [Ionicons]

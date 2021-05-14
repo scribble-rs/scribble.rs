@@ -81,8 +81,16 @@ func initEnglishTranslation() Translation {
 			"connection seems to be working, either the\nserver or your firewall hasn't "+
 			"been configured correctly.\n\nTo retry, reload the page.")
 
+	//Help dialog
+	translation.put("controls", "Controls")
+	translation.put("pencil", "Pencil")
+	translation.put("eraser", "Eraser")
+	translation.put("fill-bucket", "Fill bucket")
+	translation.put("switch-tools-intro", "You can switch between tools using shortcuts")
+	translation.put("switch-pencil-sizes", "You can also switch between pencil sizes using keys %s to %s.")
+
 	//Generic words
-	//As "close" in "closing the window"
+	//"close" as in "closing the window"
 	translation.put("close", "Close")
 	translation.put("no", "No")
 	translation.put("yes", "Yes")

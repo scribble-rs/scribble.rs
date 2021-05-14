@@ -42,6 +42,11 @@
                     </div>
                     <div id="word-container"></div>
                     <div>
+                        <button id="help-button" onclick="showHelpDialog()"
+                            class="dialog-button header-button" alt="{{.Translation.Get "votekick-a-player"}}"
+                            title="{{.Translation.Get "votekick-a-player"}}">
+                            <img src="{{.RootPath}}/resources/help.svg" class="header-button-image" />
+                        </button>
                         <button id="kick-button" style="display: none;" onclick="showKickDialog()"
                             class="dialog-button header-button" alt="{{.Translation.Get "votekick-a-player"}}"
                             title="{{.Translation.Get "votekick-a-player"}}">
@@ -417,7 +422,8 @@
             };
 
             socket.onopen = () => {
-                hideReconnectDialog();
+                closeDialog(reconnectDialogId);
+
                 hasSocketEverConnected = true;
                 socketIsConnecting = false;
 
@@ -445,13 +451,6 @@
             if (previousReconnectDialog === undefined || previousReconnectDialog === null) {
                 showTextDialog(reconnectDialogId, '{{.Translation.Get "connection-lost"}}',
                     '{{.Translation.Get "connection-lost-text"}}' );
-            }
-        }
-
-        function hideReconnectDialog() {
-            let previousReconnectDialog = document.getElementById(reconnectDialogId);
-            if (previousReconnectDialog !== undefined && previousReconnectDialog !== null) {
-                centerDialogs.removeChild(previousReconnectDialog);
             }
         }
 
@@ -543,6 +542,55 @@
 
             newDialog.style.visibility = "visible";
             centerDialogs.appendChild(newDialog);
+        }
+
+        function closeDialog(id) {
+            const dialog = document.getElementById(id);
+            if (dialog !== undefined && dialog !== null) {
+                const parent = dialog.parentElement;
+                if (parent !== undefined && parent !== null) {
+                    parent.removeChild(dialog);
+                }
+            }
+        }
+
+        const helpDialogId = "help-dialog";
+        function showHelpDialog() {
+            closeDialog(helpDialogId);
+            const controlsLabel = document.createElement("b");
+            controlsLabel.innerText = '{{.Translation.Get "controls"}}';
+
+            const controlsTextOne = document.createElement("p");
+            controlsTextOne.innerText = '{{.Translation.Get "switch-tools-intro"}}:';
+
+            const controlsTextTwo = document.createElement("p");
+            controlsTextTwo.innerHTML = '{{.Translation.Get "pencil"}}: <kbd>Q</kbd><br/>' +
+                '{{.Translation.Get "fill-bucket"}}: <kbd>W</kbd><br/>' +
+                '{{.Translation.Get "eraser"}}: <kbd>E</kbd><br/>';
+
+            const controlsTextThree = document.createElement("p");
+            controlsTextThree.innerHTML = '{{printf (.Translation.Get "switch-pencil-sizes") "<kbd>1</kbd>" "<kbd>4</kbd>"}}';
+
+            const closeButton = document.createElement("button");
+            closeButton.innerText = '{{.Translation.Get "close"}}';
+            closeButton.classList.add("dialog-button");
+            closeButton.addEventListener("click", event => {
+                closeDialog(helpDialogId)
+            })
+
+            const buttonBar = document.createElement("div");
+            buttonBar.classList.add("button-center-wrapper");
+            buttonBar.appendChild(closeButton);
+
+            const dialogContent = document.createElement("div");
+            dialogContent.appendChild(controlsLabel)
+            dialogContent.appendChild(controlsTextOne);
+            dialogContent.appendChild(controlsTextTwo);
+            dialogContent.appendChild(controlsTextThree);
+
+            dialogContent.appendChild(buttonBar);
+
+            showDialog(helpDialogId, '{{.Translation.Get "help"}}', dialogContent);
         }
 
         function showKickDialog() {
@@ -1456,6 +1504,61 @@
         //drawingBoard, the lines will end too early on leave and start
         //too late on exit.
         window.addEventListener('mousemove', onGlobalMouseMove);
+
+        function isAnyDialogVisible() {
+            for (let i = 0; i < centerDialogs.children.length; i++) {
+                if (centerDialogs.children[i].style.visibility === "visible") {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        function onKeyDown(event) {
+            //Avoid firing actions if the user is in the chat.
+            if (document.activeElement instanceof HTMLInputElement) {
+                return;
+            }
+
+            //If dialogs are open, it doesn't really make sense to be able to
+            //change tools. As this is like being in the pause menu of a game.
+            if (isAnyDialogVisible()) {
+                return;
+            }
+
+            //They key choice was made like this, since it's easy to remember
+            //and easy to reach. This is how many MOBAs do it and I personally
+            //find it better than having to find specific keys on your
+            //keyboard. Especially for people that aren't used to typing
+            //without looking at their keyboard, this might help.
+            if (event.key === "q") {
+                toolButtonPen.click();
+                chooseTool(pen);
+            } else if (event.key === "w") {
+                toolButtonFill.click();
+                chooseTool(fillBucket);
+            } else if (event.key === "e") {
+                toolButtonRubber.click();
+                chooseTool(rubber);
+            } else if (event.key === "1") {
+                sizeButton8.click();
+                setLineWidth(8);
+            } else if (event.key === "2") {
+                sizeButton16.click();
+                setLineWidth(16);
+            } else if (event.key === "3") {
+                sizeButton24.click();
+                setLineWidth(24);
+            } else if (event.key === "4") {
+                sizeButton32.click();
+                setLineWidth(32);
+            }
+        }
+        
+        //Handling events on the canvas directly isn't possible, since the user
+        //must've clicked it at least once in order for that to work.
+        window.addEventListener("keydown", onKeyDown);
 
         function handleCanvasResize() {
             //Resize canvas HTML element properly.
