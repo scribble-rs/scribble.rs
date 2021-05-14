@@ -24,24 +24,28 @@ func init() {
 		lobbyCleanupTicker := time.NewTicker(90 * time.Second)
 		for {
 			<-lobbyCleanupTicker.C
-
-			globalStateMutex.Lock()
-
-			for index := len(lobbies) - 1; index >= 0; index-- {
-				lobby := lobbies[index]
-				if lobby.HasConnectedPlayers() {
-					continue
-				}
-
-				disconnectTime := lobby.LastPlayerDisconnectTime
-				if disconnectTime == nil || time.Since(*disconnectTime) >= 75*time.Second {
-					removeLobbyByIndex(index)
-				}
-			}
-
-			globalStateMutex.Unlock()
+			cleanupRoutineLogic()
 		}
 	}()
+}
+
+// cleanupRoutineLogic is an extra function in order to prevent deadlocks by
+// being able to use defer mutex.Unlock().
+func cleanupRoutineLogic() {
+	globalStateMutex.Lock()
+	defer globalStateMutex.Unlock()
+
+	for index := len(lobbies) - 1; index >= 0; index-- {
+		lobby := lobbies[index]
+		if lobby.HasConnectedPlayers() {
+			continue
+		}
+
+		disconnectTime := lobby.LastPlayerDisconnectTime
+		if disconnectTime == nil || time.Since(*disconnectTime) >= 75*time.Second {
+			removeLobbyByIndex(index)
+		}
+	}
 }
 
 // AddLobby adds a lobby to the instance, making it visible for GetLobby calls.
