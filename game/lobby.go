@@ -735,25 +735,26 @@ func recalculateRanks(lobby *Lobby) {
 }
 
 func createWordHintFor(word string, showAll bool) []*WordHint {
+	//While len(word) is technically wrong, as an emoji for example would
+	//take more than one character, this is unlikely to happen. Meaning that
+	//most of the time this preallocation makes sense.
 	wordHints := make([]*WordHint, 0, len(word))
 	for _, char := range word {
-		irrelevantChar := char == ' ' || char == '_' || char == '-'
-		if showAll {
+		//These characters are part of the word, but aren't relevant for the
+		//guess. In order to make the word hints more useful to the
+		//guesser, those are always shown. An example would be "Pac-Man".
+		//Because these characters aren't relevant for the guess, they
+		//aren't being underlined.
+		alwaysVisibleCharacter := char == ' ' || char == '_' || char == '-'
+		if showAll || alwaysVisibleCharacter {
 			wordHints = append(wordHints, &WordHint{
 				Character: char,
-				Underline: !irrelevantChar,
+				Underline: !alwaysVisibleCharacter,
 			})
 		} else {
-			if irrelevantChar {
-				wordHints = append(wordHints, &WordHint{
-					Character: char,
-					Underline: !irrelevantChar,
-				})
-			} else {
-				wordHints = append(wordHints, &WordHint{
-					Underline: !irrelevantChar,
-				})
-			}
+			wordHints = append(wordHints, &WordHint{
+				Underline: true,
+			})
 		}
 	}
 
