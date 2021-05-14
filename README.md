@@ -74,8 +74,7 @@ port though.
 
 It should run on any system that go supports as a compilation target.
 
-This application uses go modules, therefore you need to make sure that you
-have go version `1.16` or higher.
+This application go version `1.16` or higher.
 
 ## Docker
 
