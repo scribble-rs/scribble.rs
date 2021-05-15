@@ -331,7 +331,10 @@ func stats(w http.ResponseWriter, r *http.Request) {
 func GetLobby(r *http.Request) (*game.Lobby, error) {
 	lobbyID := r.URL.Query().Get("lobby_id")
 	if lobbyID == "" {
-		return nil, ErrNoLobbyIDSupplied
+		lobbyID = r.FormValue("lobby_id")
+		if lobbyID == "" {
+			return nil, ErrNoLobbyIDSupplied
+		}
 	}
 
 	lobby := state.GetLobby(lobbyID)
