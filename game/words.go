@@ -19,6 +19,7 @@ var (
 		"german":     "de",
 		"french":     "fr",
 		"dutch":      "nl",
+		"persian":    "fa",
 	}
 
 	//go:embed words/*
