@@ -24,14 +24,14 @@ func init() {
 
 // SetupRoutes registers the /v1/ endpoints with the http package.
 func SetupRoutes() {
-	http.HandleFunc(RootPath+"/v1/stats", stats)
+	http.HandleFunc(RootPath+"/v1/stats", statsEndpoint)
 	//The websocket is shared between the public API and the official client
 	http.HandleFunc(RootPath+"/v1/ws", wsEndpoint)
 
 	//These exist only for the public API. We version them in order to ensure
 	//backwards compatibility as far as possible.
 	http.HandleFunc(RootPath+"/v1/lobby", lobbyEndpoint)
-	http.HandleFunc(RootPath+"/v1/lobby/player", enterLobby)
+	http.HandleFunc(RootPath+"/v1/lobby/player", enterLobbyEndpoint)
 }
 
 // remoteAddressToSimpleIP removes unnecessary clutter from the input,

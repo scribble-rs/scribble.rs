@@ -137,7 +137,7 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 	state.AddLobby(lobby)
 }
 
-func enterLobby(w http.ResponseWriter, r *http.Request) {
+func enterLobbyEndpoint(w http.ResponseWriter, r *http.Request) {
 	lobby, success := getLobbyWithErrorHandling(w, r)
 	if !success {
 		return
@@ -322,7 +322,7 @@ func lobbyEndpoint(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func stats(w http.ResponseWriter, r *http.Request) {
+func statsEndpoint(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(state.Stats())
 }
