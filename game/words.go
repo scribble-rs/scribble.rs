@@ -91,7 +91,7 @@ func GetRandomWords(wordCount int, lobby *Lobby) []string {
 
 // getRandomWordsCustomRng allows passing a custom generator for random
 // numbers. This can be used for predictability in unit tests.
-// See GetRandomWords for functionallity documentation.
+// See GetRandomWords for functionality documentation.
 func getRandomWordsCustomRng(wordCount int, lobby *Lobby, rng func() int) []string {
 	if lobby.CustomWordsChance > 0 && len(lobby.CustomWords) > 0 {
 		//Always get custom words

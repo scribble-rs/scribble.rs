@@ -20,7 +20,7 @@ func Test_readWordList(t *testing.T) {
 	})
 
 	for language := range languageIdentifiers {
-		t.Run(fmt.Sprintf("Testing language file from embeded data for %s", language), func(t *testing.T) {
+		t.Run(fmt.Sprintf("Testing language file from embedded data for %s", language), func(t *testing.T) {
 			testWordList(language, t)
 		})
 		t.Run(fmt.Sprintf("Testing language file from in-memory cached data for %s", language), func(t *testing.T) {
