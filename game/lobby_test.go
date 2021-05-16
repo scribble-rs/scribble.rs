@@ -192,3 +192,87 @@ func Test_handleNameChangeEvent(t *testing.T) {
 		t.Errorf("playername didn't change; Expected %s, but was %s", expectedName, player.Name)
 	}
 }
+
+func Test_wordSelectionEvent(t *testing.T) {
+	firstWordChoice := "abc"
+	lobby := &Lobby{
+		mutex: &sync.Mutex{},
+		EditableLobbySettings: &EditableLobbySettings{
+			DrawingTime: 10,
+			Rounds:      10,
+		},
+		words: []string{firstWordChoice, "def", "ghi"},
+	}
+	wordHintEvents := make(map[string]*GameEvent)
+	lobby.WriteJSON = func(player *Player, object interface{}) error {
+		gameEvent, ok := object.(*GameEvent)
+		if !ok {
+			panic("Unsupported event data type")
+		}
+
+		if gameEvent.Type == "update-wordhint" {
+			wordHintEvents[player.ID] = gameEvent
+		}
+
+		return nil
+	}
+	drawer := lobby.JoinPlayer("Drawer")
+	drawer.Connected = true
+	lobby.Owner = drawer
+	lobby.creator = drawer
+
+	startError := lobby.HandleEvent(nil, &GameEvent{
+		Type: "start",
+	}, drawer)
+	if startError != nil {
+		t.Errorf("Couldn't start lobby: %s", startError)
+	}
+
+	guesser := lobby.JoinPlayer("Guesser")
+	guesser.Connected = true
+
+	choiceError := lobby.HandleEvent(nil, &GameEvent{
+		Type: "choose-word",
+		Data: 0,
+	}, drawer)
+	if choiceError != nil {
+		t.Errorf("Couldn't choose word: %s", choiceError)
+	}
+
+	wordHintsForDrawerEvent := wordHintEvents[drawer.ID]
+	wordHintsForDrawer := wordHintsForDrawerEvent.Data.([]*WordHint)
+	if len(wordHintsForDrawer) != 3 {
+		t.Errorf("Word hints for drawer were of incorrect length; %d != %d", len(wordHintsForDrawer), 3)
+	}
+
+	for index, wordHint := range wordHintsForDrawer {
+		if wordHint.Character == 0 {
+			t.Error("Word hints for drawer contained invisible character")
+		}
+
+		if !wordHint.Underline {
+			t.Error("Word hints for drawer contained not underlined character")
+		}
+
+		expectedRune := rune(firstWordChoice[index])
+		if wordHint.Character != expectedRune {
+			t.Errorf("Character at index %d was %c instead of %c", index, wordHint.Character, expectedRune)
+		}
+	}
+
+	wordHintsForGuesserEvent := wordHintEvents[guesser.ID]
+	wordHintsForGuesser := wordHintsForGuesserEvent.Data.([]*WordHint)
+	if len(wordHintsForGuesser) != 3 {
+		t.Errorf("Word hints for guesser were of incorrect length; %d != %d", len(wordHintsForGuesser), 3)
+	}
+
+	for _, wordHint := range wordHintsForGuesser {
+		if wordHint.Character != 0 {
+			t.Error("Word hints for guesser contained visible character")
+		}
+
+		if !wordHint.Underline {
+			t.Error("Word hints for guesser contained not underlined character")
+		}
+	}
+}
