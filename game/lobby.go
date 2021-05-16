@@ -211,23 +211,24 @@ func (lobby *Lobby) HandleEvent(raw []byte, received *GameEvent, player *Player)
 
 func handleMessage(message string, sender *Player, lobby *Lobby) {
 	trimmedMessage := strings.TrimSpace(message)
+	//Emppty message can neither be a correct guess nor are useful for
+	//other players in the chat.
 	if trimmedMessage == "" {
 		return
 	}
 
+	//If no word is currently selected, all players can talk to each other
+	//and we don't have to check for corrected guesses.
 	if lobby.CurrentWord == "" {
 		sendMessageToAll(trimmedMessage, sender, lobby)
 		return
 	}
 
-	if sender.State == Drawing || sender.State == Standby {
+	if sender.State != Guessing {
 		lobby.sendMessageToAllNonGuessing(trimmedMessage, sender)
-	} else if sender.State == Guessing {
-		lowerCasedInput := lobby.lowercaser.String(trimmedMessage)
-		currentWord := lobby.CurrentWord
-
-		normInput := simplifyText(lowerCasedInput)
-		normSearched := simplifyText(currentWord)
+	} else {
+		normInput := simplifyText(lobby.lowercaser.String(trimmedMessage))
+		normSearched := simplifyText(lobby.CurrentWord)
 
 		if normSearched == normInput {
 			secondsLeft := int(lobby.RoundEndTime/1000 - time.Now().UTC().UnixNano()/1000000000)
