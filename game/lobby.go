@@ -156,25 +156,7 @@ func (lobby *Lobby) HandleEvent(raw []byte, received *GameEvent, player *Player)
 
 		drawer := lobby.drawer
 		if player == drawer && len(lobby.wordChoice) > 0 && chosenIndex >= 0 && chosenIndex <= 2 {
-			lobby.CurrentWord = lobby.wordChoice[chosenIndex]
-
-			//Depending on how long the word is, a fixed amount of hints
-			//would be too easy or too hard.
-			runeCount := utf8.RuneCountInString(lobby.CurrentWord)
-			if runeCount <= 2 {
-				lobby.hintCount = 0
-			} else if runeCount <= 4 {
-				lobby.hintCount = 1
-			} else if runeCount <= 9 {
-				lobby.hintCount = 2
-			} else {
-				lobby.hintCount = 3
-			}
-			lobby.hintsLeft = lobby.hintCount
-
-			lobby.wordChoice = nil
-			lobby.wordHints = createWordHintFor(lobby.CurrentWord, false)
-			lobby.wordHintsShown = createWordHintFor(lobby.CurrentWord, true)
+			lobby.selectWord(chosenIndex)
 
 			wordHintData := &GameEvent{Type: "update-wordhint", Data: lobby.wordHints}
 			wordHintDataRevealed := &GameEvent{Type: "update-wordhint", Data: lobby.wordHintsShown}
@@ -752,31 +734,55 @@ func recalculateRanks(lobby *Lobby) {
 	}
 }
 
-func createWordHintFor(word string, showAll bool) []*WordHint {
-	//While len(word) is technically wrong, as an emoji for example would
-	//take more than one character, this is unlikely to happen. Meaning that
-	//most of the time this preallocation makes sense.
-	wordHints := make([]*WordHint, 0, len(word))
-	for _, char := range word {
+func (lobby *Lobby) selectWord(wordChoiceIndex int) {
+	lobby.CurrentWord = lobby.wordChoice[wordChoiceIndex]
+	lobby.wordChoice = nil
+
+	//Depending on how long the word is, a fixed amount of hints
+	//would be too easy or too hard.
+	runeCount := utf8.RuneCountInString(lobby.CurrentWord)
+	if runeCount <= 2 {
+		lobby.hintCount = 0
+	} else if runeCount <= 4 {
+		lobby.hintCount = 1
+	} else if runeCount <= 9 {
+		lobby.hintCount = 2
+	} else {
+		lobby.hintCount = 3
+	}
+	lobby.hintsLeft = lobby.hintCount
+
+	//We generate both the "empty" word hints and the hints for the
+	//drawer. Since the length is the same, we do it in one run.
+	lobby.wordHints = make([]*WordHint, 0, runeCount)
+	lobby.wordHintsShown = make([]*WordHint, 0, runeCount)
+
+	for _, char := range lobby.CurrentWord {
 		//These characters are part of the word, but aren't relevant for the
 		//guess. In order to make the word hints more useful to the
 		//guesser, those are always shown. An example would be "Pac-Man".
 		//Because these characters aren't relevant for the guess, they
 		//aren't being underlined.
-		alwaysVisibleCharacter := char == ' ' || char == '_' || char == '-'
-		if showAll || alwaysVisibleCharacter {
-			wordHints = append(wordHints, &WordHint{
+		isAlwaysVisibleCharacter := char == ' ' || char == '_' || char == '-'
+
+		//The hints for the drawer are always visible, therefore they
+		//don't require any handling of different cases.
+		lobby.wordHintsShown = append(lobby.wordHintsShown, &WordHint{
+			Character: char,
+			Underline: !isAlwaysVisibleCharacter,
+		})
+
+		if isAlwaysVisibleCharacter {
+			lobby.wordHints = append(lobby.wordHints, &WordHint{
 				Character: char,
-				Underline: !alwaysVisibleCharacter,
+				Underline: false,
 			})
 		} else {
-			wordHints = append(wordHints, &WordHint{
+			lobby.wordHints = append(lobby.wordHints, &WordHint{
 				Underline: true,
 			})
 		}
 	}
-
-	return wordHints
 }
 
 func (lobby *Lobby) sendDataToEveryoneExceptSender(sender *Player, data interface{}) {
