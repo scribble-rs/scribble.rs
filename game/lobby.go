@@ -177,7 +177,7 @@ func (lobby *Lobby) HandleEvent(raw []byte, received *GameEvent, player *Player)
 			lobby.wordHintsShown = createWordHintFor(lobby.CurrentWord, true)
 
 			wordHintData := &GameEvent{Type: "update-wordhint", Data: lobby.wordHints}
-			wordHintDataRevealed := &GameEvent{Type: "update-wordhint", Data: lobby.wordHints}
+			wordHintDataRevealed := &GameEvent{Type: "update-wordhint", Data: lobby.wordHintsShown}
 			for _, otherPlayer := range lobby.GetPlayers() {
 				if otherPlayer.State == Guessing {
 					lobby.WriteJSON(otherPlayer, wordHintData)
