@@ -271,13 +271,9 @@ func createPlayer(name string) *Player {
 		Name:         SanitizeName(name),
 		ID:           uuid.Must(uuid.NewV4()).String(),
 		userSession:  uuid.Must(uuid.NewV4()).String(),
-		Score:        0,
-		LastScore:    0,
-		Rank:         1,
 		votedForKick: make(map[string]bool),
 		socketMutex:  &sync.Mutex{},
 		State:        Guessing,
-		Connected:    false,
 	}
 }
 
