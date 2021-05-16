@@ -49,7 +49,7 @@ func remoteAddressToSimpleIP(input string) string {
 	return strings.TrimSuffix(strings.TrimPrefix(address, "["), "]")
 }
 
-// GetIPADdressFromRequest extracts the clients IP address from the request.
+// GetIPAddressFromRequest extracts the clients IP address from the request.
 // This function respects forwarding headers.
 func GetIPAddressFromRequest(r *http.Request) string {
 	//See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
