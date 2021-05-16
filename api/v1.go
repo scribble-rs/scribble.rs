@@ -204,6 +204,12 @@ func editLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	parseError := r.ParseForm()
+	if parseError != nil {
+		http.Error(w, fmt.Sprintf("error parsing request query into form (%s)", parseError), http.StatusBadRequest)
+		return
+	}
+
 	var requestErrors []string
 
 	//Uneditable properties
@@ -212,11 +218,6 @@ func editLobby(w http.ResponseWriter, r *http.Request) {
 	}
 	if r.Form.Get("language") != "" {
 		requestErrors = append(requestErrors, "can't modify language in existing lobby")
-	}
-
-	parseError := r.ParseForm()
-	if parseError != nil {
-		http.Error(w, fmt.Sprintf("error parsing from (%s)", parseError), http.StatusBadRequest)
 	}
 
 	//Editable properties
