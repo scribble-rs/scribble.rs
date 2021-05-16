@@ -154,8 +154,9 @@ func enterLobby(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			var clientsWithSameIP int
 			requestAddress := GetIPAddressFromRequest(r)
+
+			var clientsWithSameIP int
 			for _, otherPlayer := range lobby.GetPlayers() {
 				if otherPlayer.GetLastKnownAddress() == requestAddress {
 					clientsWithSameIP++
@@ -167,7 +168,7 @@ func enterLobby(w http.ResponseWriter, r *http.Request) {
 			}
 
 			newPlayer := lobby.JoinPlayer(GetPlayername(r))
-			newPlayer.SetLastKnownAddress(GetIPAddressFromRequest(r))
+			newPlayer.SetLastKnownAddress(requestAddress)
 
 			// Use the players generated usersession and pass it as a cookie.
 			http.SetCookie(w, &http.Cookie{
