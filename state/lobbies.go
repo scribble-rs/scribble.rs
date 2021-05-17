@@ -13,13 +13,17 @@ var (
 	lobbies          []*game.Lobby = nil
 )
 
-func init() {
-	//Task to clean up empty lobbies. An empty lobby is a lobby where all
-	//players have been disconnected for a certain timeframe. This avoids
-	//deleting lobbies when the creator of a lobby accidentally reconnects
-	//or needs to refresh. Another scenario might be where the server loses
-	//it's connection to all players temporarily. While unlikely, we'll be
-	//able to preserve lobbies this way.
+// LaunchCleanupRoutine starts a task to clean up empty lobbies. An empty
+// lobby is a lobby where all players have been disconnected for a certain
+// timeframe. This avoids deleting lobbies when the creator of a lobby
+// accidentally reconnects or needs to refresh. Another scenario might be
+// where the server loses it's connection to all players temporarily. While
+// unlikely, we'll be able to preserve lobbies this way.
+// This method shouldn't be called more than once. Initially this was part of
+// this packages init method, however, in order to avoid side effects in
+// tests, this has been moved into a public function that has to be called
+// manually.
+func LaunchCleanupRoutine() {
 	go func() {
 		lobbyCleanupTicker := time.NewTicker(90 * time.Second)
 		for {

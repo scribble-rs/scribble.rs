@@ -12,6 +12,7 @@ import (
 
 	"github.com/scribble-rs/scribble.rs/api"
 	"github.com/scribble-rs/scribble.rs/frontend"
+	"github.com/scribble-rs/scribble.rs/state"
 )
 
 func main() {
@@ -50,6 +51,7 @@ func main() {
 
 	api.SetupRoutes()
 	frontend.SetupRoutes()
+	state.LaunchCleanupRoutine()
 
 	log.Fatalln(http.ListenAndServe(fmt.Sprintf(":%d", portHTTP), nil))
 }
