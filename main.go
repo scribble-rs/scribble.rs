@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/scribble-rs/scribble.rs/api"
@@ -15,20 +16,19 @@ import (
 	"github.com/scribble-rs/scribble.rs/state"
 )
 
-func main() {
-	portHTTPFlag := flag.Int("portHTTP", -1, "defines the port to be used for http mode")
-	flag.Parse()
+const defaultPort = 8080
 
-	var portHTTP int
-	if *portHTTPFlag != -1 {
-		portHTTP = *portHTTPFlag
+func determinePort(portHTTPFlag int) int {
+	portHTTP := -1
+	if portHTTPFlag != -1 {
+		portHTTP = portHTTPFlag
 		log.Printf("Listening on port %d sourced from portHTTP flag.\n", portHTTP)
 	} else {
 		//Support for heroku, as heroku expects applications to use a specific port.
 		envPort, portVarAvailable := os.LookupEnv("PORT")
 		if portVarAvailable {
 			log.Printf("'PORT' environment variable found: '%s'\n", envPort)
-			parsed, parseError := strconv.ParseInt(envPort, 10, 32)
+			parsed, parseError := strconv.ParseInt(strings.TrimSpace(envPort), 10, 32)
 			if parseError == nil {
 				portHTTP = int(parsed)
 				log.Printf("Listening on port %d sourced from 'PORT' environment variable\n", portHTTP)
@@ -39,10 +39,25 @@ func main() {
 		}
 	}
 
-	if portHTTP == 0 {
-		portHTTP = 8080
+	if portHTTP != -1 && portHTTP < 0 || portHTTP > 65535 {
+		log.Println("Port has to be between 0 and 65535.")
+		log.Println("Falling back to default port.")
+		portHTTP = -1
+	}
+
+	if portHTTP < 0 {
+		portHTTP = defaultPort
 		log.Printf("Listening on default port %d\n", portHTTP)
 	}
+
+	return portHTTP
+}
+
+func main() {
+	portHTTPFlag := flag.Int("portHTTP", -1, "defines the port to be used for http mode")
+	flag.Parse()
+
+	portHTTP := determinePort(*portHTTPFlag)
 
 	//Setting the seed in order for the petnames to be random.
 	rand.Seed(time.Now().UnixNano())
