@@ -77,6 +77,8 @@ func initGermanTranslation() {
 			"Internet zu funktionieren, aber entweder wurden der Server oder \ndeine Firewall falsch konfiguriert.\n\n"+
 			"Versuche die Seite neu zu laden.")
 
+	translation.put("message-too-long", "Deine Nachricht ist zu lang.")
+
 	//Help dialog
 	translation.put("controls", "Steuerung")
 	translation.put("pencil", "Stift")

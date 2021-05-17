@@ -917,11 +917,24 @@
         }
 
         function sendMessage() {
-            socket.send(JSON.stringify({
-                type: "message",
-                data: messageInput.value
-            }));
-            messageInput.value = "";
+            //We first check if there's more than 10000 characters and only if
+            //there isn't, we check for more than 10000 bytes, as that's
+            //potentially slower.
+            if (messageInput.value.length > 10000
+                || (new TextEncoder().encode(messageInput.value)).length > 10000) {
+                appendMessage("system-message", '{{.Translation.Get "system"}}', 
+                    '{{.Translation.Get "message-too-long"}}');
+                //We keep the messageInput content, since it could've been
+                //something important and we don't want the user having to
+                //rewrite it. Instead they can send it via some other means
+                //or shorten it a bit.
+            } else {
+                socket.send(JSON.stringify({
+                    type: "message",
+                    data: messageInput.value
+                }));
+                messageInput.value = "";
+            }
 
             // Necessary in order to keep the page from submitting.
             return false;

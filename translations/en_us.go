@@ -83,6 +83,8 @@ func initEnglishTranslation() Translation {
 			"connection seems to be working, either the\nserver or your firewall hasn't "+
 			"been configured correctly.\n\nTo retry, reload the page.")
 
+	translation.put("message-too-long", "Your message is too long.")
+
 	//Help dialog
 	translation.put("controls", "Controls")
 	translation.put("pencil", "Pencil")
