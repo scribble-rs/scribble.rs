@@ -217,8 +217,16 @@ func (lobby *Lobby) HandleEvent(raw []byte, received *GameEvent, player *Player)
 }
 
 func handleMessage(message string, sender *Player, lobby *Lobby) {
+	//Very long message can cause lags and can therefore be easily abused.
+	//While it is debatable whether a 10000 byte (not character) long
+	//message makes sense, this is technically easy to manage and therefore
+	//allowed for now.
+	if len(message) > 10000 {
+		return
+	}
+
 	trimmedMessage := strings.TrimSpace(message)
-	//Emppty message can neither be a correct guess nor are useful for
+	//Empty message can neither be a correct guess nor are useful for
 	//other players in the chat.
 	if trimmedMessage == "" {
 		return
