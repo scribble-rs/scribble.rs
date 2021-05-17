@@ -93,6 +93,13 @@ type KickVote struct {
 }
 
 func (lobby *Lobby) HandleEvent(raw []byte, received *GameEvent, player *Player) error {
+	if received.Type == "keep-alive" {
+		//This is a known dummy event in order to avoid accidental websocket
+		//connection closure. However, no action is required on the server.
+		//Either way, we needn't needlessly lock the lobby.
+		return nil
+	}
+
 	lobby.mutex.Lock()
 	defer lobby.mutex.Unlock()
 
@@ -205,10 +212,6 @@ func (lobby *Lobby) HandleEvent(raw []byte, received *GameEvent, player *Player)
 			lobby.WriteJSON(player, GameEvent{Type: "drawing", Data: lobby.currentDrawing})
 		}
 	}
-	/* else if received.Type == "keep-alive" {
-		This is a known dummy event in order to avoid accidental websocket
-		connection closure. However, no action is required on the server.
-	}*/
 
 	return nil
 }
