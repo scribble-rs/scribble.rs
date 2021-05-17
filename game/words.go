@@ -46,6 +46,8 @@ func readWordListInternal(
 
 		//Due to people having git autoreplace newline characters, there
 		//might be unnecessary \r characters.
+		//While regex isn't super, this doesn't really matter as the word lists
+		//are cached and only the first start of the first lobby will be slower.
 		words = regexp.MustCompile("\r?\n").Split(wordListFile, -1)
 		for wordIndex, word := range words {
 			words[wordIndex] = lowercaser.String(word)
