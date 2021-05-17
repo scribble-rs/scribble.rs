@@ -1574,7 +1574,10 @@
         window.addEventListener("keydown", onKeyDown);
 
         function handleCanvasResize() {
-            //Resize canvas HTML element properly.
+            if (drawingBoard.width === drawingBoard.clientWidth && drawingBoard.height === drawingBoard.clientHeight) {
+                return false;
+            }
+
             drawingBoard.width = drawingBoard.clientWidth;
             drawingBoard.height = drawingBoard.clientHeight;
             setLineWidth(localLineWidthUnscaled);
@@ -1587,19 +1590,22 @@
             //no height constraint.
             //This workaround doesn't affect the portrait view.
             chat.style.maxHeight = drawingBoard.clientHeight+"px";
+
+            return true;
         }
 
         //Call intially to correct initial state
         handleCanvasResize();
 
         window.addEventListener("resize", () => {
-            handleCanvasResize();
-            //Since the canvas gets cleared, we request the drawing again.
-            //Saving it locally would be wasteful and might slow down some
-            //clients due to a lot of memory allocation.
-            socket.send(JSON.stringify({
-                type: "request-drawing",
-            }));
+            if (handleCanvasResize()) {
+                //Since the canvas gets cleared, we request the drawing again.
+                //Saving it locally would be wasteful and might slow down some
+                //clients due to a lot of memory allocation.
+                socket.send(JSON.stringify({
+                    type: "request-drawing",
+                }));
+            }
         }, false);
 
 
