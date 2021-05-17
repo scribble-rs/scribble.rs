@@ -121,9 +121,18 @@ func removeLobby(id string) {
 }
 
 func removeLobbyByIndex(indexToDelete int) {
-	lobby := lobbies[indexToDelete]
-	lobbies = append(lobbies[:indexToDelete], lobbies[indexToDelete+1:]...)
-	log.Printf("Closing lobby %s. There are currently %d open lobbies left.\n", lobby.LobbyID, len(lobbies))
+	lobbyId := lobbies[indexToDelete].LobbyID
+
+	//We delete the lobby without maintaining order, since the lobby order
+	//is irrelevant. This holds true as long as there's no paging for
+	//requesting lobbies via the API.
+	lobbies[indexToDelete] = lobbies[len(lobbies)-1]
+	//Unreference the moved item in the other slot to prevent potential
+	//memory leaks.
+	lobbies[len(lobbies)-1] = nil
+	lobbies = lobbies[:len(lobbies)-1]
+
+	log.Printf("Closing lobby %s. There are currently %d open lobbies left.\n", lobbyId, len(lobbies))
 }
 
 // pageStats represents dynamic information about the website.

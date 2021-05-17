@@ -33,6 +33,9 @@ type LobbyEntry struct {
 }
 
 func publicLobbies(w http.ResponseWriter, r *http.Request) {
+	//REMARK: If paging is ever implemented, we might want to maintain order
+	//when deleting lobbies from state in the state package.
+
 	lobbies := state.GetPublicLobbies()
 	lobbyEntries := make([]*LobbyEntry, 0, len(lobbies))
 	for _, lobby := range lobbies {
