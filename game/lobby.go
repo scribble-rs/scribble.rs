@@ -199,7 +199,11 @@ func (lobby *Lobby) HandleEvent(raw []byte, received *GameEvent, player *Player)
 		}
 		handleNameChangeEvent(player, lobby, newName)
 	} else if received.Type == "request-drawing" {
-		lobby.WriteJSON(player, GameEvent{Type: "drawing", Data: lobby.currentDrawing})
+		//Since the client shouldn't be blocking to wait for the drawing, it's
+		//fine to emit the event if there's no drawing.
+		if len(lobby.currentDrawing) != 0 {
+			lobby.WriteJSON(player, GameEvent{Type: "drawing", Data: lobby.currentDrawing})
+		}
 	}
 	/* else if received.Type == "keep-alive" {
 		This is a known dummy event in order to avoid accidental websocket
