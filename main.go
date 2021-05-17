@@ -47,11 +47,11 @@ func main() {
 	//Setting the seed in order for the petnames to be random.
 	rand.Seed(time.Now().UnixNano())
 
-	log.Println("Started.")
-
 	api.SetupRoutes()
 	frontend.SetupRoutes()
 	state.LaunchCleanupRoutine()
+
+	log.Println("Started.")
 
 	log.Fatalln(http.ListenAndServe(fmt.Sprintf(":%d", portHTTP), nil))
 }
