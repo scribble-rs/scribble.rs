@@ -12,11 +12,12 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/scribble-rs/scribble.rs/sanitize"
+
 	discordemojimap "github.com/Bios-Marcel/discordemojimap/v2"
 	"github.com/agnivade/levenshtein"
 	petname "github.com/dustinkirkland/golang-petname"
 	"github.com/gofrs/uuid"
-	"github.com/kennygrant/sanitize"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
