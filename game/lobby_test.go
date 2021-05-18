@@ -316,7 +316,9 @@ func Test_kickDrawer(t *testing.T) {
 		t.Errorf("Drawer should've been a, but was %s", lobby.drawer.Name)
 	}
 
-	advanceLobby(lobby)
+	lobby.Synchronized(func() {
+		advanceLobby(lobby)
+	})
 
 	if lobby.drawer == nil {
 		t.Error("Drawer should've been b, but was nil")
@@ -326,7 +328,9 @@ func Test_kickDrawer(t *testing.T) {
 		t.Errorf("Drawer should've been b, but was %s", lobby.drawer.Name)
 	}
 
-	kickPlayer(lobby, b, 1)
+	lobby.Synchronized(func() {
+		kickPlayer(lobby, b, 1)
+	})
 
 	if lobby.drawer == nil {
 		t.Error("Drawer should've been c, but was nil")
