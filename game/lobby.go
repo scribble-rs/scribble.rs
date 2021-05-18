@@ -507,7 +507,10 @@ func handleNameChangeEvent(caller *Player, lobby *Lobby, name string) {
 // advanceLobbyPredefineDrawer is required in cases where the drawer is removed game
 func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player) {
 	if lobby.timeLeftTicker != nil {
-		lobby.timeLeftTicker.Stop()
+		//We want to create a new ticker later on. By setting the current
+		//ticker to nil, we'll cause the ticker routine to stop the ticker
+		//and then stop itself. Later on we create a new routine.
+		//This way we won't have race conditions or wrongly executed logic.
 		lobby.timeLeftTicker = nil
 	}
 
@@ -581,7 +584,7 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 	//We use milliseconds for higher accuracy
 	lobby.RoundEndTime = time.Now().UTC().UnixNano()/1000000 + int64(lobby.DrawingTime)*1000
 	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
-	go startTurnTimeTicker(lobby)
+	go startTurnTimeTicker(lobby, lobby.timeLeftTicker)
 
 	nextTurnEvent := &NextTurn{
 		Round:        lobby.Round,
@@ -670,29 +673,35 @@ func determineNextDrawer(lobby *Lobby) (*Player, bool) {
 // startTurnTimeTicker executes a loop that listens to the lobbies
 // timeLeftTicker and executes a tickLogic on each tick. This method
 // blocks until the turn ends.
-func startTurnTimeTicker(lobby *Lobby) {
+func startTurnTimeTicker(lobby *Lobby, ticker *time.Ticker) {
 	for {
-		ticker := lobby.timeLeftTicker
-		if ticker == nil {
-			return
-		}
 		<-ticker.C
-
-		if !lobby.tickLogic() {
+		if !lobby.tickLogic(ticker) {
 			break
 		}
 	}
+
+	log.Println("TimeTickerRoutine killed")
 }
 
 // tickLogic checks whether the lobby needs to proceed to the next round and
 // updates the available word hints if required. The return value indicates
-// whether additional ticks are necessary or not.
-func (lobby *Lobby) tickLogic() bool {
+// whether additional ticks are necessary or not. The ticker is automatically
+// stopped if no additional ticks are required.
+func (lobby *Lobby) tickLogic(expectedTicker *time.Ticker) bool {
 	lobby.mutex.Lock()
 	defer lobby.mutex.Unlock()
 
+	//Since we have a lock on the lobby, we can find out if the ticker we are
+	//listening to is still valid. If not, we want to kill the outer routine.
+	if lobby.timeLeftTicker != expectedTicker {
+		expectedTicker.Stop()
+		return false
+	}
+
 	currentTime := getTimeAsMillis()
 	if currentTime >= lobby.RoundEndTime {
+		expectedTicker.Stop()
 		advanceLobby(lobby)
 		//Kill outer goroutine and therefore avoid executing hint logic.
 		return false
