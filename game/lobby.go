@@ -680,8 +680,6 @@ func startTurnTimeTicker(lobby *Lobby, ticker *time.Ticker) {
 			break
 		}
 	}
-
-	log.Println("TimeTickerRoutine killed")
 }
 
 // tickLogic checks whether the lobby needs to proceed to the next round and
