@@ -332,6 +332,23 @@ func (lobby *Lobby) hasConnectedPlayersInternal() bool {
 	return false
 }
 
+// CanIPConnect checks whether the IP is still allowed regarding the lobbies
+// clients per IP address limit. This function should only be called for
+// players that aren't already in the lobby.
+func (lobby *Lobby) CanIPConnect(address string) bool {
+	var clientsWithSameIP int
+	for _, player := range lobby.GetPlayers() {
+		if player.GetLastKnownAddress() == address {
+			clientsWithSameIP++
+			if clientsWithSameIP >= lobby.ClientsPerIPLimit {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
 func (lobby *Lobby) IsPublic() bool {
 	return lobby.Public
 }

@@ -159,15 +159,9 @@ func enterLobbyEndpoint(w http.ResponseWriter, r *http.Request) {
 
 			requestAddress := GetIPAddressFromRequest(r)
 
-			var clientsWithSameIP int
-			for _, otherPlayer := range lobby.GetPlayers() {
-				if otherPlayer.GetLastKnownAddress() == requestAddress {
-					clientsWithSameIP++
-					if clientsWithSameIP >= lobby.ClientsPerIPLimit {
-						http.Error(w, "maximum amount of newPlayer per IP reached", http.StatusUnauthorized)
-						return
-					}
-				}
+			if !lobby.CanIPConnect(requestAddress) {
+				http.Error(w, "maximum amount of players per IP reached", http.StatusUnauthorized)
+				return
 			}
 
 			newPlayer := lobby.JoinPlayer(GetPlayername(r))
