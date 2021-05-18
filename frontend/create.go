@@ -1,6 +1,7 @@
 package frontend
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/scribble-rs/scribble.rs/api"
@@ -21,7 +22,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 	err := pageTemplates.ExecuteTemplate(w, "lobby-create-page", createPageData)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error templating home page: %s\n", err)
 	}
 }
 
