@@ -276,3 +276,63 @@ func Test_wordSelectionEvent(t *testing.T) {
 		}
 	}
 }
+
+func Test_kickDrawer(t *testing.T) {
+	lobby := &Lobby{
+		mutex: &sync.Mutex{},
+		EditableLobbySettings: &EditableLobbySettings{
+			DrawingTime: 10,
+			Rounds:      10,
+		},
+		words: []string{"a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a"},
+	}
+	//Dummy to avoid crashes
+	lobby.WriteJSON = func(player *Player, object interface{}) error {
+		return nil
+	}
+
+	a := lobby.JoinPlayer("a")
+	a.Connected = true
+	lobby.Owner = a
+	lobby.creator = a
+
+	b := lobby.JoinPlayer("b")
+	b.Connected = true
+	c := lobby.JoinPlayer("c")
+	c.Connected = true
+
+	startError := lobby.HandleEvent(nil, &GameEvent{
+		Type: "start",
+	}, a)
+	if startError != nil {
+		t.Errorf("Couldn't start lobby: %s", startError)
+	}
+
+	if lobby.drawer == nil {
+		t.Error("Drawer should've been a, but was nil")
+	}
+
+	if lobby.drawer != a {
+		t.Errorf("Drawer should've been a, but was %s", lobby.drawer.Name)
+	}
+
+	advanceLobby(lobby)
+
+	if lobby.drawer == nil {
+		t.Error("Drawer should've been b, but was nil")
+	}
+
+	if lobby.drawer != b {
+		t.Errorf("Drawer should've been b, but was %s", lobby.drawer.Name)
+	}
+
+	kickPlayer(lobby, b, 1)
+
+	if lobby.drawer == nil {
+		t.Error("Drawer should've been c, but was nil")
+	}
+
+	if lobby.drawer != c {
+		t.Errorf("Drawer should've been c, but was %s", lobby.drawer.Name)
+	}
+}
