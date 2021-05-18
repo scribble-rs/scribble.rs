@@ -121,13 +121,7 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 	lobby.WriteJSON = WriteJSON
 	player.SetLastKnownAddress(GetIPAddressFromRequest(r))
 
-	// Use the players generated usersession and pass it as a cookie.
-	http.SetCookie(w, &http.Cookie{
-		Name:     "usersession",
-		Value:    player.GetUserSession(),
-		Path:     "/",
-		SameSite: http.SameSiteStrictMode,
-	})
+	SetUsersessionCookie(w, player)
 
 	lobbyData := CreateLobbyData(lobby)
 
@@ -168,12 +162,7 @@ func enterLobbyEndpoint(w http.ResponseWriter, r *http.Request) {
 			newPlayer.SetLastKnownAddress(requestAddress)
 
 			// Use the players generated usersession and pass it as a cookie.
-			http.SetCookie(w, &http.Cookie{
-				Name:     "usersession",
-				Value:    newPlayer.GetUserSession(),
-				Path:     "/",
-				SameSite: http.SameSiteStrictMode,
-			})
+			SetUsersessionCookie(w, newPlayer)
 		} else {
 			player.SetLastKnownAddress(GetIPAddressFromRequest(r))
 		}
@@ -187,6 +176,16 @@ func enterLobbyEndpoint(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, encodingError.Error(), http.StatusInternalServerError)
 		}
 	}
+}
+
+// SetUsersessionCookie takes the players usersession and sets it as a cookie.
+func SetUsersessionCookie(w http.ResponseWriter, player *game.Player) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "usersession",
+		Value:    player.GetUserSession(),
+		Path:     "/",
+		SameSite: http.SameSiteStrictMode,
+	})
 }
 
 func editLobby(w http.ResponseWriter, r *http.Request) {

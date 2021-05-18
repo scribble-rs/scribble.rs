@@ -63,13 +63,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 
 			newPlayer := lobby.JoinPlayer(api.GetPlayername(r))
 
-			// Use the players generated usersession and pass it as a cookie.
-			http.SetCookie(w, &http.Cookie{
-				Name:     "usersession",
-				Value:    newPlayer.GetUserSession(),
-				Path:     "/",
-				SameSite: http.SameSiteStrictMode,
-			})
+			api.SetUsersessionCookie(w, newPlayer)
 		} else {
 			if player.Connected && player.GetWebsocket() != nil {
 				userFacingError(w, "It appears you already have an open tab for this lobby.")

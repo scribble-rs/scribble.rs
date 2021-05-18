@@ -151,13 +151,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 	lobby.WriteJSON = api.WriteJSON
 	player.SetLastKnownAddress(api.GetIPAddressFromRequest(r))
 
-	// Use the players generated usersession and pass it as a cookie.
-	http.SetCookie(w, &http.Cookie{
-		Name:     "usersession",
-		Value:    player.GetUserSession(),
-		Path:     "/",
-		SameSite: http.SameSiteStrictMode,
-	})
+	api.SetUsersessionCookie(w, player)
 
 	//We only add the lobby if we could do all necessary pre-steps successfully.
 	state.AddLobby(lobby)
