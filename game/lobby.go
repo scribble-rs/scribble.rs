@@ -1010,5 +1010,5 @@ var connectionCharacterReplacer = strings.NewReplacer(" ", "", "-", "", "_", "")
 // Spaces, dashes, underscores and accented characters are removed or replaced.
 func simplifyText(s string) string {
 	return connectionCharacterReplacer.
-		Replace(sanitize.Accents(s))
+		Replace(sanitize.ReplaceAccentedCharacters(s))
 }

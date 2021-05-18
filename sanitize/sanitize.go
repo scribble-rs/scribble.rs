@@ -82,12 +82,11 @@ var transliterations = map[rune]string{
 	'ß': "ss",
 }
 
-// Accents replaces a set of accented characters with ascii equivalents.
-func Accents(s string) string {
-	// Replace some common accent characters
+// ReplaceAccentedCharacters replaces a set of accented characters with ascii
+// equivalents. For example "ÿ" would become "y".
+func ReplaceAccentedCharacters(s string) string {
 	b := bytes.NewBufferString("")
 	for _, c := range s {
-		// Check transliterations first
 		if val, ok := transliterations[c]; ok {
 			b.WriteString(val)
 		} else {
