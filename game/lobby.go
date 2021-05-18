@@ -945,8 +945,15 @@ func (lobby *Lobby) OnPlayerConnectUnsynchronized(player *Player) {
 		lobby.WriteJSON(lobby.drawer, &GameEvent{Type: "your-turn", Data: lobby.wordChoice})
 	}
 
-	//TODO Only send to everyone except for the new player, since it's part of the ready event.
-	lobby.triggerPlayersUpdate()
+	event := &GameEvent{Type: "update-players", Data: lobby.players}
+	for _, otherPlayer := range lobby.GetPlayers() {
+		//The player that just joined already has the most up-to-date data due
+		//to the ready event being sent. Therefeore it'd be wasteful to send
+		//that player and update event for players.
+		if otherPlayer != player {
+			lobby.WriteJSON(otherPlayer, event)
+		}
+	}
 }
 
 func (lobby *Lobby) OnPlayerDisconnect(player *Player) {
