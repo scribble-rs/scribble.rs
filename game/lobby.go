@@ -403,20 +403,6 @@ func kickPlayer(lobby *Lobby, playerToKick *Player, playerToKickIndex int) {
 		delete(otherPlayer.votedForKick, playerToKick.ID)
 	}
 
-	lobby.players = append(lobby.players[:playerToKickIndex], lobby.players[playerToKickIndex+1:]...)
-
-	if lobby.drawer == playerToKick {
-		lobby.TriggerUpdateEvent("drawer-kicked", nil)
-		//Since the drawing person has been kicked, that probably means that he/she was trolling, therefore
-		//we redact everyones last earned score.
-		for _, otherPlayer := range lobby.players {
-			otherPlayer.Score -= otherPlayer.LastScore
-			otherPlayer.LastScore = 0
-		}
-		lobby.scoreEarnedByGuessers = 0
-		//We must absolutely not set lobby.drawer to nil, since this would cause the drawing order to be ruined.
-	}
-
 	//If the owner is kicked, we choose the next best person as the owner.
 	if lobby.Owner == playerToKick {
 		for _, otherPlayer := range lobby.players {
@@ -432,13 +418,33 @@ func kickPlayer(lobby *Lobby, playerToKick *Player, playerToKickIndex int) {
 		}
 	}
 
-	if lobby.drawer == playerToKick || !lobby.isAnyoneStillGuessing() {
-		advanceLobby(lobby)
+	if lobby.drawer == playerToKick {
+		newDrawer, roundOver := determineNextDrawer(lobby)
+		lobby.players = append(lobby.players[:playerToKickIndex], lobby.players[playerToKickIndex+1:]...)
+		lobby.TriggerUpdateEvent("drawer-kicked", nil)
+
+		//Since the drawer has been kicked, that probably means that they were
+		//probably probably trolling, therefore we redact everyones last earned
+		//score.
+		for _, otherPlayer := range lobby.players {
+			otherPlayer.Score -= otherPlayer.LastScore
+			otherPlayer.LastScore = 0
+		}
+		lobby.scoreEarnedByGuessers = 0
+		lobby.drawer = nil
+
+		advanceLobbyPredefineDrawer(lobby, roundOver, newDrawer)
 	} else {
-		//This isn't necessary in case we need to advanced the lobby, as it has
-		//to happen anyways and sending events twice would be wasteful.
-		recalculateRanks(lobby)
-		lobby.triggerPlayersUpdate()
+		lobby.players = append(lobby.players[:playerToKickIndex], lobby.players[playerToKickIndex+1:]...)
+
+		if lobby.isAnyoneStillGuessing() {
+			//This isn't necessary in case we need to advanced the lobby, as it has
+			//to happen anyways and sending events twice would be wasteful.
+			recalculateRanks(lobby)
+			lobby.triggerPlayersUpdate()
+		} else {
+			advanceLobby(lobby)
+		}
 	}
 }
 
@@ -498,31 +504,33 @@ func handleNameChangeEvent(caller *Player, lobby *Lobby, name string) {
 	}
 }
 
-// advanceLobby will either start the game or jump over to the next turn.
-func advanceLobby(lobby *Lobby) {
+// advanceLobbyPredefineDrawer is required in cases where the drawer is removed game
+func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player) {
 	if lobby.timeLeftTicker != nil {
 		lobby.timeLeftTicker.Stop()
 		lobby.timeLeftTicker = nil
 	}
 
-	//The drawer can potentially be null if he's kicked, in that case we proceed with the round if anyone has already
-	drawer := lobby.drawer
-	if drawer != nil && lobby.scoreEarnedByGuessers > 0 {
+	//The drawer can potentially be null if kicked or the game just started.
+	if lobby.drawer != nil {
+		if lobby.scoreEarnedByGuessers <= 0 {
+			lobby.drawer.LastScore = 0
+		} else {
+			//Average score, but minus one player, since the own score is 0 and doesn't count.
+			playerCount := lobby.GetConnectedPlayerCount()
+			//If the drawer isn't connected though, we mustn't subtract from the count.
+			if lobby.drawer.Connected {
+				playerCount--
+			}
 
-		//Average score, but minus one player, since the own score is 0 and doesn't count.
-		playerCount := lobby.GetConnectedPlayerCount()
-		//If the drawer isn't connected though, we mustn't subtract from the count.
-		if drawer.Connected {
-			playerCount--
+			var averageScore int
+			if playerCount > 0 {
+				averageScore = lobby.scoreEarnedByGuessers / playerCount
+			}
+
+			lobby.drawer.LastScore = averageScore
+			lobby.drawer.Score += lobby.drawer.LastScore
 		}
-
-		var averageScore int
-		if playerCount > 0 {
-			averageScore = lobby.scoreEarnedByGuessers / playerCount
-		}
-
-		drawer.LastScore = averageScore
-		drawer.Score += drawer.LastScore
 	}
 
 	//We need this for the next-turn event, in order to allow the client
@@ -536,17 +544,21 @@ func advanceLobby(lobby *Lobby) {
 	lobby.CurrentWord = ""
 	lobby.wordHints = nil
 
-	//If the round ends and people still have guessing, that means the "Last" value
-	//for the next turn has to be "no score earned".
 	for _, otherPlayer := range lobby.players {
+		//If the round ends and people still have guessing, that means the "Last" value
+		//for the next turn has to be "no score earned".
 		if otherPlayer.State == Guessing {
 			otherPlayer.LastScore = 0
 		}
+		//Initially all players are in guessing state, as the drawer gets
+		//defined further at the bottom.
 		otherPlayer.State = Guessing
+
+		//FIXME Reconsider resetting this. I can't think of a good argument
+		//for this right now.
 		otherPlayer.votedForKick = make(map[string]bool)
 	}
 
-	newDrawer, roundOver := selectNextDrawer(lobby)
 	if roundOver {
 		if lobby.Round == lobby.Rounds {
 			endGame(lobby)
@@ -589,6 +601,12 @@ func advanceLobby(lobby *Lobby) {
 	lobby.WriteJSON(lobby.drawer, &GameEvent{Type: "your-turn", Data: lobby.wordChoice})
 }
 
+// advanceLobby will either start the game or jump over to the next turn.
+func advanceLobby(lobby *Lobby) {
+	newDrawer, roundOver := determineNextDrawer(lobby)
+	advanceLobbyPredefineDrawer(lobby, roundOver, newDrawer)
+}
+
 // GameOverEvent is basically the ready event, but contains the last word.
 // This is required in order to show the last player the word, in case they
 // didn't manage to guess it in time. This is necessary since the last word
@@ -616,12 +634,12 @@ func endGame(lobby *Lobby) {
 	}
 }
 
-// selectNextDrawer returns the next person that's supposed to be drawing, but
+// determineNextDrawer returns the next person that's supposed to be drawing, but
 // doesn't tell the lobby yet. The boolean signals whether the current round
 // is over.
-func selectNextDrawer(lobby *Lobby) (*Player, bool) {
-	for index, otherPlayer := range lobby.players {
-		if otherPlayer == lobby.drawer {
+func determineNextDrawer(lobby *Lobby) (*Player, bool) {
+	for index, player := range lobby.players {
+		if player == lobby.drawer {
 			//If we have someone that's drawing, take the next one
 			for i := index + 1; i < len(lobby.players); i++ {
 				player := lobby.players[i]
@@ -636,6 +654,16 @@ func selectNextDrawer(lobby *Lobby) (*Player, bool) {
 		}
 	}
 
+	//We prefer the first connected player.
+	for _, player := range lobby.players {
+		if player.Connected {
+			return player, true
+		}
+	}
+
+	//If no player is connected, we simply chose the first player.
+	//Safe, since the lobby can't be empty, as leaving doesn't remove players
+	//from the array, but only sets them to a disconnected state.
 	return lobby.players[0], true
 }
 
