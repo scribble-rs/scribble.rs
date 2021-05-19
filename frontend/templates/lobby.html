@@ -1044,7 +1044,6 @@
 
                     clear(context);
 
-                    gameState = "ongoing";
                     round = parsed.data.round;
                     updateRoundsDisplay();
                     applyPlayers(parsed.data.players);
@@ -1056,9 +1055,16 @@
                     //We clear this, since there's no word chosen right now.
                     wordContainer.innerHTML = "";
 
-                    showRoundEndMessage(parsed.data.previousWord);
                     allowDrawing = false;
                     updateCursor();
+
+                    if (gameState === "ongoing") {
+                        //The previous turn has ended.
+                        showRoundEndMessage(parsed.data.previousWord);
+                    } else {
+                        //First turn, the game starts
+                        gameState = "ongoing";
+                    }
                 } else if (parsed.type === "your-turn") {
                     playWav('{{.RootPath}}/resources/your-turn.wav');
                     waitChooseDialog.style.visibility = "hidden";
@@ -1100,11 +1106,6 @@
         };
 
         function showRoundEndMessage(previousWord) {
-            //Happens if there has been no previous round.
-            if (previousWord === null) {
-                return;
-            }
-
             if (previousWord === "") {
                 appendMessage("system-message", null, '{{.Translation.Get "round-over"}}');
             } else {

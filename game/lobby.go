@@ -587,8 +587,6 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 		lobby.Round++
 	}
 
-	firstTurn := lobby.State != Ongoing
-
 	lobby.ClearDrawing()
 	lobby.drawer = newDrawer
 	lobby.drawer.State = Drawing
@@ -600,20 +598,12 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
 	go startTurnTimeTicker(lobby, lobby.timeLeftTicker)
 
-	nextTurnEvent := &NextTurn{
+	lobby.TriggerUpdateEvent("next-turn", &NextTurn{
 		Round:        lobby.Round,
 		Players:      lobby.players,
 		RoundEndTime: int(lobby.RoundEndTime - getTimeAsMillis()),
-	}
-
-	//In the first turn, we set this field to null to signal that
-	//there hasn't been no choice, but no turn before this round.
-	//Meaning that for the API user empty string and nil are to be
-	//treated with a different meaning.
-	if !firstTurn {
-		nextTurnEvent.PreviousWord = &previousWord
-	}
-	lobby.TriggerUpdateEvent("next-turn", nextTurnEvent)
+		PreviousWord: previousWord,
+	})
 
 	lobby.WriteJSON(lobby.drawer, &GameEvent{Type: "your-turn", Data: lobby.wordChoice})
 }
@@ -747,10 +737,10 @@ type NextTurn struct {
 	Round        int       `json:"round"`
 	Players      []*Player `json:"players"`
 	RoundEndTime int       `json:"roundEndTime"`
-	//PreviousWord signals the last chosen word. The reason that this is a
-	//pointer, is in order to differentiate between "no word chosen" and
-	//"there was no previous turn".
-	PreviousWord *string `json:"previousWord"`
+	//PreviousWord signals the last chosen word. If empty, no word has been
+	//chosen. The client can now themselves whether there has been a previous
+	//turn, by looking at the current gamestate.
+	PreviousWord string `json:"previousWord"`
 }
 
 // recalculateRanks will assign each player his respective rank in the lobby
