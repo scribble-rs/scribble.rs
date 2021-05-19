@@ -1728,11 +1728,12 @@
         }
 
         function generateCircleMap(radius) {
-            let circleData = [];
+            const diameter = 2 * radius;
+            let circleData = new Array(diameter);
 
-            for (let x = 0; x < 2 * radius; x++) {
-                circleData[x] = [];
-                for (let y = 0; y < 2 * radius; y++) {
+            for (let x = 0; x < diameter; x++) {
+                circleData[x] = new Array(diameter);
+                for (let y = 0; y < diameter; y++) {
                     const distanceToRadius = Math.sqrt(Math.pow(radius - x, 2) + Math.pow(radius - y, 2));
                     if (distanceToRadius > radius) {
                         circleData[x][y] = 0;
