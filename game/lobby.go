@@ -536,20 +536,20 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 		}
 	}
 
-	//We need this for the next-turn event, in order to allow the client
-	//to know which word was previously supposed to be guessed.
+	//We need this for the next-turn / game-over event, in order to allow the
+	//client to know which word was previously supposed to be guessed.
 	previousWord := lobby.CurrentWord
+	lobby.CurrentWord = ""
+	lobby.wordHints = nil
 
 	if lobby.DrawingTimeNew != 0 {
 		lobby.DrawingTime = lobby.DrawingTimeNew
 	}
 	lobby.scoreEarnedByGuessers = 0
-	lobby.CurrentWord = ""
-	lobby.wordHints = nil
 
 	for _, otherPlayer := range lobby.players {
-		//If the round ends and people still have guessing, that means the "Last" value
-		//for the next turn has to be "no score earned".
+		//If the round ends and people still have guessing, that means the
+		//"LastScore" value for the next turn has to be "no score earned".
 		if otherPlayer.State == Guessing {
 			otherPlayer.LastScore = 0
 		}
@@ -562,9 +562,25 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 		otherPlayer.votedForKick = make(map[string]bool)
 	}
 
+	recalculateRanks(lobby)
+
 	if roundOver {
+		//Game over
 		if lobby.Round == lobby.Rounds {
-			endGame(lobby)
+			lobby.drawer = nil
+			lobby.Round = 0
+			lobby.State = GameOver
+
+			for _, player := range lobby.players {
+				lobby.WriteJSON(player, GameEvent{
+					Type: "game-over",
+					Data: &GameOverEvent{
+						PreviousWord: previousWord,
+						Ready:        generateReadyData(lobby, player),
+					}})
+			}
+
+			//Omit rest of events, since we don't need to advance.
 			return
 		}
 
@@ -578,8 +594,6 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 	lobby.drawer.State = Drawing
 	lobby.State = Ongoing
 	lobby.wordChoice = GetRandomWords(3, lobby)
-
-	recalculateRanks(lobby)
 
 	//We use milliseconds for higher accuracy
 	lobby.RoundEndTime = time.Now().UTC().UnixNano()/1000000 + int64(lobby.DrawingTime)*1000
@@ -618,23 +632,6 @@ func advanceLobby(lobby *Lobby) {
 type GameOverEvent struct {
 	*Ready
 	PreviousWord string `json:"previousWord"`
-}
-
-func endGame(lobby *Lobby) {
-	lobby.drawer = nil
-	lobby.Round = 0
-	lobby.State = GameOver
-
-	recalculateRanks(lobby)
-
-	for _, player := range lobby.players {
-		lobby.WriteJSON(player, GameEvent{
-			Type: "game-over",
-			Data: &GameOverEvent{
-				PreviousWord: lobby.CurrentWord,
-				Ready:        generateReadyData(lobby, player),
-			}})
-	}
 }
 
 // determineNextDrawer returns the next person that's supposed to be drawing, but
