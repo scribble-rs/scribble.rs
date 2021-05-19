@@ -747,7 +747,10 @@ type NextTurn struct {
 	Round        int       `json:"round"`
 	Players      []*Player `json:"players"`
 	RoundEndTime int       `json:"roundEndTime"`
-	PreviousWord *string   `json:"previousWord"`
+	//PreviousWord signals the last chosen word. The reason that this is a
+	//pointer, is in order to differentiate between "no word chosen" and
+	//"there was no previous turn".
+	PreviousWord *string `json:"previousWord"`
 }
 
 // recalculateRanks will assign each player his respective rank in the lobby
