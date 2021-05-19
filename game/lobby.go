@@ -572,11 +572,16 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 			lobby.State = GameOver
 
 			for _, player := range lobby.players {
+				readyData := generateReadyData(lobby, player)
+				//The drawing is always available on the client, as the
+				//game-over event is only sent to already connected players.
+				readyData.CurrentDrawing = nil
+
 				lobby.WriteJSON(player, GameEvent{
 					Type: "game-over",
 					Data: &GameOverEvent{
 						PreviousWord: previousWord,
-						Ready:        generateReadyData(lobby, player),
+						Ready:        readyData,
 					}})
 			}
 
