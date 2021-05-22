@@ -1049,3 +1049,16 @@ func simplifyText(s string) string {
 	return connectionCharacterReplacer.
 		Replace(sanitize.ReplaceAccentedCharacters(s))
 }
+
+// Shutdown sends all players an event, indicating that the lobby
+// will be shut down. The caller of this function should take care of not
+// allowing new connections. Clients should gracefully disconnect.
+func (lobby *Lobby) Shutdown() {
+	lobby.mutex.Lock()
+	defer lobby.mutex.Unlock()
+
+	shutdownEvent := GameEvent{Type: "shutdown"}
+	for _, player := range lobby.players {
+		lobby.WriteJSON(player, shutdownEvent)
+	}
+}

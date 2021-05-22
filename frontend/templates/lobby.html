@@ -1101,6 +1101,11 @@
                         + '{{.Translation.Get "max-players-setting"}}: ' + parsed.data.maxPlayers + "\n"
                         + '{{.Translation.Get "custom-words-chance-setting"}}: ' + parsed.data.customWordsChance + "%\n"
                         + '{{.Translation.Get "players-per-ip-limit-setting"}}: ' + parsed.data.clientsPerIpLimit);
+                } else if (parsed.type === "shutdown") {
+                    socket.onclose = null;
+                    socket.close();
+                    showDialog("shutdown-info", "Server shutting down",
+                        document.createTextNode("Sorry, but the server is about to shut down. Please come back at a later time."));
                 }
             }
         };

@@ -7,8 +7,10 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/scribble-rs/scribble.rs/api"
@@ -66,7 +68,17 @@ func main() {
 	frontend.SetupRoutes()
 	state.LaunchCleanupRoutine()
 
-	log.Println("Started.")
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, syscall.SIGTERM)
+	go func() {
+		defer os.Exit(0)
 
+		<-signalChan
+		log.Println("Received SIGTERM, gracefully shutting down.")
+
+		state.ShutdownLobbiesGracefully()
+	}()
+
+	log.Println("Started.")
 	log.Fatalln(http.ListenAndServe(fmt.Sprintf(":%d", portHTTP), nil))
 }

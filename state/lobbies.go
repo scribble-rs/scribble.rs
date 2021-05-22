@@ -75,6 +75,24 @@ func GetLobby(id string) *game.Lobby {
 	return nil
 }
 
+// ShutdownLobbiesGracefully shuts down all lobbies and removes them from the
+// state, preventing reconnects to existing lobbies. New lobbies can
+// technically still be added.
+func ShutdownLobbiesGracefully() {
+	globalStateMutex.Lock()
+	defer globalStateMutex.Unlock()
+
+	for _, lobby := range lobbies {
+		//Since a reconnect requires a lookup to the state, all attempts to
+		//reconnect will end up running into the global statelock. Therefore,
+		//reconnecting wouldn't be possible.
+		lobby.Shutdown()
+	}
+
+	//Instead of removing one by one, we nil the array, since that's faster.
+	lobbies = nil
+}
+
 // GetActiveLobbyCount indicates how many activate lobby there are. This includes
 // both private and public lobbies and it doesn't matter whether the game is
 // already over, hasn't even started or is still ongoing.
