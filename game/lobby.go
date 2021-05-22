@@ -285,11 +285,8 @@ func calculateGuesserScore(hintCount, hintsLeft, secondsLeft, drawingTime int) i
 	declineFactor := 1.0 / float64(drawingTime)
 	baseScore := int(maxBaseScore * math.Pow(1.0-declineFactor, float64(drawingTime-secondsLeft)))
 
-	//Every hint not shown, e.g. not needed, will give the player bonus points.
-	if hintCount < 1 {
-		return baseScore
-	}
-
+	//If all hints are shown, or the word is too short to show hints, the
+	//calculation will basically always be baseScore + 0.
 	return baseScore + hintsLeft*(maxHintBonusScore/hintCount)
 }
 
