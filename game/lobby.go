@@ -192,7 +192,7 @@ func (lobby *Lobby) HandleEvent(raw []byte, received *GameEvent, player *Player)
 			handleKickVoteEvent(lobby, player, toKickID)
 		}
 	} else if received.Type == "start" {
-		if lobby.Round == 0 && player == lobby.Owner {
+		if lobby.State != Ongoing && player == lobby.Owner {
 			//We are reseting each players score, since players could
 			//technically be player a second game after the last one
 			//has already ended.
@@ -203,6 +203,9 @@ func (lobby *Lobby) HandleEvent(raw []byte, received *GameEvent, player *Player)
 				//the same rank, therefore y'll winners for now.
 				otherPlayer.Rank = 1
 			}
+
+			//Cause advanceLobby to start at round 1, starting the game anew.
+			lobby.Round = 0
 
 			advanceLobby(lobby)
 		}
@@ -571,7 +574,6 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 		//Game over
 		if lobby.Round == lobby.Rounds {
 			lobby.drawer = nil
-			lobby.Round = 0
 			lobby.State = GameOver
 
 			for _, player := range lobby.players {
