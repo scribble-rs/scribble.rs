@@ -2,6 +2,7 @@ package game
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -152,16 +153,23 @@ func (lobby *Lobby) HandleEvent(raw []byte, received *GameEvent, player *Player)
 	} else if received.Type == "choose-word" {
 		chosenIndex, isInt := (received.Data).(int)
 		if !isInt {
-			asFloat, isFloat32 := (received.Data).(float64)
-			if isFloat32 && asFloat < 4 {
-				chosenIndex = int(asFloat)
-			} else {
+			asFloat, isFloat64 := (received.Data).(float64)
+			if !isFloat64 {
 				return fmt.Errorf("invalid data in choose-word event: %v", received.Data)
 			}
+
+			chosenIndex = int(asFloat)
 		}
 
-		drawer := lobby.drawer
-		if player == drawer && len(lobby.wordChoice) > 0 && chosenIndex >= 0 && chosenIndex <= 2 {
+		if len(lobby.wordChoice) == 0 {
+			return errors.New("word was chosen, even though no choice was available")
+		}
+
+		if chosenIndex < 0 || chosenIndex >= len(lobby.wordChoice) {
+			return fmt.Errorf("word choice was %d, but should've been >= 0 and < %d", chosenIndex, len(lobby.wordChoice))
+		}
+
+		if player == lobby.drawer {
 			lobby.selectWord(chosenIndex)
 
 			wordHintData := &GameEvent{Type: "update-wordhint", Data: lobby.wordHints}
