@@ -123,16 +123,14 @@ func (lobby *Lobby) HandleEvent(raw []byte, received *GameEvent, player *Player)
 			//This will prevent clients from lagging due to too thick lines.
 			if line.Data.LineWidth > float32(MaxBrushSize) {
 				line.Data.LineWidth = MaxBrushSize
-				received.Data = line.Data
 			} else if line.Data.LineWidth < float32(MinBrushSize) {
 				line.Data.LineWidth = MinBrushSize
-				received.Data = line.Data
 			}
 
 			lobby.AppendLine(line)
 
 			//We directly forward the event, as it seems to be valid.
-			lobby.sendDataToEveryoneExceptSender(player, received)
+			lobby.sendDataToEveryoneExceptSender(player, line)
 		}
 	} else if received.Type == "fill" {
 		if lobby.canDraw(player) {
