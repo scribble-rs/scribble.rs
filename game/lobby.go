@@ -294,6 +294,11 @@ func calculateGuesserScore(hintCount, hintsLeft, secondsLeft, drawingTime int) i
 	declineFactor := 1.0 / float64(drawingTime)
 	baseScore := int(maxBaseScore * math.Pow(1.0-declineFactor, float64(drawingTime-secondsLeft)))
 
+	//Prevent zero division panic. This could happen with two letter words.
+	if hintCount <= 0 {
+		return baseScore
+	}
+
 	//If all hints are shown, or the word is too short to show hints, the
 	//calculation will basically always be baseScore + 0.
 	return baseScore + hintsLeft*(maxHintBonusScore/hintCount)
