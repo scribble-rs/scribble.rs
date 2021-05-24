@@ -64,6 +64,7 @@ func initEnglishTranslation() Translation {
 	translation.put("round-over", "Turn over, no word was chosen.")
 	translation.put("round-over-no-word", "Turn over, the word was '%s'.")
 	translation.put("game-over-win", "Congratulations, you've won!")
+	translation.put("game-over-tie", "It's a tie!")
 	translation.put("game-over", "You placed %s. with %s points")
 
 	translation.put("change-active-color", "Change your active color")

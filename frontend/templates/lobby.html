@@ -1228,8 +1228,12 @@
                     }
 
                     if (isSelf) {
-                        if (player.rank == 1) {
-                            gameOverDialogTitle.innerText = '{{.Translation.Get "game-over-win"}}';
+                        if (player.rank === 1) {
+                            if ((i+1 < players.length && players[i+1].rank === 1) || (i !== 0 && players[0].rank === 1)) {
+                                gameOverDialogTitle.innerText = '{{.Translation.Get "game-over-tie"}}';
+                            } else {
+                                gameOverDialogTitle.innerText = '{{.Translation.Get "game-over-win"}}';
+                            }
                         } else {
                             
                             gameOverDialogTitle.innerText = '{{.Translation.Get "game-over"}}'.format(player.rank, player.score);
