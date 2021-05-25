@@ -1348,7 +1348,7 @@
                 let playerDiv = document.createElement("div");
 
                 playerDiv.classList.add("player");
-                if (player.state === "standby") {
+                if (player.state === "correct") {
                     playerDiv.classList.add("player-done");
                 }
 
@@ -1388,7 +1388,7 @@
                     drawerID = player.id;
                     drawerName = player.name;
                     scoreAndStatusDiv.appendChild(document.createTextNode("✏️"));
-                } else if (player.state === "standby") {
+                } else if (player.state === "correct") {
                     scoreAndStatusDiv.appendChild(document.createTextNode("✔️"));
                 }
 

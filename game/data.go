@@ -239,9 +239,10 @@ func (player *Player) GetUserSession() string {
 type PlayerState string
 
 const (
-	Guessing PlayerState = "guessing"
-	Drawing  PlayerState = "drawing"
 	Standby  PlayerState = "standby"
+	Drawing  PlayerState = "drawing"
+	Guessing PlayerState = "guessing"
+	Correct  PlayerState = "correct"
 )
 
 // GetPlayer searches for a player, identifying them by usersession.
@@ -280,7 +281,6 @@ func createPlayer(name string) *Player {
 		userSession:  uuid.Must(uuid.NewV4()).String(),
 		votedForKick: make(map[string]bool),
 		socketMutex:  &sync.Mutex{},
-		State:        Guessing,
 	}
 }
 

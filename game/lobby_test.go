@@ -201,7 +201,9 @@ func Test_wordSelectionEvent(t *testing.T) {
 			DrawingTime: 10,
 			Rounds:      10,
 		},
-		words: []string{firstWordChoice, "def", "ghi"},
+		State:    Unstarted,
+		GameMode: ClassicMode,
+		words:    []string{firstWordChoice, "def", "ghi"},
 	}
 	wordHintEvents := make(map[string]*GameEvent)
 	lobby.WriteJSON = func(player *Player, object interface{}) error {
@@ -230,6 +232,9 @@ func Test_wordSelectionEvent(t *testing.T) {
 
 	guesser := lobby.JoinPlayer("Guesser")
 	guesser.Connected = true
+
+	assertPlayerState(t, drawer, Drawing)
+	assertPlayerState(t, guesser, Guessing)
 
 	choiceError := lobby.HandleEvent(nil, &GameEvent{
 		Type: "choose-word",

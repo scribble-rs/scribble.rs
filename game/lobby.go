@@ -256,7 +256,7 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 			sender.Score += sender.LastScore
 
 			lobby.scoreEarnedByGuessers += sender.LastScore
-			sender.State = Standby
+			sender.State = Correct
 
 			lobby.TriggerUpdateEvent("correct-guess", sender.ID)
 
@@ -1112,10 +1112,10 @@ func (lobby *Lobby) GetAvailableWordHints(player *Player) []*WordHint {
 	//The draw simple gets every character as a word-hint. We basically abuse
 	//the hints for displaying the word, instead of having yet another GUI
 	//element that wastes space.
-	if player.State == Drawing || player.State == Standby {
-		return lobby.wordHintsShown
-	} else {
+	if player.State == Guessing {
 		return lobby.wordHints
+	} else {
+		return lobby.wordHintsShown
 	}
 }
 
@@ -1123,6 +1123,14 @@ func (lobby *Lobby) GetAvailableWordHints(player *Player) []*WordHint {
 // to the lobbies playerlist. The new players is returned.
 func (lobby *Lobby) JoinPlayer(playerName string) *Player {
 	player := createPlayer(playerName)
+
+	if lobby.State == Ongoing {
+		if lobby.GameMode == ClassicMode {
+			player.State = Guessing
+		} else {
+			player.State = Drawing
+		}
+	}
 
 	lobby.players = append(lobby.players, player)
 
