@@ -277,14 +277,15 @@ func Test_wordSelectionEvent(t *testing.T) {
 	}
 }
 
-func Test_kickDrawer(t *testing.T) {
+func Test_kickDrawer_classicMode(t *testing.T) {
 	lobby := &Lobby{
 		mutex: &sync.Mutex{},
 		EditableLobbySettings: &EditableLobbySettings{
 			DrawingTime: 10,
 			Rounds:      10,
 		},
-		words: []string{"a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a"},
+		GameMode: ClassicMode,
+		words:    []string{"a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a"},
 	}
 	//Dummy to avoid crashes
 	lobby.WriteJSON = func(player *Player, object interface{}) error {
@@ -308,43 +309,80 @@ func Test_kickDrawer(t *testing.T) {
 		t.Errorf("Couldn't start lobby: %s", startError)
 	}
 
-	if a.State != Drawing {
-		t.Errorf("A should've been the drawer, but was %v", a.State)
-	}
-
-	if b.State != Guessing {
-		t.Errorf("B should've been guessing, but was %v", b.State)
-	}
-
-	if c.State != Guessing {
-		t.Errorf("C should've been guessing, but was %v", c.State)
-	}
+	assertPlayerState(t, a, Drawing)
+	assertPlayerState(t, b, Guessing)
+	assertPlayerState(t, c, Guessing)
 
 	lobby.Synchronized(func() {
 		advanceLobby(lobby)
 	})
 
-	if b.State != Drawing {
-		t.Errorf("B should've been the drawer, but was %v", b.State)
-	}
-
-	if a.State != Guessing {
-		t.Errorf("A should've been guessing, but was %v", a.State)
-	}
-
-	if c.State != Guessing {
-		t.Errorf("C should've been guessing, but was %v", c.State)
-	}
+	assertPlayerState(t, a, Guessing)
+	assertPlayerState(t, b, Drawing)
+	assertPlayerState(t, c, Guessing)
 
 	lobby.Synchronized(func() {
 		kickPlayer(lobby, b, 1)
 	})
 
-	if a.State != Guessing {
-		t.Errorf("A should've been guessing, but was %v", a.State)
+	assertPlayerState(t, a, Guessing)
+	assertPlayerState(t, c, Drawing)
+}
+
+func Test_kickGuesser_tooManyCooksMode(t *testing.T) {
+	lobby := &Lobby{
+		mutex: &sync.Mutex{},
+		EditableLobbySettings: &EditableLobbySettings{
+			DrawingTime: 10,
+			Rounds:      10,
+		},
+		GameMode: TooManyCooks,
+		words:    []string{"a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a"},
+	}
+	//Dummy to avoid crashes
+	lobby.WriteJSON = func(player *Player, object interface{}) error {
+		return nil
 	}
 
-	if c.State != Drawing {
-		t.Errorf("C should've been the drawer, but was %v", c.State)
+	a := lobby.JoinPlayer("a")
+	a.Connected = true
+	lobby.Owner = a
+	lobby.creator = a
+
+	b := lobby.JoinPlayer("b")
+	b.Connected = true
+	c := lobby.JoinPlayer("c")
+	c.Connected = true
+
+	startError := lobby.HandleEvent(nil, &GameEvent{
+		Type: "start",
+	}, a)
+	if startError != nil {
+		t.Errorf("Couldn't start lobby: %s", startError)
+	}
+
+	assertPlayerState(t, a, Guessing)
+	assertPlayerState(t, b, Drawing)
+	assertPlayerState(t, c, Drawing)
+
+	lobby.Synchronized(func() {
+		advanceLobby(lobby)
+	})
+
+	assertPlayerState(t, a, Drawing)
+	assertPlayerState(t, b, Guessing)
+	assertPlayerState(t, c, Drawing)
+
+	lobby.Synchronized(func() {
+		kickPlayer(lobby, b, 1)
+	})
+
+	assertPlayerState(t, a, Drawing)
+	assertPlayerState(t, c, Guessing)
+}
+
+func assertPlayerState(t *testing.T, player *Player, state PlayerState) {
+	if player.State != state {
+		t.Errorf("Player '%s' should've had state '%s', but had '%s'", player.Name, state, player.State)
 	}
 }
