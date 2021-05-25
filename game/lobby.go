@@ -439,15 +439,21 @@ func kickPlayer(lobby *Lobby, playerToKick *Player, playerToKickIndex int) {
 
 		advanceLobbyPredefineDrawer(lobby, roundOver, newDrawer)
 	} else {
-		lobby.players = append(lobby.players[:playerToKickIndex], lobby.players[playerToKickIndex+1:]...)
-
-		if lobby.isAnyoneStillGuessing() {
-			//This isn't necessary in case we need to advanced the lobby, as it has
-			//to happen anyways and sending events twice would be wasteful.
-			recalculateRanks(lobby)
-			lobby.triggerPlayersUpdate()
+		if lobby.GameMode == TooManyCooks {
+			setNextDrawers, roundOver := determineNextDrawersTooManyCooksMode(lobby)
+			lobby.players = append(lobby.players[:playerToKickIndex], lobby.players[playerToKickIndex+1:]...)
+			advanceLobbyPredefineDrawer(lobby, roundOver, setNextDrawers)
 		} else {
-			advanceLobby(lobby)
+			lobby.players = append(lobby.players[:playerToKickIndex], lobby.players[playerToKickIndex+1:]...)
+
+			if lobby.isAnyoneStillGuessing() {
+				//This isn't necessary in case we need to advanced the lobby, as it has
+				//to happen anyways and sending events twice would be wasteful.
+				recalculateRanks(lobby)
+				lobby.triggerPlayersUpdate()
+			} else {
+				advanceLobby(lobby)
+			}
 		}
 	}
 }
