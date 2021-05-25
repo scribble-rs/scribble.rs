@@ -13,6 +13,13 @@ import (
 
 const slotReservationTime = time.Minute * 5
 
+type GameMode string
+
+const (
+	ClassicMode  GameMode = "classic"
+	TooManyCooks GameMode = "toomanycooks"
+)
+
 // Lobby represents a game session.
 // FIXME Field visibilities should be changed in case we ever serialize this.
 type Lobby struct {
@@ -34,8 +41,6 @@ type Lobby struct {
 
 	// Whether the game has started, is ongoing or already over.
 	State gameState
-	// drawer references the Player that is currently drawing.
-	drawer *Player
 	// Owner references the Player that currently owns the lobby.
 	// Meaning this player has rights to restart or change certain settings.
 	Owner *Player
@@ -64,6 +69,8 @@ type Lobby struct {
 	// RoundEndTime represents the time at which the current round will end.
 	// This is a UTC unix-timestamp in milliseconds.
 	RoundEndTime int64
+
+	GameMode GameMode
 
 	timeLeftTicker        *time.Ticker
 	scoreEarnedByGuessers int

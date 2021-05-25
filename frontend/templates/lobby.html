@@ -971,6 +971,7 @@
         let rounds = 0;
         let roundEndTime = 0;
         let gameState = "unstarted";
+        let gameMode = "classic";
         let votekickEnabled;
 
         function registerMessageHandler(targetSocket) {
@@ -1068,7 +1069,13 @@
                 } else if (parsed.type === "your-turn") {
                     playWav('{{.RootPath}}/resources/your-turn.wav');
                     waitChooseDialog.style.visibility = "hidden";
-                    promptWords(parsed.data[0], parsed.data[1], parsed.data[2]);
+                    if (parsed.data === null || parsed.data === undefined) {
+                        //TooManyCooks mode has no word choice, but reuses the event
+                        allowDrawing = true
+                        updateCursor();
+                    } else {
+                        promptWords(parsed.data[0], parsed.data[1], parsed.data[2]);
+                    }
                 } else if (parsed.type === "drawing") {
                     applyDrawData(parsed.data);
                 } else if (parsed.type === "kick-vote") {
@@ -1154,6 +1161,7 @@
             round = ready.round;
             rounds = ready.rounds;
             gameState = ready.gameState;
+            gameMode = ready.gameMode;
             votekickEnabled = ready.votekickEnabled;
             updateRoundsDisplay();
             updateButtonVisibilities();

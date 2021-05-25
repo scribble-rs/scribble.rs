@@ -308,35 +308,43 @@ func Test_kickDrawer(t *testing.T) {
 		t.Errorf("Couldn't start lobby: %s", startError)
 	}
 
-	if lobby.drawer == nil {
-		t.Error("Drawer should've been a, but was nil")
+	if a.State != Drawing {
+		t.Errorf("A should've been the drawer, but was %v", a.State)
 	}
 
-	if lobby.drawer != a {
-		t.Errorf("Drawer should've been a, but was %s", lobby.drawer.Name)
+	if b.State != Guessing {
+		t.Errorf("B should've been guessing, but was %v", b.State)
+	}
+
+	if c.State != Guessing {
+		t.Errorf("C should've been guessing, but was %v", c.State)
 	}
 
 	lobby.Synchronized(func() {
 		advanceLobby(lobby)
 	})
 
-	if lobby.drawer == nil {
-		t.Error("Drawer should've been b, but was nil")
+	if b.State != Drawing {
+		t.Errorf("B should've been the drawer, but was %v", b.State)
 	}
 
-	if lobby.drawer != b {
-		t.Errorf("Drawer should've been b, but was %s", lobby.drawer.Name)
+	if a.State != Guessing {
+		t.Errorf("A should've been guessing, but was %v", a.State)
+	}
+
+	if c.State != Guessing {
+		t.Errorf("C should've been guessing, but was %v", c.State)
 	}
 
 	lobby.Synchronized(func() {
 		kickPlayer(lobby, b, 1)
 	})
 
-	if lobby.drawer == nil {
-		t.Error("Drawer should've been c, but was nil")
+	if a.State != Guessing {
+		t.Errorf("A should've been guessing, but was %v", a.State)
 	}
 
-	if lobby.drawer != c {
-		t.Errorf("Drawer should've been c, but was %s", lobby.drawer.Name)
+	if c.State != Drawing {
+		t.Errorf("C should've been the drawer, but was %v", c.State)
 	}
 }
