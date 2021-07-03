@@ -73,6 +73,7 @@ func initEnglishTranslation() Translation {
 	translation.put("use-fill-bucket", "Use fill bucket (Fills the target area with the selected color)")
 	translation.put("change-pencil-size-to", "Change the pencil / eraser size to %s")
 	translation.put("clear-canvas", "Clear the canvas")
+	translation.put("undo", "Revert the last change you made (Doesn't work after \""+translation.Get("clear-canvas")+"\")")
 
 	translation.put("connection-lost", "Connection lost!")
 	translation.put("connection-lost-text", "Attempting to reconnect"+

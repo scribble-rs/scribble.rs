@@ -370,9 +370,15 @@
                         </div>
                     </label>
                 </div>
-                <!--We won't make this button easier to click, as there's no going back. -->
+                <!--We won't make these two buttons easier to click, as there's no going back. -->
                 <button class="canvas-button toolbox-group" style="font-size: 2rem;" onclick="clearCanvasAndSendEvent()"
                     alt="{{.Translation.Get "clear-canvas"}}" title="{{.Translation.Get "clear-canvas"}}">🗑
+                </button>
+                <!--We won't make this button easier to click, as there's no going back. -->
+                <button class="canvas-button toolbox-group" style="font-size: 2rem;" onclick="undoAndSendEvent()"
+                    alt="{{.Translation.Get "undo"}}" title="{{.Translation.Get "undo"}}">
+                    <img alt="{{.Translation.Get "undo"}}" title="{{.Translation.Get "undo"}}"
+                    src="{{.RootPath}}/resources/undo.svg" width="40px" height="40px" />
                 </button>
             </div>
 
@@ -912,6 +918,14 @@
                 clear(context);
                 socket.send(JSON.stringify({
                     type: "clear-drawing-board"
+                }));
+            }
+        }
+
+        function undoAndSendEvent() {
+            if (allowDrawing) {
+                socket.send(JSON.stringify({
+                    type: "undo"
                 }));
             }
         }

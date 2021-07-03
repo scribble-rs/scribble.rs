@@ -73,6 +73,16 @@ type Lobby struct {
 	// lobby object.
 	currentDrawing []interface{}
 
+	// These variables are used to define the ranges of connected drawing events.
+	// For example a line that has been drawn or a fill that has been executed.
+	// Since we can't trust the client to tell us this, we use the time passed
+	// between draw events as an indicator of which draw events make up one line.
+	// An alternative approach could be using the coordinates and see if they are
+	// connected, but that could technically undo a whole drawing.
+
+	lastDrawEvent                 time.Time
+	connectedDrawEventsIndexStack []int
+
 	lowercaser cases.Caser
 
 	//LastPlayerDisconnectTime is used to know since when a lobby is empty, in case

@@ -128,6 +128,12 @@ func (lobby *Lobby) HandleEvent(raw []byte, received *GameEvent, player *Player)
 				line.Data.LineWidth = MinBrushSize
 			}
 
+			now := time.Now()
+			if now.Sub(lobby.lastDrawEvent) > 150*time.Millisecond || lobby.wasLastDrawEventFill() {
+				lobby.connectedDrawEventsIndexStack = append(lobby.connectedDrawEventsIndexStack, len(lobby.currentDrawing))
+			}
+			lobby.lastDrawEvent = now
+
 			lobby.AppendLine(line)
 
 			//We directly forward the event, as it seems to be valid.
@@ -140,6 +146,11 @@ func (lobby *Lobby) HandleEvent(raw []byte, received *GameEvent, player *Player)
 			if jsonError != nil {
 				return fmt.Errorf("error decoding data: %s", jsonError)
 			}
+
+			//A fill always
+			lobby.connectedDrawEventsIndexStack = append(lobby.connectedDrawEventsIndexStack, len(lobby.currentDrawing))
+			lobby.lastDrawEvent = time.Now()
+
 			lobby.AppendFill(fill)
 
 			//We directly forward the event, as it seems to be valid.
@@ -148,7 +159,17 @@ func (lobby *Lobby) HandleEvent(raw []byte, received *GameEvent, player *Player)
 	} else if received.Type == "clear-drawing-board" {
 		if lobby.canDraw(player) && len(lobby.currentDrawing) > 0 {
 			lobby.ClearDrawing()
+			lobby.connectedDrawEventsIndexStack = nil
 			lobby.sendDataToEveryoneExceptSender(player, received)
+		}
+	} else if received.Type == "undo" {
+		if lobby.canDraw(player) && len(lobby.currentDrawing) > 0 && len(lobby.connectedDrawEventsIndexStack) > 0 {
+			undoFrom := lobby.connectedDrawEventsIndexStack[len(lobby.connectedDrawEventsIndexStack)-1]
+			lobby.connectedDrawEventsIndexStack = lobby.connectedDrawEventsIndexStack[:len(lobby.connectedDrawEventsIndexStack)-1]
+			if undoFrom < len(lobby.currentDrawing) {
+				lobby.currentDrawing = lobby.currentDrawing[:undoFrom]
+				lobby.TriggerUpdateEvent("drawing", lobby.currentDrawing)
+			}
 		}
 	} else if received.Type == "choose-word" {
 		chosenIndex, isInt := (received.Data).(int)
@@ -284,6 +305,14 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 			sendMessageToAll(trimmedMessage, sender, lobby)
 		}
 	}
+}
+
+func (lobby *Lobby) wasLastDrawEventFill() bool {
+	if len(lobby.currentDrawing) == 0 {
+		return false
+	}
+	_, isFillEvent := lobby.currentDrawing[len(lobby.currentDrawing)-1].(*FillEvent)
+	return isFillEvent
 }
 
 func calculateGuesserScore(hintCount, hintsLeft, secondsLeft, drawingTime int) int {
@@ -603,6 +632,7 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 	}
 
 	lobby.ClearDrawing()
+	lobby.connectedDrawEventsIndexStack = nil
 	lobby.drawer = newDrawer
 	lobby.drawer.State = Drawing
 	lobby.State = Ongoing

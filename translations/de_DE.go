@@ -67,6 +67,7 @@ func initGermanTranslation() {
 	translation.put("use-fill-bucket", "Fülleimer benutzen (Füllt den Zielbereich mit der gewählten Farbe)")
 	translation.put("change-pencil-size-to", "Ändere die Stift / Radiergummi Größe auf %s")
 	translation.put("clear-canvas", "Leere die Zeichenfläche")
+	translation.put("undo", "Mache deine letzte Änderung ungeschehen (Funktioniert nicht nach \""+translation.Get("clear-canvas")+"\")")
 
 	translation.put("connection-lost", "Verbindung verloren!")
 	translation.put("connection-lost-text", "Versuche Verbindung wiederherzustellen"+

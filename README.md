@@ -132,3 +132,4 @@ authors and feel like we've wronged you, please reach out.
 * Profile Icon - Made by [kumakamu](https://www.iconfinder.com/kumakamu)
 * [Help Icon](https://www.iconfinder.com/icons/211675/help_icon) - Made by Ionicons
 * [Fullscreen Icon](https://www.iconfinder.com/icons/298714/screen_full_icon) - Made by Github
+* [Undo Icon](https://www.iconfinder.com/icons/308948/arrow_undo_icon) - Made by [Ivan Boyko](https://www.iconfinder.com/visualpharm)
