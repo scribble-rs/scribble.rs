@@ -11,6 +11,9 @@ import (
 	"golang.org/x/text/language"
 )
 
+// ParsePlayerName checks if the given value is a valid playername. Currently
+// this only includes checkin whether the value is empty or only consists of
+// whitespace character.
 func ParsePlayerName(value string) (string, error) {
 	trimmed := strings.TrimSpace(value)
 	if trimmed == "" {
@@ -20,6 +23,8 @@ func ParsePlayerName(value string) (string, error) {
 	return trimmed, nil
 }
 
+// ParseLanguage checks whether the given value is part of the
+// game.SupportedLanguages array. The input is trimmed and lowercased.
 func ParseLanguage(value string) (string, error) {
 	toLower := strings.ToLower(strings.TrimSpace(value))
 	for languageKey := range game.SupportedLanguages {
@@ -31,6 +36,9 @@ func ParseLanguage(value string) (string, error) {
 	return "", errors.New("the given language doesn't match any supported language")
 }
 
+// ParseDrawingTime checks whether the given value is an integer between
+// the lower and upper bound of drawing time. All other invalid
+// input, including empty strings, will return an error.
 func ParseDrawingTime(value string) (int, error) {
 	result, parseErr := strconv.ParseInt(value, 10, 64)
 	if parseErr != nil {
@@ -48,6 +56,9 @@ func ParseDrawingTime(value string) (int, error) {
 	return int(result), nil
 }
 
+// ParseRounds checks whether the given value is an integer between
+// the lower and upper bound of rounds played. All other invalid
+// input, including empty strings, will return an error.
 func ParseRounds(value string) (int, error) {
 	result, parseErr := strconv.ParseInt(value, 10, 64)
 	if parseErr != nil {
@@ -65,6 +76,9 @@ func ParseRounds(value string) (int, error) {
 	return int(result), nil
 }
 
+// ParseMaxPlayers checks whether the given value is an integer between
+// the lower and upper bound of maximum players per lobby. All other invalid
+// input, including empty strings, will return an error.
 func ParseMaxPlayers(value string) (int, error) {
 	result, parseErr := strconv.ParseInt(value, 10, 64)
 	if parseErr != nil {
@@ -82,6 +96,13 @@ func ParseMaxPlayers(value string) (int, error) {
 	return int(result), nil
 }
 
+// ParseCustomWords checks whether the given value is a string containing comma
+// separated values (or a single word). Empty strings will return an empty
+// (nil) array and no error. An error is only returned if there are empty words.
+// For example these wouldn't parse:
+//     wordone,,wordtwo
+//     ,
+//     wordone,
 func ParseCustomWords(value string) ([]string, error) {
 	trimmedValue := strings.TrimSpace(value)
 	if trimmedValue == "" {
@@ -101,6 +122,11 @@ func ParseCustomWords(value string) ([]string, error) {
 	return result, nil
 }
 
+// ParseClientsPerIPLimit checks whether the given value is an integer between
+// the lower and upper bound of maximum clients per IP. All other invalid
+// input, including empty strings, will return an error. The valueName
+// parameter is only needed for the error message, since the contents of the
+// error messages are meant to be shown to the client.
 func ParseClientsPerIPLimit(value string) (int, error) {
 	result, parseErr := strconv.ParseInt(value, 10, 64)
 	if parseErr != nil {
@@ -118,6 +144,10 @@ func ParseClientsPerIPLimit(value string) (int, error) {
 	return int(result), nil
 }
 
+// ParseCustomWordsChance checks whether the given value is an integer between
+// 0 and 100. All other invalid input, including empty strings, will return an
+// error. The valueName parameter is only needed for the error message, since
+// the contents of the error messages are meant to be shown to the client.
 func ParseCustomWordsChance(value string) (int, error) {
 	result, parseErr := strconv.ParseInt(value, 10, 64)
 	if parseErr != nil {
@@ -135,6 +165,11 @@ func ParseCustomWordsChance(value string) (int, error) {
 	return int(result), nil
 }
 
+// ParseBoolean checks whether the given value is either "true" or "false".
+// The checks are case-insensitive. If an empty string is supplied, false
+// is returned. All other invalid input will return an error.
+// The valueName parameter is only needed for the error message, since the
+// contents of the error messages are meant to be shown to the client.
 func ParseBoolean(valueName string, value string) (bool, error) {
 	if value == "" {
 		return false, nil
