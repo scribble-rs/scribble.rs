@@ -136,15 +136,15 @@ func ParseCustomWordsChance(value string) (int, error) {
 }
 
 func ParseBoolean(valueName string, value string) (bool, error) {
+	if value == "" {
+		return false, nil
+	}
+
 	if strings.EqualFold(value, "true") {
 		return true, nil
 	}
 
 	if strings.EqualFold(value, "false") {
-		return false, nil
-	}
-
-	if value == "" {
 		return false, nil
 	}
 
