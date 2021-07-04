@@ -1,4 +1,4 @@
-// This package is used for cleaning up text.
+// Package sanitize is used for cleaning up text.
 // The code was copied from github.com/kennygrant/sanitize and is licensed
 // under the BSD 3-Clause "New" or "Revised" License
 package sanitize
