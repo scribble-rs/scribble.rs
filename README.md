@@ -95,13 +95,7 @@ docker run -p <port-number>:<port-number> biosmarcel/scribble.rs --portHTTP=<por
 ```
 
 ## NGINX
-Scribble.rs uses WebSockets, when running it behind an NGINX reverse proxy, enable it by adding the following lines to your server configuration.
-
-```
-proxy_http_version 1.1;
-proxy_set_header Upgrade $http_upgrade;
-proxy_set_header Connection "Upgrade";
-```
+Scribble.rs uses WebSockets, when running it behind an NGINX reverse proxy, enable it by adding the following lines to your server configuration, you will find the aprropriate configurations on the [related Wiki page](https://github.com/scribble-rs/scribble.rs/wiki/reverse-proxy-(nginx)).
 
 ## Contributing
 
