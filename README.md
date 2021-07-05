@@ -94,6 +94,15 @@ The default port is `8080`. To override it, run:
 docker run -p <port-number>:<port-number> biosmarcel/scribble.rs --portHTTP=<port-number>
 ```
 
+### NGINX
+Scribble.rs uses WebSockets, when running it behind an NGINX reverse proxy, enable it by adding the following lines to your server configuration.
+
+```
+proxy_http_version 1.1;
+proxy_set_header Upgrade $http_upgrade;
+proxy_set_header Connection "Upgrade";
+```
+
 ## Contributing
 
 There are many ways you can contribute:
