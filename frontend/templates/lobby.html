@@ -1203,23 +1203,28 @@
                     return a.rank - b.rank;
                 });
 
-                //Show at least 2 players, but up to 5.
-                const maxScoreboardSize = 5;
-
+                //These two are required for displaying the "game over / win / tie" message.
+                let countOfRankOnePlayers = 0;
+                let isSelfRankOne = false;
                 for (let i = 0; i < players.length; i++) {
                     let player = players[i];
                     if (!player.connected) {
                         continue;
                     }
 
-                    const isSelf = player.id === ownID;
+                    if (player.rank === 1) {
+                        countOfRankOnePlayers++;
+                        if (player.id === ownID) {
+                            isSelfRankOne = true;
+                        }
+                    }
 
                     //Even if we don't want to show a player-entry, we still need to iterate
                     //over all players to handle the dialog titles.
-                    if (player.rank <= maxScoreboardSize) {
+                    if (player.rank <= 5) {
                         let newScoreboardEntry = document.createElement("div");
                         newScoreboardEntry.classList.add("gameover-scoreboard-entry");
-                        if (isSelf) {
+                        if (player.id === ownID) {
                             newScoreboardEntry.classList.add("gameover-scoreboard-entry-self");
                         }
 
@@ -1240,20 +1245,18 @@
 
                         gameOverScoreboard.appendChild(newScoreboardEntry);
                     }
-
-                    if (isSelf) {
-                        if (player.rank === 1) {
-                            if ((i+1 < players.length && players[i+1].rank === 1) || (i !== 0 && players[0].rank === 1)) {
-                                gameOverDialogTitle.innerText = '{{.Translation.Get "game-over-tie"}}';
-                            } else {
-                                gameOverDialogTitle.innerText = '{{.Translation.Get "game-over-win"}}';
-                            }
-                        } else {
-                            
-                            gameOverDialogTitle.innerText = '{{.Translation.Get "game-over"}}'.format(player.rank, player.score);
-                        }
-                    }
                 }
+
+                if (isSelfRankOne) {
+                    if (countOfRankOnePlayers >= 2) {
+                        gameOverDialogTitle.innerText = '{{.Translation.Get "game-over-tie"}}';
+                    } else {
+                        gameOverDialogTitle.innerText = '{{.Translation.Get "game-over-win"}}';
+                    }
+                } else {
+                    gameOverDialogTitle.innerText = '{{.Translation.Get "game-over"}}'.format(player.rank, player.score);
+                }
+
             } else if (ready.gameState === "ongoing") {
                 // The wordHints are empty if the round is not started (no word choosen)
                 if (ready.wordHints === null) {
