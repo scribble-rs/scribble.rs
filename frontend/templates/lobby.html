@@ -371,8 +371,10 @@
                     </label>
                 </div>
                 <!--We won't make these two buttons easier to click, as there's no going back. -->
-                <button class="canvas-button toolbox-group" style="font-size: 2rem;" onclick="clearCanvasAndSendEvent()"
-                    alt="{{.Translation.Get "clear-canvas"}}" title="{{.Translation.Get "clear-canvas"}}">🗑
+                <button class="canvas-button toolbox-group" onclick="clearCanvasAndSendEvent()"
+                    alt="{{.Translation.Get "clear-canvas"}}" title="{{.Translation.Get "clear-canvas"}}">
+                    <img alt="{{.Translation.Get "clear-canvas"}}" title="{{.Translation.Get "clear-canvas"}}"
+                    src="{{.RootPath}}/resources/trash.svg" width="40px" height="40px" />
                 </button>
                 <!--We won't make this button easier to click, as there's no going back. -->
                 <button class="canvas-button toolbox-group" onclick="undoAndSendEvent()"
