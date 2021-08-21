@@ -284,6 +284,11 @@ input[type="button"]:active,
     background-color: rgb(218, 218, 218);
 }
 
+.canvas-button > img {
+    display: inline-block;
+    vertical-align: middle;
+}
+
 .canvas-button::-moz-focus-inner {
     border: 0;
 }
