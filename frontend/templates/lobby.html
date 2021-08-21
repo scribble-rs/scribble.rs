@@ -1080,9 +1080,13 @@
                     updateRoundsDisplay();
                     applyPlayers(parsed.data.players);
 
-                    //Show additional dialog, that another user (drawer) is choosing a word
-                    waitChooseDrawerSpan.innerText = drawerName;
-                    waitChooseDialog.style.visibility = "visible";
+                    //Even though we always hide the dialog in the "your-turn"
+                    //event handling, it will be shortly visible if we it here.
+                    if (drawerID !== ownID) {
+                        //Show additional dialog, that another user (drawer) is choosing a word
+                        waitChooseDrawerSpan.innerText = drawerName;
+                        waitChooseDialog.style.visibility = "visible";
+                    }
 
                     //We clear this, since there's no word chosen right now.
                     wordContainer.innerHTML = "";
@@ -1099,6 +1103,8 @@
                     }
                 } else if (parsed.type === "your-turn") {
                     playWav('{{.RootPath}}/resources/your-turn.wav');
+                    //This dialog could potentially stay visible from last
+                    //turn, in case nobody has chosen a word.
                     waitChooseDialog.style.visibility = "hidden";
                     promptWords(parsed.data[0], parsed.data[1], parsed.data[2]);
                 } else if (parsed.type === "drawing") {
@@ -1274,21 +1280,11 @@
                 } else {
                     gameOverDialogTitle.innerText = '{{.Translation.Get "game-over"}}'.format(player.rank, player.score);
                 }
-
             } else if (ready.gameState === "ongoing") {
-                // The wordHints are empty if the round is not started (no word choosen)
-                if (ready.wordHints === null) {
-                    for (let i = 0; i < ready.players.length; i++) {
-                        let player = ready.players[i];
-
-                        // check if the actual player is not drawing
-                        if ((player.id === ownID) && (player.state != "drawing")) {
-                            //Show additional dialog, that another user (drawer) is choosing a word
-                            waitChooseDrawerSpan.innerText = drawerName;
-                            waitChooseDialog.style.visibility = "visible";
-                            break;
-                        }
-                    }
+                // Lack of wordHints implies that word has been chosen yet.
+                if (ready.wordHints === null && drawerID !== ownID) {
+                    waitChooseDrawerSpan.innerText = drawerName;
+                    waitChooseDialog.style.visibility = "visible";
                 }
             }
         }
@@ -1363,6 +1359,8 @@
 
         let cachedPlayers;
 
+        //applyPlayers takes the players passed, assigns them to cachedPlayers,
+        //refreshes the scoreboard and updates the drawerID and drawerName variables.
         function applyPlayers(players) {
             playerContainer.innerHTML = "";
             cachedPlayers = players;
