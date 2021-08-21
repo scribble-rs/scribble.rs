@@ -299,8 +299,8 @@
                         <div onmousedown="document.getElementById('tool-type-pencil').click()"
                             onmouseup="document.getElementById('tool-type-pencil').click()"
                             class="line-width-button-content">
-                            <span title="{{.Translation.Get "use-pencil"}}" alt="{{.Translation.Get "use-pencil"}}"
-                                id="tool-type-pencil-button" style="font-size: 2rem;">✏️</span>
+                            <img title="{{.Translation.Get "use-pencil"}}" alt="{{.Translation.Get "use-pencil"}}"
+                                src="{{.RootPath}}/resources/pencil.svg" style="transform: scaleX(-1)" width="40px" height="40px" />
                         </div>
                     </label>
                     <label for="tool-type-fill">
@@ -1398,8 +1398,10 @@
                 if (player.state === "drawing") {
                     drawerID = player.id;
                     drawerName = player.name;
+                    //FIXME Replace with pencil.svg and mirror so that pencil points to the left.
                     scoreAndStatusDiv.appendChild(document.createTextNode("✏️"));
                 } else if (player.state === "standby") {
+                    //FIXME Replace with image as well.
                     scoreAndStatusDiv.appendChild(document.createTextNode("✔️"));
                 }
 

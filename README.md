@@ -139,5 +139,6 @@ authors and feel like we've wronged you, please reach out.
 * Profile Icon - Made by [kumakamu](https://www.iconfinder.com/kumakamu)
 * [Help Icon](https://www.iconfinder.com/icons/211675/help_icon) - Made by Ionicons
 * [Fullscreen Icon](https://www.iconfinder.com/icons/298714/screen_full_icon) - Made by Github
+* [Pencil Icon](https://github.com/twitter/twemoji/blob/8e58ae4/svg/270f.svg)
 * [Trash Icon](https://www.iconfinder.com/icons/315225/trash_can_icon) - Made by [Yannick Lung](https://yannicklung.com)
 * [Undo Icon](https://www.iconfinder.com/icons/308948/arrow_undo_icon) - Made by [Ivan Boyko](https://www.iconfinder.com/visualpharm)
