@@ -6,3 +6,4 @@ __debug_bin
 .idea/
 playground/
 *.out
+.DS_Store
