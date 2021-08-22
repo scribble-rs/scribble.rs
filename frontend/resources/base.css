@@ -9,7 +9,7 @@ body {
 }
 
 body, body::backdrop, body:fullscreen {
-    background-color: antiquewhite;;
+    background-color: antiquewhite;
 }
 
 .content-wrapper {
