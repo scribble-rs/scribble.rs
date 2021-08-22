@@ -1409,20 +1409,30 @@
                 lastPlayerscoreSpan.innerText = '{{.Translation.Get "last-turn"}}'.format(player.lastScore);
                 playerscoreDiv.appendChild(lastPlayerscoreSpan);
 
+                
                 if (player.state === "drawing") {
                     drawerID = player.id;
                     drawerName = player.name;
-                    //FIXME Replace with pencil.svg and mirror so that pencil points to the left.
-                    scoreAndStatusDiv.appendChild(document.createTextNode("✏️"));
+
+                    const playerStateImage = createPlayerStateImageNode("{{.RootPath}}/resources/pencil.svg");
+                    playerStateImage.style.transform = "scaleX(-1)";
+                    scoreAndStatusDiv.appendChild(playerStateImage);
                 } else if (player.state === "standby") {
-                    //FIXME Replace with image as well.
-                    scoreAndStatusDiv.appendChild(document.createTextNode("✔️"));
+                    const playerStateImage = createPlayerStateImageNode("{{.RootPath}}/resources/checkmark.svg");
+                    scoreAndStatusDiv.appendChild(playerStateImage);
                 }
 
                 playerContainer.appendChild(playerDiv);
             });
         }
 
+        function createPlayerStateImageNode(path) {
+            let playerStateImage = document.createElement("img");
+            playerStateImage.style.width = "1rem";
+            playerStateImage.style.height = "1rem";
+            playerStateImage.src = path;
+            return playerStateImage;
+        }
         function updateRoundsDisplay() {
             roundSpan.innerText = round;
             maxRoundSpan.innerText = rounds;
