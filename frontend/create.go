@@ -32,12 +32,12 @@ func createDefaultLobbyCreatePageData() *LobbyCreatePageData {
 		SettingBounds:     game.LobbySettingBounds,
 		Languages:         game.SupportedLanguages,
 		Public:            "false",
-		DrawingTime:       "120",
-		Rounds:            "4",
-		MaxPlayers:        "12",
-		CustomWordsChance: "50",
-		ClientsPerIPLimit: "1",
-		EnableVotekick:    "true",
+		DrawingTime:       "60",
+		Rounds:            "5",
+		MaxPlayers:        "75",
+		CustomWordsChance: "100",
+		ClientsPerIPLimit: "10",
+		EnableVotekick:    "false",
 		Language:          "english",
 	}
 }

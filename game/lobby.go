@@ -30,7 +30,7 @@ var (
 		MinRounds:            1,
 		MaxRounds:            20,
 		MinMaxPlayers:        2,
-		MaxMaxPlayers:        55,
+		MaxMaxPlayers:        75,
 		MinClientsPerIPLimit: 1,
 		MaxClientsPerIPLimit: 24,
 	}
