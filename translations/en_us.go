@@ -108,6 +108,8 @@ func initEnglishTranslation() Translation {
 	translation.put("submit-feedback", "Submit Feedback")
 	translation.put("stats", "Status")
 
+	translation.put("indiegogo", "Indiegogo")
+
 	RegisterTranslation("en", translation)
 	RegisterTranslation("en-de", translation)
 
