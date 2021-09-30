@@ -25,12 +25,12 @@ import (
 
 var (
 	LobbySettingBounds = &SettingBounds{
-		MinDrawingTime:       60,
+		MinDrawingTime:       30,
 		MaxDrawingTime:       300,
 		MinRounds:            1,
 		MaxRounds:            20,
 		MinMaxPlayers:        2,
-		MaxMaxPlayers:        24,
+		MaxMaxPlayers:        55,
 		MinClientsPerIPLimit: 1,
 		MaxClientsPerIPLimit: 24,
 	}
