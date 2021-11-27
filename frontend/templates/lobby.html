@@ -947,7 +947,12 @@
             }
         }
 
+        //Used to restore the last message on arrow up.
+        let lastMessage = "";
+
         function sendMessage() {
+            lastMessage = messageInput.value;
+
             //We first check if there's more than 10000 characters and only if
             //there isn't, we check for more than 10000 bytes, as that's
             //potentially slower.
@@ -996,6 +1001,12 @@
                 childList: true,
                 subtree: false
             });
+
+        messageInput.addEventListener("keydown", function(event) {
+            if (event.keyCode === 38 /* arrow up */ && messageInput.value.length === 0) {
+                messageInput.value = lastMessage;
+            }
+        });
 
         let ownID, ownerID, ownName, drawerID, drawerName;
         let round = 0;
