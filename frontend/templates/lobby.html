@@ -458,7 +458,7 @@
 
         const reconnectDialogId = "reconnect-dialog";
         function showReconnectDialogIfNotShown() {
-            let previousReconnectDialog = document.getElementById(reconnectDialogId);
+            const previousReconnectDialog = document.getElementById(reconnectDialogId);
 
             //Since the content is constant, there's no need to ever show two.
             if (previousReconnectDialog === undefined || previousReconnectDialog === null) {
@@ -531,24 +531,24 @@
         updateSoundIcon();
 
         function showTextDialog(id, title, message) {
-            let messageNode = document.createElement("span");
+            const messageNode = document.createElement("span");
             messageNode.innerText = message;
             showDialog(id, title, messageNode);
         }
 
         function showDialog(id, title, contentNode) {
-            let newDialog = document.createElement("div");
+            const newDialog = document.createElement("div");
             newDialog.classList.add("center-dialog");
             if (id !== null && id !== "") {
                 newDialog.id = id;
             }
 
-            let dialogTitle = document.createElement("span");
+            const dialogTitle = document.createElement("span");
             dialogTitle.classList.add("dialog-title");
             dialogTitle.innerText = title;
             newDialog.appendChild(dialogTitle);
 
-            let dialogContent = document.createElement("div");
+            const dialogContent = document.createElement("div");
             dialogContent.classList.add("center-dialog-content");
             dialogContent.appendChild(contentNode);
             newDialog.appendChild(dialogContent);
@@ -621,7 +621,7 @@
                 cachedPlayers.forEach(player => {
                     //Don't wanna allow kicking ourselves.
                     if (player.id !== ownID && player.connected) {
-                        let playerKickEntry = document.createElement("button");
+                        const playerKickEntry = document.createElement("button");
                         playerKickEntry.classList.add("kick-player-button");
                         playerKickEntry.onclick = () => onVotekickPlayer(player.id);
                         playerKickEntry.innerText = player.name;
@@ -722,9 +722,9 @@
         //The drawing board has a base size. This base size results in a certain ratio
         //that the actual canvas has to be resized accordingly too. This is needed
         //since not every client has the same screensize.
-        let baseWidth = {{.DrawingBoardBaseWidth}};
-        let baseHeight = {{.DrawingBoardBaseHeight}};
-        let boardRatio = baseWidth / baseHeight;
+        const baseWidth = {{.DrawingBoardBaseWidth}};
+        const baseHeight = {{.DrawingBoardBaseHeight}};
+        const boardRatio = baseWidth / baseHeight;
 
         // Moving this here to extract the context after resizing
         const context = drawingBoard.getContext("2d");
@@ -763,14 +763,14 @@
         let localLineWidthUnscaled = 8;
 
         //Those are not scaled for now, as the whole toolbar would then have to incorrectly size up and down.
-        let sizeButton8 = document.getElementById("size-8-button");
-        let sizeButton16 = document.getElementById("size-16-button");
-        let sizeButton24 = document.getElementById("size-24-button");
-        let sizeButton32 = document.getElementById("size-32-button");
+        const sizeButton8 = document.getElementById("size-8-button");
+        const sizeButton16 = document.getElementById("size-16-button");
+        const sizeButton24 = document.getElementById("size-24-button");
+        const sizeButton32 = document.getElementById("size-32-button");
 
-        let toolButtonPen = document.getElementById("tool-type-pencil");
-        let toolButtonRubber = document.getElementById("tool-type-rubber");
-        let toolButtonFill = document.getElementById("tool-type-fill");
+        const toolButtonPen = document.getElementById("tool-type-pencil");
+        const toolButtonRubber = document.getElementById("tool-type-rubber");
+        const toolButtonFill = document.getElementById("tool-type-fill");
 
         //We use the states present in UI elements, since in case of
         //hitting F5(Refresh), the browser will not reset these states to the
@@ -907,8 +907,7 @@
 
         function setCircleCursor(innerColor, size) {
             const outerColor = getComplementaryCursorColor(innerColor);
-
-            let circleSize = size * scaleUpFactor();
+            const circleSize = size * scaleUpFactor();
             drawingBoard.style.cursor = `url('data:image/svg+xml;utf8,`
                 + encodeURIComponent(
                     `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="32" height="32">`
@@ -918,9 +917,9 @@
         }
 
         function generateSVGCircle(circleSize, innerColor, outerColor) {
-            let circleRadius = (circleSize / 2);
-            let innerColorCSS = "rgb(" + innerColor.r + "," + innerColor.g + "," + innerColor.b + ")";
-            let outerColorCSS = "rgb(" + outerColor.r + "," + outerColor.g + "," + outerColor.b + ")";
+            const circleRadius = (circleSize / 2);
+            const innerColorCSS = "rgb(" + innerColor.r + "," + innerColor.g + "," + innerColor.b + ")";
+            const outerColorCSS = "rgb(" + outerColor.r + "," + outerColor.g + "," + outerColor.b + ")";
             return `<circle cx="` + circleRadius + `" cy="` + circleRadius + `" r="` + circleRadius + `" style="fill: ` + innerColorCSS + `; stroke: ` + outerColorCSS + `;"/>`;
         }
 
@@ -1007,7 +1006,7 @@
 
         function registerMessageHandler(targetSocket) {
             targetSocket.onmessage = event => {
-                let parsed = JSON.parse(event.data);
+                const parsed = JSON.parse(event.data);
                 if (parsed.type === "ready") {
                     handleReadyEvent(parsed.data);
                 } else  if (parsed.type === "game-over") {
@@ -1222,7 +1221,7 @@
                 gameOverScoreboard.innerHTML = "";
 
                 //Copying array so we can sort.
-                let players = cachedPlayers.slice();
+                const players = cachedPlayers.slice();
                 players.sort((a, b) => {
                     return a.rank - b.rank;
                 });
@@ -1231,7 +1230,7 @@
                 let countOfRankOnePlayers = 0;
                 let isSelfRankOne = false;
                 for (let i = 0; i < players.length; i++) {
-                    let player = players[i];
+                    const player = players[i];
                     if (!player.connected) {
                         continue;
                     }
@@ -1246,23 +1245,23 @@
                     //Even if we don't want to show a player-entry, we still need to iterate
                     //over all players to handle the dialog titles.
                     if (player.rank <= 5) {
-                        let newScoreboardEntry = document.createElement("div");
+                        const newScoreboardEntry = document.createElement("div");
                         newScoreboardEntry.classList.add("gameover-scoreboard-entry");
                         if (player.id === ownID) {
                             newScoreboardEntry.classList.add("gameover-scoreboard-entry-self");
                         }
 
-                        let scoreboardRankDiv = document.createElement("div");
+                        const scoreboardRankDiv = document.createElement("div");
                         scoreboardRankDiv.classList.add("gameover-scoreboard-rank");
                         scoreboardRankDiv.innerText = player.rank;
                         newScoreboardEntry.appendChild(scoreboardRankDiv);
 
-                        let scoreboardNameDiv = document.createElement("div");
+                        const scoreboardNameDiv = document.createElement("div");
                         scoreboardNameDiv.classList.add("gameover-scoreboard-name");
                         scoreboardNameDiv.innerText = player.name;
                         newScoreboardEntry.appendChild(scoreboardNameDiv);
 
-                        let scoreboardScoreSpan = document.createElement("span");
+                        const scoreboardScoreSpan = document.createElement("span");
                         scoreboardScoreSpan.classList.add("gameover-scoreboard-score");
                         scoreboardScoreSpan.innerText = player.score;
                         newScoreboardEntry.appendChild(scoreboardScoreSpan);
@@ -1312,7 +1311,7 @@
 
         function playWav(file) {
             if (sound) {
-                let audio = new Audio(file);
+                const audio = new Audio(file);
                 audio.type = 'audio/wav';
                 audio.play();
             }
@@ -1336,20 +1335,20 @@
                 messageContainer.removeChild(messageContainer.firstChild);
             }
 
-            let newMessageDiv = document.createElement("div");
+            const newMessageDiv = document.createElement("div");
             newMessageDiv.classList.add("message");
             if (styleClass !== null && styleClass !== "") {
                 newMessageDiv.classList.add(styleClass);
             }
 
             if (author !== null && author !== "") {
-                let authorNameSpan = document.createElement("span");
+                const authorNameSpan = document.createElement("span");
                 authorNameSpan.classList.add("chat-name");
                 authorNameSpan.innerText = author;
                 newMessageDiv.appendChild(authorNameSpan);
             }
 
-            let messageSpan = document.createElement("span");
+            const messageSpan = document.createElement("span");
             messageSpan.classList.add("message-content");
             messageSpan.innerText = message;
             newMessageDiv.appendChild(messageSpan);
@@ -1370,19 +1369,19 @@
                     return;
                 }
 
-                let playerDiv = document.createElement("div");
+                const playerDiv = document.createElement("div");
 
                 playerDiv.classList.add("player");
                 if (player.state === "standby") {
                     playerDiv.classList.add("player-done");
                 }
 
-                let rankSpan = document.createElement("span");
+                const rankSpan = document.createElement("span");
                 rankSpan.classList.add("rank");
                 rankSpan.innerText = player.rank;
                 playerDiv.appendChild(rankSpan)
 
-                let playernameSpan = document.createElement("span");
+                const playernameSpan = document.createElement("span");
                 playernameSpan.classList.add("playername");
                 playernameSpan.innerText = player.name;
                 playernameSpan.id = "playername-" + player.id;
@@ -1391,20 +1390,20 @@
                 }
                 playerDiv.appendChild(playernameSpan);
 
-                let scoreAndStatusDiv = document.createElement("div");
+                const scoreAndStatusDiv = document.createElement("div");
                 scoreAndStatusDiv.classList.add("score-and-status");
                 playerDiv.appendChild(scoreAndStatusDiv);
 
-                let playerscoreDiv = document.createElement("div");
+                const playerscoreDiv = document.createElement("div");
                 playerscoreDiv.classList.add("playerscore-group");
                 scoreAndStatusDiv.appendChild(playerscoreDiv);
 
-                let playerscoreSpan = document.createElement("span");
+                const playerscoreSpan = document.createElement("span");
                 playerscoreSpan.classList.add("playerscore");
                 playerscoreSpan.innerText = player.score;
                 playerscoreDiv.appendChild(playerscoreSpan);
 
-                let lastPlayerscoreSpan = document.createElement("span");
+                const lastPlayerscoreSpan = document.createElement("span");
                 lastPlayerscoreSpan.classList.add("last-turn-score");
                 lastPlayerscoreSpan.innerText = '{{.Translation.Get "last-turn"}}'.format(player.lastScore);
                 playerscoreDiv.appendChild(lastPlayerscoreSpan);
@@ -1427,7 +1426,7 @@
         }
 
         function createPlayerStateImageNode(path) {
-            let playerStateImage = document.createElement("img");
+            const playerStateImage = document.createElement("img");
             playerStateImage.style.width = "1rem";
             playerStateImage.style.height = "1rem";
             playerStateImage.src = path;
@@ -1441,7 +1440,7 @@
         function applyWordHints(wordHints) {
             wordContainer.innerHTML = "";
             wordHints.forEach(hint => {
-                let hintSpan = document.createElement("span");
+                const hintSpan = document.createElement("span");
                 hintSpan.classList.add("guess-letter");
                 if (hint.character === 0) {
                     hintSpan.classList.add("guess-letter-underline");
@@ -1461,7 +1460,7 @@
             clear(context);
             drawElements
                 .forEach(drawElement => {
-                    let drawData = drawElement.data;
+                    const drawData = drawElement.data;
                     if (drawElement.type === "fill") {
                         context.fillFlood(drawData.x * scaleDownFactor(), drawData.y * scaleDownFactor(), drawData.color);
                     } else if (drawElement.type === "line") {
@@ -1684,7 +1683,7 @@
 
         function fillAndSendEvent(context, x, y, color) {
             if (context.fillFlood(x, y, color)) {
-                let fillInstruction = {
+                const fillInstruction = {
                     type: "fill",
                     data: {
                         x: scaelUpAndPrepareFloatForServer(x),
@@ -1703,7 +1702,7 @@
 
             drawLine(context, x1, y1, x2, y2, color, lineWidth);
 
-            let drawInstruction = {
+            const drawInstruction = {
                 type: "line",
                 data: {
                     fromX: scaelUpAndPrepareFloatForServer(x1),
@@ -1727,10 +1726,10 @@
             lineWidth = Math.ceil(lineWidth);
 
             // calculate bounding box
-            let left = Math.max(0, Math.min(context.canvas.width, Math.min(x1, x2) - lineWidth));
-            let top = Math.max(0, Math.min(context.canvas.height, Math.min(y1, y2) - lineWidth));
-            let right = Math.max(0, Math.min(context.canvas.width, Math.max(x1, x2) + lineWidth));
-            let bottom = Math.max(0, Math.min(context.canvas.height, Math.max(y1, y2) + lineWidth));
+            const left = Math.max(0, Math.min(context.canvas.width, Math.min(x1, x2) - lineWidth));
+            const top = Math.max(0, Math.min(context.canvas.height, Math.min(y1, y2) - lineWidth));
+            const right = Math.max(0, Math.min(context.canvas.width, Math.max(x1, x2) + lineWidth));
+            const bottom = Math.max(0, Math.min(context.canvas.height, Math.max(y1, y2) + lineWidth));
 
             // off canvas, so don't draw anything
             if (right - left === 0 || bottom - top === 0) {
@@ -1783,7 +1782,7 @@
 
         function generateCircleMap(radius) {
             const diameter = 2 * radius;
-            let circleData = new Array(diameter);
+            const circleData = new Array(diameter);
 
             for (let x = 0; x < diameter; x++) {
                 circleData[x] = new Array(diameter);
