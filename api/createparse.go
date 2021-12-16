@@ -40,60 +40,24 @@ func ParseLanguage(value string) (string, error) {
 // the lower and upper bound of drawing time. All other invalid
 // input, including empty strings, will return an error.
 func ParseDrawingTime(value string) (int, error) {
-	result, parseErr := strconv.ParseInt(value, 10, 64)
-	if parseErr != nil {
-		return 0, errors.New("the drawing time must be numeric")
-	}
-
-	if result < game.LobbySettingBounds.MinDrawingTime {
-		return 0, fmt.Errorf("drawing time must not be smaller than %d", game.LobbySettingBounds.MinDrawingTime)
-	}
-
-	if result > game.LobbySettingBounds.MaxDrawingTime {
-		return 0, fmt.Errorf("drawing time must not be greater than %d", game.LobbySettingBounds.MaxDrawingTime)
-	}
-
-	return int(result), nil
+	return parseIntValue(value, game.LobbySettingBounds.MinDrawingTime,
+		game.LobbySettingBounds.MaxDrawingTime, "drawing time")
 }
 
 // ParseRounds checks whether the given value is an integer between
 // the lower and upper bound of rounds played. All other invalid
 // input, including empty strings, will return an error.
 func ParseRounds(value string) (int, error) {
-	result, parseErr := strconv.ParseInt(value, 10, 64)
-	if parseErr != nil {
-		return 0, errors.New("the rounds amount must be numeric")
-	}
-
-	if result < game.LobbySettingBounds.MinRounds {
-		return 0, fmt.Errorf("rounds must not be smaller than %d", game.LobbySettingBounds.MinRounds)
-	}
-
-	if result > game.LobbySettingBounds.MaxRounds {
-		return 0, fmt.Errorf("rounds must not be greater than %d", game.LobbySettingBounds.MaxRounds)
-	}
-
-	return int(result), nil
+	return parseIntValue(value, game.LobbySettingBounds.MinRounds,
+		game.LobbySettingBounds.MaxRounds, "rounds")
 }
 
 // ParseMaxPlayers checks whether the given value is an integer between
 // the lower and upper bound of maximum players per lobby. All other invalid
 // input, including empty strings, will return an error.
 func ParseMaxPlayers(value string) (int, error) {
-	result, parseErr := strconv.ParseInt(value, 10, 64)
-	if parseErr != nil {
-		return 0, errors.New("the max players amount must be numeric")
-	}
-
-	if result < game.LobbySettingBounds.MinMaxPlayers {
-		return 0, fmt.Errorf("maximum players must not be smaller than %d", game.LobbySettingBounds.MinMaxPlayers)
-	}
-
-	if result > game.LobbySettingBounds.MaxMaxPlayers {
-		return 0, fmt.Errorf("maximum players must not be greater than %d", game.LobbySettingBounds.MaxMaxPlayers)
-	}
-
-	return int(result), nil
+	return parseIntValue(value, game.LobbySettingBounds.MinMaxPlayers,
+		game.LobbySettingBounds.MaxMaxPlayers, "max players amount")
 }
 
 // ParseCustomWords checks whether the given value is a string containing comma
@@ -124,42 +88,31 @@ func ParseCustomWords(value string) ([]string, error) {
 
 // ParseClientsPerIPLimit checks whether the given value is an integer between
 // the lower and upper bound of maximum clients per IP. All other invalid
-// input, including empty strings, will return an error. The valueName
-// parameter is only needed for the error message, since the contents of the
-// error messages are meant to be shown to the client.
+// input, including empty strings, will return an error.
 func ParseClientsPerIPLimit(value string) (int, error) {
-	result, parseErr := strconv.ParseInt(value, 10, 64)
-	if parseErr != nil {
-		return 0, errors.New("the clients per IP limit must be numeric")
-	}
-
-	if result < game.LobbySettingBounds.MinClientsPerIPLimit {
-		return 0, fmt.Errorf("the clients per IP limit must not be lower than %d", game.LobbySettingBounds.MinClientsPerIPLimit)
-	}
-
-	if result > game.LobbySettingBounds.MaxClientsPerIPLimit {
-		return 0, fmt.Errorf("the clients per IP limit must not be higher than %d", game.LobbySettingBounds.MaxClientsPerIPLimit)
-	}
-
-	return int(result), nil
+	return parseIntValue(value, game.LobbySettingBounds.MinClientsPerIPLimit,
+		game.LobbySettingBounds.MaxClientsPerIPLimit, "clients per IP limit")
 }
 
 // ParseCustomWordsChance checks whether the given value is an integer between
 // 0 and 100. All other invalid input, including empty strings, will return an
-// error. The valueName parameter is only needed for the error message, since
-// the contents of the error messages are meant to be shown to the client.
+// error.
 func ParseCustomWordsChance(value string) (int, error) {
+	return parseIntValue(value, 0, 100, "custom word chance")
+}
+
+func parseIntValue(value string, lower, upper int64, valueName string) (int, error) {
 	result, parseErr := strconv.ParseInt(value, 10, 64)
 	if parseErr != nil {
-		return 0, errors.New("the custom word chance must be numeric")
+		return 0, fmt.Errorf("%s must be numeric", valueName)
 	}
 
-	if result < 0 {
-		return 0, errors.New("custom word chance must not be lower than 0")
+	if result < lower {
+		return 0, fmt.Errorf("%s must not be lower than %d", valueName, lower)
 	}
 
-	if result > 100 {
-		return 0, errors.New("custom word chance must not be higher than 100")
+	if result > upper {
+		return 0, fmt.Errorf("%s must not be higher than %d", valueName, upper)
 	}
 
 	return int(result), nil
@@ -168,8 +121,6 @@ func ParseCustomWordsChance(value string) (int, error) {
 // ParseBoolean checks whether the given value is either "true" or "false".
 // The checks are case-insensitive. If an empty string is supplied, false
 // is returned. All other invalid input will return an error.
-// The valueName parameter is only needed for the error message, since the
-// contents of the error messages are meant to be shown to the client.
 func ParseBoolean(valueName string, value string) (bool, error) {
 	if value == "" {
 		return false, nil
