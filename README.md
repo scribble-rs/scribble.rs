@@ -47,12 +47,17 @@ https://heroku.com/deploy?template=https://github.com/scribble-rs/scribble.rs/tr
 
 ## Building / Running
 
-Run the following to build the application:
+First you'll need to install the Go compiler by followng the instructions at https://go.dev/doc/install.
+If you are using a package manager for this, that's fine too.
+
+Next you'll have to download the code via:
 
 ```shell
 git clone https://github.com/scribble-rs/scribble.rs.git
 cd scribble.rs
 ```
+
+Lastly to build the executable, run the following:
 
 For -nix systems:
 ```shell
@@ -72,9 +77,9 @@ same architecture and OS family as the system it was compiled on.
 The default port will be `8080`. The parameter `portHTTP` allows changing the
 port though.
 
-It should run on any system that go supports as a compilation target.
+You should be able to build the binary on any system that go supports as a compilation target.
 
-This application go version `1.16` or higher.
+This application requires go version `1.16` or higher.
 
 ## Docker
 
