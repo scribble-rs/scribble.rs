@@ -1,5 +1,5 @@
-github.com/Bios-Marcel/discordemojimap/v2 v2.0.2 h1:PaCKn6keHqXFSrKvo9qM8L7fys/Ypv3CKBKXFe1OSME=
-github.com/Bios-Marcel/discordemojimap/v2 v2.0.2/go.mod h1:WO9F+XVWqw6TieAj/IzzA2eVlPfKk3sjDmZW86Sd/t4=
+github.com/Bios-Marcel/discordemojimap/v2 v2.0.3 h1:IAAbiumZAURinAj4urkK32kc5TMmAdKQuaakcQ/QZXk=
+github.com/Bios-Marcel/discordemojimap/v2 v2.0.3/go.mod h1:WO9F+XVWqw6TieAj/IzzA2eVlPfKk3sjDmZW86Sd/t4=
 github.com/agnivade/levenshtein v1.1.1 h1:QY8M92nrzkmr798gCo3kmMyqXFzdQVpxLlGPRBij0P8=
 github.com/agnivade/levenshtein v1.1.1/go.mod h1:veldBMzWxcCG2ZvUTKD2kJNRdCk5hVbJomOvKkmgYbo=
 github.com/arbovm/levenshtein v0.0.0-20160628152529-48b4e1c0c4d0 h1:jfIu9sQUG6Ig+0+Ap1h4unLjW6YQJpKZVmUzxsD4E/Q=
