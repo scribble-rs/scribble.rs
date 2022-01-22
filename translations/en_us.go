@@ -60,7 +60,7 @@ func initEnglishTranslation() Translation {
 
 	translation.put("close-guess", "'%s' is very close.")
 	translation.put("correct-guess", "You have correctly guessed the word.")
-	translation.put("correct-guess-other-player", "%s correctly guessed the word.")
+	translation.put("correct-guess-other-player", "'%s' correctly guessed the word.")
 	translation.put("round-over", "Turn over, no word was chosen.")
 	translation.put("round-over-no-word", "Turn over, the word was '%s'.")
 	translation.put("game-over-win", "Congratulations, you've won!")

@@ -54,7 +54,7 @@ func initGermanTranslation() {
 
 	translation.put("close-guess", "'%s' ist nah dran.")
 	translation.put("correct-guess", "Du hast das Wort korrekt erraten.")
-	translation.put("correct-guess-other-player", "%s hat das Wort korrekt erraten.")
+	translation.put("correct-guess-other-player", "'%s' hat das Wort korrekt erraten.")
 	translation.put("round-over", "Zug vorbei, es wurde kein Wort gewählt.")
 	translation.put("round-over-no-word", "Zug vorbei, das gewählte Wort war '%s'.")
 	translation.put("game-over-win", "Glückwunsch, du hast gewonnen!")

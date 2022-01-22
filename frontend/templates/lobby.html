@@ -1054,7 +1054,7 @@
                         for (let i = 0; i < cachedPlayers.length; i++) {
                             let player = cachedPlayers[i];
                             if (player.id === parsed.data) {
-                                appendMessage("correct-guess-message", null, '{{.Translation.Get "correct-guess-other-player"}}'.format(player.name));
+                                appendMessage("correct-guess-message-other-player", null, '{{.Translation.Get "correct-guess-other-player"}}'.format(player.name));
                                 break;
                             }
                         }

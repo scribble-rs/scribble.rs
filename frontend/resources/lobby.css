@@ -151,6 +151,11 @@
     color: rgb(38, 187, 38);
 }
 
+.correct-guess-message-other-player {
+    font-weight: bold;
+    color: rgb(231 198 32);
+}
+
 .non-guessing-player-message {
     color: rgb(38, 187, 38);
 }
