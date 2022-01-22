@@ -1027,6 +1027,14 @@
                 } else if (parsed.type === "update-players") {
                     applyPlayers(parsed.data);
                 } else if (parsed.type === "name-change") {
+                    for (let i = 0; i < cachedPlayers.length; i++) {
+                        let player = cachedPlayers[i];
+                        if (player.id === parsed.data.playerId) {
+                            player.name = parsed.data.playerName;
+                            break;
+                        }
+                    }
+
                     const playernameSpan = document.getElementById("playername-" + parsed.data.playerId);
                     if (playernameSpan !== null) {
                         playernameSpan.innerText = parsed.data.playerName;
