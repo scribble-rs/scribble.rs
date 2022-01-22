@@ -103,3 +103,14 @@ kbd {
     padding: 2px 4px;
     white-space: nowrap;
 }
+
+@media only screen
+    and (min-device-width: 375px) and (max-device-width: 812px),
+    (orientation: portrait) or (max-aspect-ratio: 4/3) {
+    h1 {
+        font-size: 4rem;
+    }
+    h2 {
+        font-size: 2rem;
+    }
+}

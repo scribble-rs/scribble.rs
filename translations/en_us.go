@@ -105,7 +105,7 @@ func initEnglishTranslation() Translation {
 	translation.put("source-code", "Source Code")
 	translation.put("help", "Help")
 	translation.put("contact", "Contact")
-	translation.put("submit-feedback", "Submit Feedback")
+	translation.put("submit-feedback", "Feedback")
 	translation.put("stats", "Status")
 
 	RegisterTranslation("en", translation)

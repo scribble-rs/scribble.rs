@@ -5,6 +5,7 @@
 <head>
     <title>Scribble.rs</title>
     <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     {{template "font-decl" .}}
     <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/base.css"/>
     <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/lobby_create.css"/>
@@ -70,7 +71,7 @@
                     <textarea class="input-item" name="custom_words"
                     placeholder="{{.Translation.Get "custom-words-info"}}">{{.CustomWords}}</textarea>
                     <b>{{.Translation.Get "custom-words-chance-setting"}}</b>
-                    <div style="display: flex;">
+                    <div class="input-item" style="display: flex;">
                         0%
                         <input style="flex: 1;" type="range" name="custom_words_chance" min="1" max="100" value="{{.CustomWordsChance}}">
                         100%
@@ -86,7 +87,7 @@
                             {{if eq .EnableVotekick "true"}}checked{{end}}/>
                         </div>
                     </details>
-                    <button type="submit" form="lobby-create" style="grid-column-start: 1; grid-column-end: 3;">
+                    <button type="submit" class="create-button" form="lobby-create">
                             {{.Translation.Get "create-lobby"}}
                     </button>
                 </form>

@@ -498,9 +498,20 @@ input[type="button"]:active,
   and (max-device-width: 812px)
   and (orientation: landscape)
   and (display-mode: fullscreen) {
-      html {
-          font-size: 0.8rem;
-      }
+    html {
+        font-size: 0.8rem;
+    }
+    .dialog-title {
+        font-size: 1.75rem;
+    }
+}
+
+@media only screen
+and (min-device-width: 375px)
+and (max-device-width: 812px) {
+    .dialog-title {
+        font-size: 1.75rem;
+    }
 }
 
 @media only screen and (orientation: portrait), (max-aspect-ratio: 4/3) {

@@ -28,6 +28,10 @@
     grid-column-start: 1;
     grid-column-end: 3;
 }
+.create-button {
+    grid-column-start: 1;
+    grid-column-end: 3;
+}
 
 .tab-header {
     display: grid;
@@ -147,4 +151,59 @@ tr:hover {
 
 tr[selected="true"] {
     background-color: #6464de;
+}
+
+@media only screen
+    and (min-device-width: 375px) and (max-device-width: 812px),
+    (orientation: portrait) or (max-aspect-ratio: 4/3) {
+    .tab-header {
+        margin: 0;
+    }
+    .tab-content {
+        padding: 0;
+        margin: 0;
+    }
+
+    .center-container {
+        margin: 0;
+    }
+    .content-container {
+        width: 96%;
+        padding: 2%;
+    }
+    .input-container {
+        align-items: start;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        row-gap: 5px;
+    }
+    .input-item {
+        min-width: auto;
+    }
+    .advanced-section {
+        width: 100%;
+    }
+    .input-container > input[type="checkbox"] {
+        min-width: auto;
+        width: initial;
+    }
+    .input-container > * {
+        flex-grow: 1;
+    }
+    .create-button {
+        width: 100%;
+    }
+
+    .join-lobby-data {
+        flex-direction: column;
+    }
+    .lobby-details {
+        margin: 0.5rem;
+        padding: 0.5rem;
+        row-gap: 0.5rem;
+    }
+    .table-wrapper-wrapper {
+        margin: 0.5rem;
+    }
 }
