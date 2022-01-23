@@ -1,7 +1,6 @@
 package game
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -13,6 +12,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/scribble-rs/scribble.rs/sanitize"
 
 	discordemojimap "github.com/Bios-Marcel/discordemojimap/v2"
@@ -114,18 +114,21 @@ func (lobby *Lobby) HandleEvent(raw []byte, received *GameEvent, player *Player)
 		handleMessage(dataAsString, player, lobby)
 	} else if received.Type == "line" {
 		if lobby.canDraw(player) {
-			line := &LineEvent{}
-			jsonError := json.Unmarshal(raw, line)
-			if jsonError != nil {
-				return fmt.Errorf("error decoding data: %s", jsonError)
+			line := &Line{}
+			//It's cheaper to restructure the already unmarshalled map data
+			//instead of calling json.unmarshal again with a more specific
+			//type. Benchmarks can be found in json_test.go.
+			decodeError := mapstructure.Decode(received.Data, line)
+			if decodeError != nil {
+				return fmt.Errorf("error decoding data: %s", decodeError)
 			}
 
 			//In case the line is too big, we overwrite the data of the event.
 			//This will prevent clients from lagging due to too thick lines.
-			if line.Data.LineWidth > float32(MaxBrushSize) {
-				line.Data.LineWidth = MaxBrushSize
-			} else if line.Data.LineWidth < float32(MinBrushSize) {
-				line.Data.LineWidth = MinBrushSize
+			if line.LineWidth > float32(MaxBrushSize) {
+				line.LineWidth = MaxBrushSize
+			} else if line.LineWidth < float32(MinBrushSize) {
+				line.LineWidth = MinBrushSize
 			}
 
 			now := time.Now()
@@ -134,24 +137,28 @@ func (lobby *Lobby) HandleEvent(raw []byte, received *GameEvent, player *Player)
 			}
 			lobby.lastDrawEvent = now
 
-			lobby.AppendLine(line)
+			lineEvent := &LineEvent{Type: "line", Data: line}
+			lobby.AppendLine(lineEvent)
 
 			//We directly forward the event, as it seems to be valid.
-			lobby.sendDataToEveryoneExceptSender(player, line)
+			lobby.sendDataToEveryoneExceptSender(player, lineEvent)
 		}
 	} else if received.Type == "fill" {
 		if lobby.canDraw(player) {
-			fill := &FillEvent{}
-			jsonError := json.Unmarshal(raw, fill)
-			if jsonError != nil {
-				return fmt.Errorf("error decoding data: %s", jsonError)
+			//It's cheaper to restructure the already unmarshalled map data
+			//instead of calling json.unmarshal again with a more specific
+			//type. Benchmarks can be found in json_test.go.
+			fill := &Fill{}
+			decodeError := mapstructure.Decode(received.Data, fill)
+			if decodeError != nil {
+				return fmt.Errorf("error decoding data: %s", decodeError)
 			}
 
 			//A fill always
 			lobby.connectedDrawEventsIndexStack = append(lobby.connectedDrawEventsIndexStack, len(lobby.currentDrawing))
 			lobby.lastDrawEvent = time.Now()
 
-			lobby.AppendFill(fill)
+			lobby.AppendFill(&FillEvent{Type: "fill", Data: fill})
 
 			//We directly forward the event, as it seems to be valid.
 			lobby.sendDataToEveryoneExceptSender(player, received)
