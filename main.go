@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime/pprof"
 	"strconv"
 	"strings"
 	"syscall"
@@ -55,9 +56,20 @@ func determinePort(portHTTPFlag int) int {
 	return portHTTP
 }
 
+var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
+
 func main() {
 	portHTTPFlag := flag.Int("portHTTP", -1, "defines the port to be used for http mode")
 	flag.Parse()
+
+	if *cpuprofile != "" {
+		log.Println("Starting CPU profiling ....")
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+	}
 
 	portHTTP := determinePort(*portHTTPFlag)
 
@@ -69,14 +81,17 @@ func main() {
 	state.LaunchCleanupRoutine()
 
 	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, syscall.SIGTERM)
+	signal.Notify(signalChan, syscall.SIGTERM, syscall.SIGINT)
 	go func() {
 		defer os.Exit(0)
 
-		<-signalChan
-		log.Println("Received SIGTERM, gracefully shutting down.")
+		log.Printf("Received %s, gracefully shutting down.\n", <-signalChan)
 
 		state.ShutdownLobbiesGracefully()
+		if *cpuprofile != "" {
+			pprof.StopCPUProfile()
+			log.Println("Finished CPU profiling.")
+		}
 	}()
 
 	log.Println("Started.")
