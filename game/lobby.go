@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/mitchellh/mapstructure"
@@ -949,10 +950,14 @@ func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTim
 // of an adverb, an adjective and a animal name. The result can generally be
 // trusted to be sane.
 func generatePlayerName() string {
-	adjective := strings.Title(petname.Adjective())
-	adverb := strings.Title(petname.Adverb())
-	name := strings.Title(petname.Name())
-	return adverb + adjective + name
+	words := [3]string{petname.Adverb(), petname.Adjective(), petname.Name()}
+	buffer := make([]byte, 0, 32)
+	for _, word := range words {
+		//Manually uppercasing the first rune is cheaper than calling strings.ToUpper.
+		buffer = append(buffer, byte(unicode.ToUpper(rune(word[0]))))
+		buffer = append(buffer, word[1:]...)
+	}
+	return string(buffer)
 }
 
 // Message represents a message in the chatroom.
