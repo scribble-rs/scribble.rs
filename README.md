@@ -140,6 +140,7 @@ Some of these were slightly altered if the license allowed it.
 Treat each of the files in this repository with the same license terms as the
 original file.
 
+* Logo - All rights reserved, excluded from BSD-3 licensing
 * Favicon - All rights reserved, excluded from BSD-3 licensing
 * Rubber Icon - Made by [Pixel Buddha](https://www.flaticon.com/authors/pixel-buddha) from [flaticon.com](https://flaticon.com)
 * Fill Bucket Icon - Made by [inipagistudio](https://www.flaticon.com/authors/inipagistudio) from [flaticon.com](https://flaticon.com)

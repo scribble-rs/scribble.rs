@@ -1,3 +1,11 @@
+#logo {
+    width: 50vw;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .center-container {
     display: flex;
     flex-direction: column;
@@ -151,6 +159,9 @@ tr[selected="true"] {
 @media only screen
     and (min-device-width: 375px) and (max-device-width: 812px),
     (orientation: portrait) or (max-aspect-ratio: 4/3) {
+    #logo {
+        width: 95vw;
+    }
     .tab-header {
         margin: 0;
     }
