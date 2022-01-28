@@ -13,11 +13,6 @@
     padding: 1rem 3rem 1rem 3rem;
 }
 
-.input-item {
-    width: inherit;
-    min-width: 300px;
-}
-
 .error-list {
     background-color: rgb(236, 93, 93);
     padding: 10px;
@@ -178,14 +173,10 @@ tr[selected="true"] {
         width: 100%;
         row-gap: 5px;
     }
-    .input-item {
-        min-width: auto;
-    }
     .advanced-section {
         width: 100%;
     }
     .input-container > input[type="checkbox"] {
-        min-width: auto;
         width: initial;
     }
     .input-container > * {
