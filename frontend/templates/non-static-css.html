@@ -1,0 +1,33 @@
+{{/* A little hack so we need don't to have CSS templates and embed those directly. */}}
+{{/* The reason being that we need to be able to define the RootPath here. */}}
+{{define "non-static-css-decl"}}
+<style>
+    @font-face {
+        font-family: 'Montserrat';
+        font-weight: normal;
+        src: local('Monserrat'),
+        url({{.RootPath}}/resources/Montserrat-Regular.otf) format("opentype");
+    }
+
+    @font-face {
+        font-family: 'Montserrat';
+        font-weight: bold;
+        src: local('Monserrat Bold'),
+        url({{.RootPath}}/resources/Montserrat-Bold.otf) format("opentype");
+    }
+
+    .content-wrapper::before {
+        content: ' ';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.20;
+        background-image: url('{{.RootPath}}/resources/background.png');
+        background-size: 400px 400px;
+        background-repeat: repeat;
+        z-index: -1;
+    }
+</style>
+{{end}}

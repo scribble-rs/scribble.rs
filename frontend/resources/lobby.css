@@ -8,6 +8,14 @@
     grid-gap: 5px;
 }
 
+#lobby-header > * {
+    background-color: white;
+    height: 100%;
+    align-items: center;
+    padding-left: 0.2rem;
+    padding-right: 0.2rem;
+}
+
 #lobby-header-center-element {
     display: flex;
     /* Hack to remove extra space between buttons */
@@ -36,6 +44,7 @@
     justify-items: center;
     align-self: center;
     text-align: center;
+    padding-bottom: 0.4rem;
 }
 
 .guess-letter-underline {

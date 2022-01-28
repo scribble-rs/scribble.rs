@@ -5,7 +5,7 @@
 <head>
     <title>Scribble.rs - Error</title>
     <meta charset="UTF-8" />
-    {{template "font-decl" .}}
+    {{template "non-static-css-decl" .}}
     <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/base.css" />
     <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/error.css" />
     {{template "favicon-decl" .}}
@@ -13,9 +13,13 @@
 
 <body>
     <div class="content-wrapper">
-        <h1 class="error-title">(◕︿◕✿)</h1>
-        <h2 class="error-message">{{.ErrorMessage}}</h2>
-        <a class="go-back" href="{{.RootPath}}/">Click here to get back to the Homepage</a>
+        <div class="error-pane-wrapper">
+            <div class="error-pane">
+                <h1 class="error-title">(◕︿◕✿)</h1>
+                <h2 class="error-message">{{.ErrorMessage}}</h2>
+                <a class="go-back" href="{{.RootPath}}/">Click here to get back to the Homepage</a>
+            </div>
+        </div>
         {{template "footer" .}}
     </div>
 </body>

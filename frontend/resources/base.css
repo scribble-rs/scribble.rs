@@ -4,12 +4,11 @@ html, body {
 
 body {
     font-family: 'Montserrat';
-    background-color: antiquewhite;
     margin: 0;
 }
 
 body, body::backdrop, body:fullscreen {
-    background-color: antiquewhite;
+    background-color: #badeb8;
 }
 
 .content-wrapper {
