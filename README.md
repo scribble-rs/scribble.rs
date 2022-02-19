@@ -81,6 +81,12 @@ You should be able to build the binary on any system that go supports as a compi
 
 This application requires go version `1.16` or higher.
 
+## Pre-compiled binaries
+
+In the [Releases](https://github.com/scribble-rs/scribble.rs/releases) section you can find the latest stable release.
+
+Alternatively each commit uploads artifacts which will be available for a certain time.
+
 ## Docker
 
 Alternatively there's a docker container:
