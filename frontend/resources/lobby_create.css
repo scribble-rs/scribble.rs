@@ -191,7 +191,10 @@ tr[selected="true"] {
         width: initial;
     }
     .input-container > * {
-        flex-grow: 1;
+        width: 100%;
+        /* These two prevent blow-out of the input elements */
+        display: block;
+        box-sizing: border-box;
     }
     .create-button {
         width: 100%;
