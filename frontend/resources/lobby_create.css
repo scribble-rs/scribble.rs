@@ -28,12 +28,10 @@
     color: white;
     font-weight: bold;
     margin-bottom: 20px;
-    grid-column-start: 1;
-    grid-column-end: 3;
+    grid-column: 1 / -1;
 }
 .create-button {
-    grid-column-start: 1;
-    grid-column-end: 3;
+    grid-column: 1 / -1;
 }
 
 .tab-header {
@@ -148,8 +146,7 @@ tr:hover {
 }
 
 #join-button {
-    grid-column-start: 1;
-    grid-column-end: 3;
+    grid-column: 1 / -1;
 }
 
 tr[selected="true"] {
@@ -176,25 +173,6 @@ tr[selected="true"] {
     .content-container {
         width: 96%;
         padding: 2%;
-    }
-    .input-container {
-        align-items: start;
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        row-gap: 5px;
-    }
-    .advanced-section {
-        width: 100%;
-    }
-    .input-container > input[type="checkbox"] {
-        width: initial;
-    }
-    .input-container > * {
-        width: 100%;
-        /* These two prevent blow-out of the input elements */
-        display: block;
-        box-sizing: border-box;
     }
     .create-button {
         width: 100%;

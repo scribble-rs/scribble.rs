@@ -28,7 +28,8 @@ func initEnglishTranslation() Translation {
 	translation.put("player-kicked", "Player has been kicked.")
 	translation.put("owner-change", "%s is the new lobby owner.")
 
-	translation.put("change-lobby-settings", "Change the lobby settings")
+	translation.put("change-lobby-settings-tooltip", "Change the lobby settings")
+	translation.put("change-lobby-settings-title", "Lobby settings")
 	translation.put("lobby-settings-changed", "Lobby settings changed")
 	translation.put("advanced-settings", "Advanced settings")
 	translation.put("word-language", "Word-Language")

@@ -57,8 +57,9 @@
                             <img src="{{.RootPath}}/resources/kick.png" class="header-button-image" />
                         </button>
                         <button id="lobby-settings-button" style="display: none;" onclick="showLobbySettingsDialog()"
-                            class="dialog-button header-button" alt="{{.Translation.Get "change-lobby-settings"}}"
-                            title="{{.Translation.Get "change-lobby-settings"}}">
+                            class="dialog-button header-button"
+                            alt="{{.Translation.Get "change-lobby-settings-tooltip"}}"
+                            title="{{.Translation.Get "change-lobby-settings-tooltip"}}">
                             <img src="{{.RootPath}}/resources/settings.svg" class="header-button-image" />
                         </button>
                     </div>
@@ -103,14 +104,14 @@
                                     <div style="display: flex; flex-direction: row;">
                                         <input class="namechange-field" type="text"
                                             id="namechange-field-start-dialog"></input>
-                                        <button class="dialog-button"
+                                        <button class="dialog-button namechange-apply-button"
                                             onclick="changeName(document.getElementById('namechange-field-start-dialog').value)">{{.Translation.Get "apply"}}</button>
                                     </div>
                                 </div>
-                                <div class="button-center-wrapper">
-                                    <button class="dialog-button"
-                                        onclick="startGame()">{{.Translation.Get "start"}}</button>
-                                </div>
+                            </div>
+                            <div class="button-center-wrapper">
+                                <button class="dialog-button"
+                                    onclick="startGame()">{{.Translation.Get "start"}}</button>
                             </div>
                         </div>
 
@@ -123,7 +124,7 @@
                                     <div style="display: flex; flex-direction: row;">
                                         <input class="namechange-field" type="text"
                                             id="namechange-field-unstarted-dialog"></input>
-                                        <button class="dialog-button"
+                                        <button class="dialog-button namechange-apply-button"
                                             onclick="changeName(document.getElementById('namechange-field-unstarted-dialog').value)">{{.Translation.Get "apply"}}</button>
                                     </div>
                                 </div>
@@ -140,83 +141,80 @@
                         <div id="namechange-dialog" class="center-dialog">
                             <span class="dialog-title">{{.Translation.Get "change-your-name"}}</span>
                             <div class="center-dialog-content">
-                                <form
+                                <form id="username-form"
                                     onsubmit="changeName(document.getElementById('namechange-field').value);hideNameChangeDialog();return false">
                                     <input class="namechange-field" type="text" id="namechange-field"></input>
-                                    <div class="button-center-wrapper">
-                                        <button class="dialog-button" type="submit">{{.Translation.Get "save"}}</button>
-                                        <button class="dialog-button" type="button"
-                                            onclick="hideNameChangeDialog()">{{.Translation.Get "close"}}</button>
-                                    </div>
                                 </form>
+                            </div>
+                            <div class="button-center-wrapper">
+                                <button class="dialog-button" type="submit"
+                                    form="username-form">{{.Translation.Get "save"}}</button>
+                                <button class="dialog-button" type="button"
+                                    onclick="hideNameChangeDialog()">{{.Translation.Get "close"}}</button>
                             </div>
                         </div>
 
                         <div id="lobbysettings-dialog" class="center-dialog">
-                            <span class="dialog-title">{{.Translation.Get "change-lobby-settings"}}</span>
+                            <span class="dialog-title">{{.Translation.Get "change-lobby-settings-title"}}</span>
                             <div class="center-dialog-content">
-                                <div style="display: flex; flex-direction: column;">
-                                    <div class="input-container">
-                                        <b>{{.Translation.Get "drawing-time-setting"}}</b>
-                                        <input id="lobby-settings-drawing-time" class="input-item" type="number"
-                                            name="drawing_time" min="{{.MinDrawingTime}}" max="{{.MaxDrawingTime}}"
-                                            value="{{.DrawingTime}}" />
-                                        <b>{{.Translation.Get "rounds-setting"}}</b>
-                                        <input id="lobby-settings-max-rounds" class="input-item" type="number"
-                                            name="rounds" min="{{.MinRounds}}" max="{{.MaxRounds}}"
-                                            value="{{.Rounds}}" />
-                                        <b>{{.Translation.Get "max-players-setting"}}</b>
-                                        <input id="lobby-settings-max-players" type="number" name="max_players"
-                                            min="{{.MinMaxPlayers}}" max="{{.MaxMaxPlayers}}" value="{{.MaxPlayers}}" />
-                                        <b>{{.Translation.Get "public-lobby-setting"}}</b>
-                                        <input id="lobby-settings-public" type="checkbox" name="public" {{if eq
+                                <div class="input-container">
+                                    <b>{{.Translation.Get "drawing-time-setting"}}</b>
+                                    <input id="lobby-settings-drawing-time" class="input-item" type="number"
+                                        name="drawing_time" min="{{.MinDrawingTime}}" max="{{.MaxDrawingTime}}"
+                                        value="{{.DrawingTime}}" />
+                                    <b>{{.Translation.Get "rounds-setting"}}</b>
+                                    <input id="lobby-settings-max-rounds" class="input-item" type="number" name="rounds"
+                                        min="{{.MinRounds}}" max="{{.MaxRounds}}" value="{{.Rounds}}" />
+                                    <b>{{.Translation.Get "max-players-setting"}}</b>
+                                    <input id="lobby-settings-max-players" type="number" name="max_players"
+                                        min="{{.MinMaxPlayers}}" max="{{.MaxMaxPlayers}}" value="{{.MaxPlayers}}" />
+                                    <b>{{.Translation.Get "public-lobby-setting"}}</b>
+                                    <input id="lobby-settings-public" type="checkbox" name="public" {{if eq
                                             .Public true}}checked{{end}} />
-                                        <b>{{.Translation.Get "custom-words-chance-setting"}}</b>
-                                        <div style="display: flex;">
-                                            0%
-                                            <input style="flex: 1;" id="lobby-settings-custom-words-chance" type="range"
-                                                name="custom_words_chance" min="1" max="100"
-                                                value="{{.CustomWordsChance}}">
-                                            100%
-                                        </div>
-
-                                        <details class="advanced-section">
-                                            <summary>{{.Translation.Get "advanced-settings"}}</summary>
-                                            <div class="input-container">
-                                                <b>{{.Translation.Get "players-per-ip-limit-setting"}}</b>
-                                                <input id="lobby-settings-clients-per-ip-limit" type="number"
-                                                    name="clients_per_ip_limit" min="{{.MinClientsPerIPLimit}}"
-                                                    max="{{.MaxClientsPerIPLimit}}" value="{{.ClientsPerIPLimit}}" />
-                                                <b>{{.Translation.Get "enable-votekick-setting"}}</b>
-                                                <input id="lobby-settings-enable-votekick" type="checkbox"
-                                                    name="enable_votekick" {{if eq .EnableVotekick
+                                    <b>{{.Translation.Get "custom-words-chance-setting"}}</b>
+                                    <div class="input-item percent-slider">
+                                        <span>0%</span>
+                                        <input id="lobby-settings-custom-words-chance" type="range"
+                                            name="custom_words_chance" min="1" max="100" value="{{.CustomWordsChance}}">
+                                        <span>100%</span>
+                                    </div>
+                                    <b>{{.Translation.Get "players-per-ip-limit-setting"}}</b>
+                                    <input id="lobby-settings-clients-per-ip-limit" type="number"
+                                        name="clients_per_ip_limit" min="{{.MinClientsPerIPLimit}}"
+                                        max="{{.MaxClientsPerIPLimit}}" value="{{.ClientsPerIPLimit}}" />
+                                    <b>{{.Translation.Get "enable-votekick-setting"}}</b>
+                                    <input id="lobby-settings-enable-votekick" type="checkbox" name="enable_votekick" {{if eq .EnableVotekick
                                                     true}}checked{{end}} />
-                                            </div>
-                                        </details>
-                                        <button class="dialog-button" onclick="saveLobbySettings()"
-                                            style="grid-column-start: 1; grid-column-end: 3;">
-                                            {{.Translation.Get "save-settings"}}
-                                        </button>
-                                    </div>
-                                    <div class="button-center-wrapper">
-                                        <button class="dialog-button"
-                                            onclick="hideLobbySettingsDialog()">{{.Translation.Get "close"}}</button>
-                                    </div>
                                 </div>
+                            </div>
+                            <div class="button-center-wrapper">
+                                <button class="dialog-button" onclick="saveLobbySettings()">
+                                    {{.Translation.Get "save-settings"}}
+                                </button>
+                                <button class="dialog-button"
+                                    onclick="hideLobbySettingsDialog()">{{.Translation.Get "close"}}</button>
                             </div>
                         </div>
 
                         <div id="game-over-dialog" class="center-dialog">
                             <span id="game-over-dialog-title" class="dialog-title">Game over!</span>
-                            <div id="game-over-scoreboard"></div>
-                            <button id="restart-button" class="dialog-button" onclick="startGame()">Restart</button>
+                            <div class="center-dialog-content">
+                                <div id="game-over-scoreboard"></div>
+                            </div>
+                            <div class="button-center-wrapper">
+                                <button id="restart-button" class="dialog-button" onclick="startGame()">Restart</button>
+                            </div>
                         </div>
 
                         <div id="kick-dialog" class="center-dialog">
                             <span class="dialog-title">{{.Translation.Get "votekick-a-player"}}</span>
-                            <div id="kick-dialog-players"></div>
-                            <button onclick="hideKickDialog()"
-                                class="dialog-button dialog-close-button">{{.Translation.Get "close"}}</button>
+                            <div class="center-dialog-content">
+                                <div id="kick-dialog-players"></div>
+                            </div>
+                            <div class="button-center-wrapper">
+                                <button onclick="hideKickDialog()"
+                                    class="dialog-button">{{.Translation.Get "close"}}</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -536,7 +534,7 @@
             showDialog(id, title, messageNode);
         }
 
-        function showDialog(id, title, contentNode) {
+        function showDialog(id, title, contentNode, buttonBar) {
             const newDialog = document.createElement("div");
             newDialog.classList.add("center-dialog");
             if (id !== null && id !== "") {
@@ -552,6 +550,10 @@
             dialogContent.classList.add("center-dialog-content");
             dialogContent.appendChild(contentNode);
             newDialog.appendChild(dialogContent);
+
+            if (buttonBar !== null && buttonBar !== undefined) {
+                newDialog.appendChild(buttonBar);
+            }
 
             newDialog.style.visibility = "visible";
             centerDialogs.appendChild(newDialog);
@@ -601,9 +603,7 @@
             dialogContent.appendChild(controlsTextTwo);
             dialogContent.appendChild(controlsTextThree);
 
-            dialogContent.appendChild(buttonBar);
-
-            showDialog(helpDialogId, '{{.Translation.Get "help"}}', dialogContent);
+            showDialog(helpDialogId, '{{.Translation.Get "help"}}', dialogContent, buttonBar);
         }
 
         function showKickDialog() {

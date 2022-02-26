@@ -130,6 +130,15 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
+}
+
+.center-dialog-content {
+    overflow: auto;
+    flex: 1;
+    width: 100%;
+    justify-content: center;
+    display: flex;
 }
 
 #chat {
@@ -220,10 +229,6 @@
 
 .dialog-button + .dialog-button {
     margin-left: 0.25rem;
-}
-
-.dialog-close-button {
-    margin-top: 1rem;
 }
 
 button:hover,
@@ -432,11 +437,8 @@ input[type="button"]:active,
 }
 
 #kick-dialog-players {
-    width: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
+    flex: 1;
 }
-
 .kick-player-button {
     width: 100%;
     border: none;
@@ -446,10 +448,6 @@ input[type="button"]:active,
 
 .kick-player-button + .kick-player-button {
     margin-top: 0.5rem;
-}
-
-.game-over-scoreboard {
-    overflow-y: auto;
 }
 
 .gameover-scoreboard-entry {
@@ -495,7 +493,12 @@ input[type="button"]:active,
 }
 
 .namechange-field {
-    margin-right: 0.25rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.namechange-apply-button {
+    margin-left: 0.5rem;
 }
 
 #waitchoose-drawer {

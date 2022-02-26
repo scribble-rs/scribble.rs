@@ -22,7 +22,8 @@ func initGermanTranslation() {
 	translation.put("show-help", "Hilfe anzeigen")
 	translation.put("votekick-a-player", "Stimme dafür ab, einen Spieler rauszuwerfen")
 
-	translation.put("change-lobby-settings", "Lobby-Einstellungen ändern")
+	translation.put("change-lobby-settings-tooltip", "Lobby-Einstellungen ändern")
+	translation.put("change-lobby-settings-title", "Lobby-Einstellungen")
 	translation.put("lobby-settings-changed", "Lobby-Einstelungen verändert")
 	translation.put("advanced-settings", "Erweiterte Einstellungen")
 	translation.put("word-language", "Sprache der Wörter")
