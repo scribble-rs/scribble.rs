@@ -21,7 +21,6 @@ func initGermanTranslation() {
 	translation.put("toggle-fullscreen", "Vollbild aktivieren / deaktivieren")
 	translation.put("show-help", "Hilfe anzeigen")
 	translation.put("votekick-a-player", "Stimme dafür ab, einen Spieler rauszuwerfen")
-	translation.put("time-left", "Zeit")
 
 	translation.put("change-lobby-settings", "Lobby-Einstellungen ändern")
 	translation.put("lobby-settings-changed", "Lobby-Einstelungen verändert")

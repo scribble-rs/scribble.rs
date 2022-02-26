@@ -19,7 +19,6 @@ func initEnglishTranslation() Translation {
 	translation.put("toggle-fullscreen", "Toggle fullscreen")
 	translation.put("show-help", "Show help")
 	translation.put("votekick-a-player", "Vote to kick a player")
-	translation.put("time-left", "Time")
 
 	translation.put("last-turn", "(Last turn: %s)")
 
