@@ -978,15 +978,16 @@ type Ready struct {
 	PlayerName   string `json:"playerName"`
 	AllowDrawing bool   `json:"allowDrawing"`
 
-	VotekickEnabled bool          `json:"votekickEnabled"`
-	GameState       gameState     `json:"gameState"`
-	OwnerID         string        `json:"ownerId"`
-	Round           int           `json:"round"`
-	Rounds          int           `json:"rounds"`
-	RoundEndTime    int           `json:"roundEndTime"`
-	WordHints       []*WordHint   `json:"wordHints"`
-	Players         []*Player     `json:"players"`
-	CurrentDrawing  []interface{} `json:"currentDrawing"`
+	VotekickEnabled    bool          `json:"votekickEnabled"`
+	GameState          gameState     `json:"gameState"`
+	OwnerID            string        `json:"ownerId"`
+	Round              int           `json:"round"`
+	Rounds             int           `json:"rounds"`
+	RoundEndTime       int           `json:"roundEndTime"`
+	DrawingTimeSetting int           `json:"drawingTimeSetting"`
+	WordHints          []*WordHint   `json:"wordHints"`
+	Players            []*Player     `json:"players"`
+	CurrentDrawing     []interface{} `json:"currentDrawing"`
 }
 
 func generateReadyData(lobby *Lobby, player *Player) *Ready {
@@ -995,14 +996,15 @@ func generateReadyData(lobby *Lobby, player *Player) *Ready {
 		AllowDrawing: player.State == Drawing,
 		PlayerName:   player.Name,
 
-		VotekickEnabled: lobby.EnableVotekick,
-		GameState:       lobby.State,
-		OwnerID:         lobby.Owner.ID,
-		Round:           lobby.Round,
-		Rounds:          lobby.Rounds,
-		WordHints:       lobby.GetAvailableWordHints(player),
-		Players:         lobby.players,
-		CurrentDrawing:  lobby.currentDrawing,
+		VotekickEnabled:    lobby.EnableVotekick,
+		GameState:          lobby.State,
+		OwnerID:            lobby.Owner.ID,
+		Round:              lobby.Round,
+		Rounds:             lobby.Rounds,
+		DrawingTimeSetting: lobby.DrawingTime,
+		WordHints:          lobby.GetAvailableWordHints(player),
+		Players:            lobby.players,
+		CurrentDrawing:     lobby.currentDrawing,
 	}
 
 	if lobby.State != Ongoing {

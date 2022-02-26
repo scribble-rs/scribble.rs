@@ -1014,6 +1014,7 @@
         let roundEndTime = 0;
         let gameState = "unstarted";
         let votekickEnabled;
+        let drawingTimeSetting = "∞";
 
         function registerMessageHandler(targetSocket) {
             targetSocket.onmessage = event => {
@@ -1205,6 +1206,7 @@
             rounds = ready.rounds;
             gameState = ready.gameState;
             votekickEnabled = ready.votekickEnabled;
+            drawingTimeSetting = ready.drawingTimeSetting;
             updateRoundsDisplay();
             updateButtonVisibilities();
 
@@ -1336,7 +1338,7 @@
                 const secondsLeft = Math.max(0, Math.floor(msLeft / 1000));
                 timeLeftValue.innerText = "" + secondsLeft
             } else {
-                timeLeftValue.innerText = "∞";
+                timeLeftValue.innerText = "" + drawingTimeSetting;
             }
         }, 500);
 
