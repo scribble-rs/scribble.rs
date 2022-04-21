@@ -1656,12 +1656,12 @@
         window.addEventListener("keydown", onKeyDown);
 
         function handleCanvasResize() {
-            playerContainer.style.height = drawingBoard.clientHeight + "px";
-
-            if (drawingBoard.width === drawingBoard.clientWidth && drawingBoard.height === drawingBoard.clientHeight) {
+            if ((drawingBoard.width === drawingBoard.clientWidth && drawingBoard.height === drawingBoard.clientHeight) &&
+                playerContainer.clientHeight === drawingBoard.clientHeight) {
                 return false;
             }
 
+            playerContainer.style.height = drawingBoard.clientHeight + "px";
             drawingBoard.width = drawingBoard.clientWidth;
             drawingBoard.height = drawingBoard.clientHeight;
             setLineWidth(localLineWidthUnscaled);

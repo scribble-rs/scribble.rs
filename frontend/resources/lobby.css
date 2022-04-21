@@ -574,7 +574,6 @@ and (max-device-width: 812px) {
     #player-container {
         grid-column: 1;
         grid-row: 4;
-        overflow-y: auto;
     }
 
     #chat {
