@@ -1656,6 +1656,8 @@
         window.addEventListener("keydown", onKeyDown);
 
         function handleCanvasResize() {
+            playerContainer.style.height = drawingBoard.clientHeight + "px";
+
             if (drawingBoard.width === drawingBoard.clientWidth && drawingBoard.height === drawingBoard.clientHeight) {
                 return false;
             }

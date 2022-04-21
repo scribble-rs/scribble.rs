@@ -379,6 +379,7 @@ input[type="button"]:active,
     grid-column: 1;
     grid-row-start: 2;
     grid-row-end: 3;
+    overflow-y: auto;
 }
 
 .player {
@@ -573,6 +574,7 @@ and (max-device-width: 812px) {
     #player-container {
         grid-column: 1;
         grid-row: 4;
+        overflow-y: auto;
     }
 
     #chat {
