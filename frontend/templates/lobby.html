@@ -1670,8 +1670,11 @@
             //wasn't needed anymore, however, without this, the chat container will expand
             //it's own parent, causing overflow-y to not take effect, since the parent has
             //no height constraint.
-            //This workaround doesn't affect the portrait view.
+            //FIXME This isn't optimal for the portrait view. However, the chatview
+            //already has a custom max-height in that mode anyway. For the player list
+            //it is a worthwhile trade-off for now.
             chat.style.maxHeight = drawingBoard.clientHeight + "px";
+            playerContainer.style.maxHeight = drawingBoard.clientHeight + "px";
 
             return true;
         }

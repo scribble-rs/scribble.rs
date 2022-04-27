@@ -377,8 +377,8 @@ input[type="button"]:active,
     display: flex;
     flex-direction: column;
     grid-column: 1;
-    grid-row-start: 2;
-    grid-row-end: 3;
+    grid-row: 2;
+    overflow-y: auto;
 }
 
 .player {
