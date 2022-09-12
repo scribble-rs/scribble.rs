@@ -1,5 +1,12 @@
+body{
+    background-color: #8EC5FC;
+    background-image: linear-gradient(to right top, #051937, #00446b, #00769d, #00abc9);
+    
+}
 #logo {
     width: 50vw;
+    height:120px;
+    width:250px;
     margin-top: 1rem;
     margin-bottom: 1rem;
     margin-left: auto;
@@ -17,19 +24,11 @@
 
 .content-container {
     display: block;
-    background-color: rgb(250, 192, 202);
-    padding: 1rem 3rem 1rem 3rem;
+    background-color: #8EC5FC;
+    background-image: linear-gradient(to right top, #051937, #00446b, #00769d, #00abc9);
+     padding: 1rem 3rem 1rem 3rem;
 }
 
-.error-list {
-    background-color: rgb(236, 93, 93);
-    padding: 10px;
-    border-radius: 15px;
-    color: white;
-    font-weight: bold;
-    margin-bottom: 20px;
-    grid-column: 1 / -1;
-}
 .create-button {
     grid-column: 1 / -1;
 }
@@ -41,16 +40,18 @@
 }
 
 .tab-label {
-    background-color: rgb(236, 234, 234);
+    background-image: linear-gradient(to right top, #051937, #00446b, #00769d, #00abc9);
     border-bottom: 0.3rem solid #cac5c5;
     outline: none;
+    font-size: 18px;
+    text-align: center;
     cursor: pointer;
     padding: 1rem;
 }
 
 .tab-button:checked + .tab-label {
-    background-color: rgb(179, 224, 241);
-    border-bottom: 0.3rem solid rgb(102, 102, 212);
+    background-image: linear-gradient(to right top, #051937, #00446b, #00769d, #00abc9);
+    border-bottom: 0.3rem solid rgb(130, 130, 212);
     padding: 1rem;
 }
 
@@ -65,6 +66,73 @@
     overflow: auto;
 }
 
+.input-item {
+        border: 0;
+        border-bottom: 1px solid black;
+        outline: 0;
+        font-size: 1.3rem;
+        color: black;
+        padding: 1px 0;
+        background: transparent;
+        transition: border-color 0.2s;
+    }
+    
+
+    button {
+        transition-duration: 0.4s;
+        font-size: 17px;
+        background-color: black;   }
+      
+      button:hover {
+        background-color: #080808; 
+        color: rgb(136, 204, 204);
+      }
+    
+    
+    
+    /* CSS */
+    .button-59 {
+      align-items: center;
+      background-color: #fff;
+      border: 2px solid #000;
+      box-sizing: border-box;
+      color: #000;
+      cursor: pointer;
+      display: inline-flex;
+      fill: #000;
+      font-family: Inter,sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      height: 48px;
+      justify-content: center;
+      letter-spacing: -.8px;
+      line-height: 24px;
+      min-width: 140px;
+      outline: 0;
+      padding: 0 17px;
+      text-align: center;
+      text-decoration: none;
+      transition: all .3s;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    
+    .button-59:focus {
+      color: #171e29;
+    }
+    
+    .button-59:hover {
+      border-color: rgb(106, 194, 216);
+      color: rgb(106, 194, 216);
+      fill: rgb(106, 194, 216);
+    }
+    
+    .button-59:active {
+      border-color: rgb(106, 194, 216);
+      color: rgb(106, 194, 216);
+      fill: rgb(106, 194, 216);
+    }
 /* display: block causes the element to be visible, since the default value is none */
 #create-lobby {
     display: block;
@@ -87,7 +155,7 @@
 
 .table-wrapper {
     flex: 1;
-    border: 1px solid slategray;
+    border: 1px solid rgb(137, 176, 216);
     overflow-y: scroll;
 }
 
@@ -108,8 +176,9 @@
     flex: 2;
     margin: 1rem;
     padding: 1rem;
-    background-color: rgb(226, 226, 226);
-    overflow: auto;
+    background-color: #8EC5FC;
+background-image: linear-gradient(62deg, #8EC5FC 0%, #E0C3FC 100%);
+
 }
 
 .lobby-detail {
@@ -150,8 +219,9 @@ tr:hover {
 }
 
 tr[selected="true"] {
-    background-color: #6464de;
-}
+    background-color: #0093E9;
+    background-image: linear-gradient(160deg, #0093E9 0%, #80D0C7 100%);
+    }
 
 @media only screen
     and (min-device-width: 375px) and (max-device-width: 812px),

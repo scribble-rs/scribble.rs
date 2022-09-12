@@ -2,7 +2,6 @@
     grid-column-start: 1;
     grid-column-end: 4;
     grid-row: 1;
-
     display:grid;
     grid-template-columns: 15rem auto 18rem;
     grid-gap: 5px;
@@ -110,6 +109,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    
 }
 
 .center-dialog {
@@ -124,7 +124,7 @@
     /* A dialog should never fully hide the canvas. */
     max-width: 80%;
     max-height: 80%;
-    background-color: rgb(225, 221, 221);
+    background-color: rgb(35, 38, 39);
     padding: 1rem;
     display: flex;
     flex-direction: column;
