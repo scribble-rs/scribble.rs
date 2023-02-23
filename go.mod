@@ -9,5 +9,5 @@ require (
 	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/gorilla/websocket v1.4.2
 	github.com/mitchellh/mapstructure v1.4.3
-	golang.org/x/text v0.3.7
+	golang.org/x/text v0.3.8
 )
