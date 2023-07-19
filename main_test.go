@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"os"
 	"testing"
 )
 
@@ -84,7 +83,7 @@ func TestDeterminePort(t *testing.T) {
 			for _, arg := range flag.CommandLine.Args() {
 				t.Logf("Removing arg %s", arg)
 			}
-			os.Setenv("PORT", testCase.portEnv)
+			t.Setenv("PORT", testCase.portEnv)
 
 			port := determinePort(testCase.portFlag)
 			if port != testCase.expectedPort {
