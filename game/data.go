@@ -149,7 +149,7 @@ type RGBColor struct {
 	B uint8 `json:"b"`
 }
 
-// Line is the struct that a client send when drawing
+// Line is the struct that a client sends when drawing.
 type Line struct {
 	FromX     float32  `json:"fromX"`
 	FromY     float32  `json:"fromY"`

@@ -472,8 +472,7 @@ func kickPlayer(lobby *Lobby, playerToKick *Player, playerToKickIndex int) {
 		lobby.TriggerUpdateEvent("drawer-kicked", nil)
 
 		// Since the drawer has been kicked, that probably means that they were
-		// probably probably trolling, therefore we redact everyones last earned
-		// score.
+		// probably trolling, therefore we redact everyones last earned score.
 		for _, otherPlayer := range lobby.players {
 			otherPlayer.Score -= otherPlayer.LastScore
 			otherPlayer.LastScore = 0
@@ -552,7 +551,8 @@ func handleNameChangeEvent(caller *Player, lobby *Lobby, name string) {
 	}
 }
 
-// advanceLobbyPredefineDrawer is required in cases where the drawer is removed game
+// advanceLobbyPredefineDrawer is required in cases where the drawer is removed
+// from the game.
 func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player) {
 	if lobby.timeLeftTicker != nil {
 		// We want to create a new ticker later on. By setting the current
@@ -809,7 +809,7 @@ func recalculateRanks(lobby *Lobby) {
 	})
 
 	// We start at maxint32, since we want the first player to cause an
-	// increment of the the score, which will always happen this way, as
+	// increment of the score, which will always happen this way, as
 	// no player can have a score this high.
 	lastScore := math.MaxInt32
 	var lastRank int
@@ -928,7 +928,7 @@ func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTim
 
 	lobby.Wordpack = chosenLanguage
 
-	// Neccessary to correctly treat words from player, however, custom words might be treated incorrectly.
+	// Necessary to correctly treat words from player, however, custom words might be treated incorrectly.
 	lobby.lowercaser = cases.Lower(language.Make(getLanguageIdentifier(chosenLanguage)))
 
 	// customWords are lowercased afterwards, as they are direct user input.

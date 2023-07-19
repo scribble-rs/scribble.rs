@@ -1,3 +1,5 @@
+// This file contains the API methods for the public API
+
 package api
 
 import (
@@ -11,7 +13,6 @@ import (
 	"github.com/scribble-rs/scribble.rs/state"
 )
 
-// This file contains the API methods for the public API
 var (
 	ErrNoLobbyIDSupplied = errors.New("please supply a lobby id via the 'lobby_id' query parameter")
 	ErrLobbyNotExistent  = errors.New("the requested lobby doesn't exist")
