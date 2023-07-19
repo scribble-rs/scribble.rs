@@ -84,14 +84,14 @@ var transliterations = map[rune]string{
 
 // ReplaceAccentedCharacters replaces a set of accented characters with ascii
 // equivalents. For example "ÿ" would become "y".
-func ReplaceAccentedCharacters(s string) string {
-	b := bytes.NewBufferString("")
-	for _, c := range s {
-		if val, ok := transliterations[c]; ok {
-			b.WriteString(val)
+func ReplaceAccentedCharacters(str string) string {
+	buffer := bytes.NewBufferString("")
+	for _, character := range str {
+		if val, contains := transliterations[character]; contains {
+			buffer.WriteString(val)
 		} else {
-			b.WriteRune(c)
+			buffer.WriteRune(character)
 		}
 	}
-	return b.String()
+	return buffer.String()
 }

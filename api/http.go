@@ -51,14 +51,14 @@ func remoteAddressToSimpleIP(input string) string {
 
 // GetIPAddressFromRequest extracts the clients IP address from the request.
 // This function respects forwarding headers.
-func GetIPAddressFromRequest(r *http.Request) string {
+func GetIPAddressFromRequest(request *http.Request) string {
 	// See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
 	// See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded
 
 	// The following logic has been implemented according to the spec, therefore please
 	// refer to the spec if you have a question.
 
-	forwardedAddress := r.Header.Get("X-Forwarded-For")
+	forwardedAddress := request.Header.Get("X-Forwarded-For")
 	if forwardedAddress != "" {
 		// Since the field may contain multiple addresses separated by commas, we use the first
 		// one, which according to the docs is supposed to be the client address.
@@ -66,7 +66,7 @@ func GetIPAddressFromRequest(r *http.Request) string {
 		return remoteAddressToSimpleIP(clientAddress)
 	}
 
-	standardForwardedHeader := r.Header.Get("Forwarded")
+	standardForwardedHeader := request.Header.Get("Forwarded")
 	if standardForwardedHeader != "" {
 		targetPrefix := "for="
 		// Since forwarded can contain more than one field, we search for one specific field.
@@ -81,5 +81,5 @@ func GetIPAddressFromRequest(r *http.Request) string {
 		}
 	}
 
-	return remoteAddressToSimpleIP(r.RemoteAddr)
+	return remoteAddressToSimpleIP(request.RemoteAddr)
 }

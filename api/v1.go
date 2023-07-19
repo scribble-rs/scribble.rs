@@ -32,7 +32,7 @@ type LobbyEntry struct {
 	Wordpack        string `json:"wordpack"`
 }
 
-func publicLobbies(w http.ResponseWriter, r *http.Request) {
+func publicLobbies(writer http.ResponseWriter, request *http.Request) {
 	// REMARK: If paging is ever implemented, we might want to maintain order
 	// when deleting lobbies from state in the state package.
 
@@ -54,28 +54,28 @@ func publicLobbies(w http.ResponseWriter, r *http.Request) {
 			Wordpack:        lobby.Wordpack,
 		})
 	}
-	encodingError := json.NewEncoder(w).Encode(lobbyEntries)
+	encodingError := json.NewEncoder(writer).Encode(lobbyEntries)
 	if encodingError != nil {
-		http.Error(w, encodingError.Error(), http.StatusInternalServerError)
+		http.Error(writer, encodingError.Error(), http.StatusInternalServerError)
 	}
 }
 
-func createLobby(w http.ResponseWriter, r *http.Request) {
-	formParseError := r.ParseForm()
+func createLobby(writer http.ResponseWriter, request *http.Request) {
+	formParseError := request.ParseForm()
 	if formParseError != nil {
-		http.Error(w, formParseError.Error(), http.StatusBadRequest)
+		http.Error(writer, formParseError.Error(), http.StatusBadRequest)
 		return
 	}
 
-	language, languageInvalid := ParseLanguage(r.Form.Get("language"))
-	drawingTime, drawingTimeInvalid := ParseDrawingTime(r.Form.Get("drawing_time"))
-	rounds, roundsInvalid := ParseRounds(r.Form.Get("rounds"))
-	maxPlayers, maxPlayersInvalid := ParseMaxPlayers(r.Form.Get("max_players"))
-	customWords, customWordsInvalid := ParseCustomWords(r.Form.Get("custom_words"))
-	customWordChance, customWordChanceInvalid := ParseCustomWordsChance(r.Form.Get("custom_words_chance"))
-	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
-	enableVotekick, enableVotekickInvalid := ParseBoolean("enable votekick", r.Form.Get("enable_votekick"))
-	publicLobby, publicLobbyInvalid := ParseBoolean("public", r.Form.Get("public"))
+	language, languageInvalid := ParseLanguage(request.Form.Get("language"))
+	drawingTime, drawingTimeInvalid := ParseDrawingTime(request.Form.Get("drawing_time"))
+	rounds, roundsInvalid := ParseRounds(request.Form.Get("rounds"))
+	maxPlayers, maxPlayersInvalid := ParseMaxPlayers(request.Form.Get("max_players"))
+	customWords, customWordsInvalid := ParseCustomWords(request.Form.Get("custom_words"))
+	customWordChance, customWordChanceInvalid := ParseCustomWordsChance(request.Form.Get("custom_words_chance"))
+	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(request.Form.Get("clients_per_ip_limit"))
+	enableVotekick, enableVotekickInvalid := ParseBoolean("enable votekick", request.Form.Get("enable_votekick"))
+	publicLobby, publicLobbyInvalid := ParseBoolean("public", request.Form.Get("public"))
 
 	var requestErrors []string
 	if languageInvalid != nil {
@@ -107,35 +107,35 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(requestErrors) != 0 {
-		http.Error(w, strings.Join(requestErrors, ";"), http.StatusBadRequest)
+		http.Error(writer, strings.Join(requestErrors, ";"), http.StatusBadRequest)
 		return
 	}
 
-	playerName := GetPlayername(r)
+	playerName := GetPlayername(request)
 	player, lobby, createError := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
 	if createError != nil {
-		http.Error(w, createError.Error(), http.StatusBadRequest)
+		http.Error(writer, createError.Error(), http.StatusBadRequest)
 		return
 	}
 
 	lobby.WriteJSON = WriteJSON
-	player.SetLastKnownAddress(GetIPAddressFromRequest(r))
+	player.SetLastKnownAddress(GetIPAddressFromRequest(request))
 
-	SetUsersessionCookie(w, player)
+	SetUsersessionCookie(writer, player)
 
 	lobbyData := CreateLobbyData(lobby)
 
-	encodingError := json.NewEncoder(w).Encode(lobbyData)
+	encodingError := json.NewEncoder(writer).Encode(lobbyData)
 	if encodingError != nil {
-		http.Error(w, encodingError.Error(), http.StatusInternalServerError)
+		http.Error(writer, encodingError.Error(), http.StatusInternalServerError)
 	}
 
 	// We only add the lobby if everything else was successful.
 	state.AddLobby(lobby)
 }
 
-func enterLobbyEndpoint(w http.ResponseWriter, r *http.Request) {
-	lobby, success := getLobbyWithErrorHandling(w, r)
+func enterLobbyEndpoint(writer http.ResponseWriter, request *http.Request) {
+	lobby, success := getLobbyWithErrorHandling(writer, request)
 	if !success {
 		return
 	}
@@ -143,37 +143,37 @@ func enterLobbyEndpoint(w http.ResponseWriter, r *http.Request) {
 	var lobbyData *LobbyData
 
 	lobby.Synchronized(func() {
-		player := GetPlayer(lobby, r)
+		player := GetPlayer(lobby, request)
 
 		if player == nil {
 			if !lobby.HasFreePlayerSlot() {
-				http.Error(w, "lobby already full", http.StatusUnauthorized)
+				http.Error(writer, "lobby already full", http.StatusUnauthorized)
 				return
 			}
 
-			requestAddress := GetIPAddressFromRequest(r)
+			requestAddress := GetIPAddressFromRequest(request)
 
 			if !lobby.CanIPConnect(requestAddress) {
-				http.Error(w, "maximum amount of players per IP reached", http.StatusUnauthorized)
+				http.Error(writer, "maximum amount of players per IP reached", http.StatusUnauthorized)
 				return
 			}
 
-			newPlayer := lobby.JoinPlayer(GetPlayername(r))
+			newPlayer := lobby.JoinPlayer(GetPlayername(request))
 			newPlayer.SetLastKnownAddress(requestAddress)
 
 			// Use the players generated usersession and pass it as a cookie.
-			SetUsersessionCookie(w, newPlayer)
+			SetUsersessionCookie(writer, newPlayer)
 		} else {
-			player.SetLastKnownAddress(GetIPAddressFromRequest(r))
+			player.SetLastKnownAddress(GetIPAddressFromRequest(request))
 		}
 
 		lobbyData = CreateLobbyData(lobby)
 	})
 
 	if lobbyData != nil {
-		encodingError := json.NewEncoder(w).Encode(lobbyData)
+		encodingError := json.NewEncoder(writer).Encode(lobbyData)
 		if encodingError != nil {
-			http.Error(w, encodingError.Error(), http.StatusInternalServerError)
+			http.Error(writer, encodingError.Error(), http.StatusInternalServerError)
 		}
 	}
 }
@@ -188,46 +188,46 @@ func SetUsersessionCookie(w http.ResponseWriter, player *game.Player) {
 	})
 }
 
-func editLobby(w http.ResponseWriter, r *http.Request) {
-	userSession := GetUserSession(r)
+func editLobby(writer http.ResponseWriter, request *http.Request) {
+	userSession := GetUserSession(request)
 	if userSession == "" {
-		http.Error(w, "no usersession supplied", http.StatusBadRequest)
+		http.Error(writer, "no usersession supplied", http.StatusBadRequest)
 		return
 	}
 
-	lobby, success := getLobbyWithErrorHandling(w, r)
+	lobby, success := getLobbyWithErrorHandling(writer, request)
 	if !success {
 		return
 	}
 
-	parseError := r.ParseForm()
+	parseError := request.ParseForm()
 	if parseError != nil {
-		http.Error(w, fmt.Sprintf("error parsing request query into form (%s)", parseError), http.StatusBadRequest)
+		http.Error(writer, fmt.Sprintf("error parsing request query into form (%s)", parseError), http.StatusBadRequest)
 		return
 	}
 
 	var requestErrors []string
 
 	// Uneditable properties
-	if r.Form.Get("custom_words") != "" {
+	if request.Form.Get("custom_words") != "" {
 		requestErrors = append(requestErrors, "can't modify custom_words in existing lobby")
 	}
-	if r.Form.Get("language") != "" {
+	if request.Form.Get("language") != "" {
 		requestErrors = append(requestErrors, "can't modify language in existing lobby")
 	}
 
 	// Editable properties
-	maxPlayers, maxPlayersInvalid := ParseMaxPlayers(r.Form.Get("max_players"))
-	drawingTime, drawingTimeInvalid := ParseDrawingTime(r.Form.Get("drawing_time"))
-	rounds, roundsInvalid := ParseRounds(r.Form.Get("rounds"))
-	customWordChance, customWordChanceInvalid := ParseCustomWordsChance(r.Form.Get("custom_words_chance"))
-	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
-	enableVotekick, enableVotekickInvalid := ParseBoolean("enable votekick", r.Form.Get("enable_votekick"))
-	publicLobby, publicLobbyInvalid := ParseBoolean("public", r.Form.Get("public"))
+	maxPlayers, maxPlayersInvalid := ParseMaxPlayers(request.Form.Get("max_players"))
+	drawingTime, drawingTimeInvalid := ParseDrawingTime(request.Form.Get("drawing_time"))
+	rounds, roundsInvalid := ParseRounds(request.Form.Get("rounds"))
+	customWordChance, customWordChanceInvalid := ParseCustomWordsChance(request.Form.Get("custom_words_chance"))
+	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(request.Form.Get("clients_per_ip_limit"))
+	enableVotekick, enableVotekickInvalid := ParseBoolean("enable votekick", request.Form.Get("enable_votekick"))
+	publicLobby, publicLobbyInvalid := ParseBoolean("public", request.Form.Get("public"))
 
 	owner := lobby.Owner
 	if owner == nil || owner.GetUserSession() != userSession {
-		http.Error(w, "only the lobby owner can edit the lobby", http.StatusForbidden)
+		http.Error(writer, "only the lobby owner can edit the lobby", http.StatusForbidden)
 		return
 	}
 
@@ -259,7 +259,7 @@ func editLobby(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(requestErrors) != 0 {
-		http.Error(w, strings.Join(requestErrors, ";"), http.StatusBadRequest)
+		http.Error(writer, strings.Join(requestErrors, ";"), http.StatusBadRequest)
 		return
 	}
 
@@ -289,15 +289,15 @@ func editLobby(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func getLobbyWithErrorHandling(w http.ResponseWriter, r *http.Request) (*game.Lobby, bool) {
-	lobby, err := GetLobby(r)
+func getLobbyWithErrorHandling(writer http.ResponseWriter, request *http.Request) (*game.Lobby, bool) {
+	lobby, err := GetLobby(request)
 	if err != nil {
 		if err == ErrNoLobbyIDSupplied {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			http.Error(writer, err.Error(), http.StatusBadRequest)
 		} else if err == ErrLobbyNotExistent {
-			http.Error(w, err.Error(), http.StatusNotFound)
+			http.Error(writer, err.Error(), http.StatusNotFound)
 		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
 		}
 
 		return nil, false
@@ -306,15 +306,15 @@ func getLobbyWithErrorHandling(w http.ResponseWriter, r *http.Request) (*game.Lo
 	return lobby, true
 }
 
-func lobbyEndpoint(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
-		publicLobbies(w, r)
-	} else if r.Method == http.MethodPatch {
-		editLobby(w, r)
-	} else if r.Method == http.MethodPost || r.Method == http.MethodPut {
-		createLobby(w, r)
+func lobbyEndpoint(writer http.ResponseWriter, request *http.Request) {
+	if request.Method == http.MethodGet {
+		publicLobbies(writer, request)
+	} else if request.Method == http.MethodPatch {
+		editLobby(writer, request)
+	} else if request.Method == http.MethodPost || request.Method == http.MethodPut {
+		createLobby(writer, request)
 	} else {
-		http.Error(w, fmt.Sprintf("method %s not supported", r.Method), http.StatusMethodNotAllowed)
+		http.Error(writer, fmt.Sprintf("method %s not supported", request.Method), http.StatusMethodNotAllowed)
 	}
 }
 
@@ -399,14 +399,14 @@ func CreateLobbyData(lobby *game.Lobby) *LobbyData {
 // GetUserSession accesses the usersession from an HTTP request and
 // returns the session. The session can either be in the cookie or in
 // the header. If no session can be found, an empty string is returned.
-func GetUserSession(r *http.Request) string {
-	sessionCookie, noCookieError := r.Cookie("usersession")
+func GetUserSession(request *http.Request) string {
+	sessionCookie, noCookieError := request.Cookie("usersession")
 	if noCookieError == nil && sessionCookie.Value != "" {
 		return sessionCookie.Value
 	}
 
-	session, ok := r.Header["Usersession"]
-	if ok {
+	session, contains := request.Header["Usersession"]
+	if contains {
 		return session[0]
 	}
 
@@ -421,16 +421,16 @@ func GetPlayer(lobby *game.Lobby, r *http.Request) *game.Player {
 
 // GetPlayername either retrieves the playername from a cookie, the URL form.
 // If no preferred name can be found, we return an empty string.
-func GetPlayername(r *http.Request) string {
-	parseError := r.ParseForm()
+func GetPlayername(request *http.Request) string {
+	parseError := request.ParseForm()
 	if parseError == nil {
-		username := r.Form.Get("username")
+		username := request.Form.Get("username")
 		if username != "" {
 			return username
 		}
 	}
 
-	usernameCookie, noCookieError := r.Cookie("username")
+	usernameCookie, noCookieError := request.Cookie("username")
 	if noCookieError == nil {
 		username := usernameCookie.Value
 		if username != "" {

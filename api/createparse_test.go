@@ -18,15 +18,15 @@ func Test_parsePlayerName(t *testing.T) {
 		{"normal name", "Scribble", "Scribble", false},
 		{"name with space in the middle", "Hello World", "Hello World", false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParsePlayerName(tt.value)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("parsePlayerName() error = %v, wantErr %v", err, tt.wantErr)
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			got, err := ParsePlayerName(testCase.value)
+			if (err != nil) != testCase.wantErr {
+				t.Errorf("parsePlayerName() error = %v, wantErr %v", err, testCase.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("parsePlayerName() = %v, want %v", got, tt.want)
+			if got != testCase.want {
+				t.Errorf("parsePlayerName() = %v, want %v", got, testCase.want)
 			}
 		})
 	}
@@ -47,15 +47,15 @@ func Test_parseDrawingTime(t *testing.T) {
 		{"minimum", "60", 60, false},
 		{"something valid", "150", 150, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParseDrawingTime(tt.value)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("parseDrawingTime() error = %v, wantErr %v", err, tt.wantErr)
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			got, err := ParseDrawingTime(testCase.value)
+			if (err != nil) != testCase.wantErr {
+				t.Errorf("parseDrawingTime() error = %v, wantErr %v", err, testCase.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("parseDrawingTime() = %v, want %v", got, tt.want)
+			if got != testCase.want {
+				t.Errorf("parseDrawingTime() = %v, want %v", got, testCase.want)
 			}
 		})
 	}
@@ -76,15 +76,15 @@ func Test_parseRounds(t *testing.T) {
 		{"minimum", "1", 1, false},
 		{"something valid", "15", 15, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParseRounds(tt.value)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("parseRounds() error = %v, wantErr %v", err, tt.wantErr)
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			got, err := ParseRounds(testCase.value)
+			if (err != nil) != testCase.wantErr {
+				t.Errorf("parseRounds() error = %v, wantErr %v", err, testCase.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("parseRounds() = %v, want %v", got, tt.want)
+			if got != testCase.want {
+				t.Errorf("parseRounds() = %v, want %v", got, testCase.want)
 			}
 		})
 	}
@@ -105,15 +105,15 @@ func Test_parseMaxPlayers(t *testing.T) {
 		{"minimum", "2", 2, false},
 		{"something valid", "15", 15, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParseMaxPlayers(tt.value)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("parseMaxPlayers() error = %v, wantErr %v", err, tt.wantErr)
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			got, err := ParseMaxPlayers(testCase.value)
+			if (err != nil) != testCase.wantErr {
+				t.Errorf("parseMaxPlayers() error = %v, wantErr %v", err, testCase.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("parseMaxPlayers() = %v, want %v", got, tt.want)
+			if got != testCase.want {
+				t.Errorf("parseMaxPlayers() = %v, want %v", got, testCase.want)
 			}
 		})
 	}
@@ -136,15 +136,15 @@ func Test_parseCustomWords(t *testing.T) {
 		{"two words with spaces around", " hello , world ", []string{"hello", "world"}, false},
 		{"sentence and word", "What a great day, hello ", []string{"what a great day", "hello"}, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParseCustomWords(tt.value)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("parseCustomWords() error = %v, wantErr %v", err, tt.wantErr)
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			got, err := ParseCustomWords(testCase.value)
+			if (err != nil) != testCase.wantErr {
+				t.Errorf("parseCustomWords() error = %v, wantErr %v", err, testCase.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("parseCustomWords() = %v, want %v", got, tt.want)
+			if !reflect.DeepEqual(got, testCase.want) {
+				t.Errorf("parseCustomWords() = %v, want %v", got, testCase.want)
 			}
 		})
 	}
@@ -165,15 +165,15 @@ func Test_parseCustomWordChance(t *testing.T) {
 		{"minimum", "0", 0, false},
 		{"something valid", "60", 60, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParseCustomWordsChance(tt.value)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("parseCustomWordsChance() error = %v, wantErr %v", err, tt.wantErr)
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			got, err := ParseCustomWordsChance(testCase.value)
+			if (err != nil) != testCase.wantErr {
+				t.Errorf("parseCustomWordsChance() error = %v, wantErr %v", err, testCase.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("parseCustomWordsChance() = %v, want %v", got, tt.want)
+			if got != testCase.want {
+				t.Errorf("parseCustomWordsChance() = %v, want %v", got, testCase.want)
 			}
 		})
 	}
@@ -196,15 +196,15 @@ func Test_parseBoolean(t *testing.T) {
 		{"false upper", "FALSE", false, false},
 		{"false mixed casing", "FalsE", false, false},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParseBoolean("name", tt.value)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("parseBoolean() error = %v, wantErr %v", err, tt.wantErr)
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			got, err := ParseBoolean("name", testCase.value)
+			if (err != nil) != testCase.wantErr {
+				t.Errorf("parseBoolean() error = %v, wantErr %v", err, testCase.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("parseBoolean() = %v, want %v", got, tt.want)
+			if got != testCase.want {
+				t.Errorf("parseBoolean() = %v, want %v", got, testCase.want)
 			}
 		})
 	}

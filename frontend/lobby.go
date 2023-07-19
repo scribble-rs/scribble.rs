@@ -24,16 +24,16 @@ type robotPageData struct {
 }
 
 // ssrEnterLobby opens a lobby, either opening it directly or asking for a lobby.
-func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
-	lobby, err := api.GetLobby(r)
+func ssrEnterLobby(writer http.ResponseWriter, request *http.Request) {
+	lobby, err := api.GetLobby(request)
 	if err != nil {
-		userFacingError(w, err.Error())
+		userFacingError(writer, err.Error())
 		return
 	}
 
-	userAgent := strings.ToLower(r.UserAgent())
+	userAgent := strings.ToLower(request.UserAgent())
 	if !(strings.Contains(userAgent, "gecko") || strings.Contains(userAgent, "chrome") || strings.Contains(userAgent, "opera") || strings.Contains(userAgent, "safari")) {
-		templatingError := pageTemplates.ExecuteTemplate(w, "robot-page", &robotPageData{
+		templatingError := pageTemplates.ExecuteTemplate(writer, "robot-page", &robotPageData{
 			BasePageConfig: currentBasePageConfig,
 			LobbyData:      api.CreateLobbyData(lobby),
 		})
@@ -43,30 +43,30 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	translation, locale := determineTranslation(r)
-	requestAddress := api.GetIPAddressFromRequest(r)
+	translation, locale := determineTranslation(request)
+	requestAddress := api.GetIPAddressFromRequest(request)
 
 	var pageData *lobbyPageData
 	lobby.Synchronized(func() {
-		player := api.GetPlayer(lobby, r)
+		player := api.GetPlayer(lobby, request)
 
 		if player == nil {
 			if !lobby.HasFreePlayerSlot() {
-				userFacingError(w, "Sorry, but the lobby is full.")
+				userFacingError(writer, "Sorry, but the lobby is full.")
 				return
 			}
 
 			if !lobby.CanIPConnect(requestAddress) {
-				userFacingError(w, "Sorry, but you have exceeded the maximum number of clients per IP.")
+				userFacingError(writer, "Sorry, but you have exceeded the maximum number of clients per IP.")
 				return
 			}
 
-			newPlayer := lobby.JoinPlayer(api.GetPlayername(r))
+			newPlayer := lobby.JoinPlayer(api.GetPlayername(request))
 
-			api.SetUsersessionCookie(w, newPlayer)
+			api.SetUsersessionCookie(writer, newPlayer)
 		} else {
 			if player.Connected && player.GetWebsocket() != nil {
-				userFacingError(w, "It appears you already have an open tab for this lobby.")
+				userFacingError(writer, "It appears you already have an open tab for this lobby.")
 				return
 			}
 			player.SetLastKnownAddress(requestAddress)
@@ -84,7 +84,7 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 	// In this case we don't want to template the lobby, since an error has occurred
 	// and probably already has been handled.
 	if pageData != nil {
-		templateError := pageTemplates.ExecuteTemplate(w, "lobby-page", pageData)
+		templateError := pageTemplates.ExecuteTemplate(writer, "lobby-page", pageData)
 		if templateError != nil {
 			log.Printf("Error templating lobby: %s\n", templateError)
 		}

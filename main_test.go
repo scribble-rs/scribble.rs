@@ -79,16 +79,16 @@ func TestDeterminePort(t *testing.T) {
 		},
 	}
 
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
 			for _, arg := range flag.CommandLine.Args() {
 				t.Logf("Removing arg %s", arg)
 			}
-			os.Setenv("PORT", c.portEnv)
+			os.Setenv("PORT", testCase.portEnv)
 
-			port := determinePort(c.portFlag)
-			if port != c.expectedPort {
-				t.Errorf("Port was %d instead of %d", port, c.expectedPort)
+			port := determinePort(testCase.portFlag)
+			if port != testCase.expectedPort {
+				t.Errorf("Port was %d instead of %d", port, testCase.expectedPort)
 			}
 		})
 	}

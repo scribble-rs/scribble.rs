@@ -14,13 +14,13 @@ import (
 
 // homePage servers the default page for scribble.rs, which is the page to
 // create a new lobby.
-func homePage(w http.ResponseWriter, r *http.Request) {
-	translation, locale := determineTranslation(r)
+func homePage(writer http.ResponseWriter, request *http.Request) {
+	translation, locale := determineTranslation(request)
 	createPageData := createDefaultLobbyCreatePageData()
 	createPageData.Translation = translation
 	createPageData.Locale = locale
 
-	err := pageTemplates.ExecuteTemplate(w, "lobby-create-page", createPageData)
+	err := pageTemplates.ExecuteTemplate(writer, "lobby-create-page", createPageData)
 	if err != nil {
 		log.Printf("Error templating home page: %s\n", err)
 	}
@@ -63,37 +63,37 @@ type LobbyCreatePageData struct {
 
 // ssrCreateLobby allows creating a lobby, optionally returning errors that
 // occurred during creation.
-func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
-	formParseError := r.ParseForm()
+func ssrCreateLobby(writer http.ResponseWriter, request *http.Request) {
+	formParseError := request.ParseForm()
 	if formParseError != nil {
-		http.Error(w, formParseError.Error(), http.StatusBadRequest)
+		http.Error(writer, formParseError.Error(), http.StatusBadRequest)
 		return
 	}
 
-	language, languageInvalid := api.ParseLanguage(r.Form.Get("language"))
-	drawingTime, drawingTimeInvalid := api.ParseDrawingTime(r.Form.Get("drawing_time"))
-	rounds, roundsInvalid := api.ParseRounds(r.Form.Get("rounds"))
-	maxPlayers, maxPlayersInvalid := api.ParseMaxPlayers(r.Form.Get("max_players"))
-	customWords, customWordsInvalid := api.ParseCustomWords(r.Form.Get("custom_words"))
-	customWordChance, customWordChanceInvalid := api.ParseCustomWordsChance(r.Form.Get("custom_words_chance"))
-	clientsPerIPLimit, clientsPerIPLimitInvalid := api.ParseClientsPerIPLimit(r.Form.Get("clients_per_ip_limit"))
-	enableVotekick, enableVotekickInvalid := api.ParseBoolean("enable votekick", r.Form.Get("enable_votekick"))
-	publicLobby, publicLobbyInvalid := api.ParseBoolean("public", r.Form.Get("public"))
+	language, languageInvalid := api.ParseLanguage(request.Form.Get("language"))
+	drawingTime, drawingTimeInvalid := api.ParseDrawingTime(request.Form.Get("drawing_time"))
+	rounds, roundsInvalid := api.ParseRounds(request.Form.Get("rounds"))
+	maxPlayers, maxPlayersInvalid := api.ParseMaxPlayers(request.Form.Get("max_players"))
+	customWords, customWordsInvalid := api.ParseCustomWords(request.Form.Get("custom_words"))
+	customWordChance, customWordChanceInvalid := api.ParseCustomWordsChance(request.Form.Get("custom_words_chance"))
+	clientsPerIPLimit, clientsPerIPLimitInvalid := api.ParseClientsPerIPLimit(request.Form.Get("clients_per_ip_limit"))
+	enableVotekick, enableVotekickInvalid := api.ParseBoolean("enable votekick", request.Form.Get("enable_votekick"))
+	publicLobby, publicLobbyInvalid := api.ParseBoolean("public", request.Form.Get("public"))
 
 	// Prevent resetting the form, since that would be annoying as hell.
 	pageData := LobbyCreatePageData{
 		BasePageConfig:    currentBasePageConfig,
 		SettingBounds:     game.LobbySettingBounds,
 		Languages:         game.SupportedLanguages,
-		Public:            r.Form.Get("public"),
-		DrawingTime:       r.Form.Get("drawing_time"),
-		Rounds:            r.Form.Get("rounds"),
-		MaxPlayers:        r.Form.Get("max_players"),
-		CustomWords:       r.Form.Get("custom_words"),
-		CustomWordsChance: r.Form.Get("custom_words_chance"),
-		ClientsPerIPLimit: r.Form.Get("clients_per_ip_limit"),
-		EnableVotekick:    r.Form.Get("enable_votekick"),
-		Language:          r.Form.Get("language"),
+		Public:            request.Form.Get("public"),
+		DrawingTime:       request.Form.Get("drawing_time"),
+		Rounds:            request.Form.Get("rounds"),
+		MaxPlayers:        request.Form.Get("max_players"),
+		CustomWords:       request.Form.Get("custom_words"),
+		CustomWordsChance: request.Form.Get("custom_words_chance"),
+		ClientsPerIPLimit: request.Form.Get("clients_per_ip_limit"),
+		EnableVotekick:    request.Form.Get("enable_votekick"),
+		Language:          request.Form.Get("language"),
 	}
 
 	if languageInvalid != nil {
@@ -124,38 +124,38 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 		pageData.Errors = append(pageData.Errors, publicLobbyInvalid.Error())
 	}
 
-	translation, locale := determineTranslation(r)
+	translation, locale := determineTranslation(request)
 	pageData.Translation = translation
 	pageData.Locale = locale
 
 	if len(pageData.Errors) != 0 {
-		err := pageTemplates.ExecuteTemplate(w, "lobby-create-page", pageData)
+		err := pageTemplates.ExecuteTemplate(writer, "lobby-create-page", pageData)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
 		}
 		return
 	}
 
-	playerName := api.GetPlayername(r)
+	playerName := api.GetPlayername(request)
 
 	player, lobby, createError := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
 	if createError != nil {
 		pageData.Errors = append(pageData.Errors, createError.Error())
-		templateError := pageTemplates.ExecuteTemplate(w, "lobby-create-page", pageData)
+		templateError := pageTemplates.ExecuteTemplate(writer, "lobby-create-page", pageData)
 		if templateError != nil {
-			userFacingError(w, templateError.Error())
+			userFacingError(writer, templateError.Error())
 		}
 
 		return
 	}
 
 	lobby.WriteJSON = api.WriteJSON
-	player.SetLastKnownAddress(api.GetIPAddressFromRequest(r))
+	player.SetLastKnownAddress(api.GetIPAddressFromRequest(request))
 
-	api.SetUsersessionCookie(w, player)
+	api.SetUsersessionCookie(writer, player)
 
 	// We only add the lobby if we could do all necessary pre-steps successfully.
 	state.AddLobby(lobby)
 
-	http.Redirect(w, r, currentBasePageConfig.RootPath+"/ssrEnterLobby?lobby_id="+lobby.LobbyID, http.StatusFound)
+	http.Redirect(writer, request, currentBasePageConfig.RootPath+"/ssrEnterLobby?lobby_id="+lobby.LobbyID, http.StatusFound)
 }

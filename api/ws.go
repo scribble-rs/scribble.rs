@@ -20,46 +20,46 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
-func wsEndpoint(w http.ResponseWriter, r *http.Request) {
-	sessionCookie := GetUserSession(r)
+func wsEndpoint(writer http.ResponseWriter, request *http.Request) {
+	sessionCookie := GetUserSession(request)
 	if sessionCookie == "" {
 		// This issue can happen if you illegally request a websocket
 		// connection without ever having had a usersession or your
 		// client having deleted the usersession cookie.
-		http.Error(w, "you don't have access to this lobby;usersession not set", http.StatusUnauthorized)
+		http.Error(writer, "you don't have access to this lobby;usersession not set", http.StatusUnauthorized)
 		return
 	}
 
-	lobby, lobbyError := GetLobby(r)
+	lobby, lobbyError := GetLobby(request)
 	if lobbyError != nil {
-		http.Error(w, lobbyError.Error(), http.StatusNotFound)
+		http.Error(writer, lobbyError.Error(), http.StatusNotFound)
 		return
 	}
 
 	lobby.Synchronized(func() {
 		player := lobby.GetPlayer(sessionCookie)
 		if player == nil {
-			http.Error(w, "you don't have access to this lobby;usersession unknown", http.StatusUnauthorized)
+			http.Error(writer, "you don't have access to this lobby;usersession unknown", http.StatusUnauthorized)
 			return
 		}
 
-		ws, err := upgrader.Upgrade(w, r, nil)
+		socket, err := upgrader.Upgrade(writer, request, nil)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		log.Printf("%s(%s) has connected\n", player.Name, player.ID)
 
-		player.SetWebsocket(ws)
+		player.SetWebsocket(socket)
 		lobby.OnPlayerConnectUnsynchronized(player)
 
-		ws.SetCloseHandler(func(code int, text string) error {
+		socket.SetCloseHandler(func(code int, text string) error {
 			lobby.OnPlayerDisconnect(player)
 			return nil
 		})
 
-		go wsListen(lobby, player, ws)
+		go wsListen(lobby, player, socket)
 	})
 }
 

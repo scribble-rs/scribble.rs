@@ -205,8 +205,8 @@ func Test_wordSelectionEvent(t *testing.T) {
 	}
 	wordHintEvents := make(map[string]*GameEvent)
 	lobby.WriteJSON = func(player *Player, object interface{}) error {
-		gameEvent, ok := object.(*GameEvent)
-		if !ok {
+		gameEvent, typeMatches := object.(*GameEvent)
+		if !typeMatches {
 			panic("Unsupported event data type")
 		}
 
@@ -291,19 +291,19 @@ func Test_kickDrawer(t *testing.T) {
 		return nil
 	}
 
-	a := lobby.JoinPlayer("a")
-	a.Connected = true
-	lobby.Owner = a
-	lobby.creator = a
+	marcel := lobby.JoinPlayer("marcel")
+	marcel.Connected = true
+	lobby.Owner = marcel
+	lobby.creator = marcel
 
-	b := lobby.JoinPlayer("b")
-	b.Connected = true
-	c := lobby.JoinPlayer("c")
-	c.Connected = true
+	kevin := lobby.JoinPlayer("kevin")
+	kevin.Connected = true
+	chantal := lobby.JoinPlayer("chantal")
+	chantal.Connected = true
 
 	startError := lobby.HandleEvent(nil, &GameEvent{
 		Type: "start",
-	}, a)
+	}, marcel)
 	if startError != nil {
 		t.Errorf("Couldn't start lobby: %s", startError)
 	}
@@ -312,7 +312,7 @@ func Test_kickDrawer(t *testing.T) {
 		t.Error("Drawer should've been a, but was nil")
 	}
 
-	if lobby.drawer != a {
+	if lobby.drawer != marcel {
 		t.Errorf("Drawer should've been a, but was %s", lobby.drawer.Name)
 	}
 
@@ -324,19 +324,19 @@ func Test_kickDrawer(t *testing.T) {
 		t.Error("Drawer should've been b, but was nil")
 	}
 
-	if lobby.drawer != b {
+	if lobby.drawer != kevin {
 		t.Errorf("Drawer should've been b, but was %s", lobby.drawer.Name)
 	}
 
 	lobby.Synchronized(func() {
-		kickPlayer(lobby, b, 1)
+		kickPlayer(lobby, kevin, 1)
 	})
 
 	if lobby.drawer == nil {
 		t.Error("Drawer should've been c, but was nil")
 	}
 
-	if lobby.drawer != c {
+	if lobby.drawer != chantal {
 		t.Errorf("Drawer should've been c, but was %s", lobby.drawer.Name)
 	}
 }
