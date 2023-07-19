@@ -10,9 +10,6 @@
   <a href="https://liberapay.com/biosmarcel/donate">
     <img src="https://img.shields.io/liberapay/receives/biosmarcel.svg?logo=liberapay">
   </a>
-  <a href="https://heroku.com/deploy?template=https://github.com/scribble-rs/scribble.rs/tree/master">
-    <img src="https://www.herokucdn.com/deploy/button.png">
-  </a>
 </p>
 
 Scribble.rs is an alternative to the web-based drawing game skribbl.io. My main
@@ -29,21 +26,8 @@ The comment section is powered by utteranc.es, which means it'll use the blogs r
 
 ## Play now
 
-Feel free to play on this instance
-
-* https://scribblers-official.herokuapp.com/
-  > Might not respond right-away, just wait some seconds / minutes, as it
-  > shuts down automatically when unused.
-
-### Hosting your own instance for free
-
-By using Heroku, you can deploy a temporary container that runs scribble.rs.
-The container will not have any cost and automatically suspend as soon as it
-stops receiving traffic for a while.
-
-Simply create an account at https://id.heroku.com/login and then click this link:
-
-https://heroku.com/deploy?template=https://github.com/scribble-rs/scribble.rs/tree/master
+Feel free to play on [scribblers.fly.dev](https://scribblers.fly.dev). Note that
+the instance may not respond instantly.
 
 ## Building / Running
 
@@ -79,7 +63,7 @@ port though.
 
 You should be able to build the binary on any system that go supports as a compilation target.
 
-This application requires go version `1.16` or higher.
+This application requires go version `1.20` or higher.
 
 ## Pre-compiled binaries
 

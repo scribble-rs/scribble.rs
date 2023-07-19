@@ -1,5 +1,5 @@
 # builder
-FROM golang:latest AS builder
+FROM golang:1.20 AS builder
 RUN mkdir /app
 ADD . /app/
 WORKDIR /app
