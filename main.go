@@ -27,7 +27,7 @@ func determinePort(portHTTPFlag int) int {
 		portHTTP = portHTTPFlag
 		log.Printf("Listening on port %d sourced from portHTTP flag.\n", portHTTP)
 	} else {
-		//Support for heroku, as heroku expects applications to use a specific port.
+		// Support for heroku, as heroku expects applications to use a specific port.
 		envPort, portVarAvailable := os.LookupEnv("PORT")
 		if portVarAvailable {
 			log.Printf("'PORT' environment variable found: '%s'\n", envPort)
@@ -73,7 +73,7 @@ func main() {
 
 	portHTTP := determinePort(*portHTTPFlag)
 
-	//Setting the seed in order for the petnames to be random.
+	// Setting the seed in order for the petnames to be random.
 	rand.Seed(time.Now().UnixNano())
 
 	api.SetupRoutes()

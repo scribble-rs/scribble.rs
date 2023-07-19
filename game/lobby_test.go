@@ -23,8 +23,8 @@ func createLobbyWithDemoPlayers(playercount int) *Lobby {
 
 func Test_CalculateVotesNeededToKick(t *testing.T) {
 	t.Run("Check necessary kick vote amount for players", func(test *testing.T) {
-		var expectedResults = map[int]int{
-			//Kinda irrelevant since you can't kick yourself, but who cares.
+		expectedResults := map[int]int{
+			// Kinda irrelevant since you can't kick yourself, but who cares.
 			1:  2,
 			2:  2,
 			3:  2,
@@ -49,7 +49,7 @@ func Test_CalculateVotesNeededToKick(t *testing.T) {
 
 func Test_RemoveAccents(t *testing.T) {
 	t.Run("Check removing accented characters", func(test *testing.T) {
-		var expectedResults = map[string]string{
+		expectedResults := map[string]string{
 			"é":           "e",
 			"É":           "E",
 			"à":           "a",
@@ -79,8 +79,8 @@ func Test_RemoveAccents(t *testing.T) {
 }
 
 func Test_simplifyText(t *testing.T) {
-	//We only test the replacement we do ourselves. We won't test
-	//the "sanitize", or furthermore our expectations of it for now.
+	// We only test the replacement we do ourselves. We won't test
+	// the "sanitize", or furthermore our expectations of it for now.
 
 	tests := []struct {
 		name  string
@@ -180,7 +180,7 @@ func Test_calculateGuesserScore(t *testing.T) {
 func Test_handleNameChangeEvent(t *testing.T) {
 	lobby := &Lobby{}
 	lobby.WriteJSON = func(player *Player, object interface{}) error {
-		//Dummy to pass test.
+		// Dummy to pass test.
 		return nil
 	}
 	player := lobby.JoinPlayer("Kevin")
@@ -286,7 +286,7 @@ func Test_kickDrawer(t *testing.T) {
 		},
 		words: []string{"a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a"},
 	}
-	//Dummy to avoid crashes
+	// Dummy to avoid crashes
 	lobby.WriteJSON = func(player *Player, object interface{}) error {
 		return nil
 	}

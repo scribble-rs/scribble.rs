@@ -34,8 +34,8 @@ func getLanguageIdentifier(language string) string {
 // default language lists.
 func readWordListInternal(
 	lowercaser cases.Caser, chosenLanguage string,
-	wordlistSupplier func(string) (string, error)) ([]string, error) {
-
+	wordlistSupplier func(string) (string, error),
+) ([]string, error) {
 	languageIdentifier := getLanguageIdentifier(chosenLanguage)
 	words, available := wordListCache[languageIdentifier]
 	if !available {
@@ -44,10 +44,10 @@ func readWordListInternal(
 			return nil, supplierError
 		}
 
-		//Due to people having git autoreplace newline characters, there
-		//might be unnecessary \r characters.
-		//While regex isn't super, this doesn't really matter as the word lists
-		//are cached and only the first start of the first lobby will be slower.
+		// Due to people having git autoreplace newline characters, there
+		// might be unnecessary \r characters.
+		// While regex isn't super, this doesn't really matter as the word lists
+		// are cached and only the first start of the first lobby will be slower.
 		words = regexp.MustCompile("\r?\n").Split(wordListFile, -1)
 		for wordIndex, word := range words {
 			words[wordIndex] = lowercaser.String(word)
@@ -55,7 +55,7 @@ func readWordListInternal(
 		wordListCache[languageIdentifier] = words
 	}
 
-	//We don't shuffle the wordList directory, as the cache isn't threadsafe.
+	// We don't shuffle the wordList directory, as the cache isn't threadsafe.
 	shuffledWords := make([]string, len(words))
 	copy(shuffledWords, words)
 	shuffleWordList(shuffledWords)
@@ -96,7 +96,7 @@ func GetRandomWords(wordCount int, lobby *Lobby) []string {
 // See GetRandomWords for functionality documentation.
 func getRandomWordsCustomRng(wordCount int, lobby *Lobby, rng func() int) []string {
 	if lobby.CustomWordsChance > 0 && len(lobby.CustomWords) > 0 {
-		//Always get custom words
+		// Always get custom words
 		if lobby.CustomWordsChance == 100 {
 			if len(lobby.CustomWords) >= wordCount {
 				return popCustomWords(wordCount, lobby)
@@ -138,9 +138,9 @@ func popWordpackWords(wordCount int, lobby *Lobby) []string {
 		var readError error
 		lobby.words, readError = readWordList(lobby.lowercaser, lobby.Wordpack)
 		if readError != nil {
-			//Since this list should've been successfully read once before, we
-			//can "safely" panic if this happens, assuming that there's a
-			//deeper problem.
+			// Since this list should've been successfully read once before, we
+			// can "safely" panic if this happens, assuming that there's a
+			// deeper problem.
 			panic(readError)
 		}
 	}

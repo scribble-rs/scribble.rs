@@ -23,9 +23,9 @@ var upgrader = websocket.Upgrader{
 func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	sessionCookie := GetUserSession(r)
 	if sessionCookie == "" {
-		//This issue can happen if you illegally request a websocket
-		//connection without ever having had a usersession or your
-		//client having deleted the usersession cookie.
+		// This issue can happen if you illegally request a websocket
+		// connection without ever having had a usersession or your
+		// client having deleted the usersession cookie.
 		http.Error(w, "you don't have access to this lobby;usersession not set", http.StatusUnauthorized)
 		return
 	}
@@ -64,8 +64,8 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 }
 
 func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
-	//Workaround to prevent crash, since not all kind of
-	//disconnect errors are cleanly caught by gorilla websockets.
+	// Workaround to prevent crash, since not all kind of
+	// disconnect errors are cleanly caught by gorilla websockets.
 	defer func() {
 		err := recover()
 		if err != nil {
@@ -78,16 +78,16 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 		messageType, data, err := socket.ReadMessage()
 		if err != nil {
 			if websocket.IsCloseError(err) || websocket.IsUnexpectedCloseError(err) ||
-				//This happens when the server closes the connection. It will cause 1000 retries followed by a panic.
+				// This happens when the server closes the connection. It will cause 1000 retries followed by a panic.
 				strings.Contains(err.Error(), "use of closed network connection") {
-				//Make sure that the sockethandler is called
+				// Make sure that the sockethandler is called
 				lobby.OnPlayerDisconnect(player)
-				//If the error is fatal, we stop listening for more messages.
+				// If the error is fatal, we stop listening for more messages.
 				return
 			}
 
 			log.Printf("Error reading from socket: %s\n", err)
-			//If the error doesn't seem fatal we attempt listening for more messages.
+			// If the error doesn't seem fatal we attempt listening for more messages.
 			continue
 		}
 

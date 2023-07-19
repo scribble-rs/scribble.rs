@@ -83,13 +83,13 @@ func ShutdownLobbiesGracefully() {
 	defer globalStateMutex.Unlock()
 
 	for _, lobby := range lobbies {
-		//Since a reconnect requires a lookup to the state, all attempts to
-		//reconnect will end up running into the global statelock. Therefore,
-		//reconnecting wouldn't be possible.
+		// Since a reconnect requires a lookup to the state, all attempts to
+		// reconnect will end up running into the global statelock. Therefore,
+		// reconnecting wouldn't be possible.
 		lobby.Shutdown()
 	}
 
-	//Instead of removing one by one, we nil the array, since that's faster.
+	// Instead of removing one by one, we nil the array, since that's faster.
 	lobbies = nil
 }
 
@@ -145,12 +145,12 @@ func removeLobby(id string) {
 func removeLobbyByIndex(indexToDelete int) {
 	lobbyID := lobbies[indexToDelete].LobbyID
 
-	//We delete the lobby without maintaining order, since the lobby order
-	//is irrelevant. This holds true as long as there's no paging for
-	//requesting lobbies via the API.
+	// We delete the lobby without maintaining order, since the lobby order
+	// is irrelevant. This holds true as long as there's no paging for
+	// requesting lobbies via the API.
 	lobbies[indexToDelete] = lobbies[len(lobbies)-1]
-	//Unreference the moved item in the other slot to prevent potential
-	//memory leaks.
+	// Unreference the moved item in the other slot to prevent potential
+	// memory leaks.
 	lobbies[len(lobbies)-1] = nil
 	lobbies = lobbies[:len(lobbies)-1]
 
@@ -172,8 +172,8 @@ func Stats() *pageStats {
 	defer globalStateMutex.Unlock()
 
 	var playerCount, occupiedPlayerSlotCount, connectedPlayerCount uint64
-	//While one would expect locking the lobby here, it's not very
-	//important to get 100% consistent results here.
+	// While one would expect locking the lobby here, it's not very
+	// important to get 100% consistent results here.
 	for _, lobby := range lobbies {
 		playerCount += uint64(len(lobby.GetPlayers()))
 		occupiedPlayerSlotCount += uint64(lobby.GetOccupiedPlayerSlots())

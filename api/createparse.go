@@ -64,9 +64,10 @@ func ParseMaxPlayers(value string) (int, error) {
 // separated values (or a single word). Empty strings will return an empty
 // (nil) array and no error. An error is only returned if there are empty words.
 // For example these wouldn't parse:
-//     wordone,,wordtwo
-//     ,
-//     wordone,
+//
+//	wordone,,wordtwo
+//	,
+//	wordone,
 func ParseCustomWords(value string) ([]string, error) {
 	trimmedValue := strings.TrimSpace(value)
 	if trimmedValue == "" {

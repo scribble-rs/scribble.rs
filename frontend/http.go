@@ -18,9 +18,9 @@ var (
 	frontendResourcesFS embed.FS
 )
 
-//In this init hook we initialize all templates that could at some point
-//be needed during the server runtime. If any of the templates can't be
-//loaded, we panic.
+// In this init hook we initialize all templates that could at some point
+// be needed during the server runtime. If any of the templates can't be
+// loaded, we panic.
 func init() {
 	var templateParseError error
 	pageTemplates, templateParseError = template.ParseFS(templateFS, "templates/*")
@@ -63,13 +63,13 @@ type errorPageData struct {
 	Locale      string
 }
 
-//userFacingError will return the occurred error as a custom html page to the caller.
+// userFacingError will return the occurred error as a custom html page to the caller.
 func userFacingError(w http.ResponseWriter, errorMessage string) {
 	err := pageTemplates.ExecuteTemplate(w, "error-page", &errorPageData{
 		BasePageConfig: currentBasePageConfig,
 		ErrorMessage:   errorMessage,
 	})
-	//This should never happen, but if it does, something is very wrong.
+	// This should never happen, but if it does, something is very wrong.
 	if err != nil {
 		panic(err)
 	}

@@ -55,7 +55,7 @@ func initEnglishTranslation() Translation {
 
 	translation.put("choose-a-word", "Choose a word")
 	translation.put("waiting-for-word-selection", "Waiting for word selection")
-	//This one doesn't use %s, since we want to make one part bold.
+	// This one doesn't use %s, since we want to make one part bold.
 	translation.put("is-choosing-word", "is choosing a word.")
 
 	translation.put("close-guess", "'%s' is very close.")
@@ -87,7 +87,7 @@ func initEnglishTranslation() Translation {
 
 	translation.put("message-too-long", "Your message is too long.")
 
-	//Help dialog
+	// Help dialog
 	translation.put("controls", "Controls")
 	translation.put("pencil", "Pencil")
 	translation.put("eraser", "Eraser")

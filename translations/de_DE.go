@@ -49,7 +49,7 @@ func initGermanTranslation() {
 
 	translation.put("choose-a-word", "Wähle ein Wort")
 	translation.put("waiting-for-word-selection", "Warte auf Wort-Auswahl")
-	//This one doesn't use %s, since we want to make one part bold.
+	// This one doesn't use %s, since we want to make one part bold.
 	translation.put("is-choosing-word", "wählt gerade ein Wort.")
 
 	translation.put("close-guess", "'%s' ist nah dran.")
@@ -81,7 +81,7 @@ func initGermanTranslation() {
 
 	translation.put("message-too-long", "Deine Nachricht ist zu lang.")
 
-	//Help dialog
+	// Help dialog
 	translation.put("controls", "Steuerung")
 	translation.put("pencil", "Stift")
 	translation.put("eraser", "Radiergummi")
@@ -96,7 +96,7 @@ func initGermanTranslation() {
 	translation.put("yes", "Ja")
 	translation.put("system", "System")
 
-	//Footer
+	// Footer
 	translation.put("source-code", "Source Code")
 	translation.put("help", "Hilfe")
 	translation.put("contact", "Kontakt")

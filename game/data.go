@@ -53,7 +53,7 @@ type Lobby struct {
 	// hintsLeft is the amount of hints still available for revelation.
 	hintsLeft int
 	// hintCount is the amount of hints that were initially available
-	//for revelation.
+	// for revelation.
 	hintCount int
 	// Round is the round that the Lobby is currently in. This is a number
 	// between 0 and Rounds. 0 indicates that it hasn't started yet.
@@ -85,8 +85,8 @@ type Lobby struct {
 
 	lowercaser cases.Caser
 
-	//LastPlayerDisconnectTime is used to know since when a lobby is empty, in case
-	//it is empty.
+	// LastPlayerDisconnectTime is used to know since when a lobby is empty, in case
+	// it is empty.
 	LastPlayerDisconnectTime *time.Time
 
 	mutex *sync.Mutex
@@ -287,14 +287,14 @@ func createPlayer(name string) *Player {
 	}
 }
 
-//SanitizeName removes invalid characters from the players name, resolves
-//emoji codes, limits the name length and generates a new name if necessary.
+// SanitizeName removes invalid characters from the players name, resolves
+// emoji codes, limits the name length and generates a new name if necessary.
 func SanitizeName(name string) string {
-	//We trim and handle emojis beforehand to avoid taking this into account
-	//when checking the name length, so we don't cut off too much of the name.
+	// We trim and handle emojis beforehand to avoid taking this into account
+	// when checking the name length, so we don't cut off too much of the name.
 	newName := discordemojimap.Replace(strings.TrimSpace(name))
 
-	//We don't want super-long names
+	// We don't want super-long names
 	if len(newName) > MaxPlayerNameLength {
 		return newName[:MaxPlayerNameLength+1]
 	}
@@ -381,9 +381,9 @@ func (lobby *Lobby) GetOccupiedPlayerSlots() int {
 		} else {
 			disconnectTime := player.disconnectTime
 
-			//If a player hasn't been disconnected for a certain
-			//timeframe, we will reserve the slot. This avoids frustration
-			//in situations where a player has to restart their PC or so.
+			// If a player hasn't been disconnected for a certain
+			// timeframe, we will reserve the slot. This avoids frustration
+			// in situations where a player has to restart their PC or so.
 			if disconnectTime == nil || now.Sub(*disconnectTime) < slotReservationTime {
 				occupiedPlayerSlots++
 			}

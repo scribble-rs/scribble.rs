@@ -11,8 +11,7 @@ import (
 	"github.com/scribble-rs/scribble.rs/state"
 )
 
-//This file contains the API methods for the public API
-
+// This file contains the API methods for the public API
 var (
 	ErrNoLobbyIDSupplied = errors.New("please supply a lobby id via the 'lobby_id' query parameter")
 	ErrLobbyNotExistent  = errors.New("the requested lobby doesn't exist")
@@ -33,14 +32,14 @@ type LobbyEntry struct {
 }
 
 func publicLobbies(w http.ResponseWriter, r *http.Request) {
-	//REMARK: If paging is ever implemented, we might want to maintain order
-	//when deleting lobbies from state in the state package.
+	// REMARK: If paging is ever implemented, we might want to maintain order
+	// when deleting lobbies from state in the state package.
 
 	lobbies := state.GetPublicLobbies()
 	lobbyEntries := make([]*LobbyEntry, 0, len(lobbies))
 	for _, lobby := range lobbies {
-		//While one would expect locking the lobby here, it's not very
-		//important to get 100% consistent results here.
+		// While one would expect locking the lobby here, it's not very
+		// important to get 100% consistent results here.
 		lobbyEntries = append(lobbyEntries, &LobbyEntry{
 			LobbyID:         lobby.LobbyID,
 			PlayerCount:     lobby.GetOccupiedPlayerSlots(),
@@ -111,7 +110,7 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var playerName = GetPlayername(r)
+	playerName := GetPlayername(r)
 	player, lobby, createError := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
 	if createError != nil {
 		http.Error(w, createError.Error(), http.StatusBadRequest)
@@ -130,7 +129,7 @@ func createLobby(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, encodingError.Error(), http.StatusInternalServerError)
 	}
 
-	//We only add the lobby if everything else was successful.
+	// We only add the lobby if everything else was successful.
 	state.AddLobby(lobby)
 }
 
@@ -208,7 +207,7 @@ func editLobby(w http.ResponseWriter, r *http.Request) {
 
 	var requestErrors []string
 
-	//Uneditable properties
+	// Uneditable properties
 	if r.Form.Get("custom_words") != "" {
 		requestErrors = append(requestErrors, "can't modify custom_words in existing lobby")
 	}
@@ -216,7 +215,7 @@ func editLobby(w http.ResponseWriter, r *http.Request) {
 		requestErrors = append(requestErrors, "can't modify language in existing lobby")
 	}
 
-	//Editable properties
+	// Editable properties
 	maxPlayers, maxPlayersInvalid := ParseMaxPlayers(r.Form.Get("max_players"))
 	drawingTime, drawingTimeInvalid := ParseDrawingTime(r.Form.Get("drawing_time"))
 	rounds, roundsInvalid := ParseRounds(r.Form.Get("rounds"))
@@ -263,12 +262,12 @@ func editLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//We synchronize as late as possible to avoid unnecessary lags.
-	//The previous code here isn't really prone to bugs due to lack of sync.
+	// We synchronize as late as possible to avoid unnecessary lags.
+	// The previous code here isn't really prone to bugs due to lack of sync.
 	lobby.Synchronized(func() {
-		//While changing maxClientsPerIP and maxPlayers to a value lower than
-		//is currently being used makes little sense, we'll allow it, as it doesn't
-		//really break anything.
+		// While changing maxClientsPerIP and maxPlayers to a value lower than
+		// is currently being used makes little sense, we'll allow it, as it doesn't
+		// really break anything.
 
 		lobby.MaxPlayers = maxPlayers
 		lobby.CustomWordsChance = customWordChance
@@ -345,12 +344,12 @@ func GetLobby(r *http.Request) (*game.Lobby, error) {
 }
 
 var (
-	//CanvasColor is the initially / empty canvas colors value used for
-	//Lobbydata objects.
+	// CanvasColor is the initially / empty canvas colors value used for
+	// Lobbydata objects.
 	CanvasColor = game.RGBColor{R: 255, G: 255, B: 255}
-	//SuggestedBrushSizes is suggested brush sizes value used for
-	//Lobbydata objects. A unit test makes sure these values are ordered
-	//and within the specified bounds.
+	// SuggestedBrushSizes is suggested brush sizes value used for
+	// Lobbydata objects. A unit test makes sure these values are ordered
+	// and within the specified bounds.
 	SuggestedBrushSizes = [4]uint8{8, 16, 24, 32}
 )
 
@@ -362,21 +361,21 @@ type LobbyData struct {
 	*game.EditableLobbySettings
 
 	LobbyID string `json:"lobbyId"`
-	//DrawingBoardBaseWidth is the internal canvas width and is needed for
-	//correctly up- / downscaling drawing instructions.
+	// DrawingBoardBaseWidth is the internal canvas width and is needed for
+	// correctly up- / downscaling drawing instructions.
 	DrawingBoardBaseWidth int `json:"drawingBoardBaseWidth"`
-	//DrawingBoardBaseHeight is the internal canvas height and is needed for
-	//correctly up- / downscaling drawing instructions.
+	// DrawingBoardBaseHeight is the internal canvas height and is needed for
+	// correctly up- / downscaling drawing instructions.
 	DrawingBoardBaseHeight int `json:"drawingBoardBaseHeight"`
-	//MinBrushSize is the minimum amount of pixels the brush can draw in.
+	// MinBrushSize is the minimum amount of pixels the brush can draw in.
 	MinBrushSize int `json:"minBrushSize"`
-	//MaxBrushSize is the maximum amount of pixels the brush can draw in.
+	// MaxBrushSize is the maximum amount of pixels the brush can draw in.
 	MaxBrushSize int `json:"maxBrushSize"`
-	//CanvasColor is the initially (empty) color of the canvas.
+	// CanvasColor is the initially (empty) color of the canvas.
 	CanvasColor game.RGBColor `json:"canvasColor"`
-	//SuggestedBrushSizes are suggestions for the different brush sizes
-	//that the user can choose between. These brushes are guaranteed to
-	//be ordered from low to high and stay with the bounds.
+	// SuggestedBrushSizes are suggestions for the different brush sizes
+	// that the user can choose between. These brushes are guaranteed to
+	// be ordered from low to high and stay with the bounds.
 	SuggestedBrushSizes [4]uint8 `json:"suggestedBrushSizes"`
 }
 

@@ -80,9 +80,9 @@ func ssrEnterLobby(w http.ResponseWriter, r *http.Request) {
 		}
 	})
 
-	//If the pagedata isn't initialized, it means the synchronized block has exited.
-	//In this case we don't want to template the lobby, since an error has occurred
-	//and probably already has been handled.
+	// If the pagedata isn't initialized, it means the synchronized block has exited.
+	// In this case we don't want to template the lobby, since an error has occurred
+	// and probably already has been handled.
 	if pageData != nil {
 		templateError := pageTemplates.ExecuteTemplate(w, "lobby-page", pageData)
 		if templateError != nil {

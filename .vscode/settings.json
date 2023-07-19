@@ -1,3 +1,7 @@
 {
     "html.format.templating": true,
+    "go.lintTool": "golangci-lint",
+    "go.lintFlags": [
+        "--fast"
+    ]
 }

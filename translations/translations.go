@@ -10,7 +10,7 @@ import (
 // init initializes all localization packs. Each new package has to be added
 // to this function.
 func init() {
-	//We are making sure to add english first, since it's the default.
+	// We are making sure to add english first, since it's the default.
 	DefaultTranslation = initEnglishTranslation()
 	initGermanTranslation()
 }
@@ -71,7 +71,7 @@ func GetLanguage(locale string) Translation {
 // it available via Get. If the language is already registered, the server
 // panics. This happens on startup, therefore it's safe.
 func RegisterTranslation(locale string, translation Translation) {
-	//Make sure the locale is valid.
+	// Make sure the locale is valid.
 	language.MustParse(locale)
 
 	localeLowercased := strings.ToLower(locale)

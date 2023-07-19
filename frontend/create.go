@@ -10,7 +10,7 @@ import (
 	"github.com/scribble-rs/scribble.rs/translations"
 )
 
-//This file contains the API for the official web client.
+// This file contains the API for the official web client.
 
 // homePage servers the default page for scribble.rs, which is the page to
 // create a new lobby.
@@ -80,7 +80,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 	enableVotekick, enableVotekickInvalid := api.ParseBoolean("enable votekick", r.Form.Get("enable_votekick"))
 	publicLobby, publicLobbyInvalid := api.ParseBoolean("public", r.Form.Get("public"))
 
-	//Prevent resetting the form, since that would be annoying as hell.
+	// Prevent resetting the form, since that would be annoying as hell.
 	pageData := LobbyCreatePageData{
 		BasePageConfig:    currentBasePageConfig,
 		SettingBounds:     game.LobbySettingBounds,
@@ -136,7 +136,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var playerName = api.GetPlayername(r)
+	playerName := api.GetPlayername(r)
 
 	player, lobby, createError := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
 	if createError != nil {
@@ -154,7 +154,7 @@ func ssrCreateLobby(w http.ResponseWriter, r *http.Request) {
 
 	api.SetUsersessionCookie(w, player)
 
-	//We only add the lobby if we could do all necessary pre-steps successfully.
+	// We only add the lobby if we could do all necessary pre-steps successfully.
 	state.AddLobby(lobby)
 
 	http.Redirect(w, r, currentBasePageConfig.RootPath+"/ssrEnterLobby?lobby_id="+lobby.LobbyID, http.StatusFound)

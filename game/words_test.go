@@ -42,8 +42,8 @@ func testWordList(chosenLanguage string, t *testing.T) {
 
 	for _, word := range words {
 		if word == "" {
-			//We can't print the faulty line, since we are shuffling
-			//the words in order to avoid predictability.
+			// We can't print the faulty line, since we are shuffling
+			// the words in order to avoid predictability.
 			t.Errorf("Wordlist for language %s contained empty word", chosenLanguage)
 		}
 
@@ -158,7 +158,7 @@ func Test_regressionGetRandomWords_singleCustomWord(t *testing.T) {
 		t.Error("Custom should've been found, but wasn't.")
 	}
 
-	//Now furthermore, we expect 2 - 100 to give us non-custom words and not panic.
+	// Now furthermore, we expect 2 - 100 to give us non-custom words and not panic.
 	for i := 2; i <= 100; i++ {
 		if getRandomWordsCustomRng(1, lobby, func() int { return i })[0] == "custom" {
 			t.Error("Custom word was found but shouldn't have.")
@@ -184,8 +184,8 @@ func Test_getRandomWordsReloading(t *testing.T) {
 			mutex:       &sync.Mutex{},
 		}
 
-		//Running this 10 times, expecting it to get 3 words each time, even
-		//though our pool has only got a size of 3.
+		// Running this 10 times, expecting it to get 3 words each time, even
+		// though our pool has only got a size of 3.
 		for i := 0; i < 10; i++ {
 			words := GetRandomWords(3, lobby)
 			if len(words) != 3 {
@@ -204,8 +204,8 @@ func Test_getRandomWordsReloading(t *testing.T) {
 			mutex:       &sync.Mutex{},
 		}
 
-		//Running this 10 times, expecting it to get 3 words each time, even
-		//though our pool has only got a size of 3.
+		// Running this 10 times, expecting it to get 3 words each time, even
+		// though our pool has only got a size of 3.
 		for i := 0; i < 10; i++ {
 			words := GetRandomWords(3, lobby)
 			if len(words) != 3 {
@@ -224,8 +224,8 @@ func Test_getRandomWordsReloading(t *testing.T) {
 			mutex:       &sync.Mutex{},
 		}
 
-		//Running this 10 times, expecting it to get 3 words each time, even
-		//though our pool has only got a size of 3.
+		// Running this 10 times, expecting it to get 3 words each time, even
+		// though our pool has only got a size of 3.
 		for i := 0; i < 10; i++ {
 			words := GetRandomWords(3, lobby)
 			if len(words) != 3 {

@@ -23,7 +23,7 @@ func main() {
 	flag.Parse()
 
 	url := *page + "/v1/stats"
-	outputFile, openError := os.OpenFile(*output, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	outputFile, openError := os.OpenFile(*output, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0o644)
 	if openError != nil {
 		panic(openError)
 	}

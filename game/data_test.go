@@ -14,7 +14,7 @@ func TestOccupiedPlayerCount(t *testing.T) {
 		t.Errorf("Occupied player count expected to be 0, but was %d", lobby.GetOccupiedPlayerSlots())
 	}
 
-	//While disconnect, there's no disconnect time, which we count as occupied.
+	// While disconnect, there's no disconnect time, which we count as occupied.
 	lobby.players = append(lobby.players, &Player{})
 	if lobby.GetOccupiedPlayerSlots() != 1 {
 		t.Errorf("Occupied player count expected to be 1, but was %d", lobby.GetOccupiedPlayerSlots())
@@ -46,5 +46,4 @@ func TestOccupiedPlayerCount(t *testing.T) {
 	if lobby.GetOccupiedPlayerSlots() != 2 {
 		t.Errorf("Occupied player count expected to be 2, but was %d", lobby.GetOccupiedPlayerSlots())
 	}
-
 }

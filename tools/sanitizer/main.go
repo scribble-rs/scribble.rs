@@ -31,13 +31,13 @@ func main() {
 		}
 		lineAsString := string(line)
 
-		//Remove previously edited difficulty indicators, we don't really need it anymore.
+		// Remove previously edited difficulty indicators, we don't really need it anymore.
 		difficultyIndicatorIndex := strings.IndexRune(lineAsString, '#')
 		if difficultyIndicatorIndex != -1 {
 			lineAsString = lineAsString[:difficultyIndicatorIndex]
 		}
 
-		//Lowercase and trim, to make sure we can compare them without errors
+		// Lowercase and trim, to make sure we can compare them without errors
 		words = append(words, strings.TrimSpace(lowercaser.String(lineAsString)))
 	}
 
@@ -53,7 +53,7 @@ WORDS:
 		filteredWords = append(filteredWords, word)
 	}
 
-	//Filter for niceness
+	// Filter for niceness
 	sort.Strings(filteredWords)
 
 	for _, word := range filteredWords {
