@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 )
 
@@ -12,7 +12,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	data, err := ioutil.ReadAll(languageFile)
+	data, err := io.ReadAll(languageFile)
 	if err != nil {
 		panic(err)
 	}
