@@ -21,15 +21,17 @@ func Test_readWordList(t *testing.T) {
 
 	for language := range languageIdentifiers {
 		t.Run(fmt.Sprintf("Testing language file from embedded data for %s", language), func(t *testing.T) {
-			testWordList(language, t)
+			testWordList(t, language)
 		})
 		t.Run(fmt.Sprintf("Testing language file from in-memory cached data for %s", language), func(t *testing.T) {
-			testWordList(language, t)
+			testWordList(t, language)
 		})
 	}
 }
 
-func testWordList(chosenLanguage string, t *testing.T) {
+func testWordList(t *testing.T, chosenLanguage string) {
+	t.Helper()
+
 	lowercaser := cases.Lower(language.English)
 	words, readError := readWordList(lowercaser, chosenLanguage)
 	if readError != nil {
