@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	globalStateMutex               = &sync.Mutex{}
-	lobbies          []*game.Lobby = nil
+	globalStateMutex = &sync.Mutex{}
+	lobbies          []*game.Lobby
 )
 
 // LaunchCleanupRoutine starts a task to clean up empty lobbies. An empty

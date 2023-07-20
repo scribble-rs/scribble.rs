@@ -103,7 +103,7 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 				continue
 			}
 
-			handleError := lobby.HandleEvent(data, received, player)
+			handleError := lobby.HandleEvent(received, player)
 			if handleError != nil {
 				log.Printf("Error handling event: %s\n", handleError)
 			}

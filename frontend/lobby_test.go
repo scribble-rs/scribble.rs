@@ -12,7 +12,7 @@ func TestCreateLobby(t *testing.T) {
 		LobbyID: "TEST",
 	})
 
-	var previousSize uint8 = 0
+	var previousSize uint8
 	for _, suggestedSize := range data.SuggestedBrushSizes {
 		if suggestedSize < previousSize {
 			t.Error("Sorting in SuggestedBrushSizes is incorrect")

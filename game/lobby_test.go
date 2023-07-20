@@ -221,7 +221,7 @@ func Test_wordSelectionEvent(t *testing.T) {
 	lobby.Owner = drawer
 	lobby.creator = drawer
 
-	startError := lobby.HandleEvent(nil, &GameEvent{
+	startError := lobby.HandleEvent(&GameEvent{
 		Type: "start",
 	}, drawer)
 	if startError != nil {
@@ -231,7 +231,7 @@ func Test_wordSelectionEvent(t *testing.T) {
 	guesser := lobby.JoinPlayer("Guesser")
 	guesser.Connected = true
 
-	choiceError := lobby.HandleEvent(nil, &GameEvent{
+	choiceError := lobby.HandleEvent(&GameEvent{
 		Type: "choose-word",
 		Data: 0,
 	}, drawer)
@@ -301,7 +301,7 @@ func Test_kickDrawer(t *testing.T) {
 	chantal := lobby.JoinPlayer("chantal")
 	chantal.Connected = true
 
-	startError := lobby.HandleEvent(nil, &GameEvent{
+	startError := lobby.HandleEvent(&GameEvent{
 		Type: "start",
 	}, marcel)
 	if startError != nil {

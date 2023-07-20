@@ -95,7 +95,7 @@ type KickVote struct {
 	RequiredVoteCount int    `json:"requiredVoteCount"`
 }
 
-func (lobby *Lobby) HandleEvent(raw []byte, received *GameEvent, player *Player) error {
+func (lobby *Lobby) HandleEvent(received *GameEvent, player *Player) error {
 	if received.Type == "keep-alive" {
 		// This is a known dummy event in order to avoid accidental websocket
 		// connection closure. However, no action is required on the server.
@@ -1077,9 +1077,9 @@ func (lobby *Lobby) GetAvailableWordHints(player *Player) []*WordHint {
 	// element that wastes space.
 	if player.State == Drawing || player.State == Standby {
 		return lobby.wordHintsShown
-	} else {
-		return lobby.wordHints
 	}
+
+	return lobby.wordHints
 }
 
 // JoinPlayer creates a new player object using the given name and adds it

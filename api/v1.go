@@ -32,7 +32,7 @@ type LobbyEntry struct {
 	Wordpack        string `json:"wordpack"`
 }
 
-func publicLobbies(writer http.ResponseWriter, request *http.Request) {
+func publicLobbies(writer http.ResponseWriter, _ *http.Request) {
 	// REMARK: If paging is ever implemented, we might want to maintain order
 	// when deleting lobbies from state in the state package.
 
@@ -318,9 +318,9 @@ func lobbyEndpoint(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func statsEndpoint(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(state.Stats())
+func statsEndpoint(writer http.ResponseWriter, _ *http.Request) {
+	writer.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(writer).Encode(state.Stats())
 }
 
 // GetLobby extracts the lobby_id field from an HTTP request and searches
