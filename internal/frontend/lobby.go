@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/scribble-rs/scribble.rs/api"
-	"github.com/scribble-rs/scribble.rs/translations"
+	"github.com/scribble-rs/scribble.rs/internal/api"
+	"github.com/scribble-rs/scribble.rs/internal/translations"
 	"golang.org/x/text/language"
 )
 

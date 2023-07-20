@@ -4,10 +4,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/scribble-rs/scribble.rs/api"
-	"github.com/scribble-rs/scribble.rs/game"
-	"github.com/scribble-rs/scribble.rs/state"
-	"github.com/scribble-rs/scribble.rs/translations"
+	"github.com/scribble-rs/scribble.rs/internal/api"
+	"github.com/scribble-rs/scribble.rs/internal/game"
+	"github.com/scribble-rs/scribble.rs/internal/state"
+	"github.com/scribble-rs/scribble.rs/internal/translations"
 )
 
 // This file contains the API for the official web client.

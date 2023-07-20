@@ -32,7 +32,7 @@ jobs:
       - name: Build artifact
         shell: bash
         run: |
-          go build -o ${{ matrix.binary_name }} .
+          go build -o ${{ matrix.binary_name }} ./cmd/scribblers
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v2

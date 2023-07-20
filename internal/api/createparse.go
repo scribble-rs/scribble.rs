@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/scribble-rs/scribble.rs/game"
+	"github.com/scribble-rs/scribble.rs/internal/game"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )

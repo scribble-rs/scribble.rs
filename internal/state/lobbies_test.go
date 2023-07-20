@@ -3,7 +3,7 @@ package state
 import (
 	"testing"
 
-	"github.com/scribble-rs/scribble.rs/game"
+	"github.com/scribble-rs/scribble.rs/internal/game"
 )
 
 func TestAddAndRemove(t *testing.T) {

@@ -11,7 +11,7 @@ import (
 
 	"github.com/gorilla/websocket"
 
-	"github.com/scribble-rs/scribble.rs/game"
+	"github.com/scribble-rs/scribble.rs/internal/game"
 )
 
 var upgrader = websocket.Upgrader{

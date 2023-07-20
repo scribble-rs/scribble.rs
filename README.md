@@ -45,15 +45,8 @@ cd scribble.rs
 
 Lastly to build the executable, run the following:
 
-For -nix systems:
 ```shell
-# run `make` to see all available commands
-make build
-```
-
-For Windows:
-```shell
-go build -o scribblers .
+go build -./cmd/scribblers .
 ```
 
 This will produce a portable binary called `scribblers`. The binary doesn't

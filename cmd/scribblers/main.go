@@ -14,9 +14,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/scribble-rs/scribble.rs/api"
-	"github.com/scribble-rs/scribble.rs/frontend"
-	"github.com/scribble-rs/scribble.rs/state"
+	"github.com/scribble-rs/scribble.rs/internal/api"
+	"github.com/scribble-rs/scribble.rs/internal/frontend"
+	"github.com/scribble-rs/scribble.rs/internal/state"
 )
 
 const defaultPort = 8080

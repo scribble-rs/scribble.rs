@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/scribble-rs/scribble.rs/game"
-	"github.com/scribble-rs/scribble.rs/state"
+	"github.com/scribble-rs/scribble.rs/internal/game"
+	"github.com/scribble-rs/scribble.rs/internal/state"
 )
 
 var (
