@@ -292,9 +292,9 @@ func editLobby(writer http.ResponseWriter, request *http.Request) {
 func getLobbyWithErrorHandling(writer http.ResponseWriter, request *http.Request) (*game.Lobby, bool) {
 	lobby, err := GetLobby(request)
 	if err != nil {
-		if err == ErrNoLobbyIDSupplied {
+		if errors.Is(err, ErrNoLobbyIDSupplied) {
 			http.Error(writer, err.Error(), http.StatusBadRequest)
-		} else if err == ErrLobbyNotExistent {
+		} else if errors.Is(err, ErrLobbyNotExistent) {
 			http.Error(writer, err.Error(), http.StatusNotFound)
 		} else {
 			http.Error(writer, err.Error(), http.StatusInternalServerError)

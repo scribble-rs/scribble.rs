@@ -121,7 +121,7 @@ func (lobby *Lobby) HandleEvent(received *GameEvent, player *Player) error {
 			// type. Benchmarks can be found in json_test.go.
 			decodeError := mapstructure.Decode(received.Data, line)
 			if decodeError != nil {
-				return fmt.Errorf("error decoding data: %s", decodeError)
+				return fmt.Errorf("error decoding data: %w", decodeError)
 			}
 
 			// In case the line is too big, we overwrite the data of the event.
@@ -152,7 +152,7 @@ func (lobby *Lobby) HandleEvent(received *GameEvent, player *Player) error {
 			fill := &Fill{}
 			decodeError := mapstructure.Decode(received.Data, fill)
 			if decodeError != nil {
-				return fmt.Errorf("error decoding data: %s", decodeError)
+				return fmt.Errorf("error decoding data: %w", decodeError)
 			}
 
 			// A fill always
