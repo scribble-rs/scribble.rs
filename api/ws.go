@@ -113,7 +113,7 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 
 // WriteJSON marshals the given input into a JSON string and sends it to the
 // player using the currently established websocket connection.
-func WriteJSON(player *game.Player, object interface{}) error {
+func WriteJSON(player *game.Player, object any) error {
 	player.GetWebsocketMutex().Lock()
 	defer player.GetWebsocketMutex().Unlock()
 

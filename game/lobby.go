@@ -881,7 +881,7 @@ func (lobby *Lobby) selectWord(wordChoiceIndex int) {
 	}
 }
 
-func (lobby *Lobby) sendDataToEveryoneExceptSender(sender *Player, data interface{}) {
+func (lobby *Lobby) sendDataToEveryoneExceptSender(sender *Player, data any) {
 	for _, otherPlayer := range lobby.GetPlayers() {
 		if otherPlayer != sender {
 			lobby.WriteJSON(otherPlayer, data)
@@ -889,7 +889,7 @@ func (lobby *Lobby) sendDataToEveryoneExceptSender(sender *Player, data interfac
 	}
 }
 
-func (lobby *Lobby) TriggerUpdateEvent(eventType string, data interface{}) {
+func (lobby *Lobby) TriggerUpdateEvent(eventType string, data any) {
 	event := &GameEvent{Type: eventType, Data: data}
 	for _, otherPlayer := range lobby.GetPlayers() {
 		lobby.WriteJSON(otherPlayer, event)
@@ -915,7 +915,7 @@ func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTim
 			Public:            publicLobby,
 		},
 		CustomWords:    customWords,
-		currentDrawing: make([]interface{}, 0),
+		currentDrawing: make([]any, 0),
 		State:          Unstarted,
 		mutex:          &sync.Mutex{},
 	}
@@ -979,16 +979,16 @@ type Ready struct {
 	PlayerName   string `json:"playerName"`
 	AllowDrawing bool   `json:"allowDrawing"`
 
-	VotekickEnabled    bool          `json:"votekickEnabled"`
-	GameState          gameState     `json:"gameState"`
-	OwnerID            string        `json:"ownerId"`
-	Round              int           `json:"round"`
-	Rounds             int           `json:"rounds"`
-	RoundEndTime       int           `json:"roundEndTime"`
-	DrawingTimeSetting int           `json:"drawingTimeSetting"`
-	WordHints          []*WordHint   `json:"wordHints"`
-	Players            []*Player     `json:"players"`
-	CurrentDrawing     []interface{} `json:"currentDrawing"`
+	VotekickEnabled    bool        `json:"votekickEnabled"`
+	GameState          gameState   `json:"gameState"`
+	OwnerID            string      `json:"ownerId"`
+	Round              int         `json:"round"`
+	Rounds             int         `json:"rounds"`
+	RoundEndTime       int         `json:"roundEndTime"`
+	DrawingTimeSetting int         `json:"drawingTimeSetting"`
+	WordHints          []*WordHint `json:"wordHints"`
+	Players            []*Player   `json:"players"`
+	CurrentDrawing     []any       `json:"currentDrawing"`
 }
 
 func generateReadyData(lobby *Lobby, player *Player) *Ready {

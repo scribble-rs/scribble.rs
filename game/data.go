@@ -71,7 +71,7 @@ type Lobby struct {
 	// consist of LineEvent and FillEvent. Please do not modify the contents
 	// of this array an only move AppendLine and AppendFill on the respective
 	// lobby object.
-	currentDrawing []interface{}
+	currentDrawing []any
 
 	// These variables are used to define the ranges of connected drawing events.
 	// For example a line that has been drawn or a fill that has been executed.
@@ -91,7 +91,7 @@ type Lobby struct {
 
 	mutex *sync.Mutex
 
-	WriteJSON func(player *Player, object interface{}) error
+	WriteJSON func(player *Player, object any) error
 }
 
 // EditableLobbySettings represents all lobby settings that are editable by
@@ -259,7 +259,7 @@ func (lobby *Lobby) GetPlayer(userSession string) *Player {
 }
 
 func (lobby *Lobby) ClearDrawing() {
-	lobby.currentDrawing = make([]interface{}, 0)
+	lobby.currentDrawing = make([]any, 0)
 }
 
 // AppendLine adds a line direction to the current drawing. This exists in order
@@ -308,8 +308,8 @@ func SanitizeName(name string) string {
 
 // GameEvent contains an eventtype and optionally any data.
 type GameEvent struct {
-	Type string      `json:"type"`
-	Data interface{} `json:"data"`
+	Type string `json:"type"`
+	Data any    `json:"data"`
 }
 
 // GetConnectedPlayerCount returns the amount of player that have currently

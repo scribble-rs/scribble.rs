@@ -10,7 +10,7 @@ import (
 var (
 	ordered   = []byte(`{"type":"line","data":{"fromX":1023.53,"fromY":591.06,"toX":1017.65,"toY":602.82,"color":{"r":0,"g":0,"b":0},"lineWidth":8}}`)
 	unordered = []byte(`{"data":{"fromX":1023.53,"fromY":591.06,"toX":1017.65,"toY":602.82,"color":{"r":0,"g":0,"b":0},"lineWidth":8},"type":"line"}`)
-	mapData   = map[string]interface{}{
+	mapData   = map[string]any{
 		"fromX": 1025.53,
 		"fromY": 591.06,
 		"toX":   1017.65,
@@ -28,7 +28,7 @@ type noData struct {
 
 type data struct {
 	Type string `json:"type"`
-	Data interface{}
+	Data any
 }
 
 func BenchmarkUnmarshal_NoData_Ordered(b *testing.B) {

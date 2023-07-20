@@ -179,7 +179,7 @@ func Test_calculateGuesserScore(t *testing.T) {
 
 func Test_handleNameChangeEvent(t *testing.T) {
 	lobby := &Lobby{}
-	lobby.WriteJSON = func(player *Player, object interface{}) error {
+	lobby.WriteJSON = func(player *Player, object any) error {
 		// Dummy to pass test.
 		return nil
 	}
@@ -204,7 +204,7 @@ func Test_wordSelectionEvent(t *testing.T) {
 		words: []string{firstWordChoice, "def", "ghi"},
 	}
 	wordHintEvents := make(map[string]*GameEvent)
-	lobby.WriteJSON = func(player *Player, object interface{}) error {
+	lobby.WriteJSON = func(player *Player, object any) error {
 		gameEvent, typeMatches := object.(*GameEvent)
 		if !typeMatches {
 			panic("Unsupported event data type")
@@ -287,7 +287,7 @@ func Test_kickDrawer(t *testing.T) {
 		words: []string{"a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a"},
 	}
 	// Dummy to avoid crashes
-	lobby.WriteJSON = func(player *Player, object interface{}) error {
+	lobby.WriteJSON = func(player *Player, object any) error {
 		return nil
 	}
 
