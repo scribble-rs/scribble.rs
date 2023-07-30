@@ -84,6 +84,8 @@ The default port is `8080`. To override it, run:
 docker run -p <port-number>:<port-number> biosmarcel/scribble.rs --portHTTP=<port-number>
 ```
 
+Here's a [user-contributed walkthrough](https://gist.github.com/gitname/601d52bc1d39028c83586ad5b24589ba) of the process of deploying this Docker container to a Digital Ocean droplet.
+
 ## nginx 
 
 Since Scribble.rs uses WebSockets, when running it behind an nginx reverse proxy, you have to configure nginx to support that.
