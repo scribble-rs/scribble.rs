@@ -308,8 +308,8 @@ func SanitizeName(name string) string {
 
 // GameEvent contains an eventtype and optionally any data.
 type GameEvent struct {
-	Type string `json:"type"`
 	Data any    `json:"data"`
+	Type string `json:"type"`
 }
 
 // GetConnectedPlayerCount returns the amount of player that have currently

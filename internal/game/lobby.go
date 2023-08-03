@@ -72,16 +72,16 @@ type SettingBounds struct {
 // We use this for reparsing as soon as we know that the type is right. It's
 // a bit unperformant, but will do for now.
 type LineEvent struct {
-	Type string `json:"type"`
 	Data *Line  `json:"data"`
+	Type string `json:"type"`
 }
 
 // FillEvent is basically the same as GameEvent, but with a specific Data type.
 // We use this for reparsing as soon as we know that the type is right. It's
 // a bit unperformant, but will do for now.
 type FillEvent struct {
-	Type string `json:"type"`
 	Data *Fill  `json:"data"`
+	Type string `json:"type"`
 }
 
 // KickVote represents a players vote to kick another players. If the VoteCount
@@ -788,13 +788,13 @@ func getTimeAsMillis() int64 {
 // after a new turn started. Meaning that no word has been chosen yet and
 // therefore there are no wordhints and no current drawing instructions.
 type NextTurn struct {
-	Round        int       `json:"round"`
-	Players      []*Player `json:"players"`
-	RoundEndTime int       `json:"roundEndTime"`
 	// PreviousWord signals the last chosen word. If empty, no word has been
 	// chosen. The client can now themselves whether there has been a previous
 	// turn, by looking at the current gamestate.
-	PreviousWord string `json:"previousWord"`
+	PreviousWord string    `json:"previousWord"`
+	Players      []*Player `json:"players"`
+	Round        int       `json:"round"`
+	RoundEndTime int       `json:"roundEndTime"`
 }
 
 // recalculateRanks will assign each player his respective rank in the lobby
