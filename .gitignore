@@ -1,9 +1,12 @@
-scribblers
-scribblers.exe
-scribble.rs
-scribble.rs.exe
+# Executable names
+/scribblers
+*.exe
 __debug_bin
+# IntelliJ state
 .idea/
+# Folder that contains code used for trying stuff locally
 playground/
+# Temporary output text files
 *.out
+# System metadata files
 .DS_Store
