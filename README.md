@@ -85,7 +85,7 @@ should always be up-to-date.
 The default port is `8080`. To override it, run:
 
 ```shell
-docker run -p --env PORT=<port> <port>:<port> biosmarcel/scribble.rs
+docker run --pull --env PORT=<port> -p <port>:<port> biosmarcel/scribble.rs
 ```
 
 ## nginx 
