@@ -155,7 +155,6 @@ func (lobby *Lobby) HandleEvent(received *GameEvent, player *Player) error {
 				return fmt.Errorf("error decoding data: %w", decodeError)
 			}
 
-			// A fill always
 			lobby.connectedDrawEventsIndexStack = append(lobby.connectedDrawEventsIndexStack, len(lobby.currentDrawing))
 			lobby.lastDrawEvent = time.Now()
 
@@ -596,18 +595,14 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 	lobby.scoreEarnedByGuessers = 0
 
 	for _, otherPlayer := range lobby.players {
-		//If the round ends and people still have guessing, that means the
-		//"LastScore" value for the next turn has to be "no score earned".
+		// If the round ends and people still have guessing, that means the
+		// "LastScore" value for the next turn has to be "no score earned".
 		if otherPlayer.State == Guessing {
 			otherPlayer.LastScore = 0
 		}
 		// Initially all players are in guessing state, as the drawer gets
 		// defined further at the bottom.
 		otherPlayer.State = Guessing
-
-		// FIXME Reconsider resetting this. I can't think of a good argument
-		// for this right now.
-		otherPlayer.votedForKick = make(map[string]bool)
 	}
 
 	recalculateRanks(lobby)

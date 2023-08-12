@@ -13,8 +13,8 @@ import (
 
 const slotReservationTime = time.Minute * 5
 
-// Lobby represents a game session.
-// FIXME Field visibilities should be changed in case we ever serialize this.
+// Lobby represents a game session. It must not be sent via the API, as it
+// exposes gameplay relevant information.
 type Lobby struct {
 	// ID uniquely identified the Lobby.
 	LobbyID string
