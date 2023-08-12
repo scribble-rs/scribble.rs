@@ -1,9 +1,6 @@
 {
     "html.format.templating": true,
     "go.lintTool": "golangci-lint",
-    "go.lintFlags": [
-        "--fast"
-    ],
     "go.useLanguageServer": true,
     "gopls": {
         "formatting.gofumpt": true,
