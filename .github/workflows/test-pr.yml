@@ -20,6 +20,5 @@ jobs:
           go-version: ${{ matrix.go-version }}
 
       - name: Run tests
-        shell: bash
         run: |
-          go test -race -covermode=atomic ./...
+          go test -v -race -covermode=atomic ./...
