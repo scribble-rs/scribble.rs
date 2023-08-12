@@ -64,9 +64,8 @@ type LobbyCreatePageData struct {
 // ssrCreateLobby allows creating a lobby, optionally returning errors that
 // occurred during creation.
 func ssrCreateLobby(writer http.ResponseWriter, request *http.Request) {
-	formParseError := request.ParseForm()
-	if formParseError != nil {
-		http.Error(writer, formParseError.Error(), http.StatusBadRequest)
+	if err := request.ParseForm(); err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -138,12 +137,11 @@ func ssrCreateLobby(writer http.ResponseWriter, request *http.Request) {
 
 	playerName := api.GetPlayername(request)
 
-	player, lobby, createError := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
-	if createError != nil {
-		pageData.Errors = append(pageData.Errors, createError.Error())
-		templateError := pageTemplates.ExecuteTemplate(writer, "lobby-create-page", pageData)
-		if templateError != nil {
-			userFacingError(writer, templateError.Error())
+	player, lobby, err := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
+	if err != nil {
+		pageData.Errors = append(pageData.Errors, err.Error())
+		if err := pageTemplates.ExecuteTemplate(writer, "lobby-create-page", pageData); err != nil {
+			userFacingError(writer, err.Error())
 		}
 
 		return

@@ -13,8 +13,8 @@ import (
 
 func Test_readWordList(t *testing.T) {
 	t.Run("test invalid language file", func(t *testing.T) {
-		_, readError := readWordList(cases.Lower(language.English), "owO")
-		if readError == nil {
+		_, err := readWordList(cases.Lower(language.English), "owO")
+		if err == nil {
 			t.Errorf("Reading word list didn't return an error, even though the language doesn't exist.")
 		}
 	})
@@ -33,9 +33,9 @@ func testWordList(t *testing.T, chosenLanguage string) {
 	t.Helper()
 
 	lowercaser := cases.Lower(language.English)
-	words, readError := readWordList(lowercaser, chosenLanguage)
-	if readError != nil {
-		t.Errorf("Error reading language %s: %s", chosenLanguage, readError)
+	words, err := readWordList(lowercaser, chosenLanguage)
+	if err != nil {
+		t.Errorf("Error reading language %s: %s", chosenLanguage, err)
 	}
 
 	if len(words) == 0 {

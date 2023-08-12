@@ -2,6 +2,7 @@ package game
 
 import (
 	"embed"
+	"fmt"
 	"io"
 	"math/rand"
 	"regexp"
@@ -39,9 +40,9 @@ func readWordListInternal(
 	languageIdentifier := getLanguageIdentifier(chosenLanguage)
 	words, available := wordListCache[languageIdentifier]
 	if !available {
-		wordListFile, supplierError := wordlistSupplier(languageIdentifier)
-		if supplierError != nil {
-			return nil, supplierError
+		wordListFile, err := wordlistSupplier(languageIdentifier)
+		if err != nil {
+			return nil, err
 		}
 
 		// Due to people having git autoreplace newline characters, there
@@ -70,14 +71,14 @@ func readWordListInternal(
 // whole application.
 func readWordList(lowercaser cases.Caser, chosenLanguage string) ([]string, error) {
 	return readWordListInternal(lowercaser, chosenLanguage, func(key string) (string, error) {
-		wordFile, wordErr := wordFS.Open("words/" + key)
-		if wordErr != nil {
-			return "", wordErr
+		wordFile, err := wordFS.Open("words/" + key)
+		if err != nil {
+			return "", fmt.Errorf("error opening word file from binary: %w", err)
 		}
 
-		wordBytes, readError := io.ReadAll(wordFile)
-		if readError != nil {
-			return "", readError
+		wordBytes, err := io.ReadAll(wordFile)
+		if err != nil {
+			return "", fmt.Errorf("error reading wordfile: %w", err)
 		}
 
 		return string(wordBytes), nil

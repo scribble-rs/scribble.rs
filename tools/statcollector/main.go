@@ -23,9 +23,9 @@ func main() {
 	flag.Parse()
 
 	url := *page + "/v1/stats"
-	outputFile, openError := os.OpenFile(*output, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0o644)
-	if openError != nil {
-		panic(openError)
+	outputFile, err := os.OpenFile(*output, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0o644)
+	if err != nil {
+		panic(err)
 	}
 	encoder := json.NewEncoder(outputFile)
 	shutdownTimer := time.NewTimer(*duration)

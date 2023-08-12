@@ -14,11 +14,15 @@ import (
 	"github.com/scribble-rs/scribble.rs/internal/game"
 )
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	CheckOrigin:     func(r *http.Request) bool { return true },
-}
+var (
+	ErrPlayerNotConnected = errors.New("player not connected")
+
+	upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		CheckOrigin:     func(r *http.Request) bool { return true },
+	}
+)
 
 func wsEndpoint(writer http.ResponseWriter, request *http.Request) {
 	sessionCookie := GetUserSession(request)
@@ -30,9 +34,9 @@ func wsEndpoint(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	lobby, lobbyError := GetLobby(request)
-	if lobbyError != nil {
-		http.Error(writer, lobbyError.Error(), http.StatusNotFound)
+	lobby, err := GetLobby(request)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusNotFound)
 		return
 	}
 
@@ -67,8 +71,7 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 	// Workaround to prevent crash, since not all kind of
 	// disconnect errors are cleanly caught by gorilla websockets.
 	defer func() {
-		err := recover()
-		if err != nil {
+		if err := recover(); err != nil {
 			log.Printf("Error occurred in wsListen.\n\tError: %s\n\tPlayer: %s(%s)\nStack %s\n", err, player.Name, player.ID, string(debug.Stack()))
 			lobby.OnPlayerDisconnect(player)
 		}
@@ -93,19 +96,21 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 
 		if messageType == websocket.TextMessage {
 			received := &game.Event{}
-			err := json.Unmarshal(data, received)
-			if err != nil {
+
+			if err := json.Unmarshal(data, received); err != nil {
 				log.Printf("Error unmarshalling message: %s\n", err)
-				sendError := WriteJSON(player, game.Event{Type: "system-message", Data: fmt.Sprintf("An error occurred trying to read your request, please report the error via GitHub: %s!", err)})
-				if sendError != nil {
-					log.Printf("Error sending errormessage: %s\n", sendError)
+				err := WriteJSON(player, game.Event{
+					Type: "system-message",
+					Data: fmt.Sprintf("error parsing message, please report this issue via Github: %s!", err),
+				})
+				if err != nil {
+					log.Printf("Error sending errormessage: %s\n", err)
 				}
 				continue
 			}
 
-			handleError := lobby.HandleEvent(received, player)
-			if handleError != nil {
-				log.Printf("Error handling event: %s\n", handleError)
+			if err := lobby.HandleEvent(received, player); err != nil {
+				log.Printf("Error handling event: %s\n", err)
 			}
 		}
 	}
@@ -119,7 +124,7 @@ func WriteJSON(player *game.Player, object any) error {
 
 	socket := player.GetWebsocket()
 	if socket == nil || !player.Connected {
-		return errors.New("player not connected")
+		return ErrPlayerNotConnected
 	}
 
 	return socket.WriteJSON(object)

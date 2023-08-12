@@ -103,8 +103,8 @@ func ParseCustomWordsChance(value string) (int, error) {
 }
 
 func parseIntValue(value string, lower, upper int64, valueName string) (int, error) {
-	result, parseErr := strconv.ParseInt(value, 10, 64)
-	if parseErr != nil {
+	result, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
 		return 0, fmt.Errorf("%s must be numeric", valueName)
 	}
 

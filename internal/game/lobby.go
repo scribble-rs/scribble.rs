@@ -106,6 +106,10 @@ func (lobby *Lobby) HandleEvent(received *Event, player *Player) error {
 	lobby.mutex.Lock()
 	defer lobby.mutex.Unlock()
 
+	// For all followup unmarshalling of the already unmarshalled Event, we
+	// use mapstructure instead. It's cheaper in terms of CPU usage and
+	// memory usage. There are benchmarks to prove this in json_test.go.
+
 	if received.Type == "message" {
 		dataAsString, isString := (received.Data).(string)
 		if !isString {
@@ -116,12 +120,8 @@ func (lobby *Lobby) HandleEvent(received *Event, player *Player) error {
 	} else if received.Type == "line" {
 		if lobby.canDraw(player) {
 			line := &Line{}
-			// It's cheaper to restructure the already unmarshalled map data
-			// instead of calling json.unmarshal again with a more specific
-			// type. Benchmarks can be found in json_test.go.
-			decodeError := mapstructure.Decode(received.Data, line)
-			if decodeError != nil {
-				return fmt.Errorf("error decoding data: %w", decodeError)
+			if err := mapstructure.Decode(received.Data, line); err != nil {
+				return fmt.Errorf("error decoding data: %w", err)
 			}
 
 			// In case the line is too big, we overwrite the data of the event.
@@ -146,13 +146,9 @@ func (lobby *Lobby) HandleEvent(received *Event, player *Player) error {
 		}
 	} else if received.Type == "fill" {
 		if lobby.canDraw(player) {
-			// It's cheaper to restructure the already unmarshalled map data
-			// instead of calling json.unmarshal again with a more specific
-			// type. Benchmarks can be found in json_test.go.
 			fill := &Fill{}
-			decodeError := mapstructure.Decode(received.Data, fill)
-			if decodeError != nil {
-				return fmt.Errorf("error decoding data: %w", decodeError)
+			if err := mapstructure.Decode(received.Data, fill); err != nil {
+				return fmt.Errorf("error decoding data: %w", err)
 			}
 
 			lobby.connectedDrawEventsIndexStack = append(lobby.connectedDrawEventsIndexStack, len(lobby.currentDrawing))
@@ -279,11 +275,17 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 
 	if sender.State != Guessing {
 		lobby.sendMessageToAllNonGuessing(trimmedMessage, sender)
-	} else {
-		normInput := simplifyText(lobby.lowercaser.String(trimmedMessage))
-		normSearched := simplifyText(lobby.CurrentWord)
+		return
+	}
 
-		if normSearched == normInput {
+	normInput := simplifyText(lobby.lowercaser.String(trimmedMessage))
+	normSearched := simplifyText(lobby.CurrentWord)
+
+	// Since correct guess are probably the least common case, we'll always
+	// calculate the distance, as usually have to do it anyway.
+	switch levenshtein.ComputeDistance(normInput, normSearched) {
+	case 0:
+		{
 			secondsLeft := int(lobby.RoundEndTime/1000 - time.Now().UTC().UnixNano()/1000000000)
 
 			sender.LastScore = calculateGuesserScore(lobby.hintCount, lobby.hintsLeft, secondsLeft, lobby.DrawingTime)
@@ -302,15 +304,17 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 				recalculateRanks(lobby)
 				lobby.triggerPlayersUpdate()
 			}
-		} else if levenshtein.ComputeDistance(normInput, normSearched) == 1 {
+		}
+	case 1:
+		{
 			// In cases of a close guess, we still send the message to everyone.
 			// This allows other players to guess the word by watching what the
 			// other players are misstyping.
 			sendMessageToAll(trimmedMessage, sender, lobby)
 			lobby.WriteJSON(sender, Event{Type: "close-guess", Data: trimmedMessage})
-		} else {
-			sendMessageToAll(trimmedMessage, sender, lobby)
 		}
+	default:
+		sendMessageToAll(trimmedMessage, sender, lobby)
 	}
 }
 
@@ -437,11 +441,9 @@ func handleKickVoteEvent(lobby *Lobby, player *Player, toKickID string) {
 // state and sending all necessary events.
 func kickPlayer(lobby *Lobby, playerToKick *Player, playerToKickIndex int) {
 	// Avoiding nilpointer in case playerToKick disconnects during this event unluckily.
-	playerToKickSocket := playerToKick.ws
-	if playerToKickSocket != nil {
-		disconnectError := playerToKickSocket.Close()
-		if disconnectError != nil {
-			log.Printf("Error disconnecting kicked player:\n\t%s\n", disconnectError)
+	if playerToKickSocket := playerToKick.ws; playerToKickSocket != nil {
+		if err := playerToKickSocket.Close(); err != nil {
+			log.Printf("Error disconnecting kicked player:\n\t%s\n", err)
 		}
 	}
 

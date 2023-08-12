@@ -33,12 +33,12 @@ func ssrEnterLobby(writer http.ResponseWriter, request *http.Request) {
 
 	userAgent := strings.ToLower(request.UserAgent())
 	if !(strings.Contains(userAgent, "gecko") || strings.Contains(userAgent, "chrome") || strings.Contains(userAgent, "opera") || strings.Contains(userAgent, "safari")) {
-		templatingError := pageTemplates.ExecuteTemplate(writer, "robot-page", &robotPageData{
+		err := pageTemplates.ExecuteTemplate(writer, "robot-page", &robotPageData{
 			BasePageConfig: currentBasePageConfig,
 			LobbyData:      api.CreateLobbyData(lobby),
 		})
-		if templatingError != nil {
-			log.Printf("error templating robot page: %d\n", templatingError)
+		if err != nil {
+			log.Printf("error templating robot page: %d\n", err)
 		}
 		return
 	}
@@ -84,22 +84,19 @@ func ssrEnterLobby(writer http.ResponseWriter, request *http.Request) {
 	// In this case we don't want to template the lobby, since an error has occurred
 	// and probably already has been handled.
 	if pageData != nil {
-		templateError := pageTemplates.ExecuteTemplate(writer, "lobby-page", pageData)
-		if templateError != nil {
-			log.Printf("Error templating lobby: %s\n", templateError)
+		if err := pageTemplates.ExecuteTemplate(writer, "lobby-page", pageData); err != nil {
+			log.Printf("Error templating lobby: %s\n", err)
 		}
 	}
 }
 
 func determineTranslation(r *http.Request) (translations.Translation, string) {
-	var translation translations.Translation
-
-	languageTags, _, languageParseError := language.ParseAcceptLanguage(r.Header.Get("Accept-Language"))
-	if languageParseError == nil {
+	languageTags, _, err := language.ParseAcceptLanguage(r.Header.Get("Accept-Language"))
+	if err == nil {
 		for _, languageTag := range languageTags {
 			fullLanguageIdentifier := languageTag.String()
 			fullLanguageIdentifierLowercased := strings.ToLower(fullLanguageIdentifier)
-			translation = translations.GetLanguage(fullLanguageIdentifierLowercased)
+			translation := translations.GetLanguage(fullLanguageIdentifierLowercased)
 			if translation != nil {
 				return translation, fullLanguageIdentifierLowercased
 			}

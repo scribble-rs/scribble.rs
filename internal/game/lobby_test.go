@@ -50,22 +50,23 @@ func Test_CalculateVotesNeededToKick(t *testing.T) {
 func Test_RemoveAccents(t *testing.T) {
 	t.Run("Check removing accented characters", func(test *testing.T) {
 		expectedResults := map[string]string{
-			"é":           "e",
-			"É":           "E",
-			"à":           "a",
-			"À":           "A",
-			"ç":           "c",
-			"Ç":           "C",
-			"ö":           "oe",
-			"Ö":           "OE",
-			"œ":           "oe",
-			"\n":          "\n",
-			"\t":          "\t",
-			"\r":          "\r",
-			"":            "",
-			"·":           "·",
-			"?:!":         "?:!",
-			"ac-ab":       "acab",
+			"é":     "e",
+			"É":     "E",
+			"à":     "a",
+			"À":     "A",
+			"ç":     "c",
+			"Ç":     "C",
+			"ö":     "oe",
+			"Ö":     "OE",
+			"œ":     "oe",
+			"\n":    "\n",
+			"\t":    "\t",
+			"\r":    "\r",
+			"":      "",
+			"·":     "·",
+			"?:!":   "?:!",
+			"ac-ab": "acab",
+			//nolint:gocritic,mapkey
 			"ac - _ab-- ": "acab",
 		}
 
@@ -221,22 +222,19 @@ func Test_wordSelectionEvent(t *testing.T) {
 	lobby.Owner = drawer
 	lobby.creator = drawer
 
-	startError := lobby.HandleEvent(&Event{
-		Type: "start",
-	}, drawer)
-	if startError != nil {
-		t.Errorf("Couldn't start lobby: %s", startError)
+	if err := lobby.HandleEvent(&Event{Type: "start"}, drawer); err != nil {
+		t.Errorf("Couldn't start lobby: %s", err)
 	}
 
 	guesser := lobby.JoinPlayer("Guesser")
 	guesser.Connected = true
 
-	choiceError := lobby.HandleEvent(&Event{
+	err := lobby.HandleEvent(&Event{
 		Type: "choose-word",
 		Data: 0,
 	}, drawer)
-	if choiceError != nil {
-		t.Errorf("Couldn't choose word: %s", choiceError)
+	if err != nil {
+		t.Errorf("Couldn't choose word: %s", err)
 	}
 
 	wordHintsForDrawerEvent := wordHintEvents[drawer.ID]
@@ -301,11 +299,8 @@ func Test_kickDrawer(t *testing.T) {
 	chantal := lobby.JoinPlayer("chantal")
 	chantal.Connected = true
 
-	startError := lobby.HandleEvent(&Event{
-		Type: "start",
-	}, marcel)
-	if startError != nil {
-		t.Errorf("Couldn't start lobby: %s", startError)
+	if err := lobby.HandleEvent(&Event{Type: "start"}, marcel); err != nil {
+		t.Errorf("Couldn't start lobby: %s", err)
 	}
 
 	if lobby.drawer == nil {

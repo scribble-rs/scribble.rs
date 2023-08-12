@@ -54,16 +54,15 @@ func publicLobbies(writer http.ResponseWriter, _ *http.Request) {
 			Wordpack:        lobby.Wordpack,
 		})
 	}
-	encodingError := json.NewEncoder(writer).Encode(lobbyEntries)
-	if encodingError != nil {
-		http.Error(writer, encodingError.Error(), http.StatusInternalServerError)
+
+	if err := json.NewEncoder(writer).Encode(lobbyEntries); err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
 	}
 }
 
 func createLobby(writer http.ResponseWriter, request *http.Request) {
-	formParseError := request.ParseForm()
-	if formParseError != nil {
-		http.Error(writer, formParseError.Error(), http.StatusBadRequest)
+	if err := request.ParseForm(); err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -112,9 +111,9 @@ func createLobby(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	playerName := GetPlayername(request)
-	player, lobby, createError := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
-	if createError != nil {
-		http.Error(writer, createError.Error(), http.StatusBadRequest)
+	player, lobby, err := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -125,9 +124,8 @@ func createLobby(writer http.ResponseWriter, request *http.Request) {
 
 	lobbyData := CreateLobbyData(lobby)
 
-	encodingError := json.NewEncoder(writer).Encode(lobbyData)
-	if encodingError != nil {
-		http.Error(writer, encodingError.Error(), http.StatusInternalServerError)
+	if err := json.NewEncoder(writer).Encode(lobbyData); err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
 	}
 
 	// We only add the lobby if everything else was successful.
@@ -171,9 +169,8 @@ func enterLobbyEndpoint(writer http.ResponseWriter, request *http.Request) {
 	})
 
 	if lobbyData != nil {
-		encodingError := json.NewEncoder(writer).Encode(lobbyData)
-		if encodingError != nil {
-			http.Error(writer, encodingError.Error(), http.StatusInternalServerError)
+		if err := json.NewEncoder(writer).Encode(lobbyData); err != nil {
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
 		}
 	}
 }
@@ -200,9 +197,8 @@ func editLobby(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	parseError := request.ParseForm()
-	if parseError != nil {
-		http.Error(writer, fmt.Sprintf("error parsing request query into form (%s)", parseError), http.StatusBadRequest)
+	if err := request.ParseForm(); err != nil {
+		http.Error(writer, fmt.Sprintf("error parsing request query into form (%s)", err), http.StatusBadRequest)
 		return
 	}
 
@@ -400,13 +396,12 @@ func CreateLobbyData(lobby *game.Lobby) *LobbyData {
 // returns the session. The session can either be in the cookie or in
 // the header. If no session can be found, an empty string is returned.
 func GetUserSession(request *http.Request) string {
-	sessionCookie, noCookieError := request.Cookie("usersession")
-	if noCookieError == nil && sessionCookie.Value != "" {
+	sessionCookie, err := request.Cookie("usersession")
+	if err == nil && sessionCookie.Value != "" {
 		return sessionCookie.Value
 	}
 
-	session, contains := request.Header["Usersession"]
-	if contains {
+	if session, contains := request.Header["Usersession"]; contains {
 		return session[0]
 	}
 
@@ -422,19 +417,16 @@ func GetPlayer(lobby *game.Lobby, r *http.Request) *game.Player {
 // GetPlayername either retrieves the playername from a cookie, the URL form.
 // If no preferred name can be found, we return an empty string.
 func GetPlayername(request *http.Request) string {
-	parseError := request.ParseForm()
-	if parseError == nil {
+	if err := request.ParseForm(); err == nil {
 		username := request.Form.Get("username")
 		if username != "" {
 			return username
 		}
 	}
 
-	usernameCookie, noCookieError := request.Cookie("username")
-	if noCookieError == nil {
-		username := usernameCookie.Value
-		if username != "" {
-			return username
+	if usernameCookie, err := request.Cookie("username"); err == nil {
+		if usernameCookie.Value != "" {
+			return usernameCookie.Value
 		}
 	}
 

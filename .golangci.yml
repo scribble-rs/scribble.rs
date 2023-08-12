@@ -22,8 +22,14 @@ linters:
     - paralleltest
     # Magic numbers
     - gomnd
+    # Functionlength and linelength
+    - funlen
+    - lll
+    # testpackages must be named _test for reduced visibility to package
+    # details.
+    - testpackage
 
-    ## Useful, but we won't use it for now
+    ## Useful, but we won't use it for now, maybe later
     # Allows us to define rules for dependencies
     - depguard
     # For some reason, imports aren't sorted right now.
@@ -35,6 +41,15 @@ linters:
     # Seems to be very useful, but is also a very common usecase, so we'll
     # ignore it for now
     - exhaustruct
+    # Requires certain types of tags, such as json or mapstructure.
+    # While very useful, I don't care right now.
+    - musttag
+
+linters-settings:
+  gocritic:
+    disabled-checks:
+      # This has false positives and provides little value.
+      - ifElseChain
 
 issues:
   exclude-rules:
@@ -45,6 +60,8 @@ issues:
     - path: _test\.go
       linters:
         - funlen
+        - cyclop
+        - forcetypeassert
     # The tools aren't part of the actual production code and therefore we don't
     # care about codequality much right now.
     - path: tools/
