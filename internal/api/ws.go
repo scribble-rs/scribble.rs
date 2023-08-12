@@ -92,11 +92,11 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 		}
 
 		if messageType == websocket.TextMessage {
-			received := &game.GameEvent{}
+			received := &game.Event{}
 			err := json.Unmarshal(data, received)
 			if err != nil {
 				log.Printf("Error unmarshalling message: %s\n", err)
-				sendError := WriteJSON(player, game.GameEvent{Type: "system-message", Data: fmt.Sprintf("An error occurred trying to read your request, please report the error via GitHub: %s!", err)})
+				sendError := WriteJSON(player, game.Event{Type: "system-message", Data: fmt.Sprintf("An error occurred trying to read your request, please report the error via GitHub: %s!", err)})
 				if sendError != nil {
 					log.Printf("Error sending errormessage: %s\n", sendError)
 				}

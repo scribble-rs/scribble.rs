@@ -306,8 +306,8 @@ func SanitizeName(name string) string {
 	return generatePlayerName()
 }
 
-// GameEvent contains an eventtype and optionally any data.
-type GameEvent struct {
+// Event contains an eventtype and optionally any data.
+type Event struct {
 	Data any    `json:"data"`
 	Type string `json:"type"`
 }

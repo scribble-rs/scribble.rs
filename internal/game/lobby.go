@@ -95,7 +95,7 @@ type KickVote struct {
 	RequiredVoteCount int    `json:"requiredVoteCount"`
 }
 
-func (lobby *Lobby) HandleEvent(received *GameEvent, player *Player) error {
+func (lobby *Lobby) HandleEvent(received *Event, player *Player) error {
 	if received.Type == "keep-alive" {
 		// This is a known dummy event in order to avoid accidental websocket
 		// connection closure. However, no action is required on the server.
@@ -200,8 +200,8 @@ func (lobby *Lobby) HandleEvent(received *GameEvent, player *Player) error {
 		if player == lobby.drawer {
 			lobby.selectWord(chosenIndex)
 
-			wordHintData := &GameEvent{Type: "update-wordhint", Data: lobby.wordHints}
-			wordHintDataRevealed := &GameEvent{Type: "update-wordhint", Data: lobby.wordHintsShown}
+			wordHintData := &Event{Type: "update-wordhint", Data: lobby.wordHints}
+			wordHintDataRevealed := &Event{Type: "update-wordhint", Data: lobby.wordHintsShown}
 			for _, otherPlayer := range lobby.GetPlayers() {
 				if otherPlayer.State == Guessing {
 					lobby.WriteJSON(otherPlayer, wordHintData)
@@ -247,7 +247,7 @@ func (lobby *Lobby) HandleEvent(received *GameEvent, player *Player) error {
 		// Since the client shouldn't be blocking to wait for the drawing, it's
 		// fine to emit the event if there's no drawing.
 		if len(lobby.currentDrawing) != 0 {
-			lobby.WriteJSON(player, GameEvent{Type: "drawing", Data: lobby.currentDrawing})
+			lobby.WriteJSON(player, Event{Type: "drawing", Data: lobby.currentDrawing})
 		}
 	}
 
@@ -298,7 +298,7 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 				advanceLobby(lobby)
 			} else {
 				// Since the word has been guessed correctly, we reveal it.
-				lobby.WriteJSON(sender, GameEvent{Type: "update-wordhint", Data: lobby.wordHintsShown})
+				lobby.WriteJSON(sender, Event{Type: "update-wordhint", Data: lobby.wordHintsShown})
 				recalculateRanks(lobby)
 				lobby.triggerPlayersUpdate()
 			}
@@ -307,7 +307,7 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 			// This allows other players to guess the word by watching what the
 			// other players are misstyping.
 			sendMessageToAll(trimmedMessage, sender, lobby)
-			lobby.WriteJSON(sender, GameEvent{Type: "close-guess", Data: trimmedMessage})
+			lobby.WriteJSON(sender, Event{Type: "close-guess", Data: trimmedMessage})
 		} else {
 			sendMessageToAll(trimmedMessage, sender, lobby)
 		}
@@ -351,7 +351,7 @@ func (lobby *Lobby) isAnyoneStillGuessing() bool {
 }
 
 func sendMessageToAll(message string, sender *Player, lobby *Lobby) {
-	messageEvent := GameEvent{Type: "message", Data: Message{
+	messageEvent := Event{Type: "message", Data: Message{
 		Author:   sender.Name,
 		AuthorID: sender.ID,
 		Content:  discordemojimap.Replace(message),
@@ -362,7 +362,7 @@ func sendMessageToAll(message string, sender *Player, lobby *Lobby) {
 }
 
 func (lobby *Lobby) sendMessageToAllNonGuessing(message string, sender *Player) {
-	messageEvent := GameEvent{Type: "non-guessing-player-message", Data: Message{
+	messageEvent := Event{Type: "non-guessing-player-message", Data: Message{
 		Author:   sender.Name,
 		AuthorID: sender.ID,
 		Content:  discordemojimap.Replace(message),
@@ -410,7 +410,7 @@ func handleKickVoteEvent(lobby *Lobby, player *Player, toKickID string) {
 
 	votesRequired := calculateVotesNeededToKick(playerToKick, lobby)
 
-	kickEvent := &GameEvent{
+	kickEvent := &Event{
 		Type: "kick-vote",
 		Data: &KickVote{
 			PlayerID:          playerToKick.ID,
@@ -619,7 +619,7 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 				// game-over event is only sent to already connected players.
 				readyData.CurrentDrawing = nil
 
-				lobby.WriteJSON(player, GameEvent{
+				lobby.WriteJSON(player, Event{
 					Type: "game-over",
 					Data: &GameOverEvent{
 						PreviousWord: previousWord,
@@ -654,7 +654,7 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 		PreviousWord: previousWord,
 	})
 
-	lobby.WriteJSON(lobby.drawer, &GameEvent{Type: "your-turn", Data: lobby.wordChoice})
+	lobby.WriteJSON(lobby.drawer, &Event{Type: "your-turn", Data: lobby.wordChoice})
 }
 
 // advanceLobby will either start the game or jump over to the next turn.
@@ -760,7 +760,7 @@ func (lobby *Lobby) tickLogic(expectedTicker *time.Ticker) bool {
 				randomIndex := rand.Int() % len(lobby.wordHints)
 				if lobby.wordHints[randomIndex].Character == 0 {
 					lobby.wordHints[randomIndex].Character = []rune(lobby.CurrentWord)[randomIndex]
-					wordHintData := &GameEvent{Type: "update-wordhint", Data: lobby.wordHints}
+					wordHintData := &Event{Type: "update-wordhint", Data: lobby.wordHints}
 					for _, otherPlayer := range lobby.GetPlayers() {
 						if otherPlayer.State == Guessing {
 							lobby.WriteJSON(otherPlayer, wordHintData)
@@ -885,7 +885,7 @@ func (lobby *Lobby) sendDataToEveryoneExceptSender(sender *Player, data any) {
 }
 
 func (lobby *Lobby) TriggerUpdateEvent(eventType string, data any) {
-	event := &GameEvent{Type: eventType, Data: data}
+	event := &Event{Type: eventType, Data: data}
 	for _, otherPlayer := range lobby.GetPlayers() {
 		lobby.WriteJSON(otherPlayer, event)
 	}
@@ -1016,16 +1016,16 @@ func generateReadyData(lobby *Lobby, player *Player) *Ready {
 func (lobby *Lobby) OnPlayerConnectUnsynchronized(player *Player) {
 	player.Connected = true
 	recalculateRanks(lobby)
-	lobby.WriteJSON(player, GameEvent{Type: "ready", Data: generateReadyData(lobby, player)})
+	lobby.WriteJSON(player, Event{Type: "ready", Data: generateReadyData(lobby, player)})
 
 	// This state is reached if the player reconnects before having chosen a word.
 	// This can happen if the player refreshes his browser page or the socket
 	// loses connection and reconnects quickly.
 	if lobby.drawer == player && lobby.CurrentWord == "" {
-		lobby.WriteJSON(lobby.drawer, &GameEvent{Type: "your-turn", Data: lobby.wordChoice})
+		lobby.WriteJSON(lobby.drawer, &Event{Type: "your-turn", Data: lobby.wordChoice})
 	}
 
-	event := &GameEvent{Type: "update-players", Data: lobby.players}
+	event := &Event{Type: "update-players", Data: lobby.players}
 	for _, otherPlayer := range lobby.GetPlayers() {
 		// The player that just joined already has the most up-to-date data due
 		// to the ready event being sent. Therefeore it'd be wasteful to send
@@ -1107,7 +1107,7 @@ func (lobby *Lobby) Shutdown() {
 	lobby.mutex.Lock()
 	defer lobby.mutex.Unlock()
 
-	shutdownEvent := GameEvent{Type: "shutdown"}
+	shutdownEvent := Event{Type: "shutdown"}
 	for _, player := range lobby.players {
 		lobby.WriteJSON(player, shutdownEvent)
 	}

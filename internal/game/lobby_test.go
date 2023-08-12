@@ -203,9 +203,9 @@ func Test_wordSelectionEvent(t *testing.T) {
 		},
 		words: []string{firstWordChoice, "def", "ghi"},
 	}
-	wordHintEvents := make(map[string]*GameEvent)
+	wordHintEvents := make(map[string]*Event)
 	lobby.WriteJSON = func(player *Player, object any) error {
-		gameEvent, typeMatches := object.(*GameEvent)
+		gameEvent, typeMatches := object.(*Event)
 		if !typeMatches {
 			panic("Unsupported event data type")
 		}
@@ -221,7 +221,7 @@ func Test_wordSelectionEvent(t *testing.T) {
 	lobby.Owner = drawer
 	lobby.creator = drawer
 
-	startError := lobby.HandleEvent(&GameEvent{
+	startError := lobby.HandleEvent(&Event{
 		Type: "start",
 	}, drawer)
 	if startError != nil {
@@ -231,7 +231,7 @@ func Test_wordSelectionEvent(t *testing.T) {
 	guesser := lobby.JoinPlayer("Guesser")
 	guesser.Connected = true
 
-	choiceError := lobby.HandleEvent(&GameEvent{
+	choiceError := lobby.HandleEvent(&Event{
 		Type: "choose-word",
 		Data: 0,
 	}, drawer)
@@ -301,7 +301,7 @@ func Test_kickDrawer(t *testing.T) {
 	chantal := lobby.JoinPlayer("chantal")
 	chantal.Connected = true
 
-	startError := lobby.HandleEvent(&GameEvent{
+	startError := lobby.HandleEvent(&Event{
 		Type: "start",
 	}, marcel)
 	if startError != nil {
