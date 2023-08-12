@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"math/rand"
@@ -9,69 +8,29 @@ import (
 	"os"
 	"os/signal"
 	"runtime/pprof"
-	"strconv"
-	"strings"
 	"syscall"
 	"time"
 
 	"github.com/scribble-rs/scribble.rs/internal/api"
+	"github.com/scribble-rs/scribble.rs/internal/config"
 	"github.com/scribble-rs/scribble.rs/internal/frontend"
 	"github.com/scribble-rs/scribble.rs/internal/state"
 )
 
-const defaultPort = 8080
-
-func determinePort(portHTTPFlag int) int {
-	portHTTP := -1
-	if portHTTPFlag != -1 {
-		portHTTP = portHTTPFlag
-		log.Printf("Listening on port %d sourced from portHTTP flag.\n", portHTTP)
-	} else {
-		// Support for heroku, as heroku expects applications to use a specific port.
-		envPort, portVarAvailable := os.LookupEnv("PORT")
-		if portVarAvailable {
-			log.Printf("'PORT' environment variable found: '%s'\n", envPort)
-			parsed, parseError := strconv.ParseInt(strings.TrimSpace(envPort), 10, 32)
-			if parseError == nil {
-				portHTTP = int(parsed)
-				log.Printf("Listening on port %d sourced from 'PORT' environment variable\n", portHTTP)
-			} else {
-				log.Printf("Error parsing 'PORT' variable: %s\n", parseError)
-				log.Println("Falling back to default port.")
-			}
-		}
-	}
-
-	if portHTTP != -1 && portHTTP < 0 || portHTTP > 65535 {
-		log.Println("Port has to be between 0 and 65535.")
-		log.Println("Falling back to default port.")
-		portHTTP = -1
-	}
-
-	if portHTTP < 0 {
-		portHTTP = defaultPort
-		log.Printf("Listening on default port %d\n", portHTTP)
-	}
-
-	return portHTTP
-}
-
-var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
-
 func main() {
-	portHTTPFlag := flag.Int("portHTTP", -1, "defines the port to be used for http mode")
-	flag.Parse()
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalln("error loading configuration:", err)
+	}
 
-	if *cpuprofile != "" {
+	if cfg.CPUProfilePath != "" {
 		log.Println("Starting CPU profiling ....")
-		f, err := os.Create(*cpuprofile)
+		cpuProfileFile, err := os.Create(cfg.CPUProfilePath)
 		if err != nil {
 			log.Fatal(err)
 		}
-		pprof.StartCPUProfile(f)
+		pprof.StartCPUProfile(cpuProfileFile)
 	}
-
-	portHTTP := determinePort(*portHTTPFlag)
 
 	// Setting the seed in order for the petnames to be random.
 	rand.Seed(time.Now().UnixNano())
@@ -88,12 +47,13 @@ func main() {
 		log.Printf("Received %s, gracefully shutting down.\n", <-signalChan)
 
 		state.ShutdownLobbiesGracefully()
-		if *cpuprofile != "" {
+		if cfg.CPUProfilePath != "" {
 			pprof.StopCPUProfile()
 			log.Println("Finished CPU profiling.")
 		}
 	}()
 
-	log.Println("Started.")
-	log.Fatalln(http.ListenAndServe(fmt.Sprintf(":%d", portHTTP), nil))
+	address := fmt.Sprintf("%s:%d", cfg.NetworkAddress, cfg.Port)
+	log.Println("Started, listening on:", address)
+	log.Fatalln(http.ListenAndServe(address, nil))
 }

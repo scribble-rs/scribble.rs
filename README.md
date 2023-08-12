@@ -28,6 +28,11 @@ The comment section is powered by utteranc.es, which means it'll use the blogs r
 Feel free to play on [scribblers.fly.dev](https://scribblers.fly.dev). Note that
 the instance may not respond instantly.
 
+## Configuration
+
+Configuration is read from environment variables or a `.env` file located in
+the working directory.
+
 ## Building / Running
 
 First you'll need to install the Go compiler by followng the instructions at https://go.dev/doc/install.
@@ -50,10 +55,11 @@ This will produce a portable binary called `scribblers`. The binary doesn't
 have any dependencies and should run on every system as long as it has the
 same architecture and OS family as the system it was compiled on.
 
-The default port will be `8080`. The parameter `portHTTP` allows changing the
-port though.
+The default port will be `8080`. It's changeable via the environment variable
+`PORT`.
 
-You should be able to build the binary on any system that go supports as a compilation target.
+You should be able to build the binary on any system that go supports as a
+compilation target.
 
 This application requires go version `1.20` or higher.
 
@@ -77,8 +83,9 @@ should always be up-to-date.
 ### Changing default port
 
 The default port is `8080`. To override it, run:
+
 ```shell
-docker run -p <port-number>:<port-number> biosmarcel/scribble.rs --portHTTP=<port-number>
+docker run -p --env PORT=<port> <port>:<port> biosmarcel/scribble.rs
 ```
 
 ## nginx 

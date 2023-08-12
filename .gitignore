@@ -10,3 +10,5 @@ playground/
 *.out
 # System metadata files
 .DS_Store
+# Configuration files
+.env
