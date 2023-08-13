@@ -3,7 +3,7 @@ name: Publish release
 on:
   workflow_run:
     workflows: [Build]
-    branches: [master]
+    branches: [v**]
     types: [completed]
 
 jobs:
@@ -12,7 +12,7 @@ jobs:
     # Kinda bad since it might release on any branch starting with v, but it'll do for now.
     # Tag filtering in "on:" doesn't work, since the inital build trigger gets lost.
     # github.ref is therefore also being reset to "refs/head/master".
-    if: ${{ github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.head_branch, 'v') }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Download linux artifact
