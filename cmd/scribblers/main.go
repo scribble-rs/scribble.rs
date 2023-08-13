@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path"
 	"runtime/pprof"
 	"syscall"
 	"time"
@@ -42,6 +43,13 @@ func main() {
 	router := chi.NewMux()
 	router.Use(middleware.StripSlashes)
 	router.Use(middleware.Recoverer)
+
+	// Healthcheck for deployments with monitoring if required.
+	router.Get(
+		"/"+path.Join(cfg.RootPath, "health"),
+		func(writer http.ResponseWriter, _ *http.Request) {
+			writer.WriteHeader(http.StatusOK)
+		})
 
 	api.SetupRoutes(cfg.RootPath, router)
 
