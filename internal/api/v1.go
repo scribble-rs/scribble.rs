@@ -20,16 +20,17 @@ var (
 
 // LobbyEntry is an API object for representing a join-able public lobby.
 type LobbyEntry struct {
-	LobbyID         string `json:"lobbyId"`
-	PlayerCount     int    `json:"playerCount"`
-	MaxPlayers      int    `json:"maxPlayers"`
-	Round           int    `json:"round"`
-	Rounds          int    `json:"rounds"`
-	DrawingTime     int    `json:"drawingTime"`
-	CustomWords     bool   `json:"customWords"`
-	Votekick        bool   `json:"votekick"`
-	MaxClientsPerIP int    `json:"maxClientsPerIp"`
-	Wordpack        string `json:"wordpack"`
+	LobbyID         string         `json:"lobbyId"`
+	PlayerCount     int            `json:"playerCount"`
+	MaxPlayers      int            `json:"maxPlayers"`
+	Round           int            `json:"round"`
+	Rounds          int            `json:"rounds"`
+	DrawingTime     int            `json:"drawingTime"`
+	CustomWords     bool           `json:"customWords"`
+	Votekick        bool           `json:"votekick"`
+	MaxClientsPerIP int            `json:"maxClientsPerIp"`
+	Wordpack        string         `json:"wordpack"`
+	State           game.GameState `json:"state"`
 }
 
 func publicLobbies(writer http.ResponseWriter, _ *http.Request) {
@@ -52,6 +53,7 @@ func publicLobbies(writer http.ResponseWriter, _ *http.Request) {
 			Votekick:        lobby.EnableVotekick,
 			MaxClientsPerIP: lobby.ClientsPerIPLimit,
 			Wordpack:        lobby.Wordpack,
+			State:           lobby.State,
 		})
 	}
 

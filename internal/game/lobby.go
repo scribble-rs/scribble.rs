@@ -973,7 +973,7 @@ type Ready struct {
 	AllowDrawing bool   `json:"allowDrawing"`
 
 	VotekickEnabled    bool        `json:"votekickEnabled"`
-	GameState          gameState   `json:"gameState"`
+	GameState          GameState   `json:"gameState"`
 	OwnerID            string      `json:"ownerId"`
 	Round              int         `json:"round"`
 	Rounds             int         `json:"rounds"`
