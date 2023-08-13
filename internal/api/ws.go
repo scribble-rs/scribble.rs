@@ -9,9 +9,11 @@ import (
 	"runtime/debug"
 	"strings"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/websocket"
 
 	"github.com/scribble-rs/scribble.rs/internal/game"
+	"github.com/scribble-rs/scribble.rs/internal/state"
 )
 
 var (
@@ -24,7 +26,7 @@ var (
 	}
 )
 
-func wsEndpoint(writer http.ResponseWriter, request *http.Request) {
+func websocketUpgrade(writer http.ResponseWriter, request *http.Request) {
 	sessionCookie := GetUserSession(request)
 	if sessionCookie == "" {
 		// This issue can happen if you illegally request a websocket
@@ -34,9 +36,9 @@ func wsEndpoint(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	lobby, err := GetLobby(request)
-	if err != nil {
-		http.Error(writer, err.Error(), http.StatusNotFound)
+	lobby := state.GetLobby(chi.URLParam(request, "lobby_id"))
+	if lobby == nil {
+		http.Error(writer, ErrLobbyNotExistent.Error(), http.StatusNotFound)
 		return
 	}
 

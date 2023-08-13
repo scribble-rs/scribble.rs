@@ -11,6 +11,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/scribble-rs/scribble.rs/internal/api"
 	"github.com/scribble-rs/scribble.rs/internal/config"
 	"github.com/scribble-rs/scribble.rs/internal/frontend"
@@ -35,8 +37,13 @@ func main() {
 	// Setting the seed in order for the petnames to be random.
 	rand.Seed(time.Now().UnixNano())
 
-	api.SetupRoutes()
-	frontend.SetupRoutes()
+	router := chi.NewMux()
+	router.Use(middleware.StripSlashes)
+	router.Use(middleware.Recoverer)
+
+	api.SetupRoutes(router)
+	frontend.SetupRoutes(router)
+
 	state.LaunchCleanupRoutine()
 
 	signalChan := make(chan os.Signal, 1)
@@ -55,5 +62,5 @@ func main() {
 
 	address := fmt.Sprintf("%s:%d", cfg.NetworkAddress, cfg.Port)
 	log.Println("Started, listening on:", address)
-	log.Fatalln(http.ListenAndServe(address, nil))
+	log.Fatalln(http.ListenAndServe(address, router))
 }

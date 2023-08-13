@@ -3,7 +3,10 @@ package api
 import (
 	"net/http"
 	"os"
+	"path"
 	"strings"
+
+	"github.com/go-chi/chi/v5"
 )
 
 // RootPath is the path directly after the domain and before the
@@ -18,20 +21,25 @@ var RootPath string
 func init() {
 	rootPath, rootPathAvailable := os.LookupEnv("ROOT_PATH")
 	if rootPathAvailable && rootPath != "" {
-		RootPath = rootPath
+		RootPath = strings.Trim(rootPath, "/")
 	}
 }
 
 // SetupRoutes registers the /v1/ endpoints with the http package.
-func SetupRoutes() {
-	http.HandleFunc(RootPath+"/v1/stats", statsEndpoint)
-	// The websocket is shared between the public API and the official client
-	http.HandleFunc(RootPath+"/v1/ws", wsEndpoint)
+func SetupRoutes(router chi.Router) {
+	routePrefix := "/" + path.Join(RootPath, "v1")
+
+	router.Get(routePrefix+"/stats", getStats)
 
 	// These exist only for the public API. We version them in order to ensure
 	// backwards compatibility as far as possible.
-	http.HandleFunc(RootPath+"/v1/lobby", lobbyEndpoint)
-	http.HandleFunc(RootPath+"/v1/lobby/player", enterLobbyEndpoint)
+	router.Get(routePrefix+"/lobby", getLobbies)
+	router.Post(routePrefix+"/lobby", postLobby)
+
+	router.Patch("/lobby/{lobby_id}", patchLobby)
+	// The websocket is shared between the public API and the official client
+	router.Get(routePrefix+"/lobby/{lobby_id}/ws", websocketUpgrade)
+	router.Post(routePrefix+"/lobby/{lobby_id}/player", postPlayer)
 }
 
 // remoteAddressToSimpleIP removes unnecessary clutter from the input,

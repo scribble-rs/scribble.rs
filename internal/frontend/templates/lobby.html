@@ -412,10 +412,10 @@
 
             if (location.protocol === "https:") {
                 console.log("Attempting secure socket connection on port " + location.port + "...");
-                socket = new WebSocket("wss://" + location.hostname + ":" + location.port + "{{.RootPath}}/v1/ws?lobby_id={{.LobbyID}}");
+                socket = new WebSocket("wss://" + location.hostname + ":" + location.port + "{{.RootPath}}/v1/lobby/{{.LobbyID}}/ws");
             } else {
                 console.log("Attempting socket connection on port " + location.port + "...");
-                socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "{{.RootPath}}/v1/ws?lobby_id={{.LobbyID}}");
+                socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "{{.RootPath}}/v1/lobby/{{.LobbyID}}/ws");
             }
 
             socket.onerror = error => {
@@ -680,8 +680,7 @@
         }
 
         function saveLobbySettings() {
-            fetch("{{.RootPath}}/v1/lobby?" + new URLSearchParams({
-                lobby_id: '{{.LobbyID}}',
+            fetch("{{.RootPath}}/v1/lobby/{{.LobbyID}}?" + new URLSearchParams({
                 drawing_time: document.getElementById("lobby-settings-drawing-time").value,
                 rounds: document.getElementById("lobby-settings-max-rounds").value,
                 public: document.getElementById("lobby-settings-public").checked,

@@ -9,14 +9,12 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/scribble-rs/scribble.rs/internal/game"
 	"github.com/scribble-rs/scribble.rs/internal/state"
 )
 
-var (
-	ErrNoLobbyIDSupplied = errors.New("please supply a lobby id via the 'lobby_id' query parameter")
-	ErrLobbyNotExistent  = errors.New("the requested lobby doesn't exist")
-)
+var ErrLobbyNotExistent = errors.New("the requested lobby doesn't exist")
 
 // LobbyEntry is an API object for representing a join-able public lobby.
 type LobbyEntry struct {
@@ -33,7 +31,7 @@ type LobbyEntry struct {
 	State           game.GameState `json:"state"`
 }
 
-func publicLobbies(writer http.ResponseWriter, _ *http.Request) {
+func getLobbies(writer http.ResponseWriter, _ *http.Request) {
 	// REMARK: If paging is ever implemented, we might want to maintain order
 	// when deleting lobbies from state in the state package.
 
@@ -62,7 +60,7 @@ func publicLobbies(writer http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func createLobby(writer http.ResponseWriter, request *http.Request) {
+func postLobby(writer http.ResponseWriter, request *http.Request) {
 	if err := request.ParseForm(); err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
@@ -134,9 +132,10 @@ func createLobby(writer http.ResponseWriter, request *http.Request) {
 	state.AddLobby(lobby)
 }
 
-func enterLobbyEndpoint(writer http.ResponseWriter, request *http.Request) {
-	lobby, success := getLobbyWithErrorHandling(writer, request)
-	if !success {
+func postPlayer(writer http.ResponseWriter, request *http.Request) {
+	lobby := state.GetLobby(chi.URLParam(request, "lobby_id"))
+	if lobby == nil {
+		http.Error(writer, ErrLobbyNotExistent.Error(), http.StatusNotFound)
 		return
 	}
 
@@ -187,15 +186,16 @@ func SetUsersessionCookie(w http.ResponseWriter, player *game.Player) {
 	})
 }
 
-func editLobby(writer http.ResponseWriter, request *http.Request) {
+func patchLobby(writer http.ResponseWriter, request *http.Request) {
 	userSession := GetUserSession(request)
 	if userSession == "" {
 		http.Error(writer, "no usersession supplied", http.StatusBadRequest)
 		return
 	}
 
-	lobby, success := getLobbyWithErrorHandling(writer, request)
-	if !success {
+	lobby := state.GetLobby(chi.URLParam(request, "lobby_id"))
+	if lobby == nil {
+		http.Error(writer, ErrLobbyNotExistent.Error(), http.StatusNotFound)
 		return
 	}
 
@@ -287,59 +287,9 @@ func editLobby(writer http.ResponseWriter, request *http.Request) {
 	})
 }
 
-func getLobbyWithErrorHandling(writer http.ResponseWriter, request *http.Request) (*game.Lobby, bool) {
-	lobby, err := GetLobby(request)
-	if err != nil {
-		if errors.Is(err, ErrNoLobbyIDSupplied) {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
-		} else if errors.Is(err, ErrLobbyNotExistent) {
-			http.Error(writer, err.Error(), http.StatusNotFound)
-		} else {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
-		}
-
-		return nil, false
-	}
-
-	return lobby, true
-}
-
-func lobbyEndpoint(writer http.ResponseWriter, request *http.Request) {
-	if request.Method == http.MethodGet {
-		publicLobbies(writer, request)
-	} else if request.Method == http.MethodPatch {
-		editLobby(writer, request)
-	} else if request.Method == http.MethodPost || request.Method == http.MethodPut {
-		createLobby(writer, request)
-	} else {
-		http.Error(writer, fmt.Sprintf("method %s not supported", request.Method), http.StatusMethodNotAllowed)
-	}
-}
-
-func statsEndpoint(writer http.ResponseWriter, _ *http.Request) {
+func getStats(writer http.ResponseWriter, _ *http.Request) {
 	writer.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(writer).Encode(state.Stats())
-}
-
-// GetLobby extracts the lobby_id field from an HTTP request and searches
-// the corresponding lobby. If the loby doesn't exist, or no ID has been
-// supplied, we return an error.
-func GetLobby(r *http.Request) (*game.Lobby, error) {
-	lobbyID := r.URL.Query().Get("lobby_id")
-	if lobbyID == "" {
-		lobbyID = r.FormValue("lobby_id")
-		if lobbyID == "" {
-			return nil, ErrNoLobbyIDSupplied
-		}
-	}
-
-	lobby := state.GetLobby(lobbyID)
-
-	if lobby == nil {
-		return nil, ErrLobbyNotExistent
-	}
-
-	return lobby, nil
 }
 
 var (

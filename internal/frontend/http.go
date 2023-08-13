@@ -4,7 +4,9 @@ import (
 	"embed"
 	"html/template"
 	"net/http"
+	"path"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/scribble-rs/scribble.rs/internal/api"
 	"github.com/scribble-rs/scribble.rs/internal/translations"
 )
@@ -44,13 +46,17 @@ type BasePageConfig struct {
 }
 
 // SetupRoutes registers the official webclient endpoints with the http package.
-func SetupRoutes() {
-	http.Handle(api.RootPath+"/resources/",
-		http.StripPrefix(api.RootPath,
-			http.FileServer(http.FS(frontendResourcesFS))))
-	http.HandleFunc(api.RootPath+"/", homePage)
-	http.HandleFunc(api.RootPath+"/ssrEnterLobby", ssrEnterLobby)
-	http.HandleFunc(api.RootPath+"/ssrCreateLobby", ssrCreateLobby)
+func SetupRoutes(router chi.Router) {
+	router.Get("/"+api.RootPath, homePage)
+	router.Get(
+		"/"+path.Join(api.RootPath, "resources/*"),
+		http.StripPrefix(
+			api.RootPath,
+			http.FileServer(http.FS(frontendResourcesFS)),
+		).ServeHTTP,
+	)
+	router.Get("/"+path.Join(api.RootPath, "ssrEnterLobby/{lobby_id}"), ssrEnterLobby)
+	router.Post("/"+path.Join(api.RootPath, "ssrCreateLobby"), ssrCreateLobby)
 }
 
 // errorPageData represents the data that error.html requires to be displayed.
