@@ -62,5 +62,11 @@ func main() {
 
 	address := fmt.Sprintf("%s:%d", cfg.NetworkAddress, cfg.Port)
 	log.Println("Started, listening on:", address)
-	log.Fatalln(http.ListenAndServe(address, router))
+
+	httpServer := &http.Server{
+		Addr:              address,
+		Handler:           router,
+		ReadHeaderTimeout: 10 * time.Second,
+	}
+	log.Fatalln(httpServer.ListenAndServe())
 }
