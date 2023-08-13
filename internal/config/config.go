@@ -24,14 +24,7 @@ type Config struct {
 // available, it will be loaded as well. Values found in the environment
 // will overwrite whatever is load from the .env file.
 func Load() (*Config, error) {
-	localEnvVars := os.Environ()
-	envVars := make(map[string]string, len(localEnvVars))
-
-	// Add local environment variables to EnvVars map
-	for _, keyValuePair := range localEnvVars {
-		pair := strings.SplitN(keyValuePair, "=", 2)
-		envVars[pair[0]] = pair[1]
-	}
+	envVars := make(map[string]string)
 
 	dotEnvPath := ".env"
 	if _, err := os.Stat(dotEnvPath); err != nil {
@@ -44,10 +37,14 @@ func Load() (*Config, error) {
 			return nil, fmt.Errorf("error reading .env file: %w", err)
 		}
 		for key, value := range envFileContent {
-			if _, keyExistsInEnvVars := envVars[key]; !keyExistsInEnvVars {
-				envVars[key] = value
-			}
+			envVars[key] = value
 		}
+	}
+
+	// Add local environment variables to EnvVars map
+	for _, keyValuePair := range os.Environ() {
+		pair := strings.SplitN(keyValuePair, "=", 2)
+		envVars[pair[0]] = pair[1]
 	}
 
 	var config Config
