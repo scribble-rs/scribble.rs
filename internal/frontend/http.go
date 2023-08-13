@@ -2,12 +2,12 @@ package frontend
 
 import (
 	"embed"
+	"fmt"
 	"html/template"
 	"net/http"
 	"path"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/scribble-rs/scribble.rs/internal/api"
 	"github.com/scribble-rs/scribble.rs/internal/translations"
 )
 
@@ -31,8 +31,13 @@ func init() {
 	}
 }
 
-var currentBasePageConfig = &BasePageConfig{
-	RootPath: api.RootPath,
+// FIXME Delete global state.
+var currentBasePageConfig = &BasePageConfig{}
+
+func SetRootPath(rootPath string) {
+	if rootPath != "" {
+		currentBasePageConfig.RootPath = "/" + rootPath
+	}
 }
 
 // BasePageConfig is data that all pages require to function correctly, no matter
@@ -46,17 +51,20 @@ type BasePageConfig struct {
 }
 
 // SetupRoutes registers the official webclient endpoints with the http package.
-func SetupRoutes(router chi.Router) {
-	router.Get("/"+api.RootPath, homePage)
+func SetupRoutes(rootPath string, router chi.Router) {
+	router.Get("/"+rootPath, homePage)
 	router.Get(
-		"/"+path.Join(api.RootPath, "resources/*"),
-		http.StripPrefix(
-			api.RootPath,
-			http.FileServer(http.FS(frontendResourcesFS)),
-		).ServeHTTP,
+		"/"+path.Join(rootPath, "resources/*"),
+		func(w http.ResponseWriter, r *http.Request) {
+			fmt.Println(r.URL.Path)
+			http.StripPrefix(
+				"/"+rootPath,
+				http.FileServer(http.FS(frontendResourcesFS)),
+			).ServeHTTP(w, r)
+		},
 	)
-	router.Get("/"+path.Join(api.RootPath, "ssrEnterLobby/{lobby_id}"), ssrEnterLobby)
-	router.Post("/"+path.Join(api.RootPath, "ssrCreateLobby"), ssrCreateLobby)
+	router.Get("/"+path.Join(rootPath, "ssrEnterLobby/{lobby_id}"), ssrEnterLobby)
+	router.Post("/"+path.Join(rootPath, "ssrCreateLobby"), ssrCreateLobby)
 }
 
 // errorPageData represents the data that error.html requires to be displayed.

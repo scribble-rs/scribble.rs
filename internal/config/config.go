@@ -17,6 +17,11 @@ type Config struct {
 	// all interfaces. For development usecases, on windows for example, this
 	// is very annoying, as windows will nag you with firewall prompts.
 	NetworkAddress string `env:"NETWORK_ADDRESS"`
+	// RootPath is the path directly after the domain and before the
+	// scribblers paths. For example if you host scribblers on painting.com
+	// but already host a different website on that domain, then your API paths
+	// might have to look like this: painting.com/scribblers/v1
+	RootPath       string `env:"ROOT_PATH"`
 	CPUProfilePath string `env:"CPU_PROFILE_PATH"`
 }
 
@@ -58,5 +63,9 @@ func Load() (*Config, error) {
 	}); err != nil {
 		return nil, fmt.Errorf("error parsing environment variables: %w", err)
 	}
+
+	// Prevent user error and let the code decide when we need slashes.
+	config.RootPath = strings.Trim(config.RootPath, "/")
+
 	return &config, nil
 }

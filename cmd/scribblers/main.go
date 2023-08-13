@@ -43,8 +43,11 @@ func main() {
 	router.Use(middleware.StripSlashes)
 	router.Use(middleware.Recoverer)
 
-	api.SetupRoutes(router)
-	frontend.SetupRoutes(router)
+	api.SetupRoutes(cfg.RootPath, router)
+
+	// FIXME Global state needs to be deleted.
+	frontend.SetRootPath(cfg.RootPath)
+	frontend.SetupRoutes(cfg.RootPath, router)
 
 	state.LaunchCleanupRoutine()
 
@@ -61,6 +64,15 @@ func main() {
 			log.Println("Finished CPU profiling.")
 		}
 	}()
+
+	for _, route := range router.Routes() {
+		log.Printf("Registered route: %s\n", route.Pattern)
+		if route.SubRoutes != nil {
+			for _, subRoute := range route.SubRoutes.Routes() {
+				log.Printf("  Registered route: %s\n", subRoute.Pattern)
+			}
+		}
+	}
 
 	address := fmt.Sprintf("%s:%d", cfg.NetworkAddress, cfg.Port)
 	log.Println("Started, listening on:", address)
