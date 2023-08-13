@@ -29,9 +29,11 @@ func main() {
 		log.Println("Starting CPU profiling ....")
 		cpuProfileFile, err := os.Create(cfg.CPUProfilePath)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("error creating cpuprofile file:", err)
 		}
-		pprof.StartCPUProfile(cpuProfileFile)
+		if err := pprof.StartCPUProfile(cpuProfileFile); err != nil {
+			log.Fatal("error starting cpu profiling:", err)
+		}
 	}
 
 	// Setting the seed in order for the petnames to be random.
