@@ -1069,7 +1069,7 @@
                 } else if (parsed.type === "line") {
                     drawLine(context, parsed.data.fromX * scaleDownFactor(), parsed.data.fromY * scaleDownFactor(), parsed.data.toX * scaleDownFactor(), parsed.data.toY * scaleDownFactor(), parsed.data.color, parsed.data.lineWidth * scaleDownFactor());
                 } else if (parsed.type === "fill") {
-                    context.fillFlood(parsed.data.x * scaleDownFactor(), parsed.data.y * scaleDownFactor(), parsed.data.color);
+                    fillFlood(context, parsed.data.x * scaleDownFactor(), parsed.data.y * scaleDownFactor(), parsed.data.color);
                 } else if (parsed.type === "clear-drawing-board") {
                     clear(context);
                 } else if (parsed.type === "next-turn") {
@@ -1473,19 +1473,70 @@
 
         function applyDrawData(drawElements) {
             clear(context);
+            const scaleFactor = scaleDownFactor();
+            const canvasData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
+
+            // This implementation directly access the canvas data and does not
+            // put it back into the canvas context directly. This saved us not
+            // only from calling put, which is relatively cheap, but also from
+            // calling getImageData all the time.
+            const _drawLine = (x1, y1, x2, y2, color, lineWidth) => {
+                // the coordinates must be whole numbers to improve performance.
+                // also, decimals as coordinates is not making sense.
+                x1 = Math.floor(x1);
+                y1 = Math.floor(y1);
+                x2 = Math.floor(x2);
+                y2 = Math.floor(y2);
+                lineWidth = Math.ceil(lineWidth);
+
+                // calculate bounding box; While we don't use this for
+                // drawing, we still need to check whether we draw out of
+                // bounds or not.
+                const left = Math.max(0, Math.min(context.canvas.width, Math.min(x1, x2) - lineWidth));
+                const top = Math.max(0, Math.min(context.canvas.height, Math.min(y1, y2) - lineWidth));
+                const right = Math.max(0, Math.min(context.canvas.width, Math.max(x1, x2) + lineWidth));
+                const bottom = Math.max(0, Math.min(context.canvas.height, Math.max(y1, y2) + lineWidth));
+                if (right - left === 0 || bottom - top === 0) {
+                    return;
+                }
+
+                const circleMap = generateCircleMap(Math.floor(lineWidth / 2));
+                const offset = Math.floor(circleMap.length / 2);
+
+                for (let ix = 0; ix < circleMap.length; ix++) {
+                    for (let iy = 0; iy < circleMap[ix].length; iy++) {
+                        if (circleMap[ix][iy] === 1 || (x1 === x2 && y1 === y2 && circleMap[ix][iy] === 2)) {
+                            const newX1 = x1 + ix - offset;
+                            const newY1 = y1 + iy - offset;
+                            const newX2 = x2 + ix - offset;
+                            const newY2 = y2 + iy - offset;
+                            drawBresenhamLine(canvasData, newX1, newY1, newX2, newY2, color);
+                        }
+                    }
+                }
+            };
+
             drawElements
                 .forEach(drawElement => {
                     const drawData = drawElement.data;
                     if (drawElement.type === "fill") {
-                        context.fillFlood(drawData.x * scaleDownFactor(), drawData.y * scaleDownFactor(), drawData.color);
+                        fillUint8ClampedArray(
+                            canvasData.data,
+                            drawData.x * scaleFactor, drawData.y * scaleFactor,
+                            drawData.color,
+                            canvasData.width, canvasData.height);
                     } else if (drawElement.type === "line") {
-                        drawLine(context, drawData.fromX * scaleDownFactor(),
-                            drawData.fromY * scaleDownFactor(), drawData.toX * scaleDownFactor(),
-                            drawData.toY * scaleDownFactor(), drawData.color, drawData.lineWidth * scaleDownFactor());
+                        _drawLine(
+                            drawData.fromX * scaleFactor, drawData.fromY * scaleFactor,
+                            drawData.toX * scaleFactor, drawData.toY * scaleFactor,
+                            drawData.color,
+                            drawData.lineWidth * scaleFactor);
                     } else {
                         console.log("Unknown draw element type: " + drawData.type);
                     }
                 });
+
+            context.putImageData(canvasData, 0, 0);
         }
 
         let lastX = 0;
@@ -1700,7 +1751,7 @@
         }
 
         function fillAndSendEvent(context, x, y, color) {
-            if (context.fillFlood(x, y, color)) {
+            if (fillFlood(context, x, y, color)) {
                 const fillInstruction = {
                     type: "fill",
                     data: {
@@ -1769,6 +1820,7 @@
                     }
                 }
             }
+
             context.putImageData(imageData, left, top);
         }
 
