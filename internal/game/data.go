@@ -260,6 +260,7 @@ func (lobby *Lobby) GetPlayer(userSession string) *Player {
 
 func (lobby *Lobby) ClearDrawing() {
 	lobby.currentDrawing = make([]any, 0)
+	lobby.connectedDrawEventsIndexStack = nil
 }
 
 // AppendLine adds a line direction to the current drawing. This exists in order
@@ -329,10 +330,6 @@ func (lobby *Lobby) HasConnectedPlayers() bool {
 	lobby.mutex.Lock()
 	defer lobby.mutex.Unlock()
 
-	return lobby.hasConnectedPlayersInternal()
-}
-
-func (lobby *Lobby) hasConnectedPlayersInternal() bool {
 	for _, otherPlayer := range lobby.players {
 		if otherPlayer.Connected {
 			return true

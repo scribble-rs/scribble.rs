@@ -281,7 +281,7 @@ func editLobby(writer http.ResponseWriter, request *http.Request) {
 
 		lobbySettingsCopy := *lobby.EditableLobbySettings
 		lobbySettingsCopy.DrawingTime = drawingTime
-		lobby.TriggerUpdateEvent("lobby-settings-changed", lobbySettingsCopy)
+		lobby.Broadcast(&game.Event{Type: game.EventTypeLobbySettingsChanged, Data: lobbySettingsCopy})
 	})
 }
 

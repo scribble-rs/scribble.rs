@@ -21,6 +21,10 @@ func createLobbyWithDemoPlayers(playercount int) *Lobby {
 	return lobby
 }
 
+func noOpWrite(_ *Player, _ any) error {
+	return nil
+}
+
 func Test_CalculateVotesNeededToKick(t *testing.T) {
 	t.Run("Check necessary kick vote amount for players", func(test *testing.T) {
 		expectedResults := map[int]int{
@@ -180,10 +184,7 @@ func Test_calculateGuesserScore(t *testing.T) {
 
 func Test_handleNameChangeEvent(t *testing.T) {
 	lobby := &Lobby{}
-	lobby.WriteJSON = func(player *Player, object any) error {
-		// Dummy to pass test.
-		return nil
-	}
+	lobby.WriteJSON = noOpWrite
 	player := lobby.JoinPlayer("Kevin")
 
 	handleNameChangeEvent(player, lobby, "Jim")
@@ -222,7 +223,7 @@ func Test_wordSelectionEvent(t *testing.T) {
 	lobby.Owner = drawer
 	lobby.creator = drawer
 
-	if err := lobby.HandleEvent(&Event{Type: "start"}, drawer); err != nil {
+	if err := lobby.HandleEvent(&Event{Type: EventTypeStart}, drawer); err != nil {
 		t.Errorf("Couldn't start lobby: %s", err)
 	}
 
@@ -230,7 +231,7 @@ func Test_wordSelectionEvent(t *testing.T) {
 	guesser.Connected = true
 
 	err := lobby.HandleEvent(&Event{
-		Type: "choose-word",
+		Type: EventTypeChooseWord,
 		Data: 0,
 	}, drawer)
 	if err != nil {
@@ -284,10 +285,7 @@ func Test_kickDrawer(t *testing.T) {
 		},
 		words: []string{"a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a"},
 	}
-	// Dummy to avoid crashes
-	lobby.WriteJSON = func(player *Player, object any) error {
-		return nil
-	}
+	lobby.WriteJSON = noOpWrite
 
 	marcel := lobby.JoinPlayer("marcel")
 	marcel.Connected = true
@@ -299,7 +297,7 @@ func Test_kickDrawer(t *testing.T) {
 	chantal := lobby.JoinPlayer("chantal")
 	chantal.Connected = true
 
-	if err := lobby.HandleEvent(&Event{Type: "start"}, marcel); err != nil {
+	if err := lobby.HandleEvent(&Event{Type: EventTypeStart}, marcel); err != nil {
 		t.Errorf("Couldn't start lobby: %s", err)
 	}
 

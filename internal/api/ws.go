@@ -100,7 +100,7 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 			if err := json.Unmarshal(data, received); err != nil {
 				log.Printf("Error unmarshalling message: %s\n", err)
 				err := WriteJSON(player, game.Event{
-					Type: "system-message",
+					Type: game.EventTypeSystemMessage,
 					Data: fmt.Sprintf("error parsing message, please report this issue via Github: %s!", err),
 				})
 				if err != nil {
