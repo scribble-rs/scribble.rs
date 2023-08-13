@@ -18,8 +18,9 @@ The site will not display any ads or share any data with third parties.
 
 ## Play now
 
-Feel free to play on [scribblers.fly.dev](https://scribblers.fly.dev). Note that
-the instance may not respond instantly.
+Feel free to play on [scribblers.fly.dev](https://scribblers.fly.dev). Note
+that the instance may not respond instantly, as it automatically shuts down
+if no traffic is received.
 
 ## Configuration
 
@@ -28,10 +29,10 @@ the working directory.
 
 ## Building / Running
 
-First you'll need to install the Go compiler by followng the instructions at https://go.dev/doc/install.
-If you are using a package manager for this, that's fine too.
+First you'll need to install the Go compiler by followng the instructions at
+https://go.dev/doc/install. Alternatively, use your systems package manager.
 
-Next you'll have to download the code via:
+Next you'll have to download the code:
 
 ```shell
 git clone https://github.com/scribble-rs/scribble.rs.git
@@ -41,7 +42,7 @@ cd scribble.rs
 Lastly to build the executable, run the following:
 
 ```shell
-go build -./cmd/scribblers .
+go build ./cmd/scribblers .
 ```
 
 This will produce a portable binary called `scribblers`. The binary doesn't
@@ -58,9 +59,11 @@ This application requires go version `1.20` or higher.
 
 ## Pre-compiled binaries
 
-In the [Releases](https://github.com/scribble-rs/scribble.rs/releases) section you can find the latest stable release.
+In the [Releases](https://github.com/scribble-rs/scribble.rs/releases) section
+you can find the latest stable release.
 
-Alternatively each commit uploads artifacts which will be available for a certain time.
+Alternatively each commit uploads artifacts which will be available for a
+certain time.
 
 ## Docker
 
@@ -83,10 +86,13 @@ docker run --pull --env PORT=<port> -p <port>:<port> biosmarcel/scribble.rs
 
 ## nginx 
 
-Since Scribble.rs uses WebSockets, when running it behind an nginx reverse proxy, you have to configure nginx to support that.
-You will find an example configuration on the [related Wiki page](https://github.com/scribble-rs/scribble.rs/wiki/reverse-proxy-(nginx)).
+Since Scribble.rs uses WebSockets, when running it behind an nginx reverse
+proxy, you have to configure nginx to support that. You will find an example
+configuration on the [related Wiki page](https://github.com/scribble-rs/scribble.rs/wiki/reverse-proxy-(nginx)).
 
-Other reverse proxies may require similar configuration. If you are using a well known reverse proxy, you are free to contribute a configuration to the wiki.
+Other reverse proxies may require similar configuration. If you are using a
+well known reverse proxy, you are free to contribute a configuration to the
+wiki.
 
 ## Contributing
 
@@ -100,8 +106,8 @@ There are many ways you can contribute:
 
 ## Credits
 
-These resources are by people unrelated to the project, whilst not every of these
-resources requires attribution as per license, we'll do it either way ;)
+These resources are by people unrelated to the project, whilst not every of
+these resources requires attribution as per license, we'll do it either way ;)
 
 If you happen to find a mistake here, please make a PR. If you are one of the
 authors and feel like we've wronged you, please reach out.
