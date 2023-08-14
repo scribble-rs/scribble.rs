@@ -27,35 +27,44 @@ if no traffic is received.
 Configuration is read from environment variables or a `.env` file located in
 the working directory.
 
+Available settings:
+
+| Key             | Description                                                      | Default | Required |
+| --------------- | ---------------------------------------------------------------- | ------- | -------- |
+| PORT            | HTTP port that the server listens to.                            | 8080    | True     |
+| NETWORK_ADDRESS | TCP address that the server listens to.                          |         | False    |
+| ROOT_PATH       | Changes the path (after your domain) that the server listens to. |         | False    |
+
+## Docker
+
+Alternatively there's a docker container:
+
+```shell
+docker pull biosmarcel/scribble.rs:latest
+```
+
+The docker container is built from the master branch on every push, so it
+should always be up-to-date.
+
+There's also `biosmarcel/scribble.rs:windows-latest` in case you are interested
+in running a native Windows container.
+
 ## Building / Running
 
-First you'll need to install the Go compiler by followng the instructions at
-https://go.dev/doc/install. Alternatively, use your systems package manager.
+Dependencies:
+  * [go](https://go.dev/doc/install) version 1.20 or later
+  * [git](https://git-scm.com/) (You can also download a .zip from Github)
 
-Next you'll have to download the code:
+In order to download and build, open a terminal and execute:
 
 ```shell
 git clone https://github.com/scribble-rs/scribble.rs.git
 cd scribble.rs
-```
-
-Lastly to build the executable, run the following:
-
-```shell
 go build ./cmd/scribblers .
 ```
 
-This will produce a portable binary called `scribblers`. The binary doesn't
-have any dependencies and should run on every system as long as it has the
-same architecture and OS family as the system it was compiled on.
-
-The default port will be `8080`. It's changeable via the environment variable
-`PORT`.
-
-You should be able to build the binary on any system that go supports as a
-compilation target.
-
-This application requires go version `1.20` or higher.
+This will produce a portable binary called `scribblers` or `scribblers.exe` if
+you are on Windows.
 
 ## Pre-compiled binaries
 
@@ -65,23 +74,12 @@ you can find the latest stable release.
 Alternatively each commit uploads artifacts which will be available for a
 certain time.
 
-## Docker
-
-Alternatively there's a docker container:
-
-```shell
-docker pull biosmarcel/scribble.rs
-```
-
-The docker container is built from the master branch on every push, so it
-should always be up-to-date.
-
 ### Changing default port
 
 The default port is `8080`. To override it, run:
 
 ```shell
-docker run --pull --env PORT=<port> -p <port>:<port> biosmarcel/scribble.rs
+docker run --pull always --env PORT=<port> -p <port>:<port> biosmarcel/scribble.rs:latest
 ```
 
 ## nginx 
