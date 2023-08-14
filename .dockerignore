@@ -16,12 +16,12 @@ playground/
 /tools/
 # Deployment configuration
 fly.toml
-README.md
+*.md
 LICENSE
 
 .vscode/
 .github/
 .golangci.yml
 .gitignore
-Dockerfile
-Dockerfile.windows
+.git
+*.Dockerfile

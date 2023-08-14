@@ -4,7 +4,7 @@
 # We explicitly use a certain major version of go, to make sure we don't build
 # with a newer verison than we are using for CI tests, as we don't directly
 # test the produced binary but from source code directly.
-FROM docker.io/golang:1.20 AS builder
+FROM docker.io/golang:1.20.7-nanoserver-ltsc2022 AS builder
 WORKDIR /app
 
 # This causes caching of the downloaded go modules and makes repeated local
@@ -15,7 +15,8 @@ RUN go mod download -x
 
 # Copy actual codebase, since we only have the go.mod and go.sum so far.
 COPY . /app/
-RUN CGO_ENABLED=0 go build -tags timetzdata -o ./scribblers ./cmd/scribblers
+ENV CGO_ENABLED=0
+RUN go build -tags timetzdata -o ./scribblers ./cmd/scribblers
 
 #
 # Runner
@@ -36,12 +37,9 @@ RUN CGO_ENABLED=0 go build -tags timetzdata -o ./scribblers ./cmd/scribblers
 # People are currently working on providing a simpler way of producing
 # static binaries:
 # https://github.com/golang/go/issues/26492
-FROM scratch
+FROM mcr.microsoft.com/windows/nanoserver:ltsc2022
 
 COPY --from=builder /app/scribblers /scribblers
-# The scratch image doesn't contain any certificates, therefore we use
-# the builders certificate, so that we can send HTTP requests.
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 # # Certificiates aren't installed by default, but are required for https request.
 # RUN apt update && apt install ca-certificates -y
