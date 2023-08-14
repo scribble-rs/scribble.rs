@@ -157,8 +157,8 @@ func removeLobbyByIndex(indexToDelete int) {
 	log.Printf("Closing lobby %s. There are currently %d open lobbies left.\n", lobbyID, len(lobbies))
 }
 
-// pageStats represents dynamic information about the website.
-type pageStats struct {
+// PageStats represents dynamic information about the website.
+type PageStats struct {
 	ActiveLobbyCount        int    `json:"activeLobbyCount"`
 	PlayersCount            uint64 `json:"playersCount"`
 	OccupiedPlayerSlotCount uint64 `json:"occupiedPlayerSlotCount"`
@@ -167,7 +167,7 @@ type pageStats struct {
 
 // Stats delivers information about the state of the service. Currently this
 // is lobby and player counts.
-func Stats() *pageStats {
+func Stats() *PageStats {
 	globalStateMutex.Lock()
 	defer globalStateMutex.Unlock()
 
@@ -180,7 +180,7 @@ func Stats() *pageStats {
 		connectedPlayerCount += uint64(lobby.GetConnectedPlayerCount())
 	}
 
-	return &pageStats{
+	return &PageStats{
 		ActiveLobbyCount:        len(lobbies),
 		PlayersCount:            playerCount,
 		OccupiedPlayerSlotCount: occupiedPlayerSlotCount,

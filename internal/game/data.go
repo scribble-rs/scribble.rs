@@ -33,7 +33,7 @@ type Lobby struct {
 	players []*Player
 
 	// Whether the game has started, is ongoing or already over.
-	State GameState
+	State State
 	// drawer references the Player that is currently drawing.
 	drawer *Player
 	// Owner references the Player that currently owns the lobby.
@@ -122,16 +122,16 @@ type EditableLobbySettings struct {
 	Rounds int `json:"rounds"`
 }
 
-type GameState string
+type State string
 
 const (
 	// Unstarted means the lobby has been opened but never started.
-	Unstarted GameState = "unstarted"
+	Unstarted State = "unstarted"
 	// Ongoing means the lobby has already been started.
-	Ongoing GameState = "ongoing"
+	Ongoing State = "ongoing"
 	// GameOver means that the lobby had been start, but the max round limit
 	// has already been reached.
-	GameOver GameState = "gameOver"
+	GameOver State = "gameOver"
 )
 
 // WordHint describes a character of the word that is to be guessed, whether

@@ -2,7 +2,6 @@ package frontend
 
 import (
 	"embed"
-	"fmt"
 	"html/template"
 	"net/http"
 	"path"
@@ -55,13 +54,10 @@ func SetupRoutes(rootPath string, router chi.Router) {
 	router.Get("/"+rootPath, homePage)
 	router.Get(
 		"/"+path.Join(rootPath, "resources/*"),
-		func(w http.ResponseWriter, r *http.Request) {
-			fmt.Println(r.URL.Path)
-			http.StripPrefix(
-				"/"+rootPath,
-				http.FileServer(http.FS(frontendResourcesFS)),
-			).ServeHTTP(w, r)
-		},
+		http.StripPrefix(
+			"/"+rootPath,
+			http.FileServer(http.FS(frontendResourcesFS)),
+		).ServeHTTP,
 	)
 	router.Get("/"+path.Join(rootPath, "ssrEnterLobby/{lobby_id}"), ssrEnterLobby)
 	router.Post("/"+path.Join(rootPath, "ssrCreateLobby"), ssrCreateLobby)

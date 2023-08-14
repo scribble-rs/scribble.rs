@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
@@ -18,17 +19,17 @@ var ErrLobbyNotExistent = errors.New("the requested lobby doesn't exist")
 
 // LobbyEntry is an API object for representing a join-able public lobby.
 type LobbyEntry struct {
-	LobbyID         string         `json:"lobbyId"`
-	PlayerCount     int            `json:"playerCount"`
-	MaxPlayers      int            `json:"maxPlayers"`
-	Round           int            `json:"round"`
-	Rounds          int            `json:"rounds"`
-	DrawingTime     int            `json:"drawingTime"`
-	CustomWords     bool           `json:"customWords"`
-	Votekick        bool           `json:"votekick"`
-	MaxClientsPerIP int            `json:"maxClientsPerIp"`
-	Wordpack        string         `json:"wordpack"`
-	State           game.GameState `json:"state"`
+	LobbyID         string     `json:"lobbyId"`
+	PlayerCount     int        `json:"playerCount"`
+	MaxPlayers      int        `json:"maxPlayers"`
+	Round           int        `json:"round"`
+	Rounds          int        `json:"rounds"`
+	DrawingTime     int        `json:"drawingTime"`
+	CustomWords     bool       `json:"customWords"`
+	Votekick        bool       `json:"votekick"`
+	MaxClientsPerIP int        `json:"maxClientsPerIp"`
+	Wordpack        string     `json:"wordpack"`
+	State           game.State `json:"state"`
 }
 
 func getLobbies(writer http.ResponseWriter, _ *http.Request) {
@@ -289,7 +290,9 @@ func patchLobby(writer http.ResponseWriter, request *http.Request) {
 
 func getStats(writer http.ResponseWriter, _ *http.Request) {
 	writer.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(writer).Encode(state.Stats())
+	if err := json.NewEncoder(writer).Encode(state.Stats()); err != nil {
+		log.Println("error encoding stats:", err)
+	}
 }
 
 var (

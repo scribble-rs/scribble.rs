@@ -89,8 +89,8 @@ func initGermanTranslation() {
 	translation.put("switch-tools-intro", "Zwischen den Werkzeugen kannst du mit Tastaturkürzel wechseln")
 	translation.put("switch-pencil-sizes", "Die Stiftgröße kannst du mit den Tasten %s bis %s verändern.")
 
-	//Generic words
-	//"close" as in "closing the window"
+	// Generic words
+	// "close" as in "closing the window"
 	translation.put("close", "Schließen")
 	translation.put("no", "Nein")
 	translation.put("yes", "Ja")

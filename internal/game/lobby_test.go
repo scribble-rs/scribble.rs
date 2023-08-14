@@ -70,7 +70,7 @@ func Test_RemoveAccents(t *testing.T) {
 			"·":     "·",
 			"?:!":   "?:!",
 			"ac-ab": "acab",
-			//nolint:gocritic,mapkey
+			//nolint:gocritic
 			"ac - _ab-- ": "acab",
 		}
 
