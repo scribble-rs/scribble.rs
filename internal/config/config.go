@@ -49,6 +49,11 @@ func Load() (*Config, error) {
 	// Add local environment variables to EnvVars map
 	for _, keyValuePair := range os.Environ() {
 		pair := strings.SplitN(keyValuePair, "=", 2)
+		// For some reason, gitbash can contain the variable `=::=::\` which
+		// gives us a pair where the first entry is empty.
+		if pair[0] == "" {
+			continue
+		}
 		envVars[pair[0]] = pair[1]
 	}
 
