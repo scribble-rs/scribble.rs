@@ -5,6 +5,7 @@ app = "scribblers"
 primary_region = "ams"
 
 [build]
+dockerfile = "linux.Dockerfile"
 
 [deploy]
 strategy = "canary"
