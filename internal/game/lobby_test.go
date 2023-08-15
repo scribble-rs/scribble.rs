@@ -3,6 +3,8 @@ package game
 import (
 	"sync"
 	"testing"
+
+	"github.com/gofrs/uuid"
 )
 
 func createLobbyWithDemoPlayers(playercount int) *Lobby {
@@ -122,12 +124,12 @@ func Test_recalculateRanks(t *testing.T) {
 		mutex: &sync.Mutex{},
 	}
 	lobby.players = append(lobby.players, &Player{
-		ID:        "a",
+		ID:        uuid.Must(uuid.NewV4()),
 		Score:     1,
 		Connected: true,
 	})
 	lobby.players = append(lobby.players, &Player{
-		ID:        "b",
+		ID:        uuid.Must(uuid.NewV4()),
 		Score:     1,
 		Connected: true,
 	})
@@ -141,7 +143,7 @@ func Test_recalculateRanks(t *testing.T) {
 	}
 
 	lobby.players = append(lobby.players, &Player{
-		ID:        "c",
+		ID:        uuid.Must(uuid.NewV4()),
 		Score:     0,
 		Connected: true,
 	})
@@ -205,7 +207,7 @@ func Test_wordSelectionEvent(t *testing.T) {
 		},
 		words: []string{firstWordChoice, "def", "ghi"},
 	}
-	wordHintEvents := make(map[string]*Event)
+	wordHintEvents := make(map[uuid.UUID]*Event)
 	lobby.WriteJSON = func(player *Player, object any) error {
 		gameEvent, typeMatches := object.(*Event)
 		if !typeMatches {

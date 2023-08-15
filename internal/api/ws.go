@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/gofrs/uuid"
 	"github.com/gorilla/websocket"
 
 	"github.com/scribble-rs/scribble.rs/internal/game"
@@ -27,8 +28,14 @@ var (
 )
 
 func websocketUpgrade(writer http.ResponseWriter, request *http.Request) {
-	sessionCookie := GetUserSession(request)
-	if sessionCookie == "" {
+	userSession, err := GetUserSession(request)
+	if err != nil {
+		log.Printf("error getting user session: %v", err)
+		http.Error(writer, "no valid usersession supplied", http.StatusBadRequest)
+		return
+	}
+
+	if userSession == uuid.Nil {
 		// This issue can happen if you illegally request a websocket
 		// connection without ever having had a usersession or your
 		// client having deleted the usersession cookie.
@@ -43,7 +50,7 @@ func websocketUpgrade(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	lobby.Synchronized(func() {
-		player := lobby.GetPlayer(sessionCookie)
+		player := lobby.GetPlayer(userSession)
 		if player == nil {
 			http.Error(writer, "you don't have access to this lobby;usersession unknown", http.StatusUnauthorized)
 			return

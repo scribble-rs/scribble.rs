@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/gofrs/uuid"
 	"github.com/scribble-rs/scribble.rs/internal/game"
 	"github.com/scribble-rs/scribble.rs/internal/state"
 )
@@ -181,15 +182,21 @@ func postPlayer(writer http.ResponseWriter, request *http.Request) {
 func SetUsersessionCookie(w http.ResponseWriter, player *game.Player) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "usersession",
-		Value:    player.GetUserSession(),
+		Value:    player.GetUserSession().String(),
 		Path:     "/",
 		SameSite: http.SameSiteStrictMode,
 	})
 }
 
 func patchLobby(writer http.ResponseWriter, request *http.Request) {
-	userSession := GetUserSession(request)
-	if userSession == "" {
+	userSession, err := GetUserSession(request)
+	if err != nil {
+		log.Printf("error getting user session: %v", err)
+		http.Error(writer, "no valid usersession supplied", http.StatusBadRequest)
+		return
+	}
+
+	if userSession == uuid.Nil {
 		http.Error(writer, "no usersession supplied", http.StatusBadRequest)
 		return
 	}
@@ -350,23 +357,40 @@ func CreateLobbyData(lobby *game.Lobby) *LobbyData {
 // GetUserSession accesses the usersession from an HTTP request and
 // returns the session. The session can either be in the cookie or in
 // the header. If no session can be found, an empty string is returned.
-func GetUserSession(request *http.Request) string {
-	sessionCookie, err := request.Cookie("usersession")
-	if err == nil && sessionCookie.Value != "" {
-		return sessionCookie.Value
+func GetUserSession(request *http.Request) (uuid.UUID, error) {
+	var userSession string
+	if sessionCookie, err := request.Cookie("usersession"); err == nil && sessionCookie.Value != "" {
+		userSession = sessionCookie.Value
+	} else {
+		userSession = request.Header.Get("Usersession")
 	}
 
-	if session, contains := request.Header["Usersession"]; contains {
-		return session[0]
+	if userSession == "" {
+		return uuid.Nil, nil
 	}
 
-	return ""
+	id, err := uuid.FromString(userSession)
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("error parsing user session: %w", err)
+	}
+
+	return id, nil
 }
 
 // GetPlayer returns the player object that matches the usersession in the
 // supplied HTTP request and lobby. If no user session is set, we return nil.
 func GetPlayer(lobby *game.Lobby, r *http.Request) *game.Player {
-	return lobby.GetPlayer(GetUserSession(r))
+	userSession, err := GetUserSession(r)
+	if err != nil {
+		log.Printf("error getting user session: %v", err)
+		return nil
+	}
+
+	if userSession == uuid.Nil {
+		return nil
+	}
+
+	return lobby.GetPlayer(userSession)
 }
 
 // GetPlayername either retrieves the playername from a cookie, the URL form.

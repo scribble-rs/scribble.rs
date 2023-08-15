@@ -173,7 +173,7 @@ const MaxPlayerNameLength int = 30
 // Player represents a participant in a Lobby.
 type Player struct {
 	// userSession uniquely identifies the player.
-	userSession      string
+	userSession      uuid.UUID
 	ws               *websocket.Conn
 	socketMutex      *sync.Mutex
 	lastKnownAddress string
@@ -182,10 +182,10 @@ type Player struct {
 	// get kicked.
 	disconnectTime *time.Time
 
-	votedForKick map[string]bool
+	votedForKick map[uuid.UUID]bool
 
 	// ID uniquely identified the Player.
-	ID string `json:"id"`
+	ID uuid.UUID `json:"id"`
 	// Name is the players displayed name
 	Name string `json:"name"`
 	// Score is the points that the player got in the current Lobby.
@@ -235,7 +235,7 @@ func (player *Player) GetWebsocketMutex() *sync.Mutex {
 }
 
 // GetUserSession returns the players current user session.
-func (player *Player) GetUserSession() string {
+func (player *Player) GetUserSession() uuid.UUID {
 	return player.userSession
 }
 
@@ -248,7 +248,7 @@ const (
 )
 
 // GetPlayer searches for a player, identifying them by usersession.
-func (lobby *Lobby) GetPlayer(userSession string) *Player {
+func (lobby *Lobby) GetPlayer(userSession uuid.UUID) *Player {
 	for _, player := range lobby.players {
 		if player.userSession == userSession {
 			return player
@@ -280,9 +280,9 @@ func (lobby *Lobby) AppendFill(fill *FillEvent) {
 func createPlayer(name string) *Player {
 	return &Player{
 		Name:         SanitizeName(name),
-		ID:           uuid.Must(uuid.NewV4()).String(),
-		userSession:  uuid.Must(uuid.NewV4()).String(),
-		votedForKick: make(map[string]bool),
+		ID:           uuid.Must(uuid.NewV4()),
+		userSession:  uuid.Must(uuid.NewV4()),
+		votedForKick: make(map[uuid.UUID]bool),
 		socketMutex:  &sync.Mutex{},
 		State:        Guessing,
 	}

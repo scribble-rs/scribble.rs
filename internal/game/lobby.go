@@ -89,10 +89,10 @@ type FillEvent struct {
 // successful kick vote. The voting is anonymous, meaning the voting player
 // won't be exposed.
 type KickVote struct {
-	PlayerID          string `json:"playerId"`
-	PlayerName        string `json:"playerName"`
-	VoteCount         int    `json:"voteCount"`
-	RequiredVoteCount int    `json:"requiredVoteCount"`
+	PlayerID          uuid.UUID `json:"playerId"`
+	PlayerName        string    `json:"playerName"`
+	VoteCount         int       `json:"voteCount"`
+	RequiredVoteCount int       `json:"requiredVoteCount"`
 }
 
 func (lobby *Lobby) HandleEvent(received *Event, player *Player) error {
@@ -202,8 +202,13 @@ func (lobby *Lobby) HandleEvent(received *Event, player *Player) error {
 		}
 	} else if received.Type == EventTypeKickVote {
 		if lobby.EnableVotekick {
-			toKickID, isString := (received.Data).(string)
+			toKickIDString, isString := (received.Data).(string)
 			if !isString {
+				return fmt.Errorf("invalid data in kick-vote event: %v", received.Data)
+			}
+
+			toKickID, err := uuid.FromString(toKickIDString)
+			if err != nil {
 				return fmt.Errorf("invalid data in kick-vote event: %v", received.Data)
 			}
 
@@ -390,7 +395,7 @@ func (lobby *Lobby) broadcastConditional(data any, condition func(*Player) bool)
 	}
 }
 
-func handleKickVoteEvent(lobby *Lobby, player *Player, toKickID string) {
+func handleKickVoteEvent(lobby *Lobby, player *Player, toKickID uuid.UUID) {
 	// Kicking yourself isn't allowed
 	if toKickID == player.ID {
 		return
@@ -508,13 +513,13 @@ func kickPlayer(lobby *Lobby, playerToKick *Player, playerToKickIndex int) {
 }
 
 type OwnerChangeEvent struct {
-	PlayerID   string `json:"playerId"`
-	PlayerName string `json:"playerName"`
+	PlayerID   uuid.UUID `json:"playerId"`
+	PlayerName string    `json:"playerName"`
 }
 
 type NameChangeEvent struct {
-	PlayerID   string `json:"playerId"`
-	PlayerName string `json:"playerName"`
+	PlayerID   uuid.UUID `json:"playerId"`
+	PlayerName string    `json:"playerName"`
 }
 
 func calculateVotesNeededToKick(playerToKick *Player, lobby *Lobby) int {
@@ -959,7 +964,7 @@ type Message struct {
 	// Author is the player / thing that wrote the message
 	Author string `json:"author"`
 	// AuthorID is the unique identifier of the authors player object.
-	AuthorID string `json:"authorId"`
+	AuthorID uuid.UUID `json:"authorId"`
 	// Content is the actual message text.
 	Content string `json:"content"`
 }
@@ -968,13 +973,13 @@ type Message struct {
 // This includes all the necessary things for properly running a client
 // without receiving any more data.
 type Ready struct {
-	PlayerID     string `json:"playerId"`
-	PlayerName   string `json:"playerName"`
-	AllowDrawing bool   `json:"allowDrawing"`
+	PlayerID     uuid.UUID `json:"playerId"`
+	PlayerName   string    `json:"playerName"`
+	AllowDrawing bool      `json:"allowDrawing"`
 
 	VotekickEnabled    bool        `json:"votekickEnabled"`
 	GameState          State       `json:"gameState"`
-	OwnerID            string      `json:"ownerId"`
+	OwnerID            uuid.UUID   `json:"ownerId"`
 	Round              int         `json:"round"`
 	Rounds             int         `json:"rounds"`
 	RoundEndTime       int         `json:"roundEndTime"`
