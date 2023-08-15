@@ -44,6 +44,8 @@ linters:
     # Requires certain types of tags, such as json or mapstructure.
     # While very useful, I don't care right now.
     - musttag
+    # Dynamic errors are fine for our usecases.
+    - err113
 
 linters-settings:
   gocritic:
