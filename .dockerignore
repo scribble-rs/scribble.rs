@@ -24,4 +24,6 @@ LICENSE
 .golangci.yml
 .gitignore
 .git
-*.Dockerfile
+
+# Ignoring Dockerfiles will cause flyctl to fail the deploy.
+# *.Dockerfile
