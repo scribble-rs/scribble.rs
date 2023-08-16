@@ -7,8 +7,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=0.75 maximum-scale=0.75, user-scalable=0">
     {{template "non-static-css-decl" .}}
-    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/base.css" />
-    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/lobby.css" />
+    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/base.css?cache_bust={{.CacheBust}}" />
+    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/lobby.css?cache_bust={{.CacheBust}}" />
     {{template "favicon-decl" .}}
 </head>
 
@@ -37,36 +37,42 @@
                         <button onclick="showNameChangeDialog()" class="dialog-button header-button"
                             alt="{{.Translation.Get "change-your-name"}}"
                             title="{{.Translation.Get "change-your-name"}}">
-                            <img src="{{.RootPath}}/resources/user.svg" class="header-button-image" />
+                            <img src="{{.RootPath}}/resources/user.svg?cache_bust={{.CacheBust}}"
+                                class="header-button-image" />
                         </button>
                         <button onclick="toggleFullscreen()" class="dialog-button header-button"
                             alt="{{.Translation.Get "toggle-fullscreen"}}"
                             title="{{.Translation.Get "toggle-fullscreen"}}">
-                            <img src="{{.RootPath}}/resources/fullscreen.svg" class="header-button-image" />
+                            <img src="{{.RootPath}}/resources/fullscreen.svg?cache_bust={{.CacheBust}}"
+                                class="header-button-image" />
                         </button>
                     </div>
                     <div id="word-container"></div>
                     <div>
                         <button id="help-button" onclick="showHelpDialog()" class="dialog-button header-button"
                             alt="{{.Translation.Get "show-help"}}" title="{{.Translation.Get "show-help"}}">
-                            <img src="{{.RootPath}}/resources/help.svg" class="header-button-image" />
+                            <img src="{{.RootPath}}/resources/help.svg?cache_bust={{.CacheBust}}"
+                                class="header-button-image" />
                         </button>
                         <button id="kick-button" style="display: none;" onclick="showKickDialog()"
                             class="dialog-button header-button" alt="{{.Translation.Get "votekick-a-player"}}"
                             title="{{.Translation.Get "votekick-a-player"}}">
-                            <img src="{{.RootPath}}/resources/kick.png" class="header-button-image" />
+                            <img src="{{.RootPath}}/resources/kick.png?cache_bust={{.CacheBust}}"
+                                class="header-button-image" />
                         </button>
                         <button id="lobby-settings-button" style="display: none;" onclick="showLobbySettingsDialog()"
                             class="dialog-button header-button"
                             alt="{{.Translation.Get "change-lobby-settings-tooltip"}}"
                             title="{{.Translation.Get "change-lobby-settings-tooltip"}}">
-                            <img src="{{.RootPath}}/resources/settings.svg" class="header-button-image" />
+                            <img src="{{.RootPath}}/resources/settings.svg?cache_bust={{.CacheBust}}"
+                                class="header-button-image" />
                         </button>
                     </div>
                 </div>
 
                 <div id="time-left">
-                    <img src=" {{.RootPath}}/resources/clock.svg" class="header-button-image" />
+                    <img src=" {{.RootPath}}/resources/clock.svg?cache_bust={{.CacheBust}}"
+                        class="header-button-image" />
                     <div id="time-left-value">∞</div>
                 </div>
             </div>
@@ -296,8 +302,8 @@
                             onmouseup="document.getElementById('tool-type-pencil').click()"
                             class="line-width-button-content">
                             <img title="{{.Translation.Get "use-pencil"}}" alt="{{.Translation.Get "use-pencil"}}"
-                                src="{{.RootPath}}/resources/pencil.svg" style="transform: scaleX(-1)" width="40px"
-                                height="40px" />
+                                src="{{.RootPath}}/resources/pencil.svg?cache_bust={{.CacheBust}}"
+                                style="transform: scaleX(-1)" width="40px" height="40px" />
                         </div>
                     </label>
                     <label for="tool-type-fill">
@@ -307,8 +313,9 @@
                             onmouseup="document.getElementById('tool-type-fill').click()"
                             class="line-width-button-content">
                             <img alt="{{.Translation.Get "use-fill-bucket"}}"
-                                title="{{.Translation.Get "use-fill-bucket"}}" src="{{.RootPath}}/resources/fill.svg"
-                                width="40px" height="40px" />
+                                title="{{.Translation.Get "use-fill-bucket"}}"
+                                src="{{.RootPath}}/resources/fill.svg?cache_bust={{.CacheBust}}" width="40px"
+                                height="40px" />
                         </div>
                     </label>
                     <label for="tool-type-rubber">
@@ -318,7 +325,8 @@
                             onmouseup="document.getElementById('tool-type-rubber').click()"
                             class="line-width-button-content">
                             <img alt="{{.Translation.Get "use-eraser"}}" title="{{.Translation.Get "use-eraser"}}"
-                                src="{{.RootPath}}/resources/rubber.svg" width="40px" height="40px" />
+                                src="{{.RootPath}}/resources/rubber.svg?cache_bust={{.CacheBust}}" width="40px"
+                                height="40px" />
                         </div>
                     </label>
                 </div>
@@ -372,13 +380,13 @@
                 <button class="canvas-button toolbox-group" onclick="clearCanvasAndSendEvent()"
                     alt="{{.Translation.Get "clear-canvas"}}" title="{{.Translation.Get "clear-canvas"}}">
                     <img alt="{{.Translation.Get "clear-canvas"}}" title="{{.Translation.Get "clear-canvas"}}"
-                        src="{{.RootPath}}/resources/trash.svg" width="40px" height="40px" />
+                        src="{{.RootPath}}/resources/trash.svg?cache_bust={{.CacheBust}}" width="40px" height="40px" />
                 </button>
                 <!--We won't make this button easier to click, as there's no going back. -->
                 <button class="canvas-button toolbox-group" onclick="undoAndSendEvent()"
                     alt="{{.Translation.Get "undo"}}" title="{{.Translation.Get "undo"}}">
                     <img alt="{{.Translation.Get "undo"}}" title="{{.Translation.Get "undo"}}"
-                        src="{{.RootPath}}/resources/undo.svg" width="40px" height="40px" />
+                        src="{{.RootPath}}/resources/undo.svg?cache_bust={{.CacheBust}}" width="40px" height="40px" />
                 </button>
             </div>
 
@@ -394,7 +402,7 @@
         {{template "footer" .}}
     </div>
 
-    <script type="text/javascript" src="{{.RootPath}}/resources/floodfill.js"></script>
+    <script type="text/javascript" src="{{.RootPath}}/resources/floodfill.js?cache_bust={{.CacheBust}}"></script>
     <script type="text/javascript">
         String.prototype.format = function () {
             return [...arguments].reduce((p, c) => p.replace(/%s/, c), this);
@@ -712,9 +720,9 @@
 
         function updateSoundIcon() {
             if (sound) {
-                soundToggleLabel.src = "{{.RootPath}}/resources/sound.svg";
+                soundToggleLabel.src = "{{.RootPath}}/resources/sound.svg?cache_bust={{.CacheBust}}";
             } else {
-                soundToggleLabel.src = "{{.RootPath}}/resources/no-sound.svg";
+                soundToggleLabel.src = "{{.RootPath}}/resources/no-sound.svg?cache_bust={{.CacheBust}}";
             }
         }
 
@@ -1043,7 +1051,7 @@
                         waitChooseDrawerSpan.innerText = parsed.data.playerName;
                     }
                 } else if (parsed.type === "correct-guess") {
-                    playWav('{{.RootPath}}/resources/plop.wav');
+                    playWav('{{.RootPath}}/resources/plop.wav?cache_bust={{.CacheBust}}');
 
                     if (parsed.data === ownID) {
                         appendMessage("correct-guess-message", null, '{{.Translation.Get "correct-guess"}}');
@@ -1084,7 +1092,7 @@
 
                     //If a player doesn't choose, the dialog will still be up.
                     wordDialog.style.visibility = "hidden";
-                    playWav('{{.RootPath}}/resources/end-turn.wav');
+                    playWav('{{.RootPath}}/resources/end-turn.wav?cache_bust={{.CacheBust}}');
 
                     clear(context);
 
@@ -1114,7 +1122,7 @@
                         gameState = "ongoing";
                     }
                 } else if (parsed.type === "your-turn") {
-                    playWav('{{.RootPath}}/resources/your-turn.wav');
+                    playWav('{{.RootPath}}/resources/your-turn.wav?cache_bust={{.CacheBust}}');
                     //This dialog could potentially stay visible from last
                     //turn, in case nobody has chosen a word.
                     waitChooseDialog.style.visibility = "hidden";
@@ -1427,11 +1435,11 @@
                     drawerID = player.id;
                     drawerName = player.name;
 
-                    const playerStateImage = createPlayerStateImageNode("{{.RootPath}}/resources/pencil.svg");
+                    const playerStateImage = createPlayerStateImageNode("{{.RootPath}}/resources/pencil.svg?cache_bust={{.CacheBust}}");
                     playerStateImage.style.transform = "scaleX(-1)";
                     scoreAndStatusDiv.appendChild(playerStateImage);
                 } else if (player.state === "standby") {
-                    const playerStateImage = createPlayerStateImageNode("{{.RootPath}}/resources/checkmark.svg");
+                    const playerStateImage = createPlayerStateImageNode("{{.RootPath}}/resources/checkmark.svg?cache_bust={{.CacheBust}}");
                     scoreAndStatusDiv.appendChild(playerStateImage);
                 }
 

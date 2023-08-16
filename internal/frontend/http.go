@@ -1,7 +1,9 @@
 package frontend
 
 import (
+	"crypto/md5"
 	"embed"
+	"fmt"
 	"html/template"
 	"net/http"
 	"path"
@@ -19,15 +21,32 @@ var (
 	frontendResourcesFS embed.FS
 )
 
-// In this init hook we initialize all templates that could at some point
-// be needed during the server runtime. If any of the templates can't be
-// loaded, we panic.
-func init() {
-	var templateParseError error
-	pageTemplates, templateParseError = template.ParseFS(templateFS, "templates/*")
-	if templateParseError != nil {
-		panic(templateParseError)
+func Init() error {
+	var err error
+	pageTemplates, err = template.ParseFS(templateFS, "templates/*")
+	if err != nil {
+		return fmt.Errorf("error loading templates: %w", err)
 	}
+
+	entries, err := frontendResourcesFS.ReadDir("resources")
+	if err != nil {
+		return fmt.Errorf("error reading resource directory: %w", err)
+	}
+
+	hash := md5.New()
+	for _, entry := range entries {
+		bytes, err := frontendResourcesFS.ReadFile("resources/" + entry.Name())
+		if err != nil {
+			return fmt.Errorf("error reading resource %s: %w", entry.Name(), err)
+		}
+
+		if _, err := hash.Write(bytes); err != nil {
+			return fmt.Errorf("error hashing resource %s: %w", entry.Name(), err)
+		}
+	}
+
+	currentBasePageConfig.CacheBust = fmt.Sprintf("%x", hash.Sum(nil))
+	return nil
 }
 
 // FIXME Delete global state.
@@ -47,16 +66,27 @@ type BasePageConfig struct {
 	// but already host a different website, then your API paths might have to
 	// look like this: painting.com/scribblers/v1.
 	RootPath string `json:"rootPath"`
+	// CacheBust is a string that is appended to all resources to prevent
+	// browsers from using cached data of a previous version, but still have
+	// long lived max age values.
+	CacheBust string `json:"cacheBust"`
 }
 
 // SetupRoutes registers the official webclient endpoints with the http package.
 func SetupRoutes(rootPath string, router chi.Router) {
 	router.Get("/"+rootPath, homePage)
+
+	fileServer := http.FileServer(http.FS(frontendResourcesFS))
 	router.Get(
 		"/"+path.Join(rootPath, "resources/*"),
 		http.StripPrefix(
 			"/"+rootPath,
-			http.FileServer(http.FS(frontendResourcesFS)),
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				// Duration of 1 year, since we use cachebusting anyway.
+				w.Header().Set("Cache-Control", "public, max-age=31536000")
+
+				fileServer.ServeHTTP(w, r)
+			}),
 		).ServeHTTP,
 	)
 	router.Get("/"+path.Join(rootPath, "ssrEnterLobby/{lobby_id}"), ssrEnterLobby)

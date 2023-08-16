@@ -9,11 +9,19 @@ import (
 	"github.com/scribble-rs/scribble.rs/internal/translations"
 )
 
+func init() {
+	if err := Init(); err != nil {
+		panic(err)
+	}
+}
+
 func Test_templateLobbyPage(t *testing.T) {
 	var buffer bytes.Buffer
 	err := pageTemplates.ExecuteTemplate(&buffer,
 		"lobby-page", &lobbyPageData{
-			BasePageConfig: &BasePageConfig{},
+			BasePageConfig: &BasePageConfig{
+				CacheBust: "lol",
+			},
 			LobbyData: &api.LobbyData{
 				EditableLobbySettings: &game.EditableLobbySettings{},
 				SettingBounds:         game.LobbySettingBounds,

@@ -7,8 +7,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {{template "non-static-css-decl" .}}
-    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/base.css" />
-    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/lobby_create.css" />
+    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/base.css?cache_bust={{.CacheBust}}" />
+    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/lobby_create.css?cache_bust={{.CacheBust}}" />
     {{template "favicon-decl" .}}
 </head>
 
@@ -16,7 +16,7 @@
     <div class="content-wrapper">
         <noscript><span class="noscript">{{.Translation.Get "requires-js"}}</span></noscript>
 
-        <img id="logo" src="{{.RootPath}}/resources/logo.svg">
+        <img id="logo" src="{{.RootPath}}/resources/logo.svg?cache_bust={{.CacheBust}}">
 
         <div class="tab-header">
             <label for="create-lobby-tab-button">

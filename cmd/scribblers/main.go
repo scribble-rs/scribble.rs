@@ -53,6 +53,10 @@ func main() {
 
 	api.SetupRoutes(cfg.RootPath, router)
 
+	if err := frontend.Init(); err != nil {
+		log.Fatal("error setting up runnign frontend init:", err)
+	}
+
 	// FIXME Global state needs to be deleted.
 	frontend.SetRootPath(cfg.RootPath)
 	frontend.SetupRoutes(cfg.RootPath, router)
