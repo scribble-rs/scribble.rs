@@ -12,3 +12,7 @@ playground/
 .DS_Store
 # Configuration files
 .env
+# Anything temporary
+*.tmp
+# Profiling results
+*.pprof
