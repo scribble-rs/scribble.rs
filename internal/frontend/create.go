@@ -147,7 +147,8 @@ func ssrCreateLobby(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	lobby.WriteJSON = api.WriteJSON
+	lobby.WriteObject = api.WriteObject
+	lobby.WritePreparedMessage = api.WritePreparedMessage
 	player.SetLastKnownAddress(api.GetIPAddressFromRequest(request))
 
 	api.SetUsersessionCookie(writer, player)

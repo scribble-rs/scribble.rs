@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -12,6 +11,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/websocket"
+	"github.com/mailru/easyjson"
 
 	"github.com/scribble-rs/scribble.rs/internal/game"
 	"github.com/scribble-rs/scribble.rs/internal/state"
@@ -21,9 +21,10 @@ var (
 	ErrPlayerNotConnected = errors.New("player not connected")
 
 	upgrader = websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
-		CheckOrigin:     func(r *http.Request) bool { return true },
+		ReadBufferSize:    1024,
+		WriteBufferSize:   1024,
+		CheckOrigin:       func(_ *http.Request) bool { return true },
+		EnableCompression: true,
 	}
 )
 
@@ -86,6 +87,8 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 		}
 	}()
 
+	var event game.EventTypeOnly
+
 	for {
 		messageType, data, err := socket.ReadMessage()
 		if err != nil {
@@ -109,11 +112,9 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 		}
 
 		if messageType == websocket.TextMessage {
-			received := &game.Event{}
-
-			if err := json.Unmarshal(data, received); err != nil {
+			if err := easyjson.Unmarshal(data, &event); err != nil {
 				log.Printf("Error unmarshalling message: %s\n", err)
-				err := WriteJSON(player, game.Event{
+				err := WriteObject(player, game.Event{
 					Type: game.EventTypeSystemMessage,
 					Data: fmt.Sprintf("error parsing message, please report this issue via Github: %s!", err),
 				})
@@ -123,16 +124,14 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 				continue
 			}
 
-			if err := lobby.HandleEvent(received, player); err != nil {
+			if err := lobby.HandleEvent(event.Type, data, player); err != nil {
 				log.Printf("Error handling event: %s\n", err)
 			}
 		}
 	}
 }
 
-// WriteJSON marshals the given input into a JSON string and sends it to the
-// player using the currently established websocket connection.
-func WriteJSON(player *game.Player, object any) error {
+func WriteObject(player *game.Player, object easyjson.Marshaler) error {
 	player.GetWebsocketMutex().Lock()
 	defer player.GetWebsocketMutex().Unlock()
 
@@ -141,5 +140,22 @@ func WriteJSON(player *game.Player, object any) error {
 		return ErrPlayerNotConnected
 	}
 
-	return socket.WriteJSON(object)
+	bytes, err := easyjson.Marshal(object)
+	if err != nil {
+		return fmt.Errorf("error marshalling payload: %w", err)
+	}
+
+	return socket.WriteMessage(websocket.TextMessage, bytes)
+}
+
+func WritePreparedMessage(player *game.Player, message *websocket.PreparedMessage) error {
+	player.GetWebsocketMutex().Lock()
+	defer player.GetWebsocketMutex().Unlock()
+
+	socket := player.GetWebsocket()
+	if socket == nil || !player.Connected {
+		return ErrPlayerNotConnected
+	}
+
+	return socket.WritePreparedMessage(message)
 }

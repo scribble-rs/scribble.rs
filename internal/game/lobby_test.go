@@ -1,10 +1,15 @@
 package game
 
 import (
+	"encoding/json"
+	"reflect"
 	"sync"
 	"testing"
+	"unsafe"
 
 	"github.com/gofrs/uuid"
+	"github.com/gorilla/websocket"
+	easyjson "github.com/mailru/easyjson"
 )
 
 func createLobbyWithDemoPlayers(playercount int) *Lobby {
@@ -23,7 +28,11 @@ func createLobbyWithDemoPlayers(playercount int) *Lobby {
 	return lobby
 }
 
-func noOpWrite(_ *Player, _ any) error {
+func noOpWriteObject(_ *Player, _ easyjson.Marshaler) error {
+	return nil
+}
+
+func noOpWritePreparedMessage(_ *Player, _ *websocket.PreparedMessage) error {
 	return nil
 }
 
@@ -186,7 +195,8 @@ func Test_calculateGuesserScore(t *testing.T) {
 
 func Test_handleNameChangeEvent(t *testing.T) {
 	lobby := &Lobby{}
-	lobby.WriteJSON = noOpWrite
+	lobby.WriteObject = noOpWriteObject
+	lobby.WritePreparedMessage = noOpWritePreparedMessage
 	player := lobby.JoinPlayer("Kevin")
 
 	handleNameChangeEvent(player, lobby, "Jim")
@@ -195,6 +205,10 @@ func Test_handleNameChangeEvent(t *testing.T) {
 	if player.Name != expectedName {
 		t.Errorf("playername didn't change; Expected %s, but was %s", expectedName, player.Name)
 	}
+}
+
+func getUnexportedField(field reflect.Value) any {
+	return reflect.NewAt(field.Type(), unsafe.Pointer(field.UnsafeAddr())).Elem().Interface()
 }
 
 func Test_wordSelectionEvent(t *testing.T) {
@@ -207,41 +221,48 @@ func Test_wordSelectionEvent(t *testing.T) {
 		},
 		words: []string{firstWordChoice, "def", "ghi"},
 	}
-	wordHintEvents := make(map[uuid.UUID]*Event)
-	lobby.WriteJSON = func(player *Player, object any) error {
-		gameEvent, typeMatches := object.(*Event)
-		if !typeMatches {
-			panic("Unsupported event data type")
+	wordHintEvents := make(map[uuid.UUID][]*WordHint)
+	lobby.WriteObject = noOpWriteObject
+	lobby.WritePreparedMessage = func(player *Player, message *websocket.PreparedMessage) error {
+		data := getUnexportedField(reflect.ValueOf(message).Elem().FieldByName("data")).([]byte)
+		type event struct {
+			Type string          `json:"type"`
+			Data json.RawMessage `json:"data"`
+		}
+		var e event
+		if err := json.Unmarshal(data, &e); err != nil {
+			t.Fatal("error unmarshalling message", err)
 		}
 
-		if gameEvent.Type == "update-wordhint" {
-			wordHintEvents[player.ID] = gameEvent
+		if e.Type == "update-wordhint" {
+			var wordHints []*WordHint
+			if err := json.Unmarshal(e.Data, &wordHints); err != nil {
+				t.Fatal(err)
+			}
+			wordHintEvents[player.ID] = wordHints
 		}
 
 		return nil
 	}
+
 	drawer := lobby.JoinPlayer("Drawer")
 	drawer.Connected = true
 	lobby.Owner = drawer
 	lobby.creator = drawer
 
-	if err := lobby.HandleEvent(&Event{Type: EventTypeStart}, drawer); err != nil {
+	if err := lobby.HandleEvent(EventTypeStart, nil, drawer); err != nil {
 		t.Errorf("Couldn't start lobby: %s", err)
 	}
 
 	guesser := lobby.JoinPlayer("Guesser")
 	guesser.Connected = true
 
-	err := lobby.HandleEvent(&Event{
-		Type: EventTypeChooseWord,
-		Data: 0,
-	}, drawer)
+	err := lobby.HandleEvent(EventTypeChooseWord, []byte(`{"data": 0}`), drawer)
 	if err != nil {
 		t.Errorf("Couldn't choose word: %s", err)
 	}
 
-	wordHintsForDrawerEvent := wordHintEvents[drawer.ID]
-	wordHintsForDrawer := wordHintsForDrawerEvent.Data.([]*WordHint)
+	wordHintsForDrawer := wordHintEvents[drawer.ID]
 	if len(wordHintsForDrawer) != 3 {
 		t.Errorf("Word hints for drawer were of incorrect length; %d != %d", len(wordHintsForDrawer), 3)
 	}
@@ -261,8 +282,7 @@ func Test_wordSelectionEvent(t *testing.T) {
 		}
 	}
 
-	wordHintsForGuesserEvent := wordHintEvents[guesser.ID]
-	wordHintsForGuesser := wordHintsForGuesserEvent.Data.([]*WordHint)
+	wordHintsForGuesser := wordHintEvents[guesser.ID]
 	if len(wordHintsForGuesser) != 3 {
 		t.Errorf("Word hints for guesser were of incorrect length; %d != %d", len(wordHintsForGuesser), 3)
 	}
@@ -287,7 +307,8 @@ func Test_kickDrawer(t *testing.T) {
 		},
 		words: []string{"a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a"},
 	}
-	lobby.WriteJSON = noOpWrite
+	lobby.WriteObject = noOpWriteObject
+	lobby.WritePreparedMessage = noOpWritePreparedMessage
 
 	marcel := lobby.JoinPlayer("marcel")
 	marcel.Connected = true
@@ -299,7 +320,7 @@ func Test_kickDrawer(t *testing.T) {
 	chantal := lobby.JoinPlayer("chantal")
 	chantal.Connected = true
 
-	if err := lobby.HandleEvent(&Event{Type: EventTypeStart}, marcel); err != nil {
+	if err := lobby.HandleEvent(EventTypeStart, nil, marcel); err != nil {
 		t.Errorf("Couldn't start lobby: %s", err)
 	}
 

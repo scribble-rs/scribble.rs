@@ -13,7 +13,8 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/mitchellh/mapstructure"
+	"github.com/gorilla/websocket"
+	"github.com/mailru/easyjson"
 	"github.com/scribble-rs/scribble.rs/internal/sanitize"
 
 	discordemojimap "github.com/Bios-Marcel/discordemojimap/v2"
@@ -68,35 +69,8 @@ type SettingBounds struct {
 	MaxClientsPerIPLimit int64 `json:"maxClientsPerIpLimit"`
 }
 
-// LineEvent is basically the same as GameEvent, but with a specific Data type.
-// We use this for reparsing as soon as we know that the type is right. It's
-// a bit unperformant, but will do for now.
-type LineEvent struct {
-	Data *Line  `json:"data"`
-	Type string `json:"type"`
-}
-
-// FillEvent is basically the same as GameEvent, but with a specific Data type.
-// We use this for reparsing as soon as we know that the type is right. It's
-// a bit unperformant, but will do for now.
-type FillEvent struct {
-	Data *Fill  `json:"data"`
-	Type string `json:"type"`
-}
-
-// KickVote represents a players vote to kick another players. If the VoteCount
-// is as great or greater than the RequiredVoteCount, the event indicates a
-// successful kick vote. The voting is anonymous, meaning the voting player
-// won't be exposed.
-type KickVote struct {
-	PlayerID          uuid.UUID `json:"playerId"`
-	PlayerName        string    `json:"playerName"`
-	VoteCount         int       `json:"voteCount"`
-	RequiredVoteCount int       `json:"requiredVoteCount"`
-}
-
-func (lobby *Lobby) HandleEvent(received *Event, player *Player) error {
-	if received.Type == "keep-alive" {
+func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player) error {
+	if eventType == "keep-alive" {
 		// This is a known dummy event in order to avoid accidental websocket
 		// connection closure. However, no action is required on the server.
 		// Either way, we needn't needlessly lock the lobby.
@@ -110,26 +84,26 @@ func (lobby *Lobby) HandleEvent(received *Event, player *Player) error {
 	// use mapstructure instead. It's cheaper in terms of CPU usage and
 	// memory usage. There are benchmarks to prove this in json_test.go.
 
-	if received.Type == EventTypeMessage {
-		dataAsString, isString := (received.Data).(string)
-		if !isString {
-			return fmt.Errorf("invalid data received: '%s'", received.Data)
+	if eventType == EventTypeMessage {
+		var message StringDataEvent
+		if err := easyjson.Unmarshal(payload, &message); err != nil {
+			return fmt.Errorf("invalid data received: '%s'", string(payload))
 		}
 
-		handleMessage(dataAsString, player, lobby)
-	} else if received.Type == EventTypeLine {
+		handleMessage(message.Data, player, lobby)
+	} else if eventType == EventTypeLine {
 		if lobby.canDraw(player) {
-			line := &Line{}
-			if err := mapstructure.Decode(received.Data, line); err != nil {
+			var line LineEvent
+			if err := easyjson.Unmarshal(payload, &line); err != nil {
 				return fmt.Errorf("error decoding data: %w", err)
 			}
 
 			// In case the line is too big, we overwrite the data of the event.
 			// This will prevent clients from lagging due to too thick lines.
-			if line.LineWidth > float32(MaxBrushSize) {
-				line.LineWidth = MaxBrushSize
-			} else if line.LineWidth < float32(MinBrushSize) {
-				line.LineWidth = MinBrushSize
+			if line.Data.LineWidth > float32(MaxBrushSize) {
+				line.Data.LineWidth = MaxBrushSize
+			} else if line.Data.LineWidth < float32(MinBrushSize) {
+				line.Data.LineWidth = MinBrushSize
 			}
 
 			now := time.Now()
@@ -138,33 +112,34 @@ func (lobby *Lobby) HandleEvent(received *Event, player *Player) error {
 			}
 			lobby.lastDrawEvent = now
 
-			lineEvent := &LineEvent{Type: EventTypeLine, Data: line}
-			lobby.AppendLine(lineEvent)
+			lobby.AppendLine(&line)
 
 			// We directly forward the event, as it seems to be valid.
-			lobby.broadcastConditional(lineEvent, ExcludePlayer(player))
+			lobby.broadcastConditional(&line, ExcludePlayer(player))
 		}
-	} else if received.Type == EventTypeFill {
+	} else if eventType == EventTypeFill {
 		if lobby.canDraw(player) {
-			fill := &Fill{}
-			if err := mapstructure.Decode(received.Data, fill); err != nil {
+			var fill FillEvent
+			if err := easyjson.Unmarshal(payload, &fill); err != nil {
 				return fmt.Errorf("error decoding data: %w", err)
 			}
 
 			lobby.connectedDrawEventsIndexStack = append(lobby.connectedDrawEventsIndexStack, len(lobby.currentDrawing))
 			lobby.lastDrawEvent = time.Now()
 
-			lobby.AppendFill(&FillEvent{Type: EventTypeFill, Data: fill})
+			lobby.AppendFill(&fill)
 
 			// We directly forward the event, as it seems to be valid.
-			lobby.broadcastConditional(received, ExcludePlayer(player))
+			lobby.broadcastConditional(&fill, ExcludePlayer(player))
 		}
-	} else if received.Type == EventTypeClearDrawingBoard {
+	} else if eventType == EventTypeClearDrawingBoard {
 		if lobby.canDraw(player) && len(lobby.currentDrawing) > 0 {
 			lobby.ClearDrawing()
-			lobby.broadcastConditional(received, ExcludePlayer(player))
+			lobby.broadcastConditional(
+				EventTypeOnly{Type: EventTypeClearDrawingBoard},
+				ExcludePlayer(player))
 		}
-	} else if received.Type == EventTypeUndo {
+	} else if eventType == EventTypeUndo {
 		if lobby.canDraw(player) && len(lobby.currentDrawing) > 0 && len(lobby.connectedDrawEventsIndexStack) > 0 {
 			undoFrom := lobby.connectedDrawEventsIndexStack[len(lobby.connectedDrawEventsIndexStack)-1]
 			lobby.connectedDrawEventsIndexStack = lobby.connectedDrawEventsIndexStack[:len(lobby.connectedDrawEventsIndexStack)-1]
@@ -173,16 +148,12 @@ func (lobby *Lobby) HandleEvent(received *Event, player *Player) error {
 				lobby.Broadcast(&Event{Type: EventTypeDrawing, Data: lobby.currentDrawing})
 			}
 		}
-	} else if received.Type == EventTypeChooseWord {
-		chosenIndex, isInt := (received.Data).(int)
-		if !isInt {
-			asFloat, isFloat64 := (received.Data).(float64)
-			if !isFloat64 {
-				return fmt.Errorf("invalid data in choose-word event: %v", received.Data)
-			}
-
-			chosenIndex = int(asFloat)
+	} else if eventType == EventTypeChooseWord {
+		var wordChoice IntDataEvent
+		if err := easyjson.Unmarshal(payload, &wordChoice); err != nil {
+			return fmt.Errorf("error decoding data: %w", err)
 		}
+		chosenIndex := wordChoice.Data
 
 		if len(lobby.wordChoice) == 0 {
 			return errors.New("word was chosen, even though no choice was available")
@@ -200,21 +171,21 @@ func (lobby *Lobby) HandleEvent(received *Event, player *Player) error {
 			wordHintDataRevealed := &Event{Type: EventTypeUpdateWordHint, Data: lobby.wordHintsShown}
 			lobby.broadcastConditional(wordHintDataRevealed, IsNotGuessing)
 		}
-	} else if received.Type == EventTypeKickVote {
+	} else if eventType == EventTypeKickVote {
 		if lobby.EnableVotekick {
-			toKickIDString, isString := (received.Data).(string)
-			if !isString {
-				return fmt.Errorf("invalid data in kick-vote event: %v", received.Data)
+			var kickEvent StringDataEvent
+			if err := easyjson.Unmarshal(payload, &kickEvent); err != nil {
+				return fmt.Errorf("invalid data received: '%s'", string(payload))
 			}
 
-			toKickID, err := uuid.FromString(toKickIDString)
+			toKickID, err := uuid.FromString(kickEvent.Data)
 			if err != nil {
-				return fmt.Errorf("invalid data in kick-vote event: %v", received.Data)
+				return fmt.Errorf("invalid data in kick-vote event: %v", payload)
 			}
 
 			handleKickVoteEvent(lobby, player, toKickID)
 		}
-	} else if received.Type == EventTypeStart {
+	} else if eventType == EventTypeStart {
 		if lobby.State != Ongoing && player == lobby.Owner {
 			// We are reseting each players score, since players could
 			// technically be player a second game after the last one
@@ -231,17 +202,18 @@ func (lobby *Lobby) HandleEvent(received *Event, player *Player) error {
 
 			advanceLobby(lobby)
 		}
-	} else if received.Type == EventTypeNameChange {
-		newName, isString := (received.Data).(string)
-		if !isString {
-			return fmt.Errorf("invalid data in name-change event: %v", received.Data)
+	} else if eventType == EventTypeNameChange {
+		var message StringDataEvent
+		if err := easyjson.Unmarshal(payload, &message); err != nil {
+			return fmt.Errorf("invalid data received: '%s'", string(payload))
 		}
-		handleNameChangeEvent(player, lobby, newName)
-	} else if received.Type == EventTypeRequestDrawing {
+
+		handleNameChangeEvent(player, lobby, message.Data)
+	} else if eventType == EventTypeRequestDrawing {
 		// Since the client shouldn't be blocking to wait for the drawing, it's
 		// fine to emit the event if there's no drawing.
 		if len(lobby.currentDrawing) != 0 {
-			lobby.WriteJSON(player, Event{Type: EventTypeDrawing, Data: lobby.currentDrawing})
+			lobby.WriteObject(player, Event{Type: EventTypeDrawing, Data: lobby.currentDrawing})
 		}
 	}
 
@@ -287,7 +259,7 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 	switch levenshtein.ComputeDistance(normInput, normSearched) {
 	case 0:
 		{
-			secondsLeft := int(lobby.RoundEndTime/1000 - time.Now().UTC().UnixNano()/1000000000)
+			secondsLeft := int(lobby.roundEndTime/1000 - time.Now().UTC().UnixNano()/1000000000)
 
 			sender.LastScore = calculateGuesserScore(lobby.hintCount, lobby.hintsLeft, secondsLeft, lobby.DrawingTime)
 			sender.Score += sender.LastScore
@@ -301,7 +273,7 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 				advanceLobby(lobby)
 			} else {
 				// Since the word has been guessed correctly, we reveal it.
-				lobby.WriteJSON(sender, Event{Type: EventTypeUpdateWordHint, Data: lobby.wordHintsShown})
+				lobby.WriteObject(sender, Event{Type: EventTypeUpdateWordHint, Data: lobby.wordHintsShown})
 				recalculateRanks(lobby)
 				lobby.Broadcast(&Event{Type: EventTypeUpdatePlayers, Data: lobby.players})
 			}
@@ -312,7 +284,7 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 			// This allows other players to guess the word by watching what the
 			// other players are misstyping.
 			lobby.broadcastMessage(trimmedMessage, sender)
-			lobby.WriteJSON(sender, Event{Type: EventTypeCloseGuess, Data: trimmedMessage})
+			lobby.WriteObject(sender, Event{Type: EventTypeCloseGuess, Data: trimmedMessage})
 		}
 	default:
 		lobby.broadcastMessage(trimmedMessage, sender)
@@ -370,7 +342,7 @@ func IsGuessing(player *Player) bool {
 }
 
 func newMessageEvent(messageType, message string, sender *Player) *Event {
-	return &Event{Type: messageType, Data: Message{
+	return &Event{Type: messageType, Data: OutgoingMessage{
 		Author:   sender.Name,
 		AuthorID: sender.ID,
 		Content:  discordemojimap.Replace(message),
@@ -381,16 +353,40 @@ func (lobby *Lobby) broadcastMessage(message string, sender *Player) {
 	lobby.Broadcast(newMessageEvent(EventTypeMessage, message, sender))
 }
 
-func (lobby *Lobby) Broadcast(data any) {
+func (lobby *Lobby) Broadcast(data easyjson.Marshaler) {
+	bytes, err := easyjson.Marshal(data)
+	if err != nil {
+		log.Println("error marshalling Broadcast message", err)
+		return
+	}
+
+	message, err := websocket.NewPreparedMessage(websocket.TextMessage, bytes)
+	if err != nil {
+		log.Println("error preparing message", err)
+		return
+	}
+
 	for _, player := range lobby.GetPlayers() {
-		lobby.WriteJSON(player, data)
+		lobby.WritePreparedMessage(player, message)
 	}
 }
 
-func (lobby *Lobby) broadcastConditional(data any, condition func(*Player) bool) {
+func (lobby *Lobby) broadcastConditional(data easyjson.Marshaler, condition func(*Player) bool) {
+	bytes, err := easyjson.Marshal(data)
+	if err != nil {
+		log.Println("error marshalling broadcastConditional message", err)
+		return
+	}
+
+	message, err := websocket.NewPreparedMessage(websocket.TextMessage, bytes)
+	if err != nil {
+		log.Println("error preparing message", err)
+		return
+	}
+
 	for _, player := range lobby.players {
 		if condition(player) {
-			lobby.WriteJSON(player, data)
+			lobby.WritePreparedMessage(player, message)
 		}
 	}
 }
@@ -486,7 +482,7 @@ func kickPlayer(lobby *Lobby, playerToKick *Player, playerToKickIndex int) {
 	if lobby.drawer == playerToKick {
 		newDrawer, roundOver := determineNextDrawer(lobby)
 		lobby.players = append(lobby.players[:playerToKickIndex], lobby.players[playerToKickIndex+1:]...)
-		lobby.Broadcast(&Event{Type: EventTypeDrawerKicked})
+		lobby.Broadcast(&EventTypeOnly{Type: EventTypeDrawerKicked})
 
 		// Since the drawer has been kicked, that probably means that they were
 		// probably trolling, therefore we redact everyones last earned score.
@@ -510,16 +506,6 @@ func kickPlayer(lobby *Lobby, playerToKick *Player, playerToKickIndex int) {
 			advanceLobby(lobby)
 		}
 	}
-}
-
-type OwnerChangeEvent struct {
-	PlayerID   uuid.UUID `json:"playerId"`
-	PlayerName string    `json:"playerName"`
-}
-
-type NameChangeEvent struct {
-	PlayerID   uuid.UUID `json:"playerId"`
-	PlayerName string    `json:"playerName"`
 }
 
 func calculateVotesNeededToKick(playerToKick *Player, lobby *Lobby) int {
@@ -640,7 +626,7 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 				// game-over event is only sent to already connected players.
 				readyData.CurrentDrawing = nil
 
-				lobby.WriteJSON(player, Event{
+				lobby.WriteObject(player, Event{
 					Type: EventTypeGameOver,
 					Data: &GameOverEvent{
 						PreviousWord: previousWord,
@@ -663,7 +649,7 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 	lobby.wordChoice = GetRandomWords(3, lobby)
 
 	// We use milliseconds for higher accuracy
-	lobby.RoundEndTime = time.Now().UTC().UnixNano()/1000000 + int64(lobby.DrawingTime)*1000
+	lobby.roundEndTime = time.Now().UTC().UnixNano()/1000000 + int64(lobby.DrawingTime)*1000
 	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
 	go startTurnTimeTicker(lobby, lobby.timeLeftTicker)
 
@@ -672,28 +658,18 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 		Data: &NextTurn{
 			Round:        lobby.Round,
 			Players:      lobby.players,
-			RoundEndTime: int(lobby.RoundEndTime - getTimeAsMillis()),
+			RoundEndTime: int(lobby.roundEndTime - getTimeAsMillis()),
 			PreviousWord: previousWord,
 		},
 	})
 
-	lobby.WriteJSON(lobby.drawer, &Event{Type: EventTypeYourTurn, Data: lobby.wordChoice})
+	lobby.WriteObject(lobby.drawer, &Event{Type: EventTypeYourTurn, Data: lobby.wordChoice})
 }
 
 // advanceLobby will either start the game or jump over to the next turn.
 func advanceLobby(lobby *Lobby) {
 	newDrawer, roundOver := determineNextDrawer(lobby)
 	advanceLobbyPredefineDrawer(lobby, roundOver, newDrawer)
-}
-
-// GameOverEvent is basically the ready event, but contains the last word.
-// This is required in order to show the last player the word, in case they
-// didn't manage to guess it in time. This is necessary since the last word
-// is usually part of the "next-turn" event, which we don't send, since the
-// game is over already.
-type GameOverEvent struct {
-	*Ready
-	PreviousWord string `json:"previousWord"`
 }
 
 // determineNextDrawer returns the next person that's supposed to be drawing, but
@@ -757,7 +733,7 @@ func (lobby *Lobby) tickLogic(expectedTicker *time.Ticker) bool {
 	}
 
 	currentTime := getTimeAsMillis()
-	if currentTime >= lobby.RoundEndTime {
+	if currentTime >= lobby.roundEndTime {
 		expectedTicker.Stop()
 		advanceLobby(lobby)
 		// Kill outer goroutine and therefore avoid executing hint logic.
@@ -772,7 +748,7 @@ func (lobby *Lobby) tickLogic(expectedTicker *time.Ticker) bool {
 		// was chosen at 60 seconds, we'll still reveal one hint
 		// instantly, as the time is already lower than 80.
 		revealHintAtXOrLower := revealHintEveryXMilliseconds * int64(lobby.hintsLeft)
-		timeLeft := lobby.RoundEndTime - currentTime
+		timeLeft := lobby.roundEndTime - currentTime
 		if timeLeft <= revealHintAtXOrLower {
 			lobby.hintsLeft--
 
@@ -799,19 +775,6 @@ func (lobby *Lobby) tickLogic(expectedTicker *time.Ticker) bool {
 
 func getTimeAsMillis() int64 {
 	return time.Now().UTC().UnixNano() / 1000000
-}
-
-// NextTurn represents the data necessary for displaying the lobby state right
-// after a new turn started. Meaning that no word has been chosen yet and
-// therefore there are no wordhints and no current drawing instructions.
-type NextTurn struct {
-	// PreviousWord signals the last chosen word. If empty, no word has been
-	// chosen. The client can now themselves whether there has been a previous
-	// turn, by looking at the current gamestate.
-	PreviousWord string    `json:"previousWord"`
-	Players      []*Player `json:"players"`
-	Round        int       `json:"round"`
-	RoundEndTime int       `json:"roundEndTime"`
 }
 
 // recalculateRanks will assign each player his respective rank in the lobby
@@ -959,36 +922,6 @@ func generatePlayerName() string {
 	return string(buffer)
 }
 
-// Message represents a message in the chatroom.
-type Message struct {
-	// Author is the player / thing that wrote the message
-	Author string `json:"author"`
-	// AuthorID is the unique identifier of the authors player object.
-	AuthorID uuid.UUID `json:"authorId"`
-	// Content is the actual message text.
-	Content string `json:"content"`
-}
-
-// Ready represents the initial state that a user needs upon connection.
-// This includes all the necessary things for properly running a client
-// without receiving any more data.
-type Ready struct {
-	PlayerID     uuid.UUID `json:"playerId"`
-	PlayerName   string    `json:"playerName"`
-	AllowDrawing bool      `json:"allowDrawing"`
-
-	VotekickEnabled    bool        `json:"votekickEnabled"`
-	GameState          State       `json:"gameState"`
-	OwnerID            uuid.UUID   `json:"ownerId"`
-	Round              int         `json:"round"`
-	Rounds             int         `json:"rounds"`
-	RoundEndTime       int         `json:"roundEndTime"`
-	DrawingTimeSetting int         `json:"drawingTimeSetting"`
-	WordHints          []*WordHint `json:"wordHints"`
-	Players            []*Player   `json:"players"`
-	CurrentDrawing     []any       `json:"currentDrawing"`
-}
-
 func generateReadyData(lobby *Lobby, player *Player) *Ready {
 	ready := &Ready{
 		PlayerID:     player.ID,
@@ -1010,7 +943,7 @@ func generateReadyData(lobby *Lobby, player *Player) *Ready {
 		// Clients should interpret 0 as "time over", unless the gamestate isn't "ongoing"
 		ready.RoundEndTime = 0
 	} else {
-		ready.RoundEndTime = int(lobby.RoundEndTime - getTimeAsMillis())
+		ready.RoundEndTime = int(lobby.roundEndTime - getTimeAsMillis())
 	}
 
 	return ready
@@ -1019,13 +952,13 @@ func generateReadyData(lobby *Lobby, player *Player) *Ready {
 func (lobby *Lobby) OnPlayerConnectUnsynchronized(player *Player) {
 	player.Connected = true
 	recalculateRanks(lobby)
-	lobby.WriteJSON(player, Event{Type: EventTypeReady, Data: generateReadyData(lobby, player)})
+	lobby.WriteObject(player, Event{Type: EventTypeReady, Data: generateReadyData(lobby, player)})
 
 	// This state is reached if the player reconnects before having chosen a word.
 	// This can happen if the player refreshes his browser page or the socket
 	// loses connection and reconnects quickly.
 	if lobby.drawer == player && lobby.CurrentWord == "" {
-		lobby.WriteJSON(lobby.drawer, &Event{Type: EventTypeYourTurn, Data: lobby.wordChoice})
+		lobby.WriteObject(lobby.drawer, &Event{Type: EventTypeYourTurn, Data: lobby.wordChoice})
 	}
 
 	// The player that just joined already has the most up-to-date data due
@@ -1106,5 +1039,5 @@ func (lobby *Lobby) Shutdown() {
 	lobby.mutex.Lock()
 	defer lobby.mutex.Unlock()
 
-	lobby.Broadcast(&Event{Type: EventTypeShutdown})
+	lobby.Broadcast(&EventTypeOnly{Type: EventTypeShutdown})
 }

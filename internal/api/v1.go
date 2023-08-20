@@ -119,7 +119,8 @@ func postLobby(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	lobby.WriteJSON = WriteJSON
+	lobby.WriteObject = WriteObject
+	lobby.WritePreparedMessage = WritePreparedMessage
 	player.SetLastKnownAddress(GetIPAddressFromRequest(request))
 
 	SetUsersessionCookie(writer, player)
@@ -180,9 +181,10 @@ func postPlayer(writer http.ResponseWriter, request *http.Request) {
 
 // SetUsersessionCookie takes the players usersession and sets it as a cookie.
 func SetUsersessionCookie(w http.ResponseWriter, player *game.Player) {
+	session := player.GetUserSession().String()
 	http.SetCookie(w, &http.Cookie{
 		Name:     "usersession",
-		Value:    player.GetUserSession().String(),
+		Value:    session,
 		Path:     "/",
 		SameSite: http.SameSiteStrictMode,
 	})

@@ -8,6 +8,7 @@ import (
 	discordemojimap "github.com/Bios-Marcel/discordemojimap/v2"
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/websocket"
+	easyjson "github.com/mailru/easyjson"
 	"golang.org/x/text/cases"
 )
 
@@ -61,9 +62,9 @@ type Lobby struct {
 	// wordChoice represents the current choice of words present to the drawer.
 	wordChoice []string
 	Wordpack   string
-	// RoundEndTime represents the time at which the current round will end.
+	// roundEndTime represents the time at which the current round will end.
 	// This is a UTC unix-timestamp in milliseconds.
-	RoundEndTime int64
+	roundEndTime int64
 
 	timeLeftTicker        *time.Ticker
 	scoreEarnedByGuessers int
@@ -91,116 +92,13 @@ type Lobby struct {
 
 	mutex *sync.Mutex
 
-	WriteJSON func(player *Player, object any) error
-}
-
-// EditableLobbySettings represents all lobby settings that are editable by
-// the lobby owner after the lobby has already been opened.
-type EditableLobbySettings struct {
-	// MaxPlayers defines the maximum amount of players in a single lobby.
-	MaxPlayers int `json:"maxPlayers"`
-	// CustomWords are additional words that will be used in addition to the
-	// predefined words.
-	// Public defines whether the lobby is being broadcast to clients asking
-	// for available lobbies.
-	Public bool `json:"public"`
-	// EnableVotekick decides whether players are allowed to kick eachother
-	// by casting majority votes.
-	EnableVotekick bool `json:"enableVotekick"`
-	// CustomWordsChance determines the chance of each word being a custom
-	// word on the next word prompt. This needs to be an integer between
-	// 0 and 100. The value represents a percentage.
-	CustomWordsChance int `json:"customWordsChance"`
-	// ClientsPerIPLimit helps preventing griefing by reducing each player
-	// to one tab per IP address.
-	ClientsPerIPLimit int `json:"clientsPerIpLimit"`
-	// DrawingTime is the amount of seconds that each player has available to
-	// finish their drawing.
-	DrawingTime int `json:"drawingTime"`
-	// Rounds defines how many iterations a lobby does before the game ends.
-	// One iteration means every participant does one drawing.
-	Rounds int `json:"rounds"`
-}
-
-type State string
-
-const (
-	// Unstarted means the lobby has been opened but never started.
-	Unstarted State = "unstarted"
-	// Ongoing means the lobby has already been started.
-	Ongoing State = "ongoing"
-	// GameOver means that the lobby had been start, but the max round limit
-	// has already been reached.
-	GameOver State = "gameOver"
-)
-
-// WordHint describes a character of the word that is to be guessed, whether
-// the character should be shown and whether it should be underlined on the
-// UI.
-type WordHint struct {
-	Character rune `json:"character"`
-	Underline bool `json:"underline"`
-}
-
-// RGBColor represents a 24-bit color consisting of red, green and blue.
-type RGBColor struct {
-	R uint8 `json:"r"`
-	G uint8 `json:"g"`
-	B uint8 `json:"b"`
-}
-
-// Line is the struct that a client sends when drawing.
-type Line struct {
-	FromX     float32  `json:"fromX"`
-	FromY     float32  `json:"fromY"`
-	ToX       float32  `json:"toX"`
-	ToY       float32  `json:"toY"`
-	Color     RGBColor `json:"color"`
-	LineWidth float32  `json:"lineWidth"`
-}
-
-// Fill represents the usage of the fill bucket.
-type Fill struct {
-	X     float32  `json:"x"`
-	Y     float32  `json:"y"`
-	Color RGBColor `json:"color"`
+	WriteObject          func(*Player, easyjson.Marshaler) error
+	WritePreparedMessage func(*Player, *websocket.PreparedMessage) error
 }
 
 // MaxPlayerNameLength defines how long a string can be at max when used
 // as the playername.
 const MaxPlayerNameLength int = 30
-
-// Player represents a participant in a Lobby.
-type Player struct {
-	// userSession uniquely identifies the player.
-	userSession      uuid.UUID
-	ws               *websocket.Conn
-	socketMutex      *sync.Mutex
-	lastKnownAddress string
-	// disconnectTime is used to kick a player in case the lobby doesn't have
-	// space for new players. The player with the oldest disconnect.Time will
-	// get kicked.
-	disconnectTime *time.Time
-
-	votedForKick map[uuid.UUID]bool
-
-	// ID uniquely identified the Player.
-	ID uuid.UUID `json:"id"`
-	// Name is the players displayed name
-	Name string `json:"name"`
-	// Score is the points that the player got in the current Lobby.
-	Score int `json:"score"`
-	// Connected defines whether the players websocket connection is currently
-	// established. This has previously been in state but has been moved out
-	// in order to avoid losing the state on refreshing the page.
-	// While checking the websocket against nil would be enough, we still need
-	// this field for sending it via the APIs.
-	Connected bool `json:"connected"`
-	// Rank is the current ranking of the player in his Lobby
-	LastScore int         `json:"lastScore"`
-	Rank      int         `json:"rank"`
-	State     PlayerState `json:"state"`
-}
 
 // GetLastKnownAddress returns the last known IP-Address used for an HTTP request.
 func (player *Player) GetLastKnownAddress() string {
@@ -305,12 +203,6 @@ func SanitizeName(name string) string {
 	}
 
 	return generatePlayerName()
-}
-
-// Event contains an eventtype and optionally any data.
-type Event struct {
-	Data any    `json:"data"`
-	Type string `json:"type"`
 }
 
 // GetConnectedPlayerCount returns the amount of player that have currently
