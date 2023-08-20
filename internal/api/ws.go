@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"runtime/debug"
-	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/gofrs/uuid"
@@ -89,12 +89,17 @@ func wsListen(lobby *game.Lobby, player *game.Player, socket *websocket.Conn) {
 	for {
 		messageType, data, err := socket.ReadMessage()
 		if err != nil {
-			if websocket.IsCloseError(err) || websocket.IsUnexpectedCloseError(err) ||
-				// This happens when the server closes the connection. It will cause 1000 retries followed by a panic.
-				strings.Contains(err.Error(), "use of closed network connection") {
-				// Make sure that the sockethandler is called
+			if websocket.IsCloseError(err) || websocket.IsUnexpectedCloseError(err) {
 				lobby.OnPlayerDisconnect(player)
-				// If the error is fatal, we stop listening for more messages.
+				return
+			}
+
+			// This way, we should catch repeated reads on closed connections
+			// on both linux and windows. Previously we did this by searching
+			// for certain text in the error message, which was neither
+			// cross-platform nor translation aware.
+			if netErr, ok := err.(*net.OpError); ok && !netErr.Temporary() {
+				lobby.OnPlayerDisconnect(player)
 				return
 			}
 
