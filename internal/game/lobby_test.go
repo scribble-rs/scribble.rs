@@ -212,17 +212,26 @@ func getUnexportedField(field reflect.Value) any {
 }
 
 func Test_wordSelectionEvent(t *testing.T) {
-	firstWordChoice := "abc"
 	lobby := &Lobby{
 		mutex: &sync.Mutex{},
 		EditableLobbySettings: &EditableLobbySettings{
 			DrawingTime: 10,
 			Rounds:      10,
 		},
-		words: []string{firstWordChoice, "def", "ghi"},
+		words: []string{"abc", "def", "ghi"},
 	}
 	wordHintEvents := make(map[uuid.UUID][]*WordHint)
-	lobby.WriteObject = noOpWriteObject
+	var wordChoice []string
+	lobby.WriteObject = func(player *Player, message easyjson.Marshaler) error {
+		event, ok := message.(*Event)
+		if ok {
+			if event.Type == EventTypeYourTurn {
+				wordChoice = event.Data.([]string)
+			}
+		}
+
+		return nil
+	}
 	lobby.WritePreparedMessage = func(player *Player, message *websocket.PreparedMessage) error {
 		data := getUnexportedField(reflect.ValueOf(message).Elem().FieldByName("data")).([]byte)
 		type event struct {
@@ -234,14 +243,14 @@ func Test_wordSelectionEvent(t *testing.T) {
 			t.Fatal("error unmarshalling message", err)
 		}
 
+		t.Log(e.Type)
 		if e.Type == "update-wordhint" {
 			var wordHints []*WordHint
 			if err := json.Unmarshal(e.Data, &wordHints); err != nil {
-				t.Fatal(err)
+				t.Fatal("error unmarshalling word hints:", err)
 			}
 			wordHintEvents[player.ID] = wordHints
 		}
-
 		return nil
 	}
 
@@ -276,7 +285,7 @@ func Test_wordSelectionEvent(t *testing.T) {
 			t.Error("Word hints for drawer contained not underlined character")
 		}
 
-		expectedRune := rune(firstWordChoice[index])
+		expectedRune := rune(wordChoice[0][index])
 		if wordHint.Character != expectedRune {
 			t.Errorf("Character at index %d was %c instead of %c", index, wordHint.Character, expectedRune)
 		}

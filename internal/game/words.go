@@ -84,59 +84,43 @@ func GetRandomWords(wordCount int, lobby *Lobby) []string {
 // numbers. This can be used for predictability in unit tests.
 // See GetRandomWords for functionality documentation.
 func getRandomWordsCustomRng(wordCount int, lobby *Lobby, rng func() int) []string {
-	if lobby.CustomWordsChance > 0 && len(lobby.CustomWords) > 0 {
-		// Always get custom words
-		if lobby.CustomWordsChance == 100 {
-			if len(lobby.CustomWords) >= wordCount {
-				return popCustomWords(wordCount, lobby)
-			}
-
-			leftOverCustomWords := len(lobby.CustomWords)
-			return append(
-				popCustomWords(len(lobby.CustomWords), lobby),
-				popWordpackWords(wordCount-leftOverCustomWords, lobby)...)
+	words := make([]string, wordCount)
+	for i := 0; i < wordCount; i++ {
+		if lobby.CustomWordsChance > 0 && len(lobby.CustomWords) > 0 && rng() <= lobby.CustomWordsChance {
+			words[i] = popCustomWord(lobby)
+		} else {
+			words[i] = popWordpackWord(lobby)
 		}
-
-		words := make([]string, 0, wordCount)
-		for i := 0; i < wordCount; i++ {
-			if len(lobby.CustomWords) >= 1 && rng() <= lobby.CustomWordsChance {
-				words = append(words, popCustomWords(1, lobby)...)
-			} else {
-				words = append(words, popWordpackWords(1, lobby)...)
-			}
-		}
-
-		return words
 	}
 
-	return popWordpackWords(wordCount, lobby)
+	return words
 }
 
-func popCustomWords(wordCount int, lobby *Lobby) []string {
-	wordIndex := len(lobby.CustomWords) - wordCount
-	lastWords := lobby.CustomWords[wordIndex:]
-	lobby.CustomWords = lobby.CustomWords[:wordIndex]
-	return lastWords
+func popCustomWord(lobby *Lobby) string {
+	lastIndex := len(lobby.CustomWords) - 1
+	lastWord := lobby.CustomWords[lastIndex]
+	lobby.CustomWords = lobby.CustomWords[:lastIndex]
+	return lastWord
 }
 
-// popWordpackWords gets X words from the wordpack. The major difference to
+// popWordpackWord gets X words from the wordpack. The major difference to
 // popCustomWords is, that the wordlist gets reset and reshuffeled once every
 // item has been popped.
-func popWordpackWords(wordCount int, lobby *Lobby) []string {
-	if len(lobby.words) < wordCount {
-		var readError error
-		lobby.words, readError = readWordList(lobby.lowercaser, lobby.Wordpack)
-		if readError != nil {
+func popWordpackWord(lobby *Lobby) string {
+	if len(lobby.words) == 0 {
+		var err error
+		lobby.words, err = readWordList(lobby.lowercaser, lobby.Wordpack)
+		if err != nil {
 			// Since this list should've been successfully read once before, we
 			// can "safely" panic if this happens, assuming that there's a
 			// deeper problem.
-			panic(readError)
+			panic(err)
 		}
 	}
-	wordIndex := len(lobby.words) - wordCount
-	lastThreeWords := lobby.words[wordIndex:]
-	lobby.words = lobby.words[:wordIndex]
-	return lastThreeWords
+	lastIndex := len(lobby.words) - 1
+	lastWord := lobby.words[lastIndex]
+	lobby.words = lobby.words[:lastIndex]
+	return lastWord
 }
 
 func shuffleWordList(wordlist []string) {
