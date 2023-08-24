@@ -324,35 +324,35 @@ func Test_kickDrawer(t *testing.T) {
 		t.Errorf("Couldn't start lobby: %s", err)
 	}
 
-	if lobby.drawer == nil {
+	if lobby.Drawer() == nil {
 		t.Error("Drawer should've been a, but was nil")
 	}
 
-	if lobby.drawer != marcel {
-		t.Errorf("Drawer should've been a, but was %s", lobby.drawer.Name)
+	if lobby.Drawer() != marcel {
+		t.Errorf("Drawer should've been a, but was %s", lobby.Drawer().Name)
 	}
 
 	lobby.Synchronized(func() {
 		advanceLobby(lobby)
 	})
 
-	if lobby.drawer == nil {
+	if lobby.Drawer() == nil {
 		t.Error("Drawer should've been b, but was nil")
 	}
 
-	if lobby.drawer != kevin {
-		t.Errorf("Drawer should've been b, but was %s", lobby.drawer.Name)
+	if lobby.Drawer() != kevin {
+		t.Errorf("Drawer should've been b, but was %s", lobby.Drawer().Name)
 	}
 
 	lobby.Synchronized(func() {
 		kickPlayer(lobby, kevin, 1)
 	})
 
-	if lobby.drawer == nil {
+	if lobby.Drawer() == nil {
 		t.Error("Drawer should've been c, but was nil")
 	}
 
-	if lobby.drawer != chantal {
-		t.Errorf("Drawer should've been c, but was %s", lobby.drawer.Name)
+	if lobby.Drawer() != chantal {
+		t.Errorf("Drawer should've been c, but was %s", lobby.Drawer().Name)
 	}
 }
