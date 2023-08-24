@@ -44,10 +44,13 @@ linters:
     # Requires certain types of tags, such as json or mapstructure.
     # While very useful, I don't care right now.
     - musttag
-    # Dynamic errors are fine for our usecases.
-    - err113
+    - goerr113
 
 linters-settings:
+  govet:
+    enable:
+      - fieldalignment
+
   gocritic:
     disabled-checks:
       # This has false positives and provides little value.
@@ -64,6 +67,7 @@ issues:
         - funlen
         - cyclop
         - forcetypeassert
+        - varnamelen
     # The tools aren't part of the actual production code and therefore we don't
     # care about codequality much right now.
     - path: tools/
