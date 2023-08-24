@@ -3,9 +3,8 @@ package game
 import (
 	"embed"
 	"fmt"
-	"io"
 	"math/rand"
-	"regexp"
+	"strings"
 	"time"
 
 	"golang.org/x/text/cases"
@@ -42,17 +41,11 @@ func readWordListInternal(
 	if !available {
 		wordListFile, err := wordlistSupplier(languageIdentifier)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error invoking wordlistSupplier: %w", err)
 		}
 
-		// Due to people having git autoreplace newline characters, there
-		// might be unnecessary \r characters.
-		// While regex isn't super, this doesn't really matter as the word lists
-		// are cached and only the first start of the first lobby will be slower.
-		words = regexp.MustCompile("\r?\n").Split(wordListFile, -1)
-		for wordIndex, word := range words {
-			words[wordIndex] = lowercaser.String(word)
-		}
+		// Wordlists are guaranteed not to contain any carriage returns (\r).
+		words = strings.Split(lowercaser.String(wordListFile), "\n")
 		wordListCache[languageIdentifier] = words
 	}
 
@@ -71,12 +64,7 @@ func readWordListInternal(
 // whole application.
 func readWordList(lowercaser cases.Caser, chosenLanguage string) ([]string, error) {
 	return readWordListInternal(lowercaser, chosenLanguage, func(key string) (string, error) {
-		wordFile, err := wordFS.Open("words/" + key)
-		if err != nil {
-			return "", fmt.Errorf("error opening word file from binary: %w", err)
-		}
-
-		wordBytes, err := io.ReadAll(wordFile)
+		wordBytes, err := wordFS.ReadFile("words/" + key)
 		if err != nil {
 			return "", fmt.Errorf("error reading wordfile: %w", err)
 		}

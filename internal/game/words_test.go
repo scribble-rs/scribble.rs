@@ -1,6 +1,7 @@
 package game
 
 import (
+	"bytes"
 	"fmt"
 	"strconv"
 	"strings"
@@ -10,6 +11,17 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
+
+func Test_wordListsContainNoCarriageReturns(t *testing.T) {
+	for _, fileName := range languageIdentifiers {
+		fileBytes, err := wordFS.ReadFile("words/" + fileName)
+		if err != nil {
+			t.Errorf("language file '%s' could not be read: %s", fileName, err)
+		} else if bytes.ContainsRune(fileBytes, '\r') {
+			t.Errorf("language file '%s' contains a carriage return", fileName)
+		}
+	}
+}
 
 func Test_readWordList(t *testing.T) {
 	t.Run("test invalid language file", func(t *testing.T) {
