@@ -16,7 +16,7 @@ RUN go mod download -x
 # Copy actual codebase, since we only have the go.mod and go.sum so far.
 COPY . /app/
 ENV CGO_ENABLED=0
-RUN go build -tags timetzdata -o ./scribblers ./cmd/scribblers
+RUN go build -ldflags "-w -s" -tags timetzdata -o ./scribblers ./cmd/scribblers
 
 #
 # Runner
