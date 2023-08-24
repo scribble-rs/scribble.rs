@@ -67,8 +67,8 @@ const (
 
 // Event contains an eventtype and optionally any data.
 type Event struct {
-	Type string `json:"type"`
 	Data any    `json:"data"`
+	Type string `json:"type"`
 }
 
 type StringDataEvent struct {
@@ -99,6 +99,7 @@ type RGBColor struct {
 }
 
 type LineEvent struct {
+	Type string `json:"type"`
 	Data struct {
 		FromX     float32  `json:"fromX"`
 		FromY     float32  `json:"fromY"`
@@ -107,7 +108,6 @@ type LineEvent struct {
 		Color     RGBColor `json:"color"`
 		LineWidth float32  `json:"lineWidth"`
 	} `json:"data"`
-	Type string `json:"type"`
 }
 
 type FillEvent struct {
@@ -124,20 +124,20 @@ type FillEvent struct {
 // successful kick vote. The voting is anonymous, meaning the voting player
 // won't be exposed.
 type KickVote struct {
-	PlayerID          uuid.UUID `json:"playerId"`
 	PlayerName        string    `json:"playerName"`
+	PlayerID          uuid.UUID `json:"playerId"`
 	VoteCount         int       `json:"voteCount"`
 	RequiredVoteCount int       `json:"requiredVoteCount"`
 }
 
 type OwnerChangeEvent struct {
-	PlayerID   uuid.UUID `json:"playerId"`
 	PlayerName string    `json:"playerName"`
+	PlayerID   uuid.UUID `json:"playerId"`
 }
 
 type NameChangeEvent struct {
-	PlayerID   uuid.UUID `json:"playerId"`
 	PlayerName string    `json:"playerName"`
+	PlayerID   uuid.UUID `json:"playerId"`
 }
 
 // GameOverEvent is basically the ready event, but contains the last word.
@@ -165,64 +165,62 @@ type NextTurn struct {
 
 // OutgoingMessage represents a message in the chatroom.
 type OutgoingMessage struct {
+	// Content is the actual message text.
+	Content string `json:"content"`
 	// Author is the player / thing that wrote the message
 	Author string `json:"author"`
 	// AuthorID is the unique identifier of the authors player object.
 	AuthorID uuid.UUID `json:"authorId"`
-	// Content is the actual message text.
-	Content string `json:"content"`
 }
 
 // Ready represents the initial state that a user needs upon connection.
 // This includes all the necessary things for properly running a client
 // without receiving any more data.
 type Ready struct {
-	PlayerID     uuid.UUID `json:"playerId"`
-	PlayerName   string    `json:"playerName"`
-	AllowDrawing bool      `json:"allowDrawing"`
-
-	VotekickEnabled    bool        `json:"votekickEnabled"`
+	WordHints          []*WordHint `json:"wordHints"`
+	PlayerName         string      `json:"playerName"`
+	Players            []*Player   `json:"players"`
 	GameState          State       `json:"gameState"`
+	CurrentDrawing     []any       `json:"currentDrawing"`
+	PlayerID           uuid.UUID   `json:"playerId"`
 	OwnerID            uuid.UUID   `json:"ownerId"`
 	Round              int         `json:"round"`
 	Rounds             int         `json:"rounds"`
 	RoundEndTime       int         `json:"roundEndTime"`
 	DrawingTimeSetting int         `json:"drawingTimeSetting"`
-	WordHints          []*WordHint `json:"wordHints"`
-	Players            []*Player   `json:"players"`
-	CurrentDrawing     []any       `json:"currentDrawing"`
+	AllowDrawing       bool        `json:"allowDrawing"`
+	VotekickEnabled    bool        `json:"votekickEnabled"`
 }
 
 // Player represents a participant in a Lobby.
 type Player struct {
 	// userSession uniquely identifies the player.
-	userSession      uuid.UUID
-	ws               *websocket.Conn
-	socketMutex      *sync.Mutex
-	lastKnownAddress string
+	userSession uuid.UUID
+	ws          *websocket.Conn
+	socketMutex *sync.Mutex
 	// disconnectTime is used to kick a player in case the lobby doesn't have
 	// space for new players. The player with the oldest disconnect.Time will
 	// get kicked.
-	disconnectTime *time.Time
+	disconnectTime   *time.Time
+	votedForKick     map[uuid.UUID]bool
+	lastKnownAddress string
 
-	votedForKick map[uuid.UUID]bool
-
-	// ID uniquely identified the Player.
-	ID uuid.UUID `json:"id"`
 	// Name is the players displayed name
-	Name string `json:"name"`
+	Name  string      `json:"name"`
+	State PlayerState `json:"state"`
+	// Rank is the current ranking of the player in his Lobby
 	// Score is the points that the player got in the current Lobby.
-	Score int `json:"score"`
+	Score     int `json:"score"`
+	LastScore int `json:"lastScore"`
+	Rank      int `json:"rank"`
 	// Connected defines whether the players websocket connection is currently
 	// established. This has previously been in state but has been moved out
 	// in order to avoid losing the state on refreshing the page.
 	// While checking the websocket against nil would be enough, we still need
 	// this field for sending it via the APIs.
 	Connected bool `json:"connected"`
-	// Rank is the current ranking of the player in his Lobby
-	LastScore int         `json:"lastScore"`
-	Rank      int         `json:"rank"`
-	State     PlayerState `json:"state"`
+	// ID uniquely identified the Player.
+	ID uuid.UUID `json:"id"`
 }
 
 // EditableLobbySettings represents all lobby settings that are editable by
