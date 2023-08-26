@@ -21,31 +21,12 @@ RUN go build -ldflags "-w -s" -tags timetzdata -o ./scribblers ./cmd/scribblers
 #
 # Runner
 #
-# We have to use a debian image, because with alpine we get an error
-#   Error loading shared library libresolv.so.2: No such file or directory (needed by /service)
-#   Error relocating /flows_service: __res_search: symbol not found
-# The following tips for alpine based images didn't solve the problem
-#   RUN apk add libaio libnsl libc6-compat
-#   RUN ln -s /lib64/* /lib
-#   RUN ln -s /lib/libc.so.6 /usr/lib/libresolv.so.2
-#
-# This seems to be related to the fact, that simply passing `CGO_ENABLED=0`
-# will not necessarily produce a static build. Whether this is enough to
-# produce a static build, depends on both the target os and the libraries used.
-# For example the standard net package seems to require C libraries.
-#
-# People are currently working on providing a simpler way of producing
-# static binaries:
-# https://github.com/golang/go/issues/26492
 FROM scratch
 
 COPY --from=builder /app/scribblers /scribblers
 # The scratch image doesn't contain any certificates, therefore we use
 # the builders certificate, so that we can send HTTP requests.
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-
-# # Certificiates aren't installed by default, but are required for https request.
-# RUN apt update && apt install ca-certificates -y
 
 # Required so go knows which timezone to use by default, if none is
 # explicitly defined when using the `time` package.
