@@ -56,6 +56,10 @@ linters-settings:
       # This has false positives and provides little value.
       - ifElseChain
 
+run:
+  skip-files:
+    - ".*_easyjson.go"
+
 issues:
   exclude-rules:
     # Exclude some linters from running on tests files. In tests, we often have
