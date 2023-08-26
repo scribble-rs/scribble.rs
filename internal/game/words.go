@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
-	"time"
 
 	"golang.org/x/text/cases"
 )
@@ -124,7 +123,6 @@ func popWordpackWord(lobby *Lobby) string {
 }
 
 func shuffleWordList(wordlist []string) {
-	rand.Seed(time.Now().Unix())
 	rand.Shuffle(len(wordlist), func(a, b int) {
 		wordlist[a], wordlist[b] = wordlist[b], wordlist[a]
 	})

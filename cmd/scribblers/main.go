@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"os/signal"
@@ -36,9 +35,6 @@ func main() {
 			log.Fatal("error starting cpu profiling:", err)
 		}
 	}
-
-	// Setting the seed in order for the petnames to be random.
-	rand.Seed(time.Now().UnixNano())
 
 	router := chi.NewMux()
 	router.Use(middleware.StripSlashes)
