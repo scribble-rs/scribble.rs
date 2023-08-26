@@ -25,8 +25,4 @@ FROM mcr.microsoft.com/windows/nanoserver:ltsc2022
 
 COPY --from=builder /app/scribblers /scribblers
 
-# Required so go knows which timezone to use by default, if none is
-# explicitly defined when using the `time` package.
-ENV TZ=Europe/Berlin
-
 ENTRYPOINT ["/scribblers"]
