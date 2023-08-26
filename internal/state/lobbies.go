@@ -71,9 +71,9 @@ func GetLobby(id string) *game.Lobby {
 	globalStateMutex.Lock()
 	defer globalStateMutex.Unlock()
 
-	for _, l := range lobbies {
-		if l.LobbyID == id {
-			return l
+	for _, lobby := range lobbies {
+		if lobby.LobbyID == id {
+			return lobby
 		}
 	}
 
@@ -134,16 +134,11 @@ func RemoveLobby(id string) {
 }
 
 func removeLobby(id string) {
-	indexToDelete := -1
-	for index, l := range lobbies {
-		if l.LobbyID == id {
-			indexToDelete = index
-			break
+	for index, lobby := range lobbies {
+		if lobby.LobbyID == id {
+			removeLobbyByIndex(index)
+			return
 		}
-	}
-
-	if indexToDelete != -1 {
-		removeLobbyByIndex(indexToDelete)
 	}
 }
 
