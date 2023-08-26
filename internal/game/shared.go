@@ -1,3 +1,4 @@
+//go:generate easyjson -all ${GOFILE}
 package game
 
 import (
@@ -13,7 +14,7 @@ import (
 // These files require special treatment, since we use easyjson for marshalling
 // and unmarshalling. If this file changes, run:
 //
-//  easyjson -all ./internal/game/shared.go
+//  go generate ./...
 //
 
 // Eevnts that are just incomming from the client.

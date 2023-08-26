@@ -20,7 +20,7 @@ type Lobby struct {
 	// ID uniquely identified the Lobby.
 	LobbyID string
 
-	*EditableLobbySettings
+	EditableLobbySettings
 
 	// DrawingTimeNew is the new value of the drawing time. If a round is
 	// already ongoing, we can't simply change the drawing time, as it would

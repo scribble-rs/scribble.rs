@@ -214,7 +214,7 @@ func getUnexportedField(field reflect.Value) any {
 func Test_wordSelectionEvent(t *testing.T) {
 	lobby := &Lobby{
 		mutex: &sync.Mutex{},
-		EditableLobbySettings: &EditableLobbySettings{
+		EditableLobbySettings: EditableLobbySettings{
 			DrawingTime: 10,
 			Rounds:      10,
 		},
@@ -310,7 +310,7 @@ func Test_wordSelectionEvent(t *testing.T) {
 func Test_kickDrawer(t *testing.T) {
 	lobby := &Lobby{
 		mutex: &sync.Mutex{},
-		EditableLobbySettings: &EditableLobbySettings{
+		EditableLobbySettings: EditableLobbySettings{
 			DrawingTime: 10,
 			Rounds:      10,
 		},

@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	LobbySettingBounds = &SettingBounds{
+	LobbySettingBounds = SettingBounds{
 		MinDrawingTime:       60,
 		MaxDrawingTime:       300,
 		MinRounds:            1,
@@ -872,7 +872,7 @@ func (lobby *Lobby) selectWord(wordChoiceIndex int) {
 func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTime, rounds, maxPlayers, customWordsChance, clientsPerIPLimit int, customWords []string, enableVotekick bool) (*Player, *Lobby, error) {
 	lobby := &Lobby{
 		LobbyID: uuid.Must(uuid.NewV4()).String(),
-		EditableLobbySettings: &EditableLobbySettings{
+		EditableLobbySettings: EditableLobbySettings{
 			Rounds:            rounds,
 			DrawingTime:       drawingTime,
 			MaxPlayers:        maxPlayers,

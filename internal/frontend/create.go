@@ -45,7 +45,7 @@ func createDefaultLobbyCreatePageData() *LobbyCreatePageData {
 // LobbyCreatePageData defines all non-static data for the lobby create page.
 type LobbyCreatePageData struct {
 	*BasePageConfig
-	*game.SettingBounds
+	game.SettingBounds
 	Translation       translations.Translation
 	Locale            string
 	Errors            []string

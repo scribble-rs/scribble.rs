@@ -175,30 +175,6 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame2(in *jlexer
 			continue
 		}
 		switch key {
-		case "playerId":
-			if data := in.UnsafeBytes(); in.Ok() {
-				in.AddError((out.PlayerID).UnmarshalText(data))
-			}
-		case "playerName":
-			out.PlayerName = string(in.String())
-		case "allowDrawing":
-			out.AllowDrawing = bool(in.Bool())
-		case "votekickEnabled":
-			out.VotekickEnabled = bool(in.Bool())
-		case "gameState":
-			out.GameState = State(in.String())
-		case "ownerId":
-			if data := in.UnsafeBytes(); in.Ok() {
-				in.AddError((out.OwnerID).UnmarshalText(data))
-			}
-		case "round":
-			out.Round = int(in.Int())
-		case "rounds":
-			out.Rounds = int(in.Int())
-		case "roundEndTime":
-			out.RoundEndTime = int(in.Int())
-		case "drawingTimeSetting":
-			out.DrawingTimeSetting = int(in.Int())
 		case "wordHints":
 			if in.IsNull() {
 				in.Skip()
@@ -230,6 +206,8 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame2(in *jlexer
 				}
 				in.Delim(']')
 			}
+		case "playerName":
+			out.PlayerName = string(in.String())
 		case "players":
 			if in.IsNull() {
 				in.Skip()
@@ -261,6 +239,8 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame2(in *jlexer
 				}
 				in.Delim(']')
 			}
+		case "gameState":
+			out.GameState = State(in.String())
 		case "currentDrawing":
 			if in.IsNull() {
 				in.Skip()
@@ -290,6 +270,26 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame2(in *jlexer
 				}
 				in.Delim(']')
 			}
+		case "playerId":
+			if data := in.UnsafeBytes(); in.Ok() {
+				in.AddError((out.PlayerID).UnmarshalText(data))
+			}
+		case "ownerId":
+			if data := in.UnsafeBytes(); in.Ok() {
+				in.AddError((out.OwnerID).UnmarshalText(data))
+			}
+		case "round":
+			out.Round = int(in.Int())
+		case "rounds":
+			out.Rounds = int(in.Int())
+		case "roundEndTime":
+			out.RoundEndTime = int(in.Int())
+		case "drawingTimeSetting":
+			out.DrawingTimeSetting = int(in.Int())
+		case "allowDrawing":
+			out.AllowDrawing = bool(in.Bool())
+		case "votekickEnabled":
+			out.VotekickEnabled = bool(in.Bool())
 		default:
 			in.SkipRecursive()
 		}
@@ -305,9 +305,24 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame2(out *jwrit
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"playerId\":"
+		const prefix string = ",\"wordHints\":"
 		out.RawString(prefix[1:])
-		out.RawText((in.PlayerID).MarshalText())
+		if in.WordHints == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v4, v5 := range in.WordHints {
+				if v4 > 0 {
+					out.RawByte(',')
+				}
+				if v5 == nil {
+					out.RawString("null")
+				} else {
+					(*v5).MarshalEasyJSON(out)
+				}
+			}
+			out.RawByte(']')
+		}
 	}
 	{
 		const prefix string = ",\"playerName\":"
@@ -315,19 +330,56 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame2(out *jwrit
 		out.String(string(in.PlayerName))
 	}
 	{
-		const prefix string = ",\"allowDrawing\":"
+		const prefix string = ",\"players\":"
 		out.RawString(prefix)
-		out.Bool(bool(in.AllowDrawing))
-	}
-	{
-		const prefix string = ",\"votekickEnabled\":"
-		out.RawString(prefix)
-		out.Bool(bool(in.VotekickEnabled))
+		if in.Players == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v6, v7 := range in.Players {
+				if v6 > 0 {
+					out.RawByte(',')
+				}
+				if v7 == nil {
+					out.RawString("null")
+				} else {
+					(*v7).MarshalEasyJSON(out)
+				}
+			}
+			out.RawByte(']')
+		}
 	}
 	{
 		const prefix string = ",\"gameState\":"
 		out.RawString(prefix)
 		out.String(string(in.GameState))
+	}
+	{
+		const prefix string = ",\"currentDrawing\":"
+		out.RawString(prefix)
+		if in.CurrentDrawing == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v8, v9 := range in.CurrentDrawing {
+				if v8 > 0 {
+					out.RawByte(',')
+				}
+				if m, ok := v9.(easyjson.Marshaler); ok {
+					m.MarshalEasyJSON(out)
+				} else if m, ok := v9.(json.Marshaler); ok {
+					out.Raw(m.MarshalJSON())
+				} else {
+					out.Raw(json.Marshal(v9))
+				}
+			}
+			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"playerId\":"
+		out.RawString(prefix)
+		out.RawText((in.PlayerID).MarshalText())
 	}
 	{
 		const prefix string = ",\"ownerId\":"
@@ -355,66 +407,14 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame2(out *jwrit
 		out.Int(int(in.DrawingTimeSetting))
 	}
 	{
-		const prefix string = ",\"wordHints\":"
+		const prefix string = ",\"allowDrawing\":"
 		out.RawString(prefix)
-		if in.WordHints == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
-		} else {
-			out.RawByte('[')
-			for v4, v5 := range in.WordHints {
-				if v4 > 0 {
-					out.RawByte(',')
-				}
-				if v5 == nil {
-					out.RawString("null")
-				} else {
-					(*v5).MarshalEasyJSON(out)
-				}
-			}
-			out.RawByte(']')
-		}
+		out.Bool(bool(in.AllowDrawing))
 	}
 	{
-		const prefix string = ",\"players\":"
+		const prefix string = ",\"votekickEnabled\":"
 		out.RawString(prefix)
-		if in.Players == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
-		} else {
-			out.RawByte('[')
-			for v6, v7 := range in.Players {
-				if v6 > 0 {
-					out.RawByte(',')
-				}
-				if v7 == nil {
-					out.RawString("null")
-				} else {
-					(*v7).MarshalEasyJSON(out)
-				}
-			}
-			out.RawByte(']')
-		}
-	}
-	{
-		const prefix string = ",\"currentDrawing\":"
-		out.RawString(prefix)
-		if in.CurrentDrawing == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
-		} else {
-			out.RawByte('[')
-			for v8, v9 := range in.CurrentDrawing {
-				if v8 > 0 {
-					out.RawByte(',')
-				}
-				if m, ok := v9.(easyjson.Marshaler); ok {
-					m.MarshalEasyJSON(out)
-				} else if m, ok := v9.(json.Marshaler); ok {
-					out.Raw(m.MarshalJSON())
-				} else {
-					out.Raw(json.Marshal(v9))
-				}
-			}
-			out.RawByte(']')
-		}
+		out.Bool(bool(in.VotekickEnabled))
 	}
 	out.RawByte('}')
 }
@@ -541,22 +541,22 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame4(in *jlexer
 			continue
 		}
 		switch key {
-		case "id":
-			if data := in.UnsafeBytes(); in.Ok() {
-				in.AddError((out.ID).UnmarshalText(data))
-			}
 		case "name":
 			out.Name = string(in.String())
+		case "state":
+			out.State = PlayerState(in.String())
 		case "score":
 			out.Score = int(in.Int())
-		case "connected":
-			out.Connected = bool(in.Bool())
 		case "lastScore":
 			out.LastScore = int(in.Int())
 		case "rank":
 			out.Rank = int(in.Int())
-		case "state":
-			out.State = PlayerState(in.String())
+		case "connected":
+			out.Connected = bool(in.Bool())
+		case "id":
+			if data := in.UnsafeBytes(); in.Ok() {
+				in.AddError((out.ID).UnmarshalText(data))
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -572,24 +572,19 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame4(out *jwrit
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"id\":"
+		const prefix string = ",\"name\":"
 		out.RawString(prefix[1:])
-		out.RawText((in.ID).MarshalText())
+		out.String(string(in.Name))
 	}
 	{
-		const prefix string = ",\"name\":"
+		const prefix string = ",\"state\":"
 		out.RawString(prefix)
-		out.String(string(in.Name))
+		out.String(string(in.State))
 	}
 	{
 		const prefix string = ",\"score\":"
 		out.RawString(prefix)
 		out.Int(int(in.Score))
-	}
-	{
-		const prefix string = ",\"connected\":"
-		out.RawString(prefix)
-		out.Bool(bool(in.Connected))
 	}
 	{
 		const prefix string = ",\"lastScore\":"
@@ -602,9 +597,14 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame4(out *jwrit
 		out.Int(int(in.Rank))
 	}
 	{
-		const prefix string = ",\"state\":"
+		const prefix string = ",\"connected\":"
 		out.RawString(prefix)
-		out.String(string(in.State))
+		out.Bool(bool(in.Connected))
+	}
+	{
+		const prefix string = ",\"id\":"
+		out.RawString(prefix)
+		out.RawText((in.ID).MarshalText())
 	}
 	out.RawByte('}')
 }
@@ -651,12 +651,12 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame5(in *jlexer
 			continue
 		}
 		switch key {
+		case "playerName":
+			out.PlayerName = string(in.String())
 		case "playerId":
 			if data := in.UnsafeBytes(); in.Ok() {
 				in.AddError((out.PlayerID).UnmarshalText(data))
 			}
-		case "playerName":
-			out.PlayerName = string(in.String())
 		default:
 			in.SkipRecursive()
 		}
@@ -672,14 +672,14 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame5(out *jwrit
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"playerId\":"
+		const prefix string = ",\"playerName\":"
 		out.RawString(prefix[1:])
-		out.RawText((in.PlayerID).MarshalText())
+		out.String(string(in.PlayerName))
 	}
 	{
-		const prefix string = ",\"playerName\":"
+		const prefix string = ",\"playerId\":"
 		out.RawString(prefix)
-		out.String(string(in.PlayerName))
+		out.RawText((in.PlayerID).MarshalText())
 	}
 	out.RawByte('}')
 }
@@ -726,14 +726,14 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame6(in *jlexer
 			continue
 		}
 		switch key {
+		case "content":
+			out.Content = string(in.String())
 		case "author":
 			out.Author = string(in.String())
 		case "authorId":
 			if data := in.UnsafeBytes(); in.Ok() {
 				in.AddError((out.AuthorID).UnmarshalText(data))
 			}
-		case "content":
-			out.Content = string(in.String())
 		default:
 			in.SkipRecursive()
 		}
@@ -749,19 +749,19 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame6(out *jwrit
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"author\":"
+		const prefix string = ",\"content\":"
 		out.RawString(prefix[1:])
+		out.String(string(in.Content))
+	}
+	{
+		const prefix string = ",\"author\":"
+		out.RawString(prefix)
 		out.String(string(in.Author))
 	}
 	{
 		const prefix string = ",\"authorId\":"
 		out.RawString(prefix)
 		out.RawText((in.AuthorID).MarshalText())
-	}
-	{
-		const prefix string = ",\"content\":"
-		out.RawString(prefix)
-		out.String(string(in.Content))
 	}
 	out.RawByte('}')
 }
@@ -939,12 +939,12 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame8(in *jlexer
 			continue
 		}
 		switch key {
+		case "playerName":
+			out.PlayerName = string(in.String())
 		case "playerId":
 			if data := in.UnsafeBytes(); in.Ok() {
 				in.AddError((out.PlayerID).UnmarshalText(data))
 			}
-		case "playerName":
-			out.PlayerName = string(in.String())
 		default:
 			in.SkipRecursive()
 		}
@@ -960,14 +960,14 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame8(out *jwrit
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"playerId\":"
+		const prefix string = ",\"playerName\":"
 		out.RawString(prefix[1:])
-		out.RawText((in.PlayerID).MarshalText())
+		out.String(string(in.PlayerName))
 	}
 	{
-		const prefix string = ",\"playerName\":"
+		const prefix string = ",\"playerId\":"
 		out.RawString(prefix)
-		out.String(string(in.PlayerName))
+		out.RawText((in.PlayerID).MarshalText())
 	}
 	out.RawByte('}')
 }
@@ -1014,10 +1014,10 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame9(in *jlexer
 			continue
 		}
 		switch key {
-		case "data":
-			easyjson9aa6bd57Decode(in, &out.Data)
 		case "type":
 			out.Type = string(in.String())
+		case "data":
+			easyjson9aa6bd57Decode(in, &out.Data)
 		default:
 			in.SkipRecursive()
 		}
@@ -1033,14 +1033,14 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame9(out *jwrit
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"data\":"
+		const prefix string = ",\"type\":"
 		out.RawString(prefix[1:])
-		easyjson9aa6bd57Encode(out, in.Data)
+		out.String(string(in.Type))
 	}
 	{
-		const prefix string = ",\"type\":"
+		const prefix string = ",\"data\":"
 		out.RawString(prefix)
-		out.String(string(in.Type))
+		easyjson9aa6bd57Encode(out, in.Data)
 	}
 	out.RawByte('}')
 }
@@ -1178,12 +1178,12 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame10(in *jlexe
 			continue
 		}
 		switch key {
+		case "playerName":
+			out.PlayerName = string(in.String())
 		case "playerId":
 			if data := in.UnsafeBytes(); in.Ok() {
 				in.AddError((out.PlayerID).UnmarshalText(data))
 			}
-		case "playerName":
-			out.PlayerName = string(in.String())
 		case "voteCount":
 			out.VoteCount = int(in.Int())
 		case "requiredVoteCount":
@@ -1203,14 +1203,14 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame10(out *jwri
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"playerId\":"
+		const prefix string = ",\"playerName\":"
 		out.RawString(prefix[1:])
-		out.RawText((in.PlayerID).MarshalText())
+		out.String(string(in.PlayerName))
 	}
 	{
-		const prefix string = ",\"playerName\":"
+		const prefix string = ",\"playerId\":"
 		out.RawString(prefix)
-		out.String(string(in.PlayerName))
+		out.RawText((in.PlayerID).MarshalText())
 	}
 	{
 		const prefix string = ",\"voteCount\":"
@@ -1336,30 +1336,6 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame12(in *jlexe
 		switch key {
 		case "previousWord":
 			out.PreviousWord = string(in.String())
-		case "playerId":
-			if data := in.UnsafeBytes(); in.Ok() {
-				in.AddError((out.PlayerID).UnmarshalText(data))
-			}
-		case "playerName":
-			out.PlayerName = string(in.String())
-		case "allowDrawing":
-			out.AllowDrawing = bool(in.Bool())
-		case "votekickEnabled":
-			out.VotekickEnabled = bool(in.Bool())
-		case "gameState":
-			out.GameState = State(in.String())
-		case "ownerId":
-			if data := in.UnsafeBytes(); in.Ok() {
-				in.AddError((out.OwnerID).UnmarshalText(data))
-			}
-		case "round":
-			out.Round = int(in.Int())
-		case "rounds":
-			out.Rounds = int(in.Int())
-		case "roundEndTime":
-			out.RoundEndTime = int(in.Int())
-		case "drawingTimeSetting":
-			out.DrawingTimeSetting = int(in.Int())
 		case "wordHints":
 			if in.IsNull() {
 				in.Skip()
@@ -1391,6 +1367,8 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame12(in *jlexe
 				}
 				in.Delim(']')
 			}
+		case "playerName":
+			out.PlayerName = string(in.String())
 		case "players":
 			if in.IsNull() {
 				in.Skip()
@@ -1422,6 +1400,8 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame12(in *jlexe
 				}
 				in.Delim(']')
 			}
+		case "gameState":
+			out.GameState = State(in.String())
 		case "currentDrawing":
 			if in.IsNull() {
 				in.Skip()
@@ -1451,6 +1431,26 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame12(in *jlexe
 				}
 				in.Delim(']')
 			}
+		case "playerId":
+			if data := in.UnsafeBytes(); in.Ok() {
+				in.AddError((out.PlayerID).UnmarshalText(data))
+			}
+		case "ownerId":
+			if data := in.UnsafeBytes(); in.Ok() {
+				in.AddError((out.OwnerID).UnmarshalText(data))
+			}
+		case "round":
+			out.Round = int(in.Int())
+		case "rounds":
+			out.Rounds = int(in.Int())
+		case "roundEndTime":
+			out.RoundEndTime = int(in.Int())
+		case "drawingTimeSetting":
+			out.DrawingTimeSetting = int(in.Int())
+		case "allowDrawing":
+			out.AllowDrawing = bool(in.Bool())
+		case "votekickEnabled":
+			out.VotekickEnabled = bool(in.Bool())
 		default:
 			in.SkipRecursive()
 		}
@@ -1471,9 +1471,24 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame12(out *jwri
 		out.String(string(in.PreviousWord))
 	}
 	{
-		const prefix string = ",\"playerId\":"
+		const prefix string = ",\"wordHints\":"
 		out.RawString(prefix)
-		out.RawText((in.PlayerID).MarshalText())
+		if in.WordHints == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v16, v17 := range in.WordHints {
+				if v16 > 0 {
+					out.RawByte(',')
+				}
+				if v17 == nil {
+					out.RawString("null")
+				} else {
+					(*v17).MarshalEasyJSON(out)
+				}
+			}
+			out.RawByte(']')
+		}
 	}
 	{
 		const prefix string = ",\"playerName\":"
@@ -1481,19 +1496,56 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame12(out *jwri
 		out.String(string(in.PlayerName))
 	}
 	{
-		const prefix string = ",\"allowDrawing\":"
+		const prefix string = ",\"players\":"
 		out.RawString(prefix)
-		out.Bool(bool(in.AllowDrawing))
-	}
-	{
-		const prefix string = ",\"votekickEnabled\":"
-		out.RawString(prefix)
-		out.Bool(bool(in.VotekickEnabled))
+		if in.Players == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v18, v19 := range in.Players {
+				if v18 > 0 {
+					out.RawByte(',')
+				}
+				if v19 == nil {
+					out.RawString("null")
+				} else {
+					(*v19).MarshalEasyJSON(out)
+				}
+			}
+			out.RawByte(']')
+		}
 	}
 	{
 		const prefix string = ",\"gameState\":"
 		out.RawString(prefix)
 		out.String(string(in.GameState))
+	}
+	{
+		const prefix string = ",\"currentDrawing\":"
+		out.RawString(prefix)
+		if in.CurrentDrawing == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v20, v21 := range in.CurrentDrawing {
+				if v20 > 0 {
+					out.RawByte(',')
+				}
+				if m, ok := v21.(easyjson.Marshaler); ok {
+					m.MarshalEasyJSON(out)
+				} else if m, ok := v21.(json.Marshaler); ok {
+					out.Raw(m.MarshalJSON())
+				} else {
+					out.Raw(json.Marshal(v21))
+				}
+			}
+			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"playerId\":"
+		out.RawString(prefix)
+		out.RawText((in.PlayerID).MarshalText())
 	}
 	{
 		const prefix string = ",\"ownerId\":"
@@ -1521,66 +1573,14 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame12(out *jwri
 		out.Int(int(in.DrawingTimeSetting))
 	}
 	{
-		const prefix string = ",\"wordHints\":"
+		const prefix string = ",\"allowDrawing\":"
 		out.RawString(prefix)
-		if in.WordHints == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
-		} else {
-			out.RawByte('[')
-			for v16, v17 := range in.WordHints {
-				if v16 > 0 {
-					out.RawByte(',')
-				}
-				if v17 == nil {
-					out.RawString("null")
-				} else {
-					(*v17).MarshalEasyJSON(out)
-				}
-			}
-			out.RawByte(']')
-		}
+		out.Bool(bool(in.AllowDrawing))
 	}
 	{
-		const prefix string = ",\"players\":"
+		const prefix string = ",\"votekickEnabled\":"
 		out.RawString(prefix)
-		if in.Players == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
-		} else {
-			out.RawByte('[')
-			for v18, v19 := range in.Players {
-				if v18 > 0 {
-					out.RawByte(',')
-				}
-				if v19 == nil {
-					out.RawString("null")
-				} else {
-					(*v19).MarshalEasyJSON(out)
-				}
-			}
-			out.RawByte(']')
-		}
-	}
-	{
-		const prefix string = ",\"currentDrawing\":"
-		out.RawString(prefix)
-		if in.CurrentDrawing == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
-		} else {
-			out.RawByte('[')
-			for v20, v21 := range in.CurrentDrawing {
-				if v20 > 0 {
-					out.RawByte(',')
-				}
-				if m, ok := v21.(easyjson.Marshaler); ok {
-					m.MarshalEasyJSON(out)
-				} else if m, ok := v21.(json.Marshaler); ok {
-					out.Raw(m.MarshalJSON())
-				} else {
-					out.Raw(json.Marshal(v21))
-				}
-			}
-			out.RawByte(']')
-		}
+		out.Bool(bool(in.VotekickEnabled))
 	}
 	out.RawByte('}')
 }
@@ -1846,8 +1846,6 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame15(in *jlexe
 			continue
 		}
 		switch key {
-		case "type":
-			out.Type = string(in.String())
 		case "data":
 			if m, ok := out.Data.(easyjson.Unmarshaler); ok {
 				m.UnmarshalEasyJSON(in)
@@ -1856,6 +1854,8 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame15(in *jlexe
 			} else {
 				out.Data = in.Interface()
 			}
+		case "type":
+			out.Type = string(in.String())
 		default:
 			in.SkipRecursive()
 		}
@@ -1871,13 +1871,8 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame15(out *jwri
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"type\":"
-		out.RawString(prefix[1:])
-		out.String(string(in.Type))
-	}
-	{
 		const prefix string = ",\"data\":"
-		out.RawString(prefix)
+		out.RawString(prefix[1:])
 		if m, ok := in.Data.(easyjson.Marshaler); ok {
 			m.MarshalEasyJSON(out)
 		} else if m, ok := in.Data.(json.Marshaler); ok {
@@ -1885,6 +1880,11 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame15(out *jwri
 		} else {
 			out.Raw(json.Marshal(in.Data))
 		}
+	}
+	{
+		const prefix string = ",\"type\":"
+		out.RawString(prefix)
+		out.String(string(in.Type))
 	}
 	out.RawByte('}')
 }

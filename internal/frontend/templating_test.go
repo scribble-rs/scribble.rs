@@ -23,8 +23,7 @@ func Test_templateLobbyPage(t *testing.T) {
 				CacheBust: "lol",
 			},
 			LobbyData: &api.LobbyData{
-				EditableLobbySettings: &game.EditableLobbySettings{},
-				SettingBounds:         game.LobbySettingBounds,
+				SettingBounds: game.LobbySettingBounds,
 			},
 			Translation: translations.DefaultTranslation,
 		})
@@ -53,7 +52,7 @@ func Test_templateRobotPage(t *testing.T) {
 		"robot-page", &lobbyPageData{
 			BasePageConfig: &BasePageConfig{},
 			LobbyData: &api.LobbyData{
-				EditableLobbySettings: &game.EditableLobbySettings{
+				EditableLobbySettings: game.EditableLobbySettings{
 					MaxPlayers: 12,
 					Rounds:     4,
 				},

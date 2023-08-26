@@ -1,9 +1,10 @@
+//go:generate easyjson -all ${GOFILE}
+
 // This file contains the API methods for the public API
 
 package api
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -12,11 +13,15 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/gofrs/uuid"
+	"github.com/mailru/easyjson"
 	"github.com/scribble-rs/scribble.rs/internal/game"
 	"github.com/scribble-rs/scribble.rs/internal/state"
 )
 
 var ErrLobbyNotExistent = errors.New("the requested lobby doesn't exist")
+
+//easyjson:json
+type LobbyEntries []*LobbyEntry
 
 // LobbyEntry is an API object for representing a join-able public lobby.
 type LobbyEntry struct {
@@ -38,7 +43,7 @@ func getLobbies(writer http.ResponseWriter, _ *http.Request) {
 	// when deleting lobbies from state in the state package.
 
 	lobbies := state.GetPublicLobbies()
-	lobbyEntries := make([]*LobbyEntry, 0, len(lobbies))
+	lobbyEntries := make(LobbyEntries, 0, len(lobbies))
 	for _, lobby := range lobbies {
 		// While one would expect locking the lobby here, it's not very
 		// important to get 100% consistent results here.
@@ -57,8 +62,11 @@ func getLobbies(writer http.ResponseWriter, _ *http.Request) {
 		})
 	}
 
-	if err := json.NewEncoder(writer).Encode(lobbyEntries); err != nil {
-		http.Error(writer, err.Error(), http.StatusInternalServerError)
+	if started, _, err := easyjson.MarshalToHTTPResponseWriter(lobbyEntries, writer); err != nil {
+		if !started {
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
+		}
+		return
 	}
 }
 
@@ -127,8 +135,11 @@ func postLobby(writer http.ResponseWriter, request *http.Request) {
 
 	lobbyData := CreateLobbyData(lobby)
 
-	if err := json.NewEncoder(writer).Encode(lobbyData); err != nil {
-		http.Error(writer, err.Error(), http.StatusInternalServerError)
+	if started, _, err := easyjson.MarshalToHTTPResponseWriter(lobbyData, writer); err != nil {
+		if !started {
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
+		}
+		return
 	}
 
 	// We only add the lobby if everything else was successful.
@@ -173,8 +184,11 @@ func postPlayer(writer http.ResponseWriter, request *http.Request) {
 	})
 
 	if lobbyData != nil {
-		if err := json.NewEncoder(writer).Encode(lobbyData); err != nil {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
+		if started, _, err := easyjson.MarshalToHTTPResponseWriter(lobbyData, writer); err != nil {
+			if !started {
+				http.Error(writer, err.Error(), http.StatusInternalServerError)
+			}
+			return
 		}
 	}
 }
@@ -291,16 +305,18 @@ func patchLobby(writer http.ResponseWriter, request *http.Request) {
 			lobby.DrawingTime = drawingTime
 		}
 
-		lobbySettingsCopy := *lobby.EditableLobbySettings
+		lobbySettingsCopy := lobby.EditableLobbySettings
 		lobbySettingsCopy.DrawingTime = drawingTime
 		lobby.Broadcast(&game.Event{Type: game.EventTypeLobbySettingsChanged, Data: lobbySettingsCopy})
 	})
 }
 
 func getStats(writer http.ResponseWriter, _ *http.Request) {
-	writer.Header().Add("Content-Type", "application/json")
-	if err := json.NewEncoder(writer).Encode(state.Stats()); err != nil {
-		log.Println("error encoding stats:", err)
+	if started, _, err := easyjson.MarshalToHTTPResponseWriter(state.Stats(), writer); err != nil {
+		if !started {
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
+		}
+		return
 	}
 }
 
@@ -318,8 +334,8 @@ var (
 // While unofficial clients will probably need all of these values, the
 // official webclient doesn't use all of them as of now.
 type LobbyData struct {
-	*game.SettingBounds
-	*game.EditableLobbySettings
+	game.SettingBounds
+	game.EditableLobbySettings
 
 	LobbyID string `json:"lobbyId"`
 	// DrawingBoardBaseWidth is the internal canvas width and is needed for
