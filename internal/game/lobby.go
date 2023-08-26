@@ -259,7 +259,7 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 	switch levenshtein.ComputeDistance(normInput, normSearched) {
 	case 0:
 		{
-			secondsLeft := int(lobby.roundEndTime/1000 - time.Now().UTC().UnixNano()/1000000000)
+			secondsLeft := int(lobby.roundEndTime/1000 - time.Now().UTC().Unix())
 
 			sender.LastScore = calculateGuesserScore(lobby.hintCount, lobby.hintsLeft, secondsLeft, lobby.DrawingTime)
 			sender.Score += sender.LastScore
@@ -655,7 +655,7 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 	lobby.wordChoice = GetRandomWords(3, lobby)
 
 	// We use milliseconds for higher accuracy
-	lobby.roundEndTime = time.Now().UTC().UnixNano()/1000000 + int64(lobby.DrawingTime)*1000
+	lobby.roundEndTime = getTimeAsMillis() + int64(lobby.DrawingTime)*1000
 	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
 	go startTurnTimeTicker(lobby, lobby.timeLeftTicker)
 
@@ -780,7 +780,7 @@ func (lobby *Lobby) tickLogic(expectedTicker *time.Ticker) bool {
 }
 
 func getTimeAsMillis() int64 {
-	return time.Now().UTC().UnixNano() / 1000000
+	return time.Now().UTC().UnixMilli()
 }
 
 // recalculateRanks will assign each player his respective rank in the lobby

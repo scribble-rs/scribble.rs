@@ -28,8 +28,4 @@ COPY --from=builder /app/scribblers /scribblers
 # the builders certificate, so that we can send HTTP requests.
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-# Required so go knows which timezone to use by default, if none is
-# explicitly defined when using the `time` package.
-ENV TZ=Europe/Berlin
-
 ENTRYPOINT ["/scribblers"]

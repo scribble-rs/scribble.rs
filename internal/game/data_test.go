@@ -41,7 +41,7 @@ func TestOccupiedPlayerCount(t *testing.T) {
 		t.Errorf("Occupied player count expected to be 3, but was %d", lobby.GetOccupiedPlayerSlots())
 	}
 
-	past := time.Now().Local().AddDate(-1, 0, 0)
+	past := time.Now().AddDate(-1, 0, 0)
 	disconnectedPlayer.disconnectTime = &past
 	if lobby.GetOccupiedPlayerSlots() != 2 {
 		t.Errorf("Occupied player count expected to be 2, but was %d", lobby.GetOccupiedPlayerSlots())
