@@ -39,6 +39,7 @@ func cleanupRoutineLogic() {
 	globalStateMutex.Lock()
 	defer globalStateMutex.Unlock()
 
+	initalLobbyCount := len(lobbies)
 	for index := len(lobbies) - 1; index >= 0; index-- {
 		lobby := lobbies[index]
 		if lobby.HasConnectedPlayers() {
@@ -49,6 +50,10 @@ func cleanupRoutineLogic() {
 		if disconnectTime == nil || time.Since(*disconnectTime) >= 75*time.Second {
 			removeLobbyByIndex(index)
 		}
+	}
+
+	if lobbiesClosed := initalLobbyCount - len(lobbies); lobbiesClosed > 0 {
+		log.Printf("Closing %d lobbies. Remaining lobbies: %d\n", lobbiesClosed, len(lobbies))
 	}
 }
 
@@ -142,19 +147,16 @@ func removeLobby(id string) {
 	}
 }
 
-func removeLobbyByIndex(indexToDelete int) {
-	lobbyID := lobbies[indexToDelete].LobbyID
-
+func removeLobbyByIndex(index int) {
 	// We delete the lobby without maintaining order, since the lobby order
 	// is irrelevant. This holds true as long as there's no paging for
 	// requesting lobbies via the API.
-	lobbies[indexToDelete] = lobbies[len(lobbies)-1]
-	// Unreference the moved item in the other slot to prevent potential
-	// memory leaks.
+	lobbies[index] = lobbies[len(lobbies)-1]
+	// Remove reference to moved lobby, as we'd multiple references to
+	// the same lobby in memory, potentially leaking memory if the
+	// lobby is removed later on.
 	lobbies[len(lobbies)-1] = nil
 	lobbies = lobbies[:len(lobbies)-1]
-
-	log.Printf("Closing lobby %s. There are currently %d open lobbies left.\n", lobbyID, len(lobbies))
 }
 
 // PageStats represents dynamic information about the website.
