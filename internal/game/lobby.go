@@ -70,7 +70,7 @@ type SettingBounds struct {
 }
 
 func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player) error {
-	if eventType == "keep-alive" {
+	if eventType == EventTypeKeepAlive {
 		// This is a known dummy event in order to avoid accidental websocket
 		// connection closure. However, no action is required on the server.
 		// Either way, we needn't needlessly lock the lobby.

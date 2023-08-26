@@ -42,6 +42,7 @@ const (
 	EventTypeOwnerChange              = "owner-change"
 	EventTypeLobbySettingsChanged     = "lobby-settings-changed"
 	EventTypeShutdown                 = "shutdown"
+	EventTypeKeepAlive                = "keep-alive"
 )
 
 // Events that are bidirectional.
