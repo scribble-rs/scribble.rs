@@ -419,10 +419,10 @@
             socketIsConnecting = true;
 
             if (location.protocol === "https:") {
-                console.log("Attempting secure socket connection on port " + location.port + "...");
+                console.log("Attempting secure socket connection ...");
                 socket = new WebSocket("wss://" + location.hostname + ":" + location.port + "{{.RootPath}}/v1/lobby/{{.LobbyID}}/ws");
             } else {
-                console.log("Attempting socket connection on port " + location.port + "...");
+                console.log("Attempting socket connection ...");
                 socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "{{.RootPath}}/v1/lobby/{{.LobbyID}}/ws");
             }
 
