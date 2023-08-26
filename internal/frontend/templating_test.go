@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/scribble-rs/scribble.rs/internal/api"
+	"github.com/scribble-rs/scribble.rs/internal/config"
 	"github.com/scribble-rs/scribble.rs/internal/game"
 	"github.com/scribble-rs/scribble.rs/internal/translations"
 )
@@ -66,7 +67,7 @@ func Test_templateRobotPage(t *testing.T) {
 }
 
 func Test_templateLobbyCreatePage(t *testing.T) {
-	createPageData := createDefaultLobbyCreatePageData()
+	createPageData := createDefaultLobbyCreatePageData(config.Default.LobbySettingDefaults)
 	createPageData.Translation = translations.DefaultTranslation
 
 	var buffer bytes.Buffer

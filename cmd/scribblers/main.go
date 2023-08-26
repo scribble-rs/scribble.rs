@@ -55,7 +55,7 @@ func main() {
 
 	// FIXME Global state needs to be deleted.
 	frontend.SetRootPath(cfg.RootPath)
-	frontend.SetupRoutes(cfg.RootPath, router)
+	frontend.SetupRoutes(cfg, router)
 
 	state.LaunchCleanupRoutine()
 

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/scribble-rs/scribble.rs/internal/api"
+	"github.com/scribble-rs/scribble.rs/internal/config"
 	"github.com/scribble-rs/scribble.rs/internal/game"
 	"github.com/scribble-rs/scribble.rs/internal/state"
 	"github.com/scribble-rs/scribble.rs/internal/translations"
@@ -14,51 +15,39 @@ import (
 
 // homePage servers the default page for scribble.rs, which is the page to
 // create a new lobby.
-func homePage(writer http.ResponseWriter, request *http.Request) {
-	translation, locale := determineTranslation(request)
-	createPageData := createDefaultLobbyCreatePageData()
-	createPageData.Translation = translation
-	createPageData.Locale = locale
+func newHomePageHandler(lobbySettingDefaults config.LobbySettingDefaults) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		translation, locale := determineTranslation(request)
+		createPageData := createDefaultLobbyCreatePageData(lobbySettingDefaults)
+		createPageData.Translation = translation
+		createPageData.Locale = locale
 
-	err := pageTemplates.ExecuteTemplate(writer, "lobby-create-page", createPageData)
-	if err != nil {
-		log.Printf("Error templating home page: %s\n", err)
+		err := pageTemplates.ExecuteTemplate(writer, "lobby-create-page", createPageData)
+		if err != nil {
+			log.Printf("Error templating home page: %s\n", err)
+		}
 	}
 }
 
-func createDefaultLobbyCreatePageData() *LobbyCreatePageData {
+func createDefaultLobbyCreatePageData(defaultLobbySettings config.LobbySettingDefaults) *LobbyCreatePageData {
 	return &LobbyCreatePageData{
-		BasePageConfig:    currentBasePageConfig,
-		SettingBounds:     game.LobbySettingBounds,
-		Languages:         game.SupportedLanguages,
-		Public:            "false",
-		DrawingTime:       "120",
-		Rounds:            "4",
-		MaxPlayers:        "12",
-		CustomWordsChance: "50",
-		ClientsPerIPLimit: "1",
-		EnableVotekick:    "true",
-		Language:          "english",
+		BasePageConfig:       currentBasePageConfig,
+		SettingBounds:        game.LobbySettingBounds,
+		Languages:            game.SupportedLanguages,
+		LobbySettingDefaults: defaultLobbySettings,
 	}
 }
 
 // LobbyCreatePageData defines all non-static data for the lobby create page.
 type LobbyCreatePageData struct {
 	*BasePageConfig
+	config.LobbySettingDefaults
 	game.SettingBounds
-	Translation       translations.Translation
-	Locale            string
-	Errors            []string
-	Languages         map[string]string
-	Public            string
-	DrawingTime       string
-	Rounds            string
-	MaxPlayers        string
-	CustomWords       string
-	CustomWordsChance string
-	ClientsPerIPLimit string
-	EnableVotekick    string
-	Language          string
+
+	Translation translations.Translation
+	Locale      string
+	Errors      []string
+	Languages   map[string]string
 }
 
 // ssrCreateLobby allows creating a lobby, optionally returning errors that
@@ -81,18 +70,20 @@ func ssrCreateLobby(writer http.ResponseWriter, request *http.Request) {
 
 	// Prevent resetting the form, since that would be annoying as hell.
 	pageData := LobbyCreatePageData{
-		BasePageConfig:    currentBasePageConfig,
-		SettingBounds:     game.LobbySettingBounds,
-		Languages:         game.SupportedLanguages,
-		Public:            request.Form.Get("public"),
-		DrawingTime:       request.Form.Get("drawing_time"),
-		Rounds:            request.Form.Get("rounds"),
-		MaxPlayers:        request.Form.Get("max_players"),
-		CustomWords:       request.Form.Get("custom_words"),
-		CustomWordsChance: request.Form.Get("custom_words_chance"),
-		ClientsPerIPLimit: request.Form.Get("clients_per_ip_limit"),
-		EnableVotekick:    request.Form.Get("enable_votekick"),
-		Language:          request.Form.Get("language"),
+		BasePageConfig: currentBasePageConfig,
+		SettingBounds:  game.LobbySettingBounds,
+		Languages:      game.SupportedLanguages,
+		LobbySettingDefaults: config.LobbySettingDefaults{
+			Public:            request.Form.Get("public"),
+			DrawingTime:       request.Form.Get("drawing_time"),
+			Rounds:            request.Form.Get("rounds"),
+			MaxPlayers:        request.Form.Get("max_players"),
+			CustomWords:       request.Form.Get("custom_words"),
+			CustomWordsChance: request.Form.Get("custom_words_chance"),
+			ClientsPerIPLimit: request.Form.Get("clients_per_ip_limit"),
+			EnableVotekick:    request.Form.Get("enable_votekick"),
+			Language:          request.Form.Get("language"),
+		},
 	}
 
 	if languageInvalid != nil {

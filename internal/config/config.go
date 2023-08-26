@@ -11,8 +11,19 @@ import (
 	"github.com/subosito/gotenv"
 )
 
+type LobbySettingDefaults struct {
+	Public            string `env:"PUBLIC"`
+	DrawingTime       string `env:"DRAWING_TIME"`
+	Rounds            string `env:"ROUNDS"`
+	MaxPlayers        string `env:"MAX_PLAYERS"`
+	CustomWords       string `env:"CUSTOM_WORDS"`
+	CustomWordsChance string `env:"CUSTOM_WORDS_CHANCE"`
+	ClientsPerIPLimit string `env:"CLIENTS_PER_IP_LIMIT"`
+	EnableVotekick    string `env:"ENABLE_VOTEKICK"`
+	Language          string `env:"LANGUAGE"`
+}
+
 type Config struct {
-	Port uint16 `env:"PORT" envDefault:"8080"`
 	// NetworkAddress is empty by default, since that implies listening on
 	// all interfaces. For development usecases, on windows for example, this
 	// is very annoying, as windows will nag you with firewall prompts.
@@ -23,6 +34,25 @@ type Config struct {
 	// might have to look like this: painting.com/scribblers/v1
 	RootPath       string `env:"ROOT_PATH"`
 	CPUProfilePath string `env:"CPU_PROFILE_PATH"`
+	// LobbySettingDefaults is used for the server side rendering of the lobby
+	// creation page. It doesn't affect the default values of lobbies created
+	// via the API.
+	LobbySettingDefaults LobbySettingDefaults `envPrefix:"LOBBY_SETTING_DEFAULTS_"`
+	Port                 uint16               `env:"PORT"`
+}
+
+var Default = Config{
+	Port: 8080,
+	LobbySettingDefaults: LobbySettingDefaults{
+		Public:            "false",
+		DrawingTime:       "120",
+		Rounds:            "4",
+		MaxPlayers:        "12",
+		CustomWordsChance: "50",
+		ClientsPerIPLimit: "1",
+		EnableVotekick:    "true",
+		Language:          "english",
+	},
 }
 
 // Load loads the configuration from the environment. If a .env file is
@@ -57,7 +87,7 @@ func Load() (*Config, error) {
 		envVars[pair[0]] = pair[1]
 	}
 
-	var config Config
+	config := Default
 	if err := env.ParseWithOptions(&config, env.Options{
 		Environment: envVars,
 		OnSet: func(key string, value any, isDefault bool) {

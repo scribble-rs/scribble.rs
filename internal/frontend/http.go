@@ -9,6 +9,7 @@ import (
 	"path"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/scribble-rs/scribble.rs/internal/config"
 	"github.com/scribble-rs/scribble.rs/internal/translations"
 )
 
@@ -73,14 +74,14 @@ type BasePageConfig struct {
 }
 
 // SetupRoutes registers the official webclient endpoints with the http package.
-func SetupRoutes(rootPath string, router chi.Router) {
-	router.Get("/"+rootPath, homePage)
+func SetupRoutes(config *config.Config, router chi.Router) {
+	router.Get("/"+config.RootPath, newHomePageHandler(config.LobbySettingDefaults))
 
 	fileServer := http.FileServer(http.FS(frontendResourcesFS))
 	router.Get(
-		"/"+path.Join(rootPath, "resources/*"),
+		"/"+path.Join(config.RootPath, "resources/*"),
 		http.StripPrefix(
-			"/"+rootPath,
+			"/"+config.RootPath,
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				// Duration of 1 year, since we use cachebusting anyway.
 				w.Header().Set("Cache-Control", "public, max-age=31536000")
@@ -89,8 +90,8 @@ func SetupRoutes(rootPath string, router chi.Router) {
 			}),
 		).ServeHTTP,
 	)
-	router.Get("/"+path.Join(rootPath, "ssrEnterLobby/{lobby_id}"), ssrEnterLobby)
-	router.Post("/"+path.Join(rootPath, "ssrCreateLobby"), ssrCreateLobby)
+	router.Get("/"+path.Join(config.RootPath, "ssrEnterLobby/{lobby_id}"), ssrEnterLobby)
+	router.Post("/"+path.Join(config.RootPath, "ssrCreateLobby"), ssrCreateLobby)
 }
 
 // errorPageData represents the data that error.html requires to be displayed.
