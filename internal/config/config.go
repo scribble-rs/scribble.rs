@@ -6,6 +6,7 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/caarlos0/env/v9"
 	"github.com/subosito/gotenv"
@@ -28,6 +29,16 @@ type CORS struct {
 	AllowCredentials bool     `env:"ALLOW_CREDENTIALS"`
 }
 
+type LobbyCleanup struct {
+	// Interval is the interval in which the cleanup routine will run. If set
+	// to `0`, the cleanup routine will be disabled.
+	Interval time.Duration `env:"INTERVAL"`
+	// PlayerInactivityThreshold is the time after which a player counts as
+	// inactivity and won't keep the lobby up. Note that cleaning up a lobby can
+	// therefore take up to Interval + PlayerInactivityThreshold.
+	PlayerInactivityThreshold time.Duration `env:"PLAYER_INACTIVITY_THRESHOLD"`
+}
+
 type Config struct {
 	// NetworkAddress is empty by default, since that implies listening on
 	// all interfaces. For development usecases, on windows for example, this
@@ -45,6 +56,7 @@ type Config struct {
 	LobbySettingDefaults LobbySettingDefaults `envPrefix:"LOBBY_SETTING_DEFAULTS_"`
 	Port                 uint16               `env:"PORT"`
 	CORS                 CORS                 `envPrefix:"CORS_"`
+	LobbyCleanup         LobbyCleanup         `envPrefix:"LOBBY_CLEANUP_"`
 }
 
 var Default = Config{
@@ -62,6 +74,10 @@ var Default = Config{
 	CORS: CORS{
 		AllowedOrigins:   []string{"*"},
 		AllowCredentials: false,
+	},
+	LobbyCleanup: LobbyCleanup{
+		Interval:                  90 * time.Second,
+		PlayerInactivityThreshold: 75 * time.Second,
 	},
 }
 

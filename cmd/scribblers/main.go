@@ -62,7 +62,9 @@ func main() {
 	frontend.SetRootPath(cfg.RootPath)
 	frontend.SetupRoutes(cfg, router)
 
-	state.LaunchCleanupRoutine()
+	if cfg.LobbyCleanup.Interval > 0 {
+		state.LaunchCleanupRoutine(cfg.LobbyCleanup)
+	}
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, syscall.SIGTERM, syscall.SIGINT)

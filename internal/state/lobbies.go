@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/scribble-rs/scribble.rs/internal/config"
 	"github.com/scribble-rs/scribble.rs/internal/game"
 )
 
@@ -25,19 +26,20 @@ var (
 // this packages init method, however, in order to avoid side effects in
 // tests, this has been moved into a public function that has to be called
 // manually.
-func LaunchCleanupRoutine() {
+func LaunchCleanupRoutine(cfg config.LobbyCleanup) {
+	log.Println("Lobby Cleanup Routine started.")
 	go func() {
-		lobbyCleanupTicker := time.NewTicker(90 * time.Second)
+		lobbyCleanupTicker := time.NewTicker(cfg.Interval)
 		for {
 			<-lobbyCleanupTicker.C
-			cleanupRoutineLogic()
+			cleanupRoutineLogic(&cfg)
 		}
 	}()
 }
 
 // cleanupRoutineLogic is an extra function in order to prevent deadlocks by
 // being able to use defer mutex.Unlock().
-func cleanupRoutineLogic() {
+func cleanupRoutineLogic(cfg *config.LobbyCleanup) {
 	globalStateMutex.Lock()
 	defer globalStateMutex.Unlock()
 
@@ -49,7 +51,7 @@ func cleanupRoutineLogic() {
 		}
 
 		disconnectTime := lobby.LastPlayerDisconnectTime
-		if disconnectTime == nil || time.Since(*disconnectTime) >= 75*time.Second {
+		if disconnectTime == nil || time.Since(*disconnectTime) >= cfg.PlayerInactivityThreshold {
 			removeLobbyByIndex(index)
 		}
 	}
