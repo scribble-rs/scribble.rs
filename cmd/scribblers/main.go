@@ -13,6 +13,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/scribble-rs/scribble.rs/internal/api"
 	"github.com/scribble-rs/scribble.rs/internal/config"
 	"github.com/scribble-rs/scribble.rs/internal/frontend"
@@ -39,6 +40,10 @@ func main() {
 	router := chi.NewMux()
 	router.Use(middleware.StripSlashes)
 	router.Use(middleware.Recoverer)
+	router.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   cfg.CORS.AllowedOrigins,
+		AllowCredentials: cfg.CORS.AllowCredentials,
+	}))
 
 	// Healthcheck for deployments with monitoring if required.
 	router.Get(

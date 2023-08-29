@@ -23,6 +23,11 @@ type LobbySettingDefaults struct {
 	Language          string `env:"LANGUAGE"`
 }
 
+type CORS struct {
+	AllowedOrigins   []string `env:"ALLOWED_ORIGINS"`
+	AllowCredentials bool     `env:"ALLOW_CREDENTIALS"`
+}
+
 type Config struct {
 	// NetworkAddress is empty by default, since that implies listening on
 	// all interfaces. For development usecases, on windows for example, this
@@ -39,6 +44,7 @@ type Config struct {
 	// via the API.
 	LobbySettingDefaults LobbySettingDefaults `envPrefix:"LOBBY_SETTING_DEFAULTS_"`
 	Port                 uint16               `env:"PORT"`
+	CORS                 CORS                 `envPrefix:"CORS_"`
 }
 
 var Default = Config{
@@ -52,6 +58,10 @@ var Default = Config{
 		ClientsPerIPLimit: "1",
 		EnableVotekick:    "true",
 		Language:          "english",
+	},
+	CORS: CORS{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: false,
 	},
 }
 
