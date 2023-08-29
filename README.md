@@ -29,11 +29,18 @@ the working directory.
 
 Available settings:
 
-| Key             | Description                                                      | Default | Required |
-| --------------- | ---------------------------------------------------------------- | ------- | -------- |
-| PORT            | HTTP port that the server listens to.                            | 8080    | True     |
-| NETWORK_ADDRESS | TCP address that the server listens to.                          |         | False    |
-| ROOT_PATH       | Changes the path (after your domain) that the server listens to. |         | False    |
+| Key                                       | Description                                                      | Default | Required |
+| ----------------------------------------- | ---------------------------------------------------------------- | ------- | -------- |
+| PORT                                      | HTTP port that the server listens to.                            | 8080    | True     |
+| NETWORK_ADDRESS                           | TCP address that the server listens to.                          |         | False    |
+| ROOT_PATH                                 | Changes the path (after your domain) that the server listens to. |         | False    |
+| CORS_ALLOWED_ORIGINS                      |                                                                  | *       | False    |
+| CORS_ALLOW_CREDENTIALS                    |                                                                  |         | False    |
+| LOBBY_CLEANUP_INTERVAL                    |                                                                  | 90s     | False    |
+| LOBBY_CLEANUP_PLAYER_INACTIVITY_THRESHOLD |                                                                  | 75s     | False    |
+
+For more up-to-date configuration, read the
+[config.go](/internal/config/config.go) file.
 
 ## Docker
 
@@ -130,3 +137,4 @@ original file.
 * [Trash Icon](https://www.iconfinder.com/icons/315225/trash_can_icon) - Made by [Yannick Lung](https://yannicklung.com)
 * [Undo Icon](https://www.iconfinder.com/icons/308948/arrow_undo_icon) - Made by [Ivan Boyko](https://www.iconfinder.com/visualpharm)
 * [Alarmclock Icon](https://www.iconfinder.com/icons/4280508/alarm_outlined_alert_clock_icon) - Made by [Kit of Parts](https://www.iconfinder.com/kitofparts)
+* https://www.iconfinder.com/icons/808399/load_turn_turnaround_icon TODO
