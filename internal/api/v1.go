@@ -32,7 +32,6 @@ type LobbyEntry struct {
 	Rounds          int        `json:"rounds"`
 	DrawingTime     int        `json:"drawingTime"`
 	CustomWords     bool       `json:"customWords"`
-	Votekick        bool       `json:"votekick"`
 	MaxClientsPerIP int        `json:"maxClientsPerIp"`
 	Wordpack        string     `json:"wordpack"`
 	State           game.State `json:"state"`
@@ -55,7 +54,6 @@ func getLobbies(writer http.ResponseWriter, _ *http.Request) {
 			Rounds:          lobby.Rounds,
 			DrawingTime:     lobby.DrawingTime,
 			CustomWords:     len(lobby.CustomWords) > 0,
-			Votekick:        lobby.EnableVotekick,
 			MaxClientsPerIP: lobby.ClientsPerIPLimit,
 			Wordpack:        lobby.Wordpack,
 			State:           lobby.State,
@@ -83,7 +81,6 @@ func postLobby(writer http.ResponseWriter, request *http.Request) {
 	customWords, customWordsInvalid := ParseCustomWords(request.Form.Get("custom_words"))
 	customWordChance, customWordChanceInvalid := ParseCustomWordsChance(request.Form.Get("custom_words_chance"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(request.Form.Get("clients_per_ip_limit"))
-	enableVotekick, enableVotekickInvalid := ParseBoolean("enable votekick", request.Form.Get("enable_votekick"))
 	publicLobby, publicLobbyInvalid := ParseBoolean("public", request.Form.Get("public"))
 
 	var requestErrors []string
@@ -108,9 +105,6 @@ func postLobby(writer http.ResponseWriter, request *http.Request) {
 	if clientsPerIPLimitInvalid != nil {
 		requestErrors = append(requestErrors, clientsPerIPLimitInvalid.Error())
 	}
-	if enableVotekickInvalid != nil {
-		requestErrors = append(requestErrors, enableVotekickInvalid.Error())
-	}
 	if publicLobbyInvalid != nil {
 		requestErrors = append(requestErrors, publicLobbyInvalid.Error())
 	}
@@ -121,7 +115,7 @@ func postLobby(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	playerName := GetPlayername(request)
-	player, lobby, err := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
+	player, lobby, err := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
@@ -244,7 +238,6 @@ func patchLobby(writer http.ResponseWriter, request *http.Request) {
 	rounds, roundsInvalid := ParseRounds(request.Form.Get("rounds"))
 	customWordChance, customWordChanceInvalid := ParseCustomWordsChance(request.Form.Get("custom_words_chance"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(request.Form.Get("clients_per_ip_limit"))
-	enableVotekick, enableVotekickInvalid := ParseBoolean("enable votekick", request.Form.Get("enable_votekick"))
 	publicLobby, publicLobbyInvalid := ParseBoolean("public", request.Form.Get("public"))
 
 	owner := lobby.Owner
@@ -273,9 +266,6 @@ func patchLobby(writer http.ResponseWriter, request *http.Request) {
 	if clientsPerIPLimitInvalid != nil {
 		requestErrors = append(requestErrors, clientsPerIPLimitInvalid.Error())
 	}
-	if enableVotekickInvalid != nil {
-		requestErrors = append(requestErrors, enableVotekickInvalid.Error())
-	}
 	if publicLobbyInvalid != nil {
 		requestErrors = append(requestErrors, publicLobbyInvalid.Error())
 	}
@@ -295,7 +285,6 @@ func patchLobby(writer http.ResponseWriter, request *http.Request) {
 		lobby.MaxPlayers = maxPlayers
 		lobby.CustomWordsChance = customWordChance
 		lobby.ClientsPerIPLimit = clientsPerIPLimit
-		lobby.EnableVotekick = enableVotekick
 		lobby.Public = publicLobby
 		lobby.Rounds = rounds
 

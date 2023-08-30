@@ -35,7 +35,6 @@ func initGermanTranslation() {
 	translation.put("custom-words-info", "Gib hier deine Extrawörter ein und trenne einzelne Wörter mit einem Komma")
 	translation.put("custom-words-chance-setting", "Chance auf Extrawort")
 	translation.put("players-per-ip-limit-setting", "Maximale Spieler pro IP")
-	translation.put("enable-votekick-setting", "Kick-Abstimmungen erlauben")
 	translation.put("save-settings", "Einstellungen Speichern")
 	translation.put("input-contains-invalid-data", "Deine Eingaben enthalten invalide Daten:")
 	translation.put("please-fix-invalid-input", "Bitte korrigiere deine Eingaben und versuche es erneut.")

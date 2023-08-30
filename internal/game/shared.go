@@ -191,7 +191,6 @@ type Ready struct {
 	RoundEndTime       int         `json:"roundEndTime"`
 	DrawingTimeSetting int         `json:"drawingTimeSetting"`
 	AllowDrawing       bool        `json:"allowDrawing"`
-	VotekickEnabled    bool        `json:"votekickEnabled"`
 }
 
 // Player represents a participant in a Lobby.
@@ -235,9 +234,6 @@ type EditableLobbySettings struct {
 	// Public defines whether the lobby is being broadcast to clients asking
 	// for available lobbies.
 	Public bool `json:"public"`
-	// EnableVotekick decides whether players are allowed to kick eachother
-	// by casting majority votes.
-	EnableVotekick bool `json:"enableVotekick"`
 	// CustomWordsChance determines the chance of each word being a custom
 	// word on the next word prompt. This needs to be an integer between
 	// 0 and 100. The value represents a percentage.

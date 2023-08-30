@@ -288,8 +288,6 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame2(in *jlexer
 			out.DrawingTimeSetting = int(in.Int())
 		case "allowDrawing":
 			out.AllowDrawing = bool(in.Bool())
-		case "votekickEnabled":
-			out.VotekickEnabled = bool(in.Bool())
 		default:
 			in.SkipRecursive()
 		}
@@ -410,11 +408,6 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame2(out *jwrit
 		const prefix string = ",\"allowDrawing\":"
 		out.RawString(prefix)
 		out.Bool(bool(in.AllowDrawing))
-	}
-	{
-		const prefix string = ",\"votekickEnabled\":"
-		out.RawString(prefix)
-		out.Bool(bool(in.VotekickEnabled))
 	}
 	out.RawByte('}')
 }
@@ -1449,8 +1442,6 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame12(in *jlexe
 			out.DrawingTimeSetting = int(in.Int())
 		case "allowDrawing":
 			out.AllowDrawing = bool(in.Bool())
-		case "votekickEnabled":
-			out.VotekickEnabled = bool(in.Bool())
 		default:
 			in.SkipRecursive()
 		}
@@ -1576,11 +1567,6 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame12(out *jwri
 		const prefix string = ",\"allowDrawing\":"
 		out.RawString(prefix)
 		out.Bool(bool(in.AllowDrawing))
-	}
-	{
-		const prefix string = ",\"votekickEnabled\":"
-		out.RawString(prefix)
-		out.Bool(bool(in.VotekickEnabled))
 	}
 	out.RawByte('}')
 }
@@ -1935,8 +1921,6 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame16(in *jlexe
 			out.MaxPlayers = int(in.Int())
 		case "public":
 			out.Public = bool(in.Bool())
-		case "enableVotekick":
-			out.EnableVotekick = bool(in.Bool())
 		case "customWordsChance":
 			out.CustomWordsChance = int(in.Int())
 		case "clientsPerIpLimit":
@@ -1968,11 +1952,6 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame16(out *jwri
 		const prefix string = ",\"public\":"
 		out.RawString(prefix)
 		out.Bool(bool(in.Public))
-	}
-	{
-		const prefix string = ",\"enableVotekick\":"
-		out.RawString(prefix)
-		out.Bool(bool(in.EnableVotekick))
 	}
 	{
 		const prefix string = ",\"customWordsChance\":"

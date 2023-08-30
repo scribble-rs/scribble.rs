@@ -20,7 +20,6 @@ type LobbySettingDefaults struct {
 	CustomWords       string `env:"CUSTOM_WORDS"`
 	CustomWordsChance string `env:"CUSTOM_WORDS_CHANCE"`
 	ClientsPerIPLimit string `env:"CLIENTS_PER_IP_LIMIT"`
-	EnableVotekick    string `env:"ENABLE_VOTEKICK"`
 	Language          string `env:"LANGUAGE"`
 }
 
@@ -68,7 +67,6 @@ var Default = Config{
 		MaxPlayers:        "12",
 		CustomWordsChance: "50",
 		ClientsPerIPLimit: "1",
-		EnableVotekick:    "true",
 		Language:          "english",
 	},
 	CORS: CORS{

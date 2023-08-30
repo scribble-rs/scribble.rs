@@ -54,8 +54,8 @@
                             <img src="{{.RootPath}}/resources/help.svg?cache_bust={{.CacheBust}}"
                                 class="header-button-image" />
                         </button>
-                        <button id="kick-button" style="display: none;" onclick="showKickDialog()"
-                            class="dialog-button header-button" alt="{{.Translation.Get "votekick-a-player"}}"
+                        <button id="kick-button" onclick="showKickDialog()" class="dialog-button header-button"
+                            alt="{{.Translation.Get "votekick-a-player"}}"
                             title="{{.Translation.Get "votekick-a-player"}}">
                             <img src="{{.RootPath}}/resources/kick.png?cache_bust={{.CacheBust}}"
                                 class="header-button-image" />
@@ -188,9 +188,6 @@
                                     <input id="lobby-settings-clients-per-ip-limit" type="number"
                                         name="clients_per_ip_limit" min="{{.MinClientsPerIPLimit}}"
                                         max="{{.MaxClientsPerIPLimit}}" value="{{.ClientsPerIPLimit}}" />
-                                    <b>{{.Translation.Get "enable-votekick-setting"}}</b>
-                                    <input id="lobby-settings-enable-votekick" type="checkbox" name="enable_votekick" {{if eq .EnableVotekick
-                                                    true}}checked{{end}} />
                                 </div>
                             </div>
                             <div class="button-center-wrapper">
@@ -615,14 +612,6 @@
         }
 
         function showKickDialog() {
-            if (votekickEnabled !== true) {
-                //Should never show, as this method should never be called anyways.
-                //Anyways, in case of a bug or forcefully calling this, we still
-                //intend to inform the user.
-                alert("Votekicking isn't enabled in this lobby.");
-                return;
-            }
-
             if (cachedPlayers && cachedPlayers) {
                 kickDialogPlayers.innerHTML = "";
 
@@ -692,7 +681,6 @@
                 drawing_time: document.getElementById("lobby-settings-drawing-time").value,
                 rounds: document.getElementById("lobby-settings-max-rounds").value,
                 public: document.getElementById("lobby-settings-public").checked,
-                enable_votekick: document.getElementById("lobby-settings-enable-votekick").checked,
                 max_players: document.getElementById("lobby-settings-max-players").value,
                 clients_per_ip_limit: document.getElementById("lobby-settings-clients-per-ip-limit").value,
                 custom_words_chance: document.getElementById("lobby-settings-custom-words-chance").value,
@@ -1020,7 +1008,6 @@
         let rounds = 0;
         let roundEndTime = 0;
         let gameState = "unstarted";
-        let votekickEnabled;
         let drawingTimeSetting = "∞";
 
         function registerMessageHandler(targetSocket) {
@@ -1147,7 +1134,6 @@
                 } else if (parsed.type === "drawer-kicked") {
                     appendMessage("system-message", '{{.Translation.Get "system"}}', '{{.Translation.Get "drawer-kicked"}}');
                 } else if (parsed.type === "lobby-settings-changed") {
-                    votekickEnabled = parsed.data.enableVotekick;
                     rounds = parsed.data.rounds;
                     updateRoundsDisplay();
                     updateButtonVisibilities();
@@ -1155,7 +1141,6 @@
                         + '{{.Translation.Get "drawing-time-setting"}}: ' + parsed.data.drawingTime + "\n"
                         + '{{.Translation.Get "rounds-setting"}}: ' + parsed.data.rounds + "\n"
                         + '{{.Translation.Get "public-lobby-setting"}}: ' + parsed.data.public + "\n"
-                        + '{{.Translation.Get "enable-votekick-setting"}}: ' + parsed.data.enableVotekick + "\n"
                         + '{{.Translation.Get "max-players-setting"}}: ' + parsed.data.maxPlayers + "\n"
                         + '{{.Translation.Get "custom-words-chance-setting"}}: ' + parsed.data.customWordsChance + "%\n"
                         + '{{.Translation.Get "players-per-ip-limit-setting"}}: ' + parsed.data.clientsPerIpLimit);
@@ -1212,7 +1197,6 @@
             round = ready.round;
             rounds = ready.rounds;
             gameState = ready.gameState;
-            votekickEnabled = ready.votekickEnabled;
             drawingTimeSetting = ready.drawingTimeSetting;
             updateRoundsDisplay();
             updateButtonVisibilities();
@@ -1315,12 +1299,6 @@
                 lobbySettingsButton.style.display = "initial";
             } else {
                 lobbySettingsButton.style.display = "none";
-            }
-
-            if (votekickEnabled) {
-                kickButton.style.display = "initial";
-            } else {
-                kickButton.style.display = "none";
             }
         }
 

@@ -51,8 +51,6 @@ func easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalApi(in *jlexer.L
 			out.DrawingTime = int(in.Int())
 		case "customWords":
 			out.CustomWords = bool(in.Bool())
-		case "votekick":
-			out.Votekick = bool(in.Bool())
 		case "maxClientsPerIp":
 			out.MaxClientsPerIP = int(in.Int())
 		case "wordpack":
@@ -107,11 +105,6 @@ func easyjson102f8a2fEncodeGithubComScribbleRsScribbleRsInternalApi(out *jwriter
 		const prefix string = ",\"customWords\":"
 		out.RawString(prefix)
 		out.Bool(bool(in.CustomWords))
-	}
-	{
-		const prefix string = ",\"votekick\":"
-		out.RawString(prefix)
-		out.Bool(bool(in.Votekick))
 	}
 	{
 		const prefix string = ",\"maxClientsPerIp\":"
@@ -273,8 +266,6 @@ func easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalApi2(in *jlexer.
 			out.MaxPlayers = int(in.Int())
 		case "public":
 			out.Public = bool(in.Bool())
-		case "enableVotekick":
-			out.EnableVotekick = bool(in.Bool())
 		case "customWordsChance":
 			out.CustomWordsChance = int(in.Int())
 		case "clientsPerIpLimit":
@@ -357,11 +348,6 @@ func easyjson102f8a2fEncodeGithubComScribbleRsScribbleRsInternalApi2(out *jwrite
 		const prefix string = ",\"public\":"
 		out.RawString(prefix)
 		out.Bool(bool(in.Public))
-	}
-	{
-		const prefix string = ",\"enableVotekick\":"
-		out.RawString(prefix)
-		out.Bool(bool(in.EnableVotekick))
 	}
 	{
 		const prefix string = ",\"customWordsChance\":"

@@ -65,7 +65,6 @@ func ssrCreateLobby(writer http.ResponseWriter, request *http.Request) {
 	customWords, customWordsInvalid := api.ParseCustomWords(request.Form.Get("custom_words"))
 	customWordChance, customWordChanceInvalid := api.ParseCustomWordsChance(request.Form.Get("custom_words_chance"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := api.ParseClientsPerIPLimit(request.Form.Get("clients_per_ip_limit"))
-	enableVotekick, enableVotekickInvalid := api.ParseBoolean("enable votekick", request.Form.Get("enable_votekick"))
 	publicLobby, publicLobbyInvalid := api.ParseBoolean("public", request.Form.Get("public"))
 
 	// Prevent resetting the form, since that would be annoying as hell.
@@ -81,7 +80,6 @@ func ssrCreateLobby(writer http.ResponseWriter, request *http.Request) {
 			CustomWords:       request.Form.Get("custom_words"),
 			CustomWordsChance: request.Form.Get("custom_words_chance"),
 			ClientsPerIPLimit: request.Form.Get("clients_per_ip_limit"),
-			EnableVotekick:    request.Form.Get("enable_votekick"),
 			Language:          request.Form.Get("language"),
 		},
 	}
@@ -107,9 +105,6 @@ func ssrCreateLobby(writer http.ResponseWriter, request *http.Request) {
 	if clientsPerIPLimitInvalid != nil {
 		pageData.Errors = append(pageData.Errors, clientsPerIPLimitInvalid.Error())
 	}
-	if enableVotekickInvalid != nil {
-		pageData.Errors = append(pageData.Errors, enableVotekickInvalid.Error())
-	}
 	if publicLobbyInvalid != nil {
 		pageData.Errors = append(pageData.Errors, publicLobbyInvalid.Error())
 	}
@@ -128,7 +123,7 @@ func ssrCreateLobby(writer http.ResponseWriter, request *http.Request) {
 
 	playerName := api.GetPlayername(request)
 
-	player, lobby, err := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords, enableVotekick)
+	player, lobby, err := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords)
 	if err != nil {
 		pageData.Errors = append(pageData.Errors, err.Error())
 		if err := pageTemplates.ExecuteTemplate(writer, "lobby-create-page", pageData); err != nil {

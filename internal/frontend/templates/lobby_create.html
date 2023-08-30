@@ -67,9 +67,6 @@
                         <b>{{.Translation.Get "public-lobby-setting"}}</b>
                         <input class="input-item" type="checkbox" name="public" value="true"
                             {{if eq .Public "true"}}checked{{end}} />
-                        <b>{{.Translation.Get "enable-votekick-setting"}}</b>
-                        <input class="input-item" type="checkbox" name="enable_votekick" value="true"
-                            {{if eq .EnableVotekick "true"}}checked{{end}} />
                         <b>{{.Translation.Get "players-per-ip-limit-setting"}}</b>
                         <input class="input-item" type="number" name="clients_per_ip_limit"
                             min="{{.MinClientsPerIPLimit}}" max="{{.MaxClientsPerIPLimit}}"
@@ -123,8 +120,6 @@
                     <span id="drawing-time-detail"></span>
                     <span class="lobby-detail">{{.Translation.Get "custom-words"}}:</span>
                     <span id="custom-words-detail"></span>
-                    <span class="lobby-detail">{{.Translation.Get "enable-votekick-setting"}}:</span>
-                    <span id="votekicking-detail"></span>
                     <span class="lobby-detail">{{.Translation.Get "players-per-ip-limit-setting"}}:</span>
                     <span id="max-clients-ip-detail"></span>
                     <button id="join-button" onclick="onJoin()" disabled>{{.Translation.Get "join-lobby"}}</button>
@@ -150,7 +145,6 @@
         let playersDetail = document.getElementById("players-detail");
         let drawingTimeDetail = document.getElementById("drawing-time-detail");
         let customWordsDetail = document.getElementById("custom-words-detail");
-        let votekickingDetail = document.getElementById("votekicking-detail");
         let maxClientsIPDetail = document.getElementById("max-clients-ip-detail");
 
         function onJoin() {
@@ -216,7 +210,6 @@
                 playersDetail.innerText = "";
                 drawingTimeDetail.innerText = "";
                 customWordsDetail.innerText = "";
-                votekickingDetail.innerText = "";
                 maxClientsIPDetail.innerText = "";
                 joinButton.disabled = true;
             } else {
@@ -225,7 +218,6 @@
                 playersDetail.innerText = lobby.playerCount + "/" + lobby.maxPlayers;
                 drawingTimeDetail.innerText = lobby.drawingTime.toString();
                 customWordsDetail.innerText = lobby.customWords ? '{{.Translation.Get "yes"}}' : '{{.Translation.Get "no"}}';
-                votekickingDetail.innerText = lobby.votekick ? '{{.Translation.Get "yes"}}' : '{{.Translation.Get "no"}}';
                 maxClientsIPDetail.innerText = lobby.maxClientsPerIp;
                 joinButton.disabled = false;
             }

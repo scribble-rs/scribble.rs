@@ -172,19 +172,17 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 			lobby.broadcastConditional(wordHintDataRevealed, IsNotGuessing)
 		}
 	} else if eventType == EventTypeKickVote {
-		if lobby.EnableVotekick {
-			var kickEvent StringDataEvent
-			if err := easyjson.Unmarshal(payload, &kickEvent); err != nil {
-				return fmt.Errorf("invalid data received: '%s'", string(payload))
-			}
-
-			toKickID, err := uuid.FromString(kickEvent.Data)
-			if err != nil {
-				return fmt.Errorf("invalid data in kick-vote event: %v", payload)
-			}
-
-			handleKickVoteEvent(lobby, player, toKickID)
+		var kickEvent StringDataEvent
+		if err := easyjson.Unmarshal(payload, &kickEvent); err != nil {
+			return fmt.Errorf("invalid data received: '%s'", string(payload))
 		}
+
+		toKickID, err := uuid.FromString(kickEvent.Data)
+		if err != nil {
+			return fmt.Errorf("invalid data in kick-vote event: %v", payload)
+		}
+
+		handleKickVoteEvent(lobby, player, toKickID)
 	} else if eventType == EventTypeStart {
 		if lobby.State != Ongoing && player == lobby.Owner {
 			// We are reseting each players score, since players could
@@ -869,7 +867,7 @@ func (lobby *Lobby) selectWord(wordChoiceIndex int) {
 
 // CreateLobby creates a new lobby including the initial player (owner) and
 // optionally returns an error, if any occurred during creation.
-func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTime, rounds, maxPlayers, customWordsChance, clientsPerIPLimit int, customWords []string, enableVotekick bool) (*Player, *Lobby, error) {
+func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTime, rounds, maxPlayers, customWordsChance, clientsPerIPLimit int, customWords []string) (*Player, *Lobby, error) {
 	lobby := &Lobby{
 		LobbyID: uuid.Must(uuid.NewV4()).String(),
 		EditableLobbySettings: EditableLobbySettings{
@@ -878,7 +876,6 @@ func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTim
 			MaxPlayers:        maxPlayers,
 			CustomWordsChance: customWordsChance,
 			ClientsPerIPLimit: clientsPerIPLimit,
-			EnableVotekick:    enableVotekick,
 			Public:            publicLobby,
 		},
 		CustomWords:    customWords,
@@ -934,7 +931,6 @@ func generateReadyData(lobby *Lobby, player *Player) *Ready {
 		AllowDrawing: player.State == Drawing,
 		PlayerName:   player.Name,
 
-		VotekickEnabled:    lobby.EnableVotekick,
 		GameState:          lobby.State,
 		OwnerID:            lobby.Owner.ID,
 		Round:              lobby.Round,

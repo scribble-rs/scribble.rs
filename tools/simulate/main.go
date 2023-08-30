@@ -56,7 +56,6 @@ func PostLobby() (*api.LobbyData, error) {
 		"max_players":          12,
 		"clients_per_ip_limit": 12,
 		"custom_words_chance":  50,
-		"enable_votekick":      true,
 		"public":               true,
 	})
 	if err != nil {
@@ -179,22 +178,24 @@ func JoinPlayer(lobbyId string) (*SimPlayer, error) {
 }
 
 func main() {
-	lobby, err := PostLobby()
-	if err != nil {
-		panic(err)
-	}
-	log.Println("Lobby:", lobby.LobbyID)
-
-	player, err := JoinPlayer(lobby.LobbyID)
-	if err != nil {
-		panic(err)
+	for i := 0; i < 10; i++ {
+		lobby, err := PostLobby()
+		if err != nil {
+			panic(err)
+		}
+		log.Println("Lobby:", lobby.LobbyID)
 	}
 
-	start := time.Now()
-	for i := 0; i < 1_000_000; i++ {
-		player.SendRandomStroke()
-		player.SendRandomMessage()
-	}
+	// player, err := JoinPlayer(lobby.LobbyID)
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	log.Println(time.Since(start).Seconds())
+	// start := time.Now()
+	// for i := 0; i < 1_000_000; i++ {
+	// 	player.SendRandomStroke()
+	// 	player.SendRandomMessage()
+	// }
+
+	// log.Println(time.Since(start).Seconds())
 }

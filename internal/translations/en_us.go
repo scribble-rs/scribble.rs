@@ -41,7 +41,6 @@ func initEnglishTranslation() Translation {
 	translation.put("custom-words-info", "Enter your additional words, separating them by commas")
 	translation.put("custom-words-chance-setting", "Custom Words Chance")
 	translation.put("players-per-ip-limit-setting", "Players per IP Limit")
-	translation.put("enable-votekick-setting", "Allow Votekick")
 	translation.put("save-settings", "Save settings")
 	translation.put("input-contains-invalid-data", "Your input contains invalid data:")
 	translation.put("please-fix-invalid-input", "Correct the invalid input and try again.")
