@@ -177,13 +177,10 @@
                                     <b>{{.Translation.Get "public-lobby-setting"}}</b>
                                     <input id="lobby-settings-public" type="checkbox" name="public" {{if eq
                                             .Public true}}checked{{end}} />
-                                    <b>{{.Translation.Get "custom-words-chance-setting"}}</b>
-                                    <div class="input-item percent-slider">
-                                        <span>0%</span>
-                                        <input id="lobby-settings-custom-words-chance" type="range"
-                                            name="custom_words_chance" min="1" max="100" value="{{.CustomWordsChance}}">
-                                        <span>100%</span>
-                                    </div>
+                                    <b>{{.Translation.Get "custom-words-per-turn-setting"}}</b>
+                                    <input id="lobby-settings-custom-words-per-turn" class="input-item" type="number"
+                                        name="custom_words_per_turn" min="{{.MinCustomWordsPerTurn}}"
+                                        max="{{.MaxCustomWordsPerTurn}}" value="{{.CustomWordsPerTurn}}" />
                                     <b>{{.Translation.Get "players-per-ip-limit-setting"}}</b>
                                     <input id="lobby-settings-clients-per-ip-limit" type="number"
                                         name="clients_per_ip_limit" min="{{.MinClientsPerIPLimit}}"
@@ -683,7 +680,7 @@
                 public: document.getElementById("lobby-settings-public").checked,
                 max_players: document.getElementById("lobby-settings-max-players").value,
                 clients_per_ip_limit: document.getElementById("lobby-settings-clients-per-ip-limit").value,
-                custom_words_chance: document.getElementById("lobby-settings-custom-words-chance").value,
+                custom_words_per_turn: document.getElementById("lobby-settings-custom-words-per-turn").value,
             }), {
                 method: 'PATCH',
             })
@@ -1142,7 +1139,7 @@
                         + '{{.Translation.Get "rounds-setting"}}: ' + parsed.data.rounds + "\n"
                         + '{{.Translation.Get "public-lobby-setting"}}: ' + parsed.data.public + "\n"
                         + '{{.Translation.Get "max-players-setting"}}: ' + parsed.data.maxPlayers + "\n"
-                        + '{{.Translation.Get "custom-words-chance-setting"}}: ' + parsed.data.customWordsChance + "%\n"
+                        + '{{.Translation.Get "custom-words-per-turn-setting"}}: ' + parsed.data.customWordsPerTurn + "%\n"
                         + '{{.Translation.Get "players-per-ip-limit-setting"}}: ' + parsed.data.clientsPerIpLimit);
                 } else if (parsed.type === "shutdown") {
                     socket.onclose = null;

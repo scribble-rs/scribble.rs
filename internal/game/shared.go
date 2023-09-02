@@ -227,24 +227,21 @@ type Player struct {
 // EditableLobbySettings represents all lobby settings that are editable by
 // the lobby owner after the lobby has already been opened.
 type EditableLobbySettings struct {
-	// MaxPlayers defines the maximum amount of players in a single lobby.
-	MaxPlayers int `json:"maxPlayers"`
 	// CustomWords are additional words that will be used in addition to the
 	// predefined words.
 	// Public defines whether the lobby is being broadcast to clients asking
 	// for available lobbies.
 	Public bool `json:"public"`
-	// CustomWordsChance determines the chance of each word being a custom
-	// word on the next word prompt. This needs to be an integer between
-	// 0 and 100. The value represents a percentage.
-	CustomWordsChance int `json:"customWordsChance"`
+	// MaxPlayers defines the maximum amount of players in a single lobby.
+	MaxPlayers         int `json:"maxPlayers"`
+	CustomWordsPerTurn int `json:"customWordsPerTurn"`
 	// ClientsPerIPLimit helps preventing griefing by reducing each player
 	// to one tab per IP address.
 	ClientsPerIPLimit int `json:"clientsPerIpLimit"`
-	// DrawingTime is the amount of seconds that each player has available to
-	// finish their drawing.
-	DrawingTime int `json:"drawingTime"`
 	// Rounds defines how many iterations a lobby does before the game ends.
 	// One iteration means every participant does one drawing.
 	Rounds int `json:"rounds"`
+	// DrawingTime is the amount of seconds that each player has available to
+	// finish their drawing.
+	DrawingTime int `json:"drawingTime"`
 }

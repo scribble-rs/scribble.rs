@@ -27,14 +27,16 @@ import (
 
 var (
 	LobbySettingBounds = SettingBounds{
-		MinDrawingTime:       60,
-		MaxDrawingTime:       300,
-		MinRounds:            1,
-		MaxRounds:            20,
-		MinMaxPlayers:        2,
-		MaxMaxPlayers:        24,
-		MinClientsPerIPLimit: 1,
-		MaxClientsPerIPLimit: 24,
+		MinDrawingTime:        60,
+		MaxDrawingTime:        300,
+		MinRounds:             1,
+		MaxRounds:             20,
+		MinMaxPlayers:         2,
+		MaxMaxPlayers:         24,
+		MinClientsPerIPLimit:  1,
+		MaxClientsPerIPLimit:  24,
+		MinCustomWordsPerTurn: 1,
+		MaxCustomWordsPerTurn: 3,
 	}
 	SupportedLanguages = map[string]string{
 		"english_gb": "English (GB)",
@@ -59,14 +61,16 @@ const (
 // SettingBounds defines the lower and upper bounds for the user-specified
 // lobby creation input.
 type SettingBounds struct {
-	MinDrawingTime       int64 `json:"minDrawingTime"`
-	MaxDrawingTime       int64 `json:"maxDrawingTime"`
-	MinRounds            int64 `json:"minRounds"`
-	MaxRounds            int64 `json:"maxRounds"`
-	MinMaxPlayers        int64 `json:"minMaxPlayers"`
-	MaxMaxPlayers        int64 `json:"maxMaxPlayers"`
-	MinClientsPerIPLimit int64 `json:"minClientsPerIpLimit"`
-	MaxClientsPerIPLimit int64 `json:"maxClientsPerIpLimit"`
+	MinDrawingTime        int `json:"minDrawingTime"`
+	MaxDrawingTime        int `json:"maxDrawingTime"`
+	MinRounds             int `json:"minRounds"`
+	MaxRounds             int `json:"maxRounds"`
+	MinMaxPlayers         int `json:"minMaxPlayers"`
+	MaxMaxPlayers         int `json:"maxMaxPlayers"`
+	MinClientsPerIPLimit  int `json:"minClientsPerIpLimit"`
+	MaxClientsPerIPLimit  int `json:"maxClientsPerIpLimit"`
+	MinCustomWordsPerTurn int `json:"minCustomWordsPerTurn"`
+	MaxCustomWordsPerTurn int `json:"maxCustomWordsPerTurn"`
 }
 
 func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player) error {
@@ -867,16 +871,16 @@ func (lobby *Lobby) selectWord(wordChoiceIndex int) {
 
 // CreateLobby creates a new lobby including the initial player (owner) and
 // optionally returns an error, if any occurred during creation.
-func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTime, rounds, maxPlayers, customWordsChance, clientsPerIPLimit int, customWords []string) (*Player, *Lobby, error) {
+func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTime, rounds, maxPlayers, customWordsPerTurn, clientsPerIPLimit int, customWords []string) (*Player, *Lobby, error) {
 	lobby := &Lobby{
 		LobbyID: uuid.Must(uuid.NewV4()).String(),
 		EditableLobbySettings: EditableLobbySettings{
-			Rounds:            rounds,
-			DrawingTime:       drawingTime,
-			MaxPlayers:        maxPlayers,
-			CustomWordsChance: customWordsChance,
-			ClientsPerIPLimit: clientsPerIPLimit,
-			Public:            publicLobby,
+			Rounds:             rounds,
+			DrawingTime:        drawingTime,
+			MaxPlayers:         maxPlayers,
+			CustomWordsPerTurn: customWordsPerTurn,
+			ClientsPerIPLimit:  clientsPerIPLimit,
+			Public:             publicLobby,
 		},
 		CustomWords:    customWords,
 		currentDrawing: make([]any, 0),

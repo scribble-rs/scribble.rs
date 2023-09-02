@@ -76,16 +76,11 @@ func readWordList(lowercaser cases.Caser, chosenLanguage string) ([]string, erro
 // The words will be chosen from the custom words and the default
 // dictionary, depending on the settings specified by the lobbies creator.
 func GetRandomWords(wordCount int, lobby *Lobby) []string {
-	return getRandomWordsCustomRng(wordCount, lobby, func() int { return rand.Intn(100) + 1 })
-}
-
-// getRandomWordsCustomRng allows passing a custom generator for random
-// numbers. This can be used for predictability in unit tests.
-// See GetRandomWords for functionality documentation.
-func getRandomWordsCustomRng(wordCount int, lobby *Lobby, rng func() int) []string {
 	words := make([]string, wordCount)
-	for i := 0; i < wordCount; i++ {
-		if lobby.CustomWordsChance > 0 && len(lobby.CustomWords) > 0 && rng() <= lobby.CustomWordsChance {
+
+	for customWordsLeft, i := lobby.CustomWordsPerTurn, 0; i < wordCount; i++ {
+		if customWordsLeft > 0 && len(lobby.CustomWords) > 0 {
+			customWordsLeft--
 			words[i] = popCustomWord(lobby)
 		} else {
 			words[i] = popWordpackWord(lobby)

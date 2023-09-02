@@ -26,15 +26,15 @@ type LobbyEntries []*LobbyEntry
 // LobbyEntry is an API object for representing a join-able public lobby.
 type LobbyEntry struct {
 	LobbyID         string     `json:"lobbyId"`
+	Wordpack        string     `json:"wordpack"`
+	State           game.State `json:"state"`
 	PlayerCount     int        `json:"playerCount"`
 	MaxPlayers      int        `json:"maxPlayers"`
 	Round           int        `json:"round"`
 	Rounds          int        `json:"rounds"`
 	DrawingTime     int        `json:"drawingTime"`
-	CustomWords     bool       `json:"customWords"`
 	MaxClientsPerIP int        `json:"maxClientsPerIp"`
-	Wordpack        string     `json:"wordpack"`
-	State           game.State `json:"state"`
+	CustomWords     bool       `json:"customWords"`
 }
 
 func getLobbies(writer http.ResponseWriter, _ *http.Request) {
@@ -79,7 +79,7 @@ func postLobby(writer http.ResponseWriter, request *http.Request) {
 	rounds, roundsInvalid := ParseRounds(request.Form.Get("rounds"))
 	maxPlayers, maxPlayersInvalid := ParseMaxPlayers(request.Form.Get("max_players"))
 	customWords, customWordsInvalid := ParseCustomWords(request.Form.Get("custom_words"))
-	customWordChance, customWordChanceInvalid := ParseCustomWordsChance(request.Form.Get("custom_words_chance"))
+	customWordsPerTurn, customWordsPerTurnInvalid := ParseCustomWordsPerTurn(request.Form.Get("custom_words_per_turn"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(request.Form.Get("clients_per_ip_limit"))
 	publicLobby, publicLobbyInvalid := ParseBoolean("public", request.Form.Get("public"))
 
@@ -99,8 +99,8 @@ func postLobby(writer http.ResponseWriter, request *http.Request) {
 	if customWordsInvalid != nil {
 		requestErrors = append(requestErrors, customWordsInvalid.Error())
 	}
-	if customWordChanceInvalid != nil {
-		requestErrors = append(requestErrors, customWordChanceInvalid.Error())
+	if customWordsPerTurnInvalid != nil {
+		requestErrors = append(requestErrors, customWordsPerTurnInvalid.Error())
 	}
 	if clientsPerIPLimitInvalid != nil {
 		requestErrors = append(requestErrors, clientsPerIPLimitInvalid.Error())
@@ -115,7 +115,7 @@ func postLobby(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	playerName := GetPlayername(request)
-	player, lobby, err := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords)
+	player, lobby, err := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordsPerTurn, clientsPerIPLimit, customWords)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
@@ -236,7 +236,7 @@ func patchLobby(writer http.ResponseWriter, request *http.Request) {
 	maxPlayers, maxPlayersInvalid := ParseMaxPlayers(request.Form.Get("max_players"))
 	drawingTime, drawingTimeInvalid := ParseDrawingTime(request.Form.Get("drawing_time"))
 	rounds, roundsInvalid := ParseRounds(request.Form.Get("rounds"))
-	customWordChance, customWordChanceInvalid := ParseCustomWordsChance(request.Form.Get("custom_words_chance"))
+	customWordsPerTurn, customWordsPerTurnInvalid := ParseCustomWordsPerTurn(request.Form.Get("custom_words_per_turn"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(request.Form.Get("clients_per_ip_limit"))
 	publicLobby, publicLobbyInvalid := ParseBoolean("public", request.Form.Get("public"))
 
@@ -260,8 +260,8 @@ func patchLobby(writer http.ResponseWriter, request *http.Request) {
 			requestErrors = append(requestErrors, fmt.Sprintf("rounds must be greater than or equal to the current round (%d)", currentRound))
 		}
 	}
-	if customWordChanceInvalid != nil {
-		requestErrors = append(requestErrors, customWordChanceInvalid.Error())
+	if customWordsPerTurnInvalid != nil {
+		requestErrors = append(requestErrors, customWordsPerTurnInvalid.Error())
 	}
 	if clientsPerIPLimitInvalid != nil {
 		requestErrors = append(requestErrors, clientsPerIPLimitInvalid.Error())
@@ -283,7 +283,7 @@ func patchLobby(writer http.ResponseWriter, request *http.Request) {
 		// really break anything.
 
 		lobby.MaxPlayers = maxPlayers
-		lobby.CustomWordsChance = customWordChance
+		lobby.CustomWordsPerTurn = customWordsPerTurn
 		lobby.ClientsPerIPLimit = clientsPerIPLimit
 		lobby.Public = publicLobby
 		lobby.Rounds = rounds

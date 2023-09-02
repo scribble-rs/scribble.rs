@@ -13,14 +13,14 @@ import (
 )
 
 type LobbySettingDefaults struct {
-	Public            string `env:"PUBLIC"`
-	DrawingTime       string `env:"DRAWING_TIME"`
-	Rounds            string `env:"ROUNDS"`
-	MaxPlayers        string `env:"MAX_PLAYERS"`
-	CustomWords       string `env:"CUSTOM_WORDS"`
-	CustomWordsChance string `env:"CUSTOM_WORDS_CHANCE"`
-	ClientsPerIPLimit string `env:"CLIENTS_PER_IP_LIMIT"`
-	Language          string `env:"LANGUAGE"`
+	Public             string `env:"PUBLIC"`
+	DrawingTime        string `env:"DRAWING_TIME"`
+	Rounds             string `env:"ROUNDS"`
+	MaxPlayers         string `env:"MAX_PLAYERS"`
+	CustomWords        string `env:"CUSTOM_WORDS"`
+	CustomWordsPerTurn string `env:"CUSTOM_WORDS_PER_TURN"`
+	ClientsPerIPLimit  string `env:"CLIENTS_PER_IP_LIMIT"`
+	Language           string `env:"LANGUAGE"`
 }
 
 type CORS struct {
@@ -61,13 +61,13 @@ type Config struct {
 var Default = Config{
 	Port: 8080,
 	LobbySettingDefaults: LobbySettingDefaults{
-		Public:            "false",
-		DrawingTime:       "120",
-		Rounds:            "4",
-		MaxPlayers:        "12",
-		CustomWordsChance: "50",
-		ClientsPerIPLimit: "1",
-		Language:          "english",
+		Public:             "false",
+		DrawingTime:        "120",
+		Rounds:             "4",
+		MaxPlayers:         "12",
+		CustomWordsPerTurn: "3",
+		ClientsPerIPLimit:  "1",
+		Language:           "english",
 	},
 	CORS: CORS{
 		AllowedOrigins:   []string{"*"},

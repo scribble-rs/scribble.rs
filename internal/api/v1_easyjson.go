@@ -39,6 +39,10 @@ func easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalApi(in *jlexer.L
 		switch key {
 		case "lobbyId":
 			out.LobbyID = string(in.String())
+		case "wordpack":
+			out.Wordpack = string(in.String())
+		case "state":
+			out.State = game.State(in.String())
 		case "playerCount":
 			out.PlayerCount = int(in.Int())
 		case "maxPlayers":
@@ -49,14 +53,10 @@ func easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalApi(in *jlexer.L
 			out.Rounds = int(in.Int())
 		case "drawingTime":
 			out.DrawingTime = int(in.Int())
-		case "customWords":
-			out.CustomWords = bool(in.Bool())
 		case "maxClientsPerIp":
 			out.MaxClientsPerIP = int(in.Int())
-		case "wordpack":
-			out.Wordpack = string(in.String())
-		case "state":
-			out.State = game.State(in.String())
+		case "customWords":
+			out.CustomWords = bool(in.Bool())
 		default:
 			in.SkipRecursive()
 		}
@@ -75,6 +75,16 @@ func easyjson102f8a2fEncodeGithubComScribbleRsScribbleRsInternalApi(out *jwriter
 		const prefix string = ",\"lobbyId\":"
 		out.RawString(prefix[1:])
 		out.String(string(in.LobbyID))
+	}
+	{
+		const prefix string = ",\"wordpack\":"
+		out.RawString(prefix)
+		out.String(string(in.Wordpack))
+	}
+	{
+		const prefix string = ",\"state\":"
+		out.RawString(prefix)
+		out.String(string(in.State))
 	}
 	{
 		const prefix string = ",\"playerCount\":"
@@ -102,24 +112,14 @@ func easyjson102f8a2fEncodeGithubComScribbleRsScribbleRsInternalApi(out *jwriter
 		out.Int(int(in.DrawingTime))
 	}
 	{
-		const prefix string = ",\"customWords\":"
-		out.RawString(prefix)
-		out.Bool(bool(in.CustomWords))
-	}
-	{
 		const prefix string = ",\"maxClientsPerIp\":"
 		out.RawString(prefix)
 		out.Int(int(in.MaxClientsPerIP))
 	}
 	{
-		const prefix string = ",\"wordpack\":"
+		const prefix string = ",\"customWords\":"
 		out.RawString(prefix)
-		out.String(string(in.Wordpack))
-	}
-	{
-		const prefix string = ",\"state\":"
-		out.RawString(prefix)
-		out.String(string(in.State))
+		out.Bool(bool(in.CustomWords))
 	}
 	out.RawByte('}')
 }
@@ -262,34 +262,38 @@ func easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalApi2(in *jlexer.
 			} else {
 				copy(out.SuggestedBrushSizes[:], in.Bytes())
 			}
-		case "maxPlayers":
-			out.MaxPlayers = int(in.Int())
 		case "public":
 			out.Public = bool(in.Bool())
-		case "customWordsChance":
-			out.CustomWordsChance = int(in.Int())
+		case "maxPlayers":
+			out.MaxPlayers = int(in.Int())
+		case "customWordsPerTurn":
+			out.CustomWordsPerTurn = int(in.Int())
 		case "clientsPerIpLimit":
 			out.ClientsPerIPLimit = int(in.Int())
-		case "drawingTime":
-			out.DrawingTime = int(in.Int())
 		case "rounds":
 			out.Rounds = int(in.Int())
+		case "drawingTime":
+			out.DrawingTime = int(in.Int())
 		case "minDrawingTime":
-			out.MinDrawingTime = int64(in.Int64())
+			out.MinDrawingTime = int(in.Int())
 		case "maxDrawingTime":
-			out.MaxDrawingTime = int64(in.Int64())
+			out.MaxDrawingTime = int(in.Int())
 		case "minRounds":
-			out.MinRounds = int64(in.Int64())
+			out.MinRounds = int(in.Int())
 		case "maxRounds":
-			out.MaxRounds = int64(in.Int64())
+			out.MaxRounds = int(in.Int())
 		case "minMaxPlayers":
-			out.MinMaxPlayers = int64(in.Int64())
+			out.MinMaxPlayers = int(in.Int())
 		case "maxMaxPlayers":
-			out.MaxMaxPlayers = int64(in.Int64())
+			out.MaxMaxPlayers = int(in.Int())
 		case "minClientsPerIpLimit":
-			out.MinClientsPerIPLimit = int64(in.Int64())
+			out.MinClientsPerIPLimit = int(in.Int())
 		case "maxClientsPerIpLimit":
-			out.MaxClientsPerIPLimit = int64(in.Int64())
+			out.MaxClientsPerIPLimit = int(in.Int())
+		case "minCustomWordsPerTurn":
+			out.MinCustomWordsPerTurn = int(in.Int())
+		case "maxCustomWordsPerTurn":
+			out.MaxCustomWordsPerTurn = int(in.Int())
 		default:
 			in.SkipRecursive()
 		}
@@ -340,19 +344,19 @@ func easyjson102f8a2fEncodeGithubComScribbleRsScribbleRsInternalApi2(out *jwrite
 		out.Base64Bytes(in.SuggestedBrushSizes[:])
 	}
 	{
-		const prefix string = ",\"maxPlayers\":"
-		out.RawString(prefix)
-		out.Int(int(in.MaxPlayers))
-	}
-	{
 		const prefix string = ",\"public\":"
 		out.RawString(prefix)
 		out.Bool(bool(in.Public))
 	}
 	{
-		const prefix string = ",\"customWordsChance\":"
+		const prefix string = ",\"maxPlayers\":"
 		out.RawString(prefix)
-		out.Int(int(in.CustomWordsChance))
+		out.Int(int(in.MaxPlayers))
+	}
+	{
+		const prefix string = ",\"customWordsPerTurn\":"
+		out.RawString(prefix)
+		out.Int(int(in.CustomWordsPerTurn))
 	}
 	{
 		const prefix string = ",\"clientsPerIpLimit\":"
@@ -360,54 +364,64 @@ func easyjson102f8a2fEncodeGithubComScribbleRsScribbleRsInternalApi2(out *jwrite
 		out.Int(int(in.ClientsPerIPLimit))
 	}
 	{
-		const prefix string = ",\"drawingTime\":"
-		out.RawString(prefix)
-		out.Int(int(in.DrawingTime))
-	}
-	{
 		const prefix string = ",\"rounds\":"
 		out.RawString(prefix)
 		out.Int(int(in.Rounds))
 	}
 	{
+		const prefix string = ",\"drawingTime\":"
+		out.RawString(prefix)
+		out.Int(int(in.DrawingTime))
+	}
+	{
 		const prefix string = ",\"minDrawingTime\":"
 		out.RawString(prefix)
-		out.Int64(int64(in.MinDrawingTime))
+		out.Int(int(in.MinDrawingTime))
 	}
 	{
 		const prefix string = ",\"maxDrawingTime\":"
 		out.RawString(prefix)
-		out.Int64(int64(in.MaxDrawingTime))
+		out.Int(int(in.MaxDrawingTime))
 	}
 	{
 		const prefix string = ",\"minRounds\":"
 		out.RawString(prefix)
-		out.Int64(int64(in.MinRounds))
+		out.Int(int(in.MinRounds))
 	}
 	{
 		const prefix string = ",\"maxRounds\":"
 		out.RawString(prefix)
-		out.Int64(int64(in.MaxRounds))
+		out.Int(int(in.MaxRounds))
 	}
 	{
 		const prefix string = ",\"minMaxPlayers\":"
 		out.RawString(prefix)
-		out.Int64(int64(in.MinMaxPlayers))
+		out.Int(int(in.MinMaxPlayers))
 	}
 	{
 		const prefix string = ",\"maxMaxPlayers\":"
 		out.RawString(prefix)
-		out.Int64(int64(in.MaxMaxPlayers))
+		out.Int(int(in.MaxMaxPlayers))
 	}
 	{
 		const prefix string = ",\"minClientsPerIpLimit\":"
 		out.RawString(prefix)
-		out.Int64(int64(in.MinClientsPerIPLimit))
+		out.Int(int(in.MinClientsPerIPLimit))
 	}
 	{
 		const prefix string = ",\"maxClientsPerIpLimit\":"
 		out.RawString(prefix)
-		out.Int64(int64(in.MaxClientsPerIPLimit))
+		out.Int(int(in.MaxClientsPerIPLimit))
+	}
+	{
+		const prefix string = ",\"minCustomWordsPerTurn\":"
+		out.RawString(prefix)
+		out.Int(int(in.MinCustomWordsPerTurn))
+	}
+	{
+		const prefix string = ",\"maxCustomWordsPerTurn\":"
+		out.RawString(prefix)
+		out.Int(int(in.MaxCustomWordsPerTurn))
 	}
 	out.RawByte('}')
 }

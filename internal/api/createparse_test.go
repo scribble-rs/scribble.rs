@@ -150,7 +150,7 @@ func Test_parseCustomWords(t *testing.T) {
 	}
 }
 
-func Test_parseCustomWordChance(t *testing.T) {
+func Test_parseCustomWordsPerTurn(t *testing.T) {
 	tests := []struct {
 		name    string
 		value   string
@@ -159,21 +159,22 @@ func Test_parseCustomWordChance(t *testing.T) {
 	}{
 		{"empty value", "", 0, true},
 		{"space", " ", 0, true},
-		{"less than minimum", "-1", 0, true},
-		{"more than maximum", "101", 0, true},
-		{"maximum", "100", 100, false},
-		{"minimum", "0", 0, false},
-		{"something valid", "60", 60, false},
+		{"lesss than minimum, zero", "0", 0, true},
+		{"less than minimum, negative", "-1", 0, true},
+		{"more than maximum", "4", 0, true},
+		{"minimum", "1", 1, false},
+		{"maximum", "3", 3, false},
+		{"something valid", "2", 2, false},
 	}
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			got, err := ParseCustomWordsChance(testCase.value)
+			got, err := ParseCustomWordsPerTurn(testCase.value)
 			if (err != nil) != testCase.wantErr {
-				t.Errorf("parseCustomWordsChance() error = %v, wantErr %v", err, testCase.wantErr)
+				t.Errorf("parseCustomWordsPerTurn() error = %v, wantErr %v", err, testCase.wantErr)
 				return
 			}
 			if got != testCase.want {
-				t.Errorf("parseCustomWordsChance() = %v, want %v", got, testCase.want)
+				t.Errorf("parseCustomWordsPerTurn() = %v, want %v", got, testCase.want)
 			}
 		})
 	}

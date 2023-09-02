@@ -95,28 +95,30 @@ func ParseClientsPerIPLimit(value string) (int, error) {
 		game.LobbySettingBounds.MaxClientsPerIPLimit, "clients per IP limit")
 }
 
-// ParseCustomWordsChance checks whether the given value is an integer between
+// ParseCustomWordsPerTurn checks whether the given value is an integer between
 // 0 and 100. All other invalid input, including empty strings, will return an
 // error.
-func ParseCustomWordsChance(value string) (int, error) {
-	return parseIntValue(value, 0, 100, "custom word chance")
+func ParseCustomWordsPerTurn(value string) (int, error) {
+	return parseIntValue(value, 1, 3, "custom words per turn")
 }
 
-func parseIntValue(value string, lower, upper int64, valueName string) (int, error) {
-	result, err := strconv.ParseInt(value, 10, 64)
-	if err != nil {
-		return 0, fmt.Errorf("%s must be numeric", valueName)
+func newIntOutOfBounds(value, valueName string, lower, upper int) error {
+	return fmt.Errorf("the value '%s' must be an integer between %d and %d, but was: '%s'", valueName, lower, upper, value)
+}
+
+func parseIntValue(toParse string, lower, upper int, valueName string) (int, error) {
+	var value int
+	if parsed, err := strconv.ParseInt(toParse, 10, 64); err != nil {
+		return 0, newIntOutOfBounds(toParse, valueName, lower, upper)
+	} else {
+		value = int(parsed)
 	}
 
-	if result < lower {
-		return 0, fmt.Errorf("%s must not be lower than %d", valueName, lower)
+	if value < lower || value > upper {
+		return 0, newIntOutOfBounds(toParse, valueName, lower, upper)
 	}
 
-	if result > upper {
-		return 0, fmt.Errorf("%s must not be higher than %d", valueName, upper)
-	}
-
-	return int(result), nil
+	return value, nil
 }
 
 // ParseBoolean checks whether the given value is either "true" or "false".

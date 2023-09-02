@@ -39,7 +39,7 @@ func initEnglishTranslation() Translation {
 	translation.put("public-lobby-setting", "Public Lobby")
 	translation.put("custom-words", "Custom Words")
 	translation.put("custom-words-info", "Enter your additional words, separating them by commas")
-	translation.put("custom-words-chance-setting", "Custom Words Chance")
+	translation.put("custom-words-per-turn-setting", "Custom Words Per Turn")
 	translation.put("players-per-ip-limit-setting", "Players per IP Limit")
 	translation.put("save-settings", "Save settings")
 	translation.put("input-contains-invalid-data", "Your input contains invalid data:")

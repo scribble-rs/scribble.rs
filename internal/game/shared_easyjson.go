@@ -1917,18 +1917,18 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame16(in *jlexe
 			continue
 		}
 		switch key {
-		case "maxPlayers":
-			out.MaxPlayers = int(in.Int())
 		case "public":
 			out.Public = bool(in.Bool())
-		case "customWordsChance":
-			out.CustomWordsChance = int(in.Int())
+		case "maxPlayers":
+			out.MaxPlayers = int(in.Int())
+		case "customWordsPerTurn":
+			out.CustomWordsPerTurn = int(in.Int())
 		case "clientsPerIpLimit":
 			out.ClientsPerIPLimit = int(in.Int())
-		case "drawingTime":
-			out.DrawingTime = int(in.Int())
 		case "rounds":
 			out.Rounds = int(in.Int())
+		case "drawingTime":
+			out.DrawingTime = int(in.Int())
 		default:
 			in.SkipRecursive()
 		}
@@ -1944,19 +1944,19 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame16(out *jwri
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"maxPlayers\":"
-		out.RawString(prefix[1:])
-		out.Int(int(in.MaxPlayers))
-	}
-	{
 		const prefix string = ",\"public\":"
-		out.RawString(prefix)
+		out.RawString(prefix[1:])
 		out.Bool(bool(in.Public))
 	}
 	{
-		const prefix string = ",\"customWordsChance\":"
+		const prefix string = ",\"maxPlayers\":"
 		out.RawString(prefix)
-		out.Int(int(in.CustomWordsChance))
+		out.Int(int(in.MaxPlayers))
+	}
+	{
+		const prefix string = ",\"customWordsPerTurn\":"
+		out.RawString(prefix)
+		out.Int(int(in.CustomWordsPerTurn))
 	}
 	{
 		const prefix string = ",\"clientsPerIpLimit\":"
@@ -1964,14 +1964,14 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame16(out *jwri
 		out.Int(int(in.ClientsPerIPLimit))
 	}
 	{
-		const prefix string = ",\"drawingTime\":"
-		out.RawString(prefix)
-		out.Int(int(in.DrawingTime))
-	}
-	{
 		const prefix string = ",\"rounds\":"
 		out.RawString(prefix)
 		out.Int(int(in.Rounds))
+	}
+	{
+		const prefix string = ",\"drawingTime\":"
+		out.RawString(prefix)
+		out.Int(int(in.DrawingTime))
 	}
 	out.RawByte('}')
 }

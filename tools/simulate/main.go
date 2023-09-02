@@ -50,13 +50,13 @@ func request(method, url string, body *body, queryParameters map[string]any) (*h
 
 func PostLobby() (*api.LobbyData, error) {
 	response, err := request(http.MethodPost, "http://localhost:8080/v1/lobby", nil, map[string]any{
-		"language":             "english",
-		"drawing_time":         120,
-		"rounds":               4,
-		"max_players":          12,
-		"clients_per_ip_limit": 12,
-		"custom_words_chance":  50,
-		"public":               true,
+		"language":              "english",
+		"drawing_time":          120,
+		"rounds":                4,
+		"max_players":           12,
+		"clients_per_ip_limit":  12,
+		"custom_words_per_turn": 3,
+		"public":                true,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("error sending request: %w", err)

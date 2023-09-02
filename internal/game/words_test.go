@@ -3,7 +3,6 @@ package game
 import (
 	"bytes"
 	"fmt"
-	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -76,7 +75,7 @@ func Test_getRandomWords(t *testing.T) {
 		lobby := &Lobby{
 			CurrentWord: "",
 			EditableLobbySettings: EditableLobbySettings{
-				CustomWordsChance: 0,
+				CustomWordsPerTurn: 0,
 			},
 			words: []string{"a", "b", "c"},
 			mutex: &sync.Mutex{},
@@ -95,7 +94,7 @@ func Test_getRandomWords(t *testing.T) {
 			CurrentWord: "",
 			words:       []string{"a", "b", "c"},
 			EditableLobbySettings: EditableLobbySettings{
-				CustomWordsChance: 0,
+				CustomWordsPerTurn: 0,
 			},
 
 			CustomWords: []string{"d", "e", "f"},
@@ -115,7 +114,7 @@ func Test_getRandomWords(t *testing.T) {
 			CurrentWord: "",
 			words:       []string{"a", "b", "c"},
 			EditableLobbySettings: EditableLobbySettings{
-				CustomWordsChance: 100,
+				CustomWordsPerTurn: 3,
 			},
 			CustomWords: nil,
 			mutex:       &sync.Mutex{},
@@ -134,7 +133,7 @@ func Test_getRandomWords(t *testing.T) {
 			CurrentWord: "",
 			words:       []string{"a", "b", "c"},
 			EditableLobbySettings: EditableLobbySettings{
-				CustomWordsChance: 100,
+				CustomWordsPerTurn: 3,
 			},
 			CustomWords: []string{"d", "e", "f"},
 			mutex:       &sync.Mutex{},
@@ -149,37 +148,6 @@ func Test_getRandomWords(t *testing.T) {
 	})
 }
 
-func Test_regressionGetRandomWords_singleCustomWord(t *testing.T) {
-	lobby := &Lobby{
-		CurrentWord: "",
-		EditableLobbySettings: EditableLobbySettings{
-			CustomWordsChance: 99,
-		},
-		CustomWords: []string{"custom"},
-		mutex:       &sync.Mutex{},
-	}
-
-	words := make([]string, 99)
-	for i := 0; i < 99; i++ {
-		words[i] = strconv.FormatInt(int64(i), 10)
-	}
-	lobby.words = words
-
-	// The implementation detail is, that the chance has to be smaller than
-	// or equal to our random number. So the only number possible to return
-	// our only custom word, is 1.
-	if getRandomWordsCustomRng(1, lobby, func() int { return 1 })[0] != "custom" {
-		t.Error("Custom should've been found, but wasn't.")
-	}
-
-	// Now furthermore, we expect 2 - 100 to give us non-custom words and not panic.
-	for i := 2; i <= 100; i++ {
-		if getRandomWordsCustomRng(1, lobby, func() int { return i })[0] == "custom" {
-			t.Error("Custom word was found but shouldn't have.")
-		}
-	}
-}
-
 func Test_getRandomWordsReloading(t *testing.T) {
 	wordList, err := readWordListInternal(cases.Lower(language.English), "test", func(language string) (string, error) {
 		return "a\nb\nc", nil
@@ -192,7 +160,7 @@ func Test_getRandomWordsReloading(t *testing.T) {
 		lobby := &Lobby{
 			words: wordList,
 			EditableLobbySettings: EditableLobbySettings{
-				CustomWordsChance: 0,
+				CustomWordsPerTurn: 0,
 			},
 			CustomWords: nil,
 			mutex:       &sync.Mutex{},
@@ -212,7 +180,7 @@ func Test_getRandomWordsReloading(t *testing.T) {
 		lobby := &Lobby{
 			words: wordList,
 			EditableLobbySettings: EditableLobbySettings{
-				CustomWordsChance: 100,
+				CustomWordsPerTurn: 3,
 			},
 			CustomWords: nil,
 			mutex:       &sync.Mutex{},
@@ -232,7 +200,7 @@ func Test_getRandomWordsReloading(t *testing.T) {
 		lobby := &Lobby{
 			words: wordList,
 			EditableLobbySettings: EditableLobbySettings{
-				CustomWordsChance: 100,
+				CustomWordsPerTurn: 3,
 			},
 			CustomWords: []string{"a"},
 			mutex:       &sync.Mutex{},

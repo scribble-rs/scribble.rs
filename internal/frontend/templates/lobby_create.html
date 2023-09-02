@@ -71,13 +71,10 @@
                         <input class="input-item" type="number" name="clients_per_ip_limit"
                             min="{{.MinClientsPerIPLimit}}" max="{{.MaxClientsPerIPLimit}}"
                             value="{{.ClientsPerIPLimit}}" />
-                        <b>{{.Translation.Get "custom-words-chance-setting"}}</b>
-                        <div class="input-item percent-slider">
-                            <span>0%</span>
-                            <input type="range" name="custom_words_chance" min="1" max="100"
-                                value="{{.CustomWordsChance}}">
-                            <span>100%</span>
-                        </div>
+                        <b>{{.Translation.Get "custom-words-per-turn-setting"}}</b>
+                        <input class="input-item" style="align-self: baseline" type="number"
+                            name="custom_words_per_turn" min="{{.MinCustomWordsPerTurn}}"
+                            max="{{.MaxCustomWordsPerTurn}}" value="{{.CustomWordsPerTurn}}" />
                         <b>{{.Translation.Get "custom-words"}}</b>
                         <textarea class="input-item" name="custom_words"
                             placeholder="{{.Translation.Get "custom-words-info"}}">{{.CustomWords}}</textarea>

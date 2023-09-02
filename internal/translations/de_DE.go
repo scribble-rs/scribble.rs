@@ -33,7 +33,7 @@ func initGermanTranslation() {
 	translation.put("public-lobby-setting", "Öffentliche Lobby")
 	translation.put("custom-words", "Extrawörter")
 	translation.put("custom-words-info", "Gib hier deine Extrawörter ein und trenne einzelne Wörter mit einem Komma")
-	translation.put("custom-words-chance-setting", "Chance auf Extrawort")
+	translation.put("custom-words-per-turn-setting", "Extrawörter pro Zug")
 	translation.put("players-per-ip-limit-setting", "Maximale Spieler pro IP")
 	translation.put("save-settings", "Einstellungen Speichern")
 	translation.put("input-contains-invalid-data", "Deine Eingaben enthalten invalide Daten:")

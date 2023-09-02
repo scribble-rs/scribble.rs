@@ -63,7 +63,7 @@ func ssrCreateLobby(writer http.ResponseWriter, request *http.Request) {
 	rounds, roundsInvalid := api.ParseRounds(request.Form.Get("rounds"))
 	maxPlayers, maxPlayersInvalid := api.ParseMaxPlayers(request.Form.Get("max_players"))
 	customWords, customWordsInvalid := api.ParseCustomWords(request.Form.Get("custom_words"))
-	customWordChance, customWordChanceInvalid := api.ParseCustomWordsChance(request.Form.Get("custom_words_chance"))
+	customWordsPerTurn, customWordsPerTurnInvalid := api.ParseCustomWordsPerTurn(request.Form.Get("custom_words_per_turn"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := api.ParseClientsPerIPLimit(request.Form.Get("clients_per_ip_limit"))
 	publicLobby, publicLobbyInvalid := api.ParseBoolean("public", request.Form.Get("public"))
 
@@ -73,14 +73,14 @@ func ssrCreateLobby(writer http.ResponseWriter, request *http.Request) {
 		SettingBounds:  game.LobbySettingBounds,
 		Languages:      game.SupportedLanguages,
 		LobbySettingDefaults: config.LobbySettingDefaults{
-			Public:            request.Form.Get("public"),
-			DrawingTime:       request.Form.Get("drawing_time"),
-			Rounds:            request.Form.Get("rounds"),
-			MaxPlayers:        request.Form.Get("max_players"),
-			CustomWords:       request.Form.Get("custom_words"),
-			CustomWordsChance: request.Form.Get("custom_words_chance"),
-			ClientsPerIPLimit: request.Form.Get("clients_per_ip_limit"),
-			Language:          request.Form.Get("language"),
+			Public:             request.Form.Get("public"),
+			DrawingTime:        request.Form.Get("drawing_time"),
+			Rounds:             request.Form.Get("rounds"),
+			MaxPlayers:         request.Form.Get("max_players"),
+			CustomWords:        request.Form.Get("custom_words"),
+			CustomWordsPerTurn: request.Form.Get("custom_words_per_turn"),
+			ClientsPerIPLimit:  request.Form.Get("clients_per_ip_limit"),
+			Language:           request.Form.Get("language"),
 		},
 	}
 
@@ -99,8 +99,8 @@ func ssrCreateLobby(writer http.ResponseWriter, request *http.Request) {
 	if customWordsInvalid != nil {
 		pageData.Errors = append(pageData.Errors, customWordsInvalid.Error())
 	}
-	if customWordChanceInvalid != nil {
-		pageData.Errors = append(pageData.Errors, customWordChanceInvalid.Error())
+	if customWordsPerTurnInvalid != nil {
+		pageData.Errors = append(pageData.Errors, customWordsPerTurnInvalid.Error())
 	}
 	if clientsPerIPLimitInvalid != nil {
 		pageData.Errors = append(pageData.Errors, clientsPerIPLimitInvalid.Error())
@@ -123,7 +123,7 @@ func ssrCreateLobby(writer http.ResponseWriter, request *http.Request) {
 
 	playerName := api.GetPlayername(request)
 
-	player, lobby, err := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordChance, clientsPerIPLimit, customWords)
+	player, lobby, err := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordsPerTurn, clientsPerIPLimit, customWords)
 	if err != nil {
 		pageData.Errors = append(pageData.Errors, err.Error())
 		if err := pageTemplates.ExecuteTemplate(writer, "lobby-create-page", pageData); err != nil {
