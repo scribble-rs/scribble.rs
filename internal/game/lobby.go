@@ -19,8 +19,8 @@ import (
 	"github.com/scribble-rs/scribble.rs/internal/sanitize"
 
 	discordemojimap "github.com/Bios-Marcel/discordemojimap/v2"
+	petname "github.com/Bios-Marcel/go-petname"
 	"github.com/agnivade/levenshtein"
-	petname "github.com/dustinkirkland/golang-petname"
 	"github.com/gofrs/uuid"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
