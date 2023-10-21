@@ -4,7 +4,7 @@
 # We explicitly use a certain major version of go, to make sure we don't build
 # with a newer verison than we are using for CI tests, as we don't directly
 # test the produced binary but from source code directly.
-FROM docker.io/golang:1.20.7-nanoserver-ltsc2022 AS builder
+FROM docker.io/golang:1.21.3-nanoserver-ltsc2022 AS builder
 WORKDIR /app
 
 # This causes caching of the downloaded go modules and makes repeated local
