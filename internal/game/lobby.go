@@ -253,8 +253,8 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 		return
 	}
 
-	normInput := simplifyText(lobby.lowercaser.String(trimmedMessage))
-	normSearched := simplifyText(lobby.CurrentWord)
+	normInput := sanitize.CleanText(lobby.lowercaser.String(trimmedMessage))
+	normSearched := sanitize.CleanText(lobby.CurrentWord)
 
 	// Since correct guess are probably the least common case, we'll always
 	// calculate the distance, as usually have to do it anyway.
@@ -1026,15 +1026,6 @@ func (lobby *Lobby) JoinPlayer(playerName string) *Player {
 
 func (lobby *Lobby) canDraw(player *Player) bool {
 	return player.State == Drawing && lobby.CurrentWord != "" && lobby.State == Ongoing
-}
-
-var connectionCharacterReplacer = strings.NewReplacer(" ", "", "-", "", "_", "")
-
-// simplifyText prepares the string for a more lax comparison of two words.
-// Spaces, dashes, underscores and accented characters are removed or replaced.
-func simplifyText(s string) string {
-	return connectionCharacterReplacer.
-		Replace(sanitize.ReplaceAccentedCharacters(s))
 }
 
 // Shutdown sends all players an event, indicating that the lobby

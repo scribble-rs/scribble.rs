@@ -1,12 +1,13 @@
 // Package sanitize is used for cleaning up text.
-// The code was copied from github.com/kennygrant/sanitize and is licensed
-// under the BSD 3-Clause "New" or "Revised" License
 package sanitize
 
-import "bytes"
+import (
+	"unicode/utf8"
+)
 
-// A very limited list of transliterations to catch common european names translated to urls.
-// This set could be expanded with at least caps and many more characters.
+// FIXME Improve transliteration set or document why the current state
+// is acceptableb. These transliterations originally come from
+// github.com/kennygrant/sanitize.
 var transliterations = map[rune]string{
 	'À': "A",
 	'Á': "A",
@@ -82,16 +83,41 @@ var transliterations = map[rune]string{
 	'ß': "ss",
 }
 
-// ReplaceAccentedCharacters replaces a set of accented characters with ascii
-// equivalents. For example "ÿ" would become "y".
-func ReplaceAccentedCharacters(str string) string {
-	buffer := bytes.NewBufferString("")
+// CleanText removes all kinds of characters that could disturb the algorithm
+// checking words for similarity.
+func CleanText(str string) string {
+	var buffer []byte
+
+	// We try to stack allocate, but also make
+	// space for the worst case scenario.
+	if len(str) <= 32 {
+		buffer = make([]byte, 0, 64)
+	} else {
+		buffer = make([]byte, 0, len(str)*2)
+	}
+
+	var changed bool
 	for _, character := range str {
+		if character < utf8.RuneSelf {
+			switch character {
+			case ' ', '-', '_':
+				changed = true
+			default:
+				buffer = append(buffer, byte(character))
+			}
+			continue
+		}
+
 		if val, contains := transliterations[character]; contains {
-			buffer.WriteString(val)
+			buffer = append(buffer, val...)
+			changed = true
 		} else {
-			buffer.WriteRune(character)
+			buffer = utf8.AppendRune(buffer, character)
 		}
 	}
-	return buffer.String()
+
+	if !changed {
+		return str
+	}
+	return string(buffer)
 }

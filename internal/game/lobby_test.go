@@ -10,6 +10,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/websocket"
 	easyjson "github.com/mailru/easyjson"
+	"github.com/scribble-rs/scribble.rs/internal/sanitize"
 )
 
 func createLobbyWithDemoPlayers(playercount int) *Lobby {
@@ -86,7 +87,7 @@ func Test_RemoveAccents(t *testing.T) {
 		}
 
 		for k, v := range expectedResults {
-			result := simplifyText(k)
+			result := sanitize.CleanText(k)
 			if result != v {
 				t.Errorf("Error. Char was %s, but should've been %s", result, v)
 			}
@@ -121,7 +122,7 @@ func Test_simplifyText(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := simplifyText(tt.input); got != tt.want {
+			if got := sanitize.CleanText(tt.input); got != tt.want {
 				t.Errorf("simplifyText() = %v, want %v", got, tt.want)
 			}
 		})
