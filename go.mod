@@ -3,7 +3,7 @@ module github.com/scribble-rs/scribble.rs
 go 1.21.3
 
 require (
-	github.com/Bios-Marcel/discordemojimap/v2 v2.0.4
+	github.com/Bios-Marcel/discordemojimap/v2 v2.0.6-0.20231019221248-bdc688c7ba00
 	github.com/Bios-Marcel/go-petname v0.0.0-20231021185512-b1d6bb8becbf
 	github.com/agnivade/levenshtein v1.1.1
 	github.com/caarlos0/env/v9 v9.0.0
