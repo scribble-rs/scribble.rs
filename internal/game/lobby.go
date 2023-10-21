@@ -10,7 +10,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"unicode"
 	"unicode/utf8"
 
 	"github.com/gorilla/websocket"
@@ -926,14 +925,7 @@ func CreateLobby(
 // of an adverb, an adjective and a animal name. The result can generally be
 // trusted to be sane.
 func generatePlayerName() string {
-	words := [3]string{petname.Adverb(), petname.Adjective(), petname.Name()}
-	buffer := make([]byte, 0, 32)
-	for _, word := range words {
-		// Manually uppercasing the first rune is cheaper than calling strings.ToUpper.
-		buffer = append(buffer, byte(unicode.ToUpper(rune(word[0]))))
-		buffer = append(buffer, word[1:]...)
-	}
-	return string(buffer)
+	return petname.Generate(3, petname.Title, petname.None)
 }
 
 func generateReadyData(lobby *Lobby, player *Player) *Ready {
