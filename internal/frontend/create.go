@@ -1,6 +1,9 @@
 package frontend
 
 import (
+	"crypto/md5"
+	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 
@@ -13,28 +16,69 @@ import (
 
 // This file contains the API for the official web client.
 
+type SSRHandler struct {
+	cfg            *config.Config
+	basePageConfig *BasePageConfig
+}
+
+func NewHandler(cfg *config.Config) (*SSRHandler, error) {
+	basePageConfig := &BasePageConfig{}
+	if cfg.RootPath != "" {
+		basePageConfig.RootPath = "/" + cfg.RootPath
+	}
+
+	var err error
+	pageTemplates, err = template.ParseFS(templateFS, "templates/*")
+	if err != nil {
+		return nil, fmt.Errorf("error loading templates: %w", err)
+	}
+
+	entries, err := frontendResourcesFS.ReadDir("resources")
+	if err != nil {
+		return nil, fmt.Errorf("error reading resource directory: %w", err)
+	}
+
+	hash := md5.New()
+	for _, entry := range entries {
+		bytes, err := frontendResourcesFS.ReadFile("resources/" + entry.Name())
+		if err != nil {
+			return nil, fmt.Errorf("error reading resource %s: %w", entry.Name(), err)
+		}
+
+		if _, err := hash.Write(bytes); err != nil {
+			return nil, fmt.Errorf("error hashing resource %s: %w", entry.Name(), err)
+		}
+	}
+
+	basePageConfig.CacheBust = fmt.Sprintf("%x", hash.Sum(nil))
+
+	handler := &SSRHandler{
+		cfg:            cfg,
+		basePageConfig: basePageConfig,
+	}
+	return handler, nil
+}
+
 // homePage servers the default page for scribble.rs, which is the page to
 // create a new lobby.
-func newHomePageHandler(lobbySettingDefaults config.LobbySettingDefaults) http.HandlerFunc {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		translation, locale := determineTranslation(request)
-		createPageData := createDefaultLobbyCreatePageData(lobbySettingDefaults)
-		createPageData.Translation = translation
-		createPageData.Locale = locale
+func (handler *SSRHandler) homePageHandler(writer http.ResponseWriter, request *http.Request) {
+	translation, locale := determineTranslation(request)
+	createPageData := handler.createDefaultLobbyCreatePageData()
+	createPageData.Translation = translation
+	createPageData.Locale = locale
 
-		err := pageTemplates.ExecuteTemplate(writer, "lobby-create-page", createPageData)
-		if err != nil {
-			log.Printf("Error templating home page: %s\n", err)
-		}
+	err := pageTemplates.ExecuteTemplate(writer, "lobby-create-page", createPageData)
+	if err != nil {
+		log.Printf("Error templating home page: %s\n", err)
 	}
 }
 
-func createDefaultLobbyCreatePageData(defaultLobbySettings config.LobbySettingDefaults) *LobbyCreatePageData {
+func (handler *SSRHandler) createDefaultLobbyCreatePageData() *LobbyCreatePageData {
 	return &LobbyCreatePageData{
-		BasePageConfig:       currentBasePageConfig,
+		BasePageConfig:       handler.basePageConfig,
 		SettingBounds:        game.LobbySettingBounds,
 		Languages:            game.SupportedLanguages,
-		LobbySettingDefaults: defaultLobbySettings,
+		LobbySettingDefaults: handler.cfg.LobbySettingDefaults,
 	}
 }
 
@@ -52,7 +96,7 @@ type LobbyCreatePageData struct {
 
 // ssrCreateLobby allows creating a lobby, optionally returning errors that
 // occurred during creation.
-func ssrCreateLobby(writer http.ResponseWriter, request *http.Request) {
+func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *http.Request) {
 	if err := request.ParseForm(); err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
@@ -69,9 +113,8 @@ func ssrCreateLobby(writer http.ResponseWriter, request *http.Request) {
 
 	// Prevent resetting the form, since that would be annoying as hell.
 	pageData := LobbyCreatePageData{
-		BasePageConfig: currentBasePageConfig,
+		BasePageConfig: handler.basePageConfig,
 		SettingBounds:  game.LobbySettingBounds,
-		Languages:      game.SupportedLanguages,
 		LobbySettingDefaults: config.LobbySettingDefaults{
 			Public:             request.Form.Get("public"),
 			DrawingTime:        request.Form.Get("drawing_time"),
@@ -123,11 +166,13 @@ func ssrCreateLobby(writer http.ResponseWriter, request *http.Request) {
 
 	playerName := api.GetPlayername(request)
 
-	player, lobby, err := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordsPerTurn, clientsPerIPLimit, customWords)
+	player, lobby, err := game.CreateLobby(handler.cfg, playerName, language,
+		publicLobby, drawingTime, rounds, maxPlayers, customWordsPerTurn,
+		clientsPerIPLimit, customWords)
 	if err != nil {
 		pageData.Errors = append(pageData.Errors, err.Error())
 		if err := pageTemplates.ExecuteTemplate(writer, "lobby-create-page", pageData); err != nil {
-			userFacingError(writer, err.Error())
+			handler.userFacingError(writer, err.Error())
 		}
 
 		return
@@ -142,5 +187,5 @@ func ssrCreateLobby(writer http.ResponseWriter, request *http.Request) {
 	// We only add the lobby if we could do all necessary pre-steps successfully.
 	state.AddLobby(lobby)
 
-	http.Redirect(writer, request, currentBasePageConfig.RootPath+"/ssrEnterLobby/"+lobby.LobbyID, http.StatusFound)
+	http.Redirect(writer, request, handler.basePageConfig.RootPath+"/ssrEnterLobby/"+lobby.LobbyID, http.StatusFound)
 }

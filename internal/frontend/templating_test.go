@@ -8,13 +8,8 @@ import (
 	"github.com/scribble-rs/scribble.rs/internal/config"
 	"github.com/scribble-rs/scribble.rs/internal/game"
 	"github.com/scribble-rs/scribble.rs/internal/translations"
+	"github.com/stretchr/testify/require"
 )
-
-func init() {
-	if err := Init(); err != nil {
-		panic(err)
-	}
-}
 
 func Test_templateLobbyPage(t *testing.T) {
 	var buffer bytes.Buffer
@@ -67,7 +62,9 @@ func Test_templateRobotPage(t *testing.T) {
 }
 
 func Test_templateLobbyCreatePage(t *testing.T) {
-	createPageData := createDefaultLobbyCreatePageData(config.Default.LobbySettingDefaults)
+	handler, err := NewHandler(&config.Config{})
+	require.NoError(t, err)
+	createPageData := handler.createDefaultLobbyCreatePageData()
 	createPageData.Translation = translations.DefaultTranslation
 
 	var buffer bytes.Buffer

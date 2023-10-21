@@ -15,6 +15,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/mailru/easyjson"
+	"github.com/scribble-rs/scribble.rs/internal/config"
 	"github.com/scribble-rs/scribble.rs/internal/sanitize"
 
 	discordemojimap "github.com/Bios-Marcel/discordemojimap/v2"
@@ -871,7 +872,13 @@ func (lobby *Lobby) selectWord(wordChoiceIndex int) {
 
 // CreateLobby creates a new lobby including the initial player (owner) and
 // optionally returns an error, if any occurred during creation.
-func CreateLobby(playerName, chosenLanguage string, publicLobby bool, drawingTime, rounds, maxPlayers, customWordsPerTurn, clientsPerIPLimit int, customWords []string) (*Player, *Lobby, error) {
+func CreateLobby(
+	cfg *config.Config,
+	playerName, chosenLanguage string,
+	publicLobby bool,
+	drawingTime, rounds, maxPlayers, customWordsPerTurn, clientsPerIPLimit int,
+	customWords []string,
+) (*Player, *Lobby, error) {
 	lobby := &Lobby{
 		LobbyID: uuid.Must(uuid.NewV4()).String(),
 		EditableLobbySettings: EditableLobbySettings{

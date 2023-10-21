@@ -26,17 +26,17 @@ type robotPageData struct {
 }
 
 // ssrEnterLobby opens a lobby, either opening it directly or asking for a lobby.
-func ssrEnterLobby(writer http.ResponseWriter, request *http.Request) {
+func (handler *SSRHandler) ssrEnterLobby(writer http.ResponseWriter, request *http.Request) {
 	lobby := state.GetLobby(chi.URLParam(request, "lobby_id"))
 	if lobby == nil {
-		userFacingError(writer, api.ErrLobbyNotExistent.Error())
+		handler.userFacingError(writer, api.ErrLobbyNotExistent.Error())
 		return
 	}
 
 	userAgent := strings.ToLower(request.UserAgent())
 	if !(strings.Contains(userAgent, "gecko") || strings.Contains(userAgent, "chrome") || strings.Contains(userAgent, "opera") || strings.Contains(userAgent, "safari")) {
 		err := pageTemplates.ExecuteTemplate(writer, "robot-page", &robotPageData{
-			BasePageConfig: currentBasePageConfig,
+			BasePageConfig: handler.basePageConfig,
 			LobbyData:      api.CreateLobbyData(lobby),
 		})
 		if err != nil {
@@ -54,12 +54,12 @@ func ssrEnterLobby(writer http.ResponseWriter, request *http.Request) {
 
 		if player == nil {
 			if !lobby.HasFreePlayerSlot() {
-				userFacingError(writer, "Sorry, but the lobby is full.")
+				handler.userFacingError(writer, "Sorry, but the lobby is full.")
 				return
 			}
 
 			if !lobby.CanIPConnect(requestAddress) {
-				userFacingError(writer, "Sorry, but you have exceeded the maximum number of clients per IP.")
+				handler.userFacingError(writer, "Sorry, but you have exceeded the maximum number of clients per IP.")
 				return
 			}
 
@@ -68,14 +68,14 @@ func ssrEnterLobby(writer http.ResponseWriter, request *http.Request) {
 			api.SetUsersessionCookie(writer, newPlayer)
 		} else {
 			if player.Connected && player.GetWebsocket() != nil {
-				userFacingError(writer, "It appears you already have an open tab for this lobby.")
+				handler.userFacingError(writer, "It appears you already have an open tab for this lobby.")
 				return
 			}
 			player.SetLastKnownAddress(requestAddress)
 		}
 
 		pageData = &lobbyPageData{
-			BasePageConfig: currentBasePageConfig,
+			BasePageConfig: handler.basePageConfig,
 			LobbyData:      api.CreateLobbyData(lobby),
 			Translation:    translation,
 			Locale:         locale,

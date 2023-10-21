@@ -55,13 +55,13 @@ func readWordListInternal(
 	return shuffledWords, nil
 }
 
-// readWordList reads the wordlist for the given language from the filesystem.
+// readDefaultWordList reads the wordlist for the given language from the filesystem.
 // If found, the list is cached and will be read from the cache upon next
 // request. The returned slice is a safe copy and can be mutated. If the
 // specified has no corresponding wordlist, an error is returned. This has been
 // a panic before, however, this could enable a user to forcefully crash the
 // whole application.
-func readWordList(lowercaser cases.Caser, chosenLanguage string) ([]string, error) {
+func readDefaultWordList(lowercaser cases.Caser, chosenLanguage string) ([]string, error) {
 	return readWordListInternal(lowercaser, chosenLanguage, func(key string) (string, error) {
 		wordBytes, err := wordFS.ReadFile("words/" + key)
 		if err != nil {
@@ -103,7 +103,7 @@ func popCustomWord(lobby *Lobby) string {
 func popWordpackWord(lobby *Lobby) string {
 	if len(lobby.words) == 0 {
 		var err error
-		lobby.words, err = readWordList(lobby.lowercaser, lobby.Wordpack)
+		lobby.words, err = readDefaultWordList(lobby.lowercaser, lobby.Wordpack)
 		if err != nil {
 			// Since this list should've been successfully read once before, we
 			// can "safely" panic if this happens, assuming that there's a

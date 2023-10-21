@@ -14,11 +14,22 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/gofrs/uuid"
 	"github.com/mailru/easyjson"
+	"github.com/scribble-rs/scribble.rs/internal/config"
 	"github.com/scribble-rs/scribble.rs/internal/game"
 	"github.com/scribble-rs/scribble.rs/internal/state"
 )
 
 var ErrLobbyNotExistent = errors.New("the requested lobby doesn't exist")
+
+type V1Handler struct {
+	cfg *config.Config
+}
+
+func NewHandler(cfg *config.Config) *V1Handler {
+	return &V1Handler{
+		cfg: cfg,
+	}
+}
 
 //easyjson:json
 type LobbyEntries []*LobbyEntry
@@ -37,7 +48,7 @@ type LobbyEntry struct {
 	CustomWords     bool       `json:"customWords"`
 }
 
-func getLobbies(writer http.ResponseWriter, _ *http.Request) {
+func (handler *V1Handler) getLobbies(writer http.ResponseWriter, _ *http.Request) {
 	// REMARK: If paging is ever implemented, we might want to maintain order
 	// when deleting lobbies from state in the state package.
 
@@ -68,7 +79,7 @@ func getLobbies(writer http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func postLobby(writer http.ResponseWriter, request *http.Request) {
+func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Request) {
 	if err := request.ParseForm(); err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
@@ -115,7 +126,9 @@ func postLobby(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	playerName := GetPlayername(request)
-	player, lobby, err := game.CreateLobby(playerName, language, publicLobby, drawingTime, rounds, maxPlayers, customWordsPerTurn, clientsPerIPLimit, customWords)
+	player, lobby, err := game.CreateLobby(handler.cfg, playerName, language,
+		publicLobby, drawingTime, rounds, maxPlayers, customWordsPerTurn,
+		clientsPerIPLimit, customWords)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
@@ -140,7 +153,7 @@ func postLobby(writer http.ResponseWriter, request *http.Request) {
 	state.AddLobby(lobby)
 }
 
-func postPlayer(writer http.ResponseWriter, request *http.Request) {
+func (handler *V1Handler) postPlayer(writer http.ResponseWriter, request *http.Request) {
 	lobby := state.GetLobby(chi.URLParam(request, "lobby_id"))
 	if lobby == nil {
 		http.Error(writer, ErrLobbyNotExistent.Error(), http.StatusNotFound)
@@ -198,7 +211,7 @@ func SetUsersessionCookie(w http.ResponseWriter, player *game.Player) {
 	})
 }
 
-func patchLobby(writer http.ResponseWriter, request *http.Request) {
+func (handler *V1Handler) patchLobby(writer http.ResponseWriter, request *http.Request) {
 	userSession, err := GetUserSession(request)
 	if err != nil {
 		log.Printf("error getting user session: %v", err)
@@ -300,7 +313,7 @@ func patchLobby(writer http.ResponseWriter, request *http.Request) {
 	})
 }
 
-func getStats(writer http.ResponseWriter, _ *http.Request) {
+func (handler *V1Handler) getStats(writer http.ResponseWriter, _ *http.Request) {
 	if started, _, err := easyjson.MarshalToHTTPResponseWriter(state.Stats(), writer); err != nil {
 		if !started {
 			http.Error(writer, err.Error(), http.StatusInternalServerError)

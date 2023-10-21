@@ -9,20 +9,20 @@ import (
 )
 
 // SetupRoutes registers the /v1/ endpoints with the http package.
-func SetupRoutes(rootPath string, router chi.Router) {
+func (handler *V1Handler) SetupRoutes(rootPath string, router chi.Router) {
 	routePrefix := "/" + path.Join(rootPath, "v1")
 
-	router.Get(routePrefix+"/stats", getStats)
+	router.Get(routePrefix+"/stats", handler.getStats)
 
 	// These exist only for the public API. We version them in order to ensure
 	// backwards compatibility as far as possible.
-	router.Get(routePrefix+"/lobby", getLobbies)
-	router.Post(routePrefix+"/lobby", postLobby)
+	router.Get(routePrefix+"/lobby", handler.getLobbies)
+	router.Post(routePrefix+"/lobby", handler.postLobby)
 
-	router.Patch(routePrefix+"/lobby/{lobby_id}", patchLobby)
+	router.Patch(routePrefix+"/lobby/{lobby_id}", handler.patchLobby)
 	// The websocket is shared between the public API and the official client
-	router.Get(routePrefix+"/lobby/{lobby_id}/ws", websocketUpgrade)
-	router.Post(routePrefix+"/lobby/{lobby_id}/player", postPlayer)
+	router.Get(routePrefix+"/lobby/{lobby_id}/ws", handler.websocketUpgrade)
+	router.Post(routePrefix+"/lobby/{lobby_id}/player", handler.postPlayer)
 }
 
 // remoteAddressToSimpleIP removes unnecessary clutter from the input,

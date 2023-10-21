@@ -52,15 +52,13 @@ func main() {
 			writer.WriteHeader(http.StatusOK)
 		})
 
-	api.SetupRoutes(cfg.RootPath, router)
+	api.NewHandler(cfg).SetupRoutes(cfg.RootPath, router)
 
-	if err := frontend.Init(); err != nil {
-		log.Fatal("error setting up runnign frontend init:", err)
+	frontendHandler, err := frontend.NewHandler(cfg)
+	if err != nil {
+		log.Fatal("error setting up frontend:", err)
 	}
-
-	// FIXME Global state needs to be deleted.
-	frontend.SetRootPath(cfg.RootPath)
-	frontend.SetupRoutes(cfg, router)
+	frontendHandler.SetupRoutes(router)
 
 	if cfg.LobbyCleanup.Interval > 0 {
 		state.LaunchCleanupRoutine(cfg.LobbyCleanup)

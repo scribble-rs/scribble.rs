@@ -28,7 +28,7 @@ var (
 	}
 )
 
-func websocketUpgrade(writer http.ResponseWriter, request *http.Request) {
+func (handler *V1Handler) websocketUpgrade(writer http.ResponseWriter, request *http.Request) {
 	userSession, err := GetUserSession(request)
 	if err != nil {
 		log.Printf("error getting user session: %v", err)

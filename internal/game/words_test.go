@@ -24,7 +24,7 @@ func Test_wordListsContainNoCarriageReturns(t *testing.T) {
 
 func Test_readWordList(t *testing.T) {
 	t.Run("test invalid language file", func(t *testing.T) {
-		_, err := readWordList(cases.Lower(language.English), "owO")
+		_, err := readDefaultWordList(cases.Lower(language.English), "owO")
 		if err == nil {
 			t.Errorf("Reading word list didn't return an error, even though the language doesn't exist.")
 		}
@@ -44,7 +44,7 @@ func testWordList(t *testing.T, chosenLanguage string) {
 	t.Helper()
 
 	lowercaser := cases.Lower(language.English)
-	words, err := readWordList(lowercaser, chosenLanguage)
+	words, err := readDefaultWordList(lowercaser, chosenLanguage)
 	if err != nil {
 		t.Errorf("Error reading language %s: %s", chosenLanguage, err)
 	}

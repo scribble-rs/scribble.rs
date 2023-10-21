@@ -1,7 +1,6 @@
 package frontend
 
 import (
-	"crypto/md5"
 	"embed"
 	"fmt"
 	"html/template"
@@ -9,7 +8,6 @@ import (
 	"path"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/scribble-rs/scribble.rs/internal/config"
 	"github.com/scribble-rs/scribble.rs/internal/translations"
 )
 
@@ -22,40 +20,11 @@ var (
 	frontendResourcesFS embed.FS
 )
 
-func Init() error {
+func init() {
 	var err error
 	pageTemplates, err = template.ParseFS(templateFS, "templates/*")
 	if err != nil {
-		return fmt.Errorf("error loading templates: %w", err)
-	}
-
-	entries, err := frontendResourcesFS.ReadDir("resources")
-	if err != nil {
-		return fmt.Errorf("error reading resource directory: %w", err)
-	}
-
-	hash := md5.New()
-	for _, entry := range entries {
-		bytes, err := frontendResourcesFS.ReadFile("resources/" + entry.Name())
-		if err != nil {
-			return fmt.Errorf("error reading resource %s: %w", entry.Name(), err)
-		}
-
-		if _, err := hash.Write(bytes); err != nil {
-			return fmt.Errorf("error hashing resource %s: %w", entry.Name(), err)
-		}
-	}
-
-	currentBasePageConfig.CacheBust = fmt.Sprintf("%x", hash.Sum(nil))
-	return nil
-}
-
-// FIXME Delete global state.
-var currentBasePageConfig = &BasePageConfig{}
-
-func SetRootPath(rootPath string) {
-	if rootPath != "" {
-		currentBasePageConfig.RootPath = "/" + rootPath
+		panic(fmt.Errorf("error loading templates: %w", err))
 	}
 }
 
@@ -74,14 +43,14 @@ type BasePageConfig struct {
 }
 
 // SetupRoutes registers the official webclient endpoints with the http package.
-func SetupRoutes(config *config.Config, router chi.Router) {
-	router.Get("/"+config.RootPath, newHomePageHandler(config.LobbySettingDefaults))
+func (handler *SSRHandler) SetupRoutes(router chi.Router) {
+	router.Get("/"+handler.cfg.RootPath, handler.homePageHandler)
 
 	fileServer := http.FileServer(http.FS(frontendResourcesFS))
 	router.Get(
-		"/"+path.Join(config.RootPath, "resources/*"),
+		"/"+path.Join(handler.cfg.RootPath, "resources/*"),
 		http.StripPrefix(
-			"/"+config.RootPath,
+			"/"+handler.cfg.RootPath,
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				// Duration of 1 year, since we use cachebusting anyway.
 				w.Header().Set("Cache-Control", "public, max-age=31536000")
@@ -90,8 +59,8 @@ func SetupRoutes(config *config.Config, router chi.Router) {
 			}),
 		).ServeHTTP,
 	)
-	router.Get("/"+path.Join(config.RootPath, "ssrEnterLobby/{lobby_id}"), ssrEnterLobby)
-	router.Post("/"+path.Join(config.RootPath, "ssrCreateLobby"), ssrCreateLobby)
+	router.Get("/"+path.Join(handler.cfg.RootPath, "ssrEnterLobby/{lobby_id}"), handler.ssrEnterLobby)
+	router.Post("/"+path.Join(handler.cfg.RootPath, "ssrCreateLobby"), handler.ssrCreateLobby)
 }
 
 // errorPageData represents the data that error.html requires to be displayed.
@@ -105,9 +74,9 @@ type errorPageData struct {
 }
 
 // userFacingError will return the occurred error as a custom html page to the caller.
-func userFacingError(w http.ResponseWriter, errorMessage string) {
+func (handler *SSRHandler) userFacingError(w http.ResponseWriter, errorMessage string) {
 	err := pageTemplates.ExecuteTemplate(w, "error-page", &errorPageData{
-		BasePageConfig: currentBasePageConfig,
+		BasePageConfig: handler.basePageConfig,
 		ErrorMessage:   errorMessage,
 	})
 	// This should never happen, but if it does, something is very wrong.
