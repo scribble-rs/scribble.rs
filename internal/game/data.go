@@ -7,7 +7,7 @@ import (
 
 	discordemojimap "github.com/Bios-Marcel/discordemojimap/v2"
 	"github.com/gofrs/uuid"
-	"github.com/gorilla/websocket"
+	"github.com/lxzan/gws"
 	easyjson "github.com/mailru/easyjson"
 	"golang.org/x/text/cases"
 )
@@ -91,7 +91,7 @@ type Lobby struct {
 	mutex *sync.Mutex
 
 	WriteObject          func(*Player, easyjson.Marshaler) error
-	WritePreparedMessage func(*Player, *websocket.PreparedMessage) error
+	WritePreparedMessage func(*Player, *gws.Broadcaster) error
 }
 
 // MaxPlayerNameLength defines how long a string can be at max when used
@@ -112,12 +112,12 @@ func (player *Player) SetLastKnownAddress(address string) {
 // GetWebsocket simply returns the players websocket connection. This method
 // exists to encapsulate the websocket field and prevent accidental sending
 // the websocket data via the network.
-func (player *Player) GetWebsocket() *websocket.Conn {
+func (player *Player) GetWebsocket() *gws.Conn {
 	return player.ws
 }
 
 // SetWebsocket sets the given connection as the players websocket connection.
-func (player *Player) SetWebsocket(socket *websocket.Conn) {
+func (player *Player) SetWebsocket(socket *gws.Conn) {
 	player.ws = socket
 }
 

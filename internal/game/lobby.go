@@ -12,7 +12,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/gorilla/websocket"
+	"github.com/lxzan/gws"
 	"github.com/mailru/easyjson"
 	"github.com/scribble-rs/scribble.rs/internal/config"
 	"github.com/scribble-rs/scribble.rs/internal/sanitize"
@@ -362,32 +362,28 @@ func (lobby *Lobby) Broadcast(data easyjson.Marshaler) {
 		return
 	}
 
-	message, err := websocket.NewPreparedMessage(websocket.TextMessage, bytes)
-	if err != nil {
-		log.Println("error preparing message", err)
-		return
-	}
-
+	message := gws.NewBroadcaster(gws.OpcodeText, bytes)
 	for _, player := range lobby.GetPlayers() {
 		lobby.WritePreparedMessage(player, message)
 	}
 }
 
 func (lobby *Lobby) broadcastConditional(data easyjson.Marshaler, condition func(*Player) bool) {
-	bytes, err := easyjson.Marshal(data)
-	if err != nil {
-		log.Println("error marshalling broadcastConditional message", err)
-		return
-	}
-
-	message, err := websocket.NewPreparedMessage(websocket.TextMessage, bytes)
-	if err != nil {
-		log.Println("error preparing message", err)
-		return
-	}
-
+	var message *gws.Broadcaster
 	for _, player := range lobby.players {
 		if condition(player) {
+			if message == nil {
+				bytes, err := easyjson.Marshal(data)
+				if err != nil {
+					log.Println("error marshalling broadcastConditional message", err)
+					return
+				}
+
+				// Message is created lazily, since the conditional events could
+				// potentially not be sent at all. The cost of the nil-check is
+				// much lower than the cost of creating the message.
+				message = gws.NewBroadcaster(gws.OpcodeText, bytes)
+			}
 			lobby.WritePreparedMessage(player, message)
 		}
 	}
@@ -453,9 +449,7 @@ func handleKickVoteEvent(lobby *Lobby, player *Player, toKickID uuid.UUID) {
 func kickPlayer(lobby *Lobby, playerToKick *Player, playerToKickIndex int) {
 	// Avoiding nilpointer in case playerToKick disconnects during this event unluckily.
 	if playerToKickSocket := playerToKick.ws; playerToKickSocket != nil {
-		if err := playerToKickSocket.Close(); err != nil {
-			log.Printf("Error disconnecting kicked player:\n\t%s\n", err)
-		}
+		playerToKickSocket.WriteClose(1000, nil)
 	}
 
 	// Since the player is already kicked, we first clean up the kicking information related to that player

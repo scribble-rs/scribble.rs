@@ -21,6 +21,7 @@ import (
 
 var ErrLobbyNotExistent = errors.New("the requested lobby doesn't exist")
 
+//easyjson:skip
 type V1Handler struct {
 	cfg *config.Config
 }

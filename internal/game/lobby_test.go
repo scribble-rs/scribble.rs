@@ -8,7 +8,7 @@ import (
 	"unsafe"
 
 	"github.com/gofrs/uuid"
-	"github.com/gorilla/websocket"
+	"github.com/lxzan/gws"
 	easyjson "github.com/mailru/easyjson"
 	"github.com/scribble-rs/scribble.rs/internal/sanitize"
 )
@@ -33,7 +33,7 @@ func noOpWriteObject(_ *Player, _ easyjson.Marshaler) error {
 	return nil
 }
 
-func noOpWritePreparedMessage(_ *Player, _ *websocket.PreparedMessage) error {
+func noOpWritePreparedMessage(_ *Player, _ *gws.Broadcaster) error {
 	return nil
 }
 
@@ -233,8 +233,8 @@ func Test_wordSelectionEvent(t *testing.T) {
 
 		return nil
 	}
-	lobby.WritePreparedMessage = func(player *Player, message *websocket.PreparedMessage) error {
-		data := getUnexportedField(reflect.ValueOf(message).Elem().FieldByName("data")).([]byte)
+	lobby.WritePreparedMessage = func(player *Player, message *gws.Broadcaster) error {
+		data := getUnexportedField(reflect.ValueOf(message).Elem().FieldByName("payload")).([]byte)
 		type event struct {
 			Type string          `json:"type"`
 			Data json.RawMessage `json:"data"`

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/gorilla/websocket"
+	"github.com/lxzan/gws"
 )
 
 //
@@ -197,7 +197,7 @@ type Ready struct {
 type Player struct {
 	// userSession uniquely identifies the player.
 	userSession uuid.UUID
-	ws          *websocket.Conn
+	ws          *gws.Conn
 	socketMutex *sync.Mutex
 	// disconnectTime is used to kick a player in case the lobby doesn't have
 	// space for new players. The player with the oldest disconnect.Time will
