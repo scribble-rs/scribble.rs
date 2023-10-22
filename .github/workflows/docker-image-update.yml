@@ -3,7 +3,7 @@ name: docker image update
 on:
   workflow_run:
     workflows: [Build]
-    branches: [master]
+    branches: [v**]
     types: [completed]
 
 jobs:
@@ -17,13 +17,13 @@ jobs:
         - os: ubuntu-latest
           platforms: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
           file: linux.Dockerfile
-          tags: latest
+          tags: latest, ${{ github.event.workflow_run.head_branch }}
           multiPlatform: true
 
         - os: windows-2022
           platforms: windows/amd64
           file: windows.Dockerfile
-          tags: windows-latest
+          tags: windows-latest, windows-${{ github.event.workflow_run.head_branch }}
           multiPlatform: false
 
     steps:

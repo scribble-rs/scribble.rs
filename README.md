@@ -50,8 +50,8 @@ Alternatively there's a docker container:
 docker pull biosmarcel/scribble.rs:latest
 ```
 
-The docker container is built from the master branch on every push, so it
-should always be up-to-date.
+Starting from v0.8.5, docker images are only built on tagged pushes. Each git
+tag becomes a docker tag, however `latest` will always point to the latest tag.
 
 There's also `biosmarcel/scribble.rs:windows-latest` in case you are interested
 in running a native Windows container.
