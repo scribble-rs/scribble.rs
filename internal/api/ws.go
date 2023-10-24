@@ -141,7 +141,6 @@ func (c *socketHandler) OnMessage(socket *gws.Conn, message *gws.Message) {
 	}
 
 	bytes := message.Bytes()
-	message.Close()
 	wsListen(lobby, player, socket, bytes)
 }
 
