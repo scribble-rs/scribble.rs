@@ -1,29 +1,20 @@
-# Executable names
-/scribblers
-*.exe
-__debug_bin
-# IntelliJ state
-.idea/
-# Folder that contains code used for trying stuff locally
-playground/
-# Temporary output text files
-*.out
-# System metadata files
-.DS_Store
-# Configuration files
-.env
-# Executable files that aren't required for the actual app to run.
-/tools/
-# Deployment configuration
-fly.toml
-*.md
-LICENSE
+# We are going with a whitelisting approach, to avoid accidentally bleeding
+# too much into our container. This reduces the amount of cache miss and
+# potentially speeds up the build.
+*
 
-.vscode/
-.github/
-.golangci.yml
-.gitignore
-.git
+# Go Code
+!internal/
+!pkg
+!cmd
 
-# Ignoring Dockerfiles will cause flyctl to fail the deploy.
-# *.Dockerfile
+# Go Modules
+!go.mod
+!go.sum
+
+# While the dockerfile aren't needed inside of the Dockerfile, fly.io requires
+# them for remote bulding and uses this dockerignore to filter what's sent to
+# the remote builder.
+!linux.Dockerfile
+!windows.Dockerfile
+
