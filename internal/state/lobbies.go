@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	globalStateMutex = &sync.Mutex{}
+	globalStateMutex = &sync.RWMutex{}
 	lobbies          []*game.Lobby
 )
 
@@ -72,8 +72,8 @@ func AddLobby(lobby *game.Lobby) {
 // GetLobby returns a Lobby that has a matching ID or no Lobby if none could
 // be found.
 func GetLobby(id string) *game.Lobby {
-	globalStateMutex.Lock()
-	defer globalStateMutex.Unlock()
+	globalStateMutex.RLock()
+	defer globalStateMutex.RUnlock()
 
 	for _, lobby := range lobbies {
 		if lobby.LobbyID == id {
@@ -106,8 +106,8 @@ func ShutdownLobbiesGracefully() {
 // both private and public lobbies and it doesn't matter whether the game is
 // already over, hasn't even started or is still ongoing.
 func GetActiveLobbyCount() int {
-	globalStateMutex.Lock()
-	defer globalStateMutex.Unlock()
+	globalStateMutex.RLock()
+	defer globalStateMutex.RUnlock()
 
 	return len(lobbies)
 }
@@ -116,8 +116,8 @@ func GetActiveLobbyCount() int {
 // This implies that the lobbies can be found in the lobby browser ob the
 // homepage.
 func GetPublicLobbies() []*game.Lobby {
-	globalStateMutex.Lock()
-	defer globalStateMutex.Unlock()
+	globalStateMutex.RLock()
+	defer globalStateMutex.RUnlock()
 
 	var publicLobbies []*game.Lobby
 	for _, lobby := range lobbies {
@@ -169,8 +169,8 @@ type PageStats struct {
 // Stats delivers information about the state of the service. Currently this
 // is lobby and player counts.
 func Stats() *PageStats {
-	globalStateMutex.Lock()
-	defer globalStateMutex.Unlock()
+	globalStateMutex.RLock()
+	defer globalStateMutex.RUnlock()
 
 	var playerCount, occupiedPlayerSlotCount, connectedPlayerCount uint64
 	// While one would expect locking the lobby here, it's not very
