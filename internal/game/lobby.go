@@ -257,6 +257,15 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 	normInput := sanitize.CleanText(lobby.lowercaser.String(trimmedMessage))
 	normSearched := sanitize.CleanText(lobby.CurrentWord)
 
+	// If the length difference is too big, we can't have a correct or close
+	// guess. This stems from the fact that the Levenshtein distance is gonna
+	// be at least the length difference. Since we are only hinting the user at
+	// at a distance of 1, we can save time.
+	if dif := len(normInput) - len(normSearched); dif > 1 || dif < -1 {
+		lobby.broadcastMessage(trimmedMessage, sender)
+		return
+	}
+
 	// Since correct guess are probably the least common case, we'll always
 	// calculate the distance, as usually have to do it anyway.
 	switch levenshtein.ComputeDistance(normInput, normSearched) {
