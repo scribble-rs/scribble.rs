@@ -37,16 +37,17 @@ type LobbyEntries []*LobbyEntry
 
 // LobbyEntry is an API object for representing a join-able public lobby.
 type LobbyEntry struct {
-	LobbyID         string     `json:"lobbyId"`
-	Wordpack        string     `json:"wordpack"`
-	State           game.State `json:"state"`
-	PlayerCount     int        `json:"playerCount"`
-	MaxPlayers      int        `json:"maxPlayers"`
-	Round           int        `json:"round"`
-	Rounds          int        `json:"rounds"`
-	DrawingTime     int        `json:"drawingTime"`
-	MaxClientsPerIP int        `json:"maxClientsPerIp"`
-	CustomWords     bool       `json:"customWords"`
+	LobbyID             string     `json:"lobbyId"`
+	Wordpack            string     `json:"wordpack"`
+	State               game.State `json:"state"`
+	PlayerCount         int        `json:"playerCount"`
+	MaxPlayers          int        `json:"maxPlayers"`
+	Round               int        `json:"round"`
+	Rounds              int        `json:"rounds"`
+	DrawingTime         int        `json:"drawingTime"`
+	MaxClientsPerIP     int        `json:"maxClientsPerIp"`
+	CustomWords         bool       `json:"customWords"`
+	WordSelectCount     int        `json:"wordSelectCount"`
 }
 
 func (handler *V1Handler) getLobbies(writer http.ResponseWriter, _ *http.Request) {
@@ -65,6 +66,7 @@ func (handler *V1Handler) getLobbies(writer http.ResponseWriter, _ *http.Request
 			Round:           lobby.Round,
 			Rounds:          lobby.Rounds,
 			DrawingTime:     lobby.DrawingTime,
+			WordSelectCount: lobby.WordSelectCount,
 			CustomWords:     len(lobby.CustomWords) > 0,
 			MaxClientsPerIP: lobby.ClientsPerIPLimit,
 			Wordpack:        lobby.Wordpack,
@@ -88,12 +90,14 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 
 	language, languageInvalid := ParseLanguage(request.Form.Get("language"))
 	drawingTime, drawingTimeInvalid := ParseDrawingTime(request.Form.Get("drawing_time"))
+	wordSelectCount, wordSelectCountInvalid := ParseWordSelectCount(request.Form.Get("word_select_count"))
 	rounds, roundsInvalid := ParseRounds(request.Form.Get("rounds"))
 	maxPlayers, maxPlayersInvalid := ParseMaxPlayers(request.Form.Get("max_players"))
 	customWords, customWordsInvalid := ParseCustomWords(request.Form.Get("custom_words"))
 	customWordsPerTurn, customWordsPerTurnInvalid := ParseCustomWordsPerTurn(request.Form.Get("custom_words_per_turn"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(request.Form.Get("clients_per_ip_limit"))
 	publicLobby, publicLobbyInvalid := ParseBoolean("public", request.Form.Get("public"))
+	timerStart, timerStartInvalid := ParseBoolean("timerStart", request.Form.Get("timer_start"))
 
 	var requestErrors []string
 	if languageInvalid != nil {
@@ -101,6 +105,9 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 	}
 	if drawingTimeInvalid != nil {
 		requestErrors = append(requestErrors, drawingTimeInvalid.Error())
+	}
+	if wordSelectCountInvalid != nil {
+		requestErrors = append(requestErrors, wordSelectCountInvalid.Error())
 	}
 	if roundsInvalid != nil {
 		requestErrors = append(requestErrors, roundsInvalid.Error())
@@ -120,6 +127,9 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 	if publicLobbyInvalid != nil {
 		requestErrors = append(requestErrors, publicLobbyInvalid.Error())
 	}
+	if timerStartInvalid != nil {
+		requestErrors = append(requestErrors, timerStartInvalid.Error())
+	}
 
 	if len(requestErrors) != 0 {
 		http.Error(writer, strings.Join(requestErrors, ";"), http.StatusBadRequest)
@@ -128,7 +138,7 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 
 	playerName := GetPlayername(request)
 	player, lobby, err := game.CreateLobby(handler.cfg, playerName, language,
-		publicLobby, drawingTime, rounds, maxPlayers, customWordsPerTurn,
+		publicLobby, timerStart, drawingTime, wordSelectCount, rounds, maxPlayers, customWordsPerTurn,
 		clientsPerIPLimit, customWords)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
@@ -249,10 +259,12 @@ func (handler *V1Handler) patchLobby(writer http.ResponseWriter, request *http.R
 	// Editable properties
 	maxPlayers, maxPlayersInvalid := ParseMaxPlayers(request.Form.Get("max_players"))
 	drawingTime, drawingTimeInvalid := ParseDrawingTime(request.Form.Get("drawing_time"))
+	wordSelectCount, wordSelectCountInvalid := ParseWordSelectCount(request.Form.Get("word_select_count"))
 	rounds, roundsInvalid := ParseRounds(request.Form.Get("rounds"))
 	customWordsPerTurn, customWordsPerTurnInvalid := ParseCustomWordsPerTurn(request.Form.Get("custom_words_per_turn"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(request.Form.Get("clients_per_ip_limit"))
 	publicLobby, publicLobbyInvalid := ParseBoolean("public", request.Form.Get("public"))
+	timerStart, timerStartInvalid := ParseBoolean("timerStart", request.Form.Get("timer_start"))
 
 	owner := lobby.Owner
 	if owner == nil || owner.GetUserSession() != userSession {
@@ -265,6 +277,9 @@ func (handler *V1Handler) patchLobby(writer http.ResponseWriter, request *http.R
 	}
 	if drawingTimeInvalid != nil {
 		requestErrors = append(requestErrors, drawingTimeInvalid.Error())
+	}
+	if wordSelectCountInvalid != nil {
+		requestErrors = append(requestErrors, wordSelectCountInvalid.Error())
 	}
 	if roundsInvalid != nil {
 		requestErrors = append(requestErrors, roundsInvalid.Error())
@@ -283,6 +298,9 @@ func (handler *V1Handler) patchLobby(writer http.ResponseWriter, request *http.R
 	if publicLobbyInvalid != nil {
 		requestErrors = append(requestErrors, publicLobbyInvalid.Error())
 	}
+	if timerStartInvalid != nil {
+		requestErrors = append(requestErrors, timerStartInvalid.Error())
+	}
 
 	if len(requestErrors) != 0 {
 		http.Error(writer, strings.Join(requestErrors, ";"), http.StatusBadRequest)
@@ -300,15 +318,17 @@ func (handler *V1Handler) patchLobby(writer http.ResponseWriter, request *http.R
 		lobby.CustomWordsPerTurn = customWordsPerTurn
 		lobby.ClientsPerIPLimit = clientsPerIPLimit
 		lobby.Public = publicLobby
+		lobby.TimerStart = timerStart
 		lobby.Rounds = rounds
+		lobby.WordSelectCount = wordSelectCount
 
 		if lobby.State == game.Ongoing {
 			lobby.DrawingTimeNew = drawingTime
 		} else {
 			lobby.DrawingTime = drawingTime
 		}
-
 		lobbySettingsCopy := lobby.EditableLobbySettings
+		lobbySettingsCopy.WordSelectCount = wordSelectCount
 		lobbySettingsCopy.DrawingTime = drawingTime
 		lobby.Broadcast(&game.Event{Type: game.EventTypeLobbySettingsChanged, Data: lobbySettingsCopy})
 	})

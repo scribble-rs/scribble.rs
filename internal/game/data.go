@@ -250,6 +250,10 @@ func (lobby *Lobby) IsPublic() bool {
 	return lobby.Public
 }
 
+func (lobby *Lobby) IsTimerStart() bool {
+	return lobby.TimerStart
+}
+
 func (lobby *Lobby) GetPlayers() []*Player {
 	return lobby.players
 }

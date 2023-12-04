@@ -104,12 +104,14 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 
 	language, languageInvalid := api.ParseLanguage(request.Form.Get("language"))
 	drawingTime, drawingTimeInvalid := api.ParseDrawingTime(request.Form.Get("drawing_time"))
+	wordSelectCount, wordSelectCountInvalid := api.ParseWordSelectCount(request.Form.Get("word_select_count"))
 	rounds, roundsInvalid := api.ParseRounds(request.Form.Get("rounds"))
 	maxPlayers, maxPlayersInvalid := api.ParseMaxPlayers(request.Form.Get("max_players"))
 	customWords, customWordsInvalid := api.ParseCustomWords(request.Form.Get("custom_words"))
 	customWordsPerTurn, customWordsPerTurnInvalid := api.ParseCustomWordsPerTurn(request.Form.Get("custom_words_per_turn"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := api.ParseClientsPerIPLimit(request.Form.Get("clients_per_ip_limit"))
 	publicLobby, publicLobbyInvalid := api.ParseBoolean("public", request.Form.Get("public"))
+	timerStart, timerStartInvalid := api.ParseBoolean("timerStart", request.Form.Get("timer_start"))
 
 	// Prevent resetting the form, since that would be annoying as hell.
 	pageData := LobbyCreatePageData{
@@ -117,7 +119,9 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 		SettingBounds:  game.LobbySettingBounds,
 		LobbySettingDefaults: config.LobbySettingDefaults{
 			Public:             request.Form.Get("public"),
+			TimerStart:         request.Form.Get("timer_start"),
 			DrawingTime:        request.Form.Get("drawing_time"),
+			WordSelectCount:    request.Form.Get("word_select_count"),
 			Rounds:             request.Form.Get("rounds"),
 			MaxPlayers:         request.Form.Get("max_players"),
 			CustomWords:        request.Form.Get("custom_words"),
@@ -132,6 +136,9 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 	}
 	if drawingTimeInvalid != nil {
 		pageData.Errors = append(pageData.Errors, drawingTimeInvalid.Error())
+	}
+	if wordSelectCountInvalid != nil {
+		pageData.Errors = append(pageData.Errors, wordSelectCountInvalid.Error())
 	}
 	if roundsInvalid != nil {
 		pageData.Errors = append(pageData.Errors, roundsInvalid.Error())
@@ -151,6 +158,9 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 	if publicLobbyInvalid != nil {
 		pageData.Errors = append(pageData.Errors, publicLobbyInvalid.Error())
 	}
+	if timerStartInvalid != nil {
+		pageData.Errors = append(pageData.Errors, timerStartInvalid.Error())
+	}
 
 	translation, locale := determineTranslation(request)
 	pageData.Translation = translation
@@ -167,7 +177,7 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 	playerName := api.GetPlayername(request)
 
 	player, lobby, err := game.CreateLobby(handler.cfg, playerName, language,
-		publicLobby, drawingTime, rounds, maxPlayers, customWordsPerTurn,
+		publicLobby, timerStart, drawingTime, wordSelectCount, rounds, maxPlayers, customWordsPerTurn,
 		clientsPerIPLimit, customWords)
 	if err != nil {
 		pageData.Errors = append(pageData.Errors, err.Error())

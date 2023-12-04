@@ -14,7 +14,9 @@ import (
 
 type LobbySettingDefaults struct {
 	Public             string `env:"PUBLIC"`
+	TimerStart         string `env:"TIMER_START"`
 	DrawingTime        string `env:"DRAWING_TIME"`
+	WordSelectCount    string `env:"WORD_SELECT_COUNT"`
 	Rounds             string `env:"ROUNDS"`
 	MaxPlayers         string `env:"MAX_PLAYERS"`
 	CustomWords        string `env:"CUSTOM_WORDS"`
@@ -62,7 +64,9 @@ var Default = Config{
 	Port: 8080,
 	LobbySettingDefaults: LobbySettingDefaults{
 		Public:             "false",
+		TimerStart:         "false",
 		DrawingTime:        "120",
+		WordSelectCount:    "5",
 		Rounds:             "4",
 		MaxPlayers:         "12",
 		CustomWordsPerTurn: "3",

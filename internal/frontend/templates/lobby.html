@@ -93,11 +93,7 @@
                         <div id="word-dialog" class="center-dialog">
                             <span class="dialog-title">{{.Translation.Get "choose-a-word"}}</span>
                             <div class="center-dialog-content">
-                                <div class="word-button-container">
-                                    <button id="word-button-zero" class="dialog-button"
-                                        onclick="chooseWord(0)"></button>
-                                    <button id="word-button-one" class="dialog-button" onclick="chooseWord(1)"></button>
-                                    <button id="word-button-two" class="dialog-button" onclick="chooseWord(2)"></button>
+                                <div id="word-button-container">
                                 </div>
                             </div>
                         </div>
@@ -171,6 +167,12 @@
                                     <b>{{.Translation.Get "rounds-setting"}}</b>
                                     <input id="lobby-settings-max-rounds" class="input-item" type="number" name="rounds"
                                         min="{{.MinRounds}}" max="{{.MaxRounds}}" value="{{.Rounds}}" />
+                                    <b>{{.Translation.Get "word-select-count-setting"}}</b>
+                                    <input id="lobby-settings-word-select-count" class="input-item" type="number" name="word_select_count"
+                                           min="{{.MinWordSelectCount}}" max="{{.MaxWordSelectCount}}" value="{{.WordSelectCount}}" />
+                                    <b>{{.Translation.Get "timer-start-setting"}}</b>
+                                    <input id="lobby-settings-timer-start" class="input-item" type="checkbox" name="timer_start" {{if eq
+                                           .TimerStart true}}checked{{end}} />
                                     <b>{{.Translation.Get "max-players-setting"}}</b>
                                     <input id="lobby-settings-max-players" type="number" name="max_players"
                                         min="{{.MinMaxPlayers}}" max="{{.MaxMaxPlayers}}" value="{{.MaxPlayers}}" />
@@ -389,6 +391,7 @@
                 <form class="message-input-form" onsubmit="return sendMessage()">
                     <input id="message-input" type="text" autocomplete="off"
                         placeholder="{{.Translation.Get "message-input-placeholder"}}" />
+                    <span id="message-char-count"></span>
                 </form>
             </div>
         </div>
@@ -488,6 +491,7 @@
         };
 
         const messageInput = document.getElementById("message-input");
+        const messageCharCount = document.getElementById("message-char-count");
         const playerContainer = document.getElementById("player-container");
         const wordContainer = document.getElementById("word-container");
         const chat = document.getElementById("chat");
@@ -512,6 +516,7 @@
         const lobbySettingsButton = document.getElementById("lobby-settings-button");
         const kickButton = document.getElementById("kick-button");
         const lobbySettingsDialog = document.getElementById("lobbysettings-dialog");
+        const lobbySettingsTimerStart = document.getElementById("lobby-settings-timer-start");
 
         const startDialog = document.getElementById("start-dialog");
         const gameOverDialog = document.getElementById("game-over-dialog");
@@ -519,10 +524,7 @@
         const gameOverScoreboard = document.getElementById("game-over-scoreboard");
         const restartButton = document.getElementById("restart-button");
         const wordDialog = document.getElementById("word-dialog");
-        const wordButtonZero = document.getElementById("word-button-zero");
-        const wordButtonOne = document.getElementById("word-button-one");
-        const wordButtonTwo = document.getElementById("word-button-two");
-
+        const wordButtonContainer = document.getElementById("word-button-container");
         const kickDialog = document.getElementById("kick-dialog");
         const kickDialogPlayers = document.getElementById("kick-dialog-players");
 
@@ -677,6 +679,7 @@
             fetch("{{.RootPath}}/v1/lobby/{{.LobbyID}}?" + new URLSearchParams({
                 drawing_time: document.getElementById("lobby-settings-drawing-time").value,
                 rounds: document.getElementById("lobby-settings-max-rounds").value,
+                word_select_count: document.getElementById("lobby-settings-word-select-count").value,
                 public: document.getElementById("lobby-settings-public").checked,
                 max_players: document.getElementById("lobby-settings-max-players").value,
                 clients_per_ip_limit: document.getElementById("lobby-settings-clients-per-ip-limit").value,
@@ -973,9 +976,24 @@
                 type: "choose-word",
                 data: index
             }));
+            wordChosen = true;
             allowDrawing = true;
             updateCursor();
             wordDialog.style.visibility = "hidden";
+
+            if(lobbySettingsTimerStart.checked) {
+                startRoundTimer();
+            }
+        }
+
+        function addWordCharCount(wordLength) {
+            const wordCharCountContainer = document.createElement("span");
+
+            wordCharCountContainer.id = 'word-char-count-container';
+            wordCharCountContainer.innerHTML = wordLength;
+
+            wordContainer.appendChild(wordCharCountContainer);
+
         }
 
         function onVotekickPlayer(playerId) {
@@ -1000,18 +1018,27 @@
             }
         });
 
+        messageInput.addEventListener('keyup', function (event) {
+            const message = messageInput.value;
+
+            messageCharCount.innerHTML = message.replace(/\s/g, '').length.toString();
+        });
+
         let ownID, ownerID, ownName, drawerID, drawerName;
         let round = 0;
         let rounds = 0;
         let roundEndTime = 0;
         let gameState = "unstarted";
         let drawingTimeSetting = "∞";
+        let wordSelectCountSetting = "3";
 
         function registerMessageHandler(targetSocket) {
             targetSocket.onmessage = event => {
                 const parsed = JSON.parse(event.data);
                 if (parsed.type === "ready") {
                     handleReadyEvent(parsed.data);
+                } else if (parsed.type === "word-chosen") {
+                    setRoundEndTime(parsed.data.roundEndTime);
                 } else if (parsed.type === "game-over") {
                     let ready = parsed.data;
                     showRoundEndMessage(ready.previousWord);
@@ -1050,7 +1077,9 @@
                 } else if (parsed.type === "update-wordhint") {
                     // this event is (also) sent if the drawer has choosen a word, so we can hide the waitChooseDialog
                     waitChooseDialog.style.visibility = "hidden";
-                    applyWordHints(parsed.data);
+                    applyWordHints(parsed.data.wordHints);
+                    setRoundEndTime(parsed.data.roundEndTime);
+                    startRoundTimer();
                 } else if (parsed.type === "message") {
                     appendMessage(null, parsed.data.author, parsed.data.content);
                 } else if (parsed.type === "system-message") {
@@ -1089,7 +1118,9 @@
                     if (drawerID !== ownID) {
                         //Show additional dialog, that another user (drawer) is choosing a word
                         waitChooseDrawerSpan.innerText = drawerName;
-                        waitChooseDialog.style.visibility = "visible";
+                        if (parsed.data.length <= 1) {
+                            waitChooseDialog.style.visibility = "visible";
+                        }
                     }
 
                     //We clear this, since there's no word chosen right now.
@@ -1110,7 +1141,9 @@
                     //This dialog could potentially stay visible from last
                     //turn, in case nobody has chosen a word.
                     waitChooseDialog.style.visibility = "hidden";
-                    promptWords(parsed.data[0], parsed.data[1], parsed.data[2]);
+
+                    promptWords(parsed.data);
+
                 } else if (parsed.type === "drawing") {
                     applyDrawData(parsed.data);
                 } else if (parsed.type === "kick-vote") {
@@ -1136,6 +1169,7 @@
                     updateButtonVisibilities();
                     appendMessage("system-message", '{{.Translation.Get "system"}}', '{{.Translation.Get "lobby-settings-changed"}}\n\n'
                         + '{{.Translation.Get "drawing-time-setting"}}: ' + parsed.data.drawingTime + "\n"
+                        + '{{.Translation.Get "word-select-count-setting"}}: ' + parsed.data.wordSelectCount + "\n"
                         + '{{.Translation.Get "rounds-setting"}}: ' + parsed.data.rounds + "\n"
                         + '{{.Translation.Get "public-lobby-setting"}}: ' + parsed.data.public + "\n"
                         + '{{.Translation.Get "max-players-setting"}}: ' + parsed.data.maxPlayers + "\n"
@@ -1195,6 +1229,7 @@
             rounds = ready.rounds;
             gameState = ready.gameState;
             drawingTimeSetting = ready.drawingTimeSetting;
+            wordSelectCountSetting = ready.wordSelectCountSetting;
             updateRoundsDisplay();
             updateButtonVisibilities();
 
@@ -1286,6 +1321,7 @@
                 // Lack of wordHints implies that word has been chosen yet.
                 if (ready.wordHints === null && drawerID !== ownID) {
                     waitChooseDrawerSpan.innerText = drawerName;
+
                     waitChooseDialog.style.visibility = "visible";
                 }
             }
@@ -1299,11 +1335,24 @@
             }
         }
 
-        function promptWords(wordOne, wordTwo, wordThree) {
-            wordButtonZero.textContent = wordOne;
-            wordButtonOne.textContent = wordTwo;
-            wordButtonTwo.textContent = wordThree;
-            wordDialog.style.visibility = "visible";
+        function promptWords(words) {
+            wordButtonContainer.innerHTML = '';
+            if (words.length <= 1) {
+                chooseWord(0);
+            } else {
+                words.forEach((word, index) => {
+                    const button = document.createElement('button');
+
+                    button.innerText = word;
+                    button.className = 'dialog-button';
+                    button.id = 'word-button-' + index;
+                    button.onclick = () => chooseWord(index);
+
+                    wordButtonContainer.appendChild(button);
+                });
+
+                wordDialog.style.visibility = "visible";
+            }
         }
 
         function playWav(file) {
@@ -1314,15 +1363,30 @@
             }
         }
 
-        window.setInterval(() => {
-            if (gameState === "ongoing") {
-                const msLeft = roundEndTime - Date.now();
-                const secondsLeft = Math.max(0, Math.floor(msLeft / 1000));
-                timeLeftValue.innerText = "" + secondsLeft
-            } else {
-                timeLeftValue.innerText = "" + drawingTimeSetting;
-            }
-        }, 500);
+        function startRoundTimer() {
+            window.setInterval(() => {
+                if (gameState === "ongoing") {
+                    const msLeft = roundEndTime - Date.now();
+                    const secondsLeft = Math.max(0, Math.floor(msLeft / 1000));
+                    timeLeftValue.innerText = "" + secondsLeft
+                } else {
+                    timeLeftValue.innerText = "" + drawingTimeSetting;
+                }
+            }, 500);
+        }
+
+        if(!lobbySettingsTimerStart.checked) {
+            startRoundTimer();
+        }
+        // window.setInterval(() => {
+        //     if (gameState === "ongoing") {
+        //         const msLeft = roundEndTime - Date.now();
+        //         const secondsLeft = Math.max(0, Math.floor(msLeft / 1000));
+        //         timeLeftValue.innerText = "" + secondsLeft
+        //     } else {
+        //         timeLeftValue.innerText = "" + drawingTimeSetting;
+        //     }
+        // }, 500);
 
         //appendMessage adds a new message to the message container. If the
         //message amount is too high, we cut off a part of the messages to
@@ -1436,6 +1500,7 @@
 
         function applyWordHints(wordHints) {
             wordContainer.innerHTML = "";
+
             wordHints.forEach(hint => {
                 const hintSpan = document.createElement("span");
                 hintSpan.classList.add("guess-letter");
@@ -1451,6 +1516,9 @@
 
                 wordContainer.appendChild(hintSpan);
             });
+
+            const wordLength = wordHints.reduce((total, x) => (x !== 32 ? total + 1: total), 0);
+            addWordCharCount(wordLength);
         }
 
         function applyDrawData(drawElements) {

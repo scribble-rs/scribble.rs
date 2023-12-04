@@ -60,7 +60,13 @@
                             max="{{.MaxDrawingTime}}" value="{{.DrawingTime}}" />
                         <b>{{.Translation.Get "rounds-setting"}}</b>
                         <input class="input-item" type="number" name="rounds" min="{{.MinRounds}}" max="{{.MaxRounds}}"
-                            value="{{.Rounds}}" />
+                               value="{{.Rounds}}" />
+                        <b>{{.Translation.Get "timer-start-setting"}}</b>
+                        <input class="input-item" type="checkbox" name="timer_start" value="true"
+                               {{if eq .TimerStart "true"}}checked{{end}} />
+                        <b>{{.Translation.Get "word-select-count-setting"}}</b>
+                        <input class="input-item" type="number" name="word_select_count"
+                               min="{{.MinWordSelectCount}}" max="{{.MaxWordSelectCount}}" value="{{.WordSelectCount}}" />
                         <b>{{.Translation.Get "max-players-setting"}}</b>
                         <input class="input-item" type="number" name="max_players" min="{{.MinMaxPlayers}}"
                             max="{{.MaxMaxPlayers}}" value="{{.MaxPlayers}}" />
@@ -102,7 +108,7 @@
                                 </tr>
                             </thead>
                             <tbody id="lobby-table-body">
-                            </tbody>
+                            </tbody> 
                         </table>
                     </div>
                 </div>
@@ -115,6 +121,7 @@
                     <span id="players-detail"></span>
                     <span class="lobby-detail">{{.Translation.Get "drawing-time-setting"}}:</span>
                     <span id="drawing-time-detail"></span>
+                    <span id="word-select-count"></span>
                     <span class="lobby-detail">{{.Translation.Get "custom-words"}}:</span>
                     <span id="custom-words-detail"></span>
                     <span class="lobby-detail">{{.Translation.Get "players-per-ip-limit-setting"}}:</span>
@@ -141,6 +148,7 @@
         let roundsDetail = document.getElementById("rounds-detail");
         let playersDetail = document.getElementById("players-detail");
         let drawingTimeDetail = document.getElementById("drawing-time-detail");
+        let wordSelectCountDetail = document.getElementById("word-select-count");
         let customWordsDetail = document.getElementById("custom-words-detail");
         let maxClientsIPDetail = document.getElementById("max-clients-ip-detail");
 
@@ -171,6 +179,8 @@
                         wordpackCell.innerText = lobby.wordpack;
                         const roundsCell = document.createElement("td");
                         roundsCell.innerText = lobby.round + "/" + lobby.rounds;
+                        const wordSelectCountCell = document.createElement("td");
+                        roundsCell.innerText = lobby.wordSelectCount;
                         const playersCell = document.createElement("td");
                         playersCell.innerText = lobby.playerCount + "/" + lobby.maxPlayers;
                         const drawingTimeCell = document.createElement("td");
@@ -181,6 +191,7 @@
                         const newRow = document.createElement("tr");
                         newRow.appendChild(wordpackCell);
                         newRow.appendChild(roundsCell);
+                        newRow.appendChild(wordSelectCountCell);
                         newRow.appendChild(playersCell);
                         newRow.appendChild(drawingTimeCell);
                         newRow.appendChild(customWordsCell);
@@ -206,6 +217,7 @@
                 roundsDetail.innerText = "";
                 playersDetail.innerText = "";
                 drawingTimeDetail.innerText = "";
+                wordSelectCountDetail.innerText = "";
                 customWordsDetail.innerText = "";
                 maxClientsIPDetail.innerText = "";
                 joinButton.disabled = true;
@@ -214,6 +226,7 @@
                 roundsDetail.innerText = lobby.round + "/" + lobby.rounds;
                 playersDetail.innerText = lobby.playerCount + "/" + lobby.maxPlayers;
                 drawingTimeDetail.innerText = lobby.drawingTime.toString();
+                wordSelectCountDetail.innerText = lobby.wordSelectCount;
                 customWordsDetail.innerText = lobby.customWords ? '{{.Translation.Get "yes"}}' : '{{.Translation.Get "no"}}';
                 maxClientsIPDetail.innerText = lobby.maxClientsPerIp;
                 joinButton.disabled = false;

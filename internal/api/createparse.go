@@ -44,6 +44,14 @@ func ParseDrawingTime(value string) (int, error) {
 		game.LobbySettingBounds.MaxDrawingTime, "drawing time")
 }
 
+// WordSelectCount checks whether the given value is an integer between
+// the lower and upper bound of word select count. All other invalid
+// input, including empty strings, will return an error.
+func ParseWordSelectCount(value string) (int, error) {
+	return parseIntValue(value, game.LobbySettingBounds.MinWordSelectCount,
+        game.LobbySettingBounds.MaxWordSelectCount, "word select count")
+}
+
 // ParseRounds checks whether the given value is an integer between
 // the lower and upper bound of rounds played. All other invalid
 // input, including empty strings, will return an error.

@@ -29,6 +29,8 @@ func initGermanTranslation() {
 	translation.put("word-language", "Sprache der Wörter")
 	translation.put("drawing-time-setting", "Zeichenzeit")
 	translation.put("rounds-setting", "Runden")
+	translation.put("word-select-count-setting", "Anzahl Wörter zur Auswahl")
+	translation.put("timer-start-setting", "Timer nach Wortwahl starten")
 	translation.put("max-players-setting", "Maximale Spieler")
 	translation.put("public-lobby-setting", "Öffentliche Lobby")
 	translation.put("custom-words", "Extrawörter")
@@ -101,6 +103,8 @@ func initGermanTranslation() {
 	translation.put("contact", "Kontakt")
 	translation.put("submit-feedback", "Feedback")
 	translation.put("stats", "Status")
+
+	translation.put("copy", "Kopieren");
 
 	RegisterTranslation("de", translation)
 	RegisterTranslation("de-de", translation)

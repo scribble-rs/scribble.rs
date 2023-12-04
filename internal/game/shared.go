@@ -34,6 +34,7 @@ const (
 	EventTypeSystemMessage            = "system-message"
 	EventTypeNonGuessingPlayerMessage = "non-guessing-player-message"
 	EventTypeReady                    = "ready"
+	EventTypeWordChosen               = "word-chosen"
 	EventTypeGameOver                 = "game-over"
 	EventTypeYourTurn                 = "your-turn"
 	EventTypeNextTurn                 = "next-turn"
@@ -152,6 +153,15 @@ type GameOverEvent struct {
 	PreviousWord string `json:"previousWord"`
 }
 
+type WordChosenEvent struct {
+	RoundEndTime int       `json:"roundEndTime"`
+}
+
+type WordHintData struct {
+	WordHints []*WordHint  `json:"wordHints"`
+	RoundEndTime int       `json:"roundEndTime"`
+}
+
 // NextTurn represents the data necessary for displaying the lobby state right
 // after a new turn started. Meaning that no word has been chosen yet and
 // therefore there are no wordhints and no current drawing instructions.
@@ -179,18 +189,19 @@ type OutgoingMessage struct {
 // This includes all the necessary things for properly running a client
 // without receiving any more data.
 type Ready struct {
-	WordHints          []*WordHint `json:"wordHints"`
-	PlayerName         string      `json:"playerName"`
-	Players            []*Player   `json:"players"`
-	GameState          State       `json:"gameState"`
-	CurrentDrawing     []any       `json:"currentDrawing"`
-	PlayerID           uuid.UUID   `json:"playerId"`
-	OwnerID            uuid.UUID   `json:"ownerId"`
-	Round              int         `json:"round"`
-	Rounds             int         `json:"rounds"`
-	RoundEndTime       int         `json:"roundEndTime"`
-	DrawingTimeSetting int         `json:"drawingTimeSetting"`
-	AllowDrawing       bool        `json:"allowDrawing"`
+	WordHints              []*WordHint `json:"wordHints"`
+	PlayerName             string      `json:"playerName"`
+	Players                []*Player   `json:"players"`
+	GameState              State       `json:"gameState"`
+	CurrentDrawing         []any       `json:"currentDrawing"`
+	PlayerID               uuid.UUID   `json:"playerId"`
+	OwnerID                uuid.UUID   `json:"ownerId"`
+	Round                  int         `json:"round"`
+	Rounds                 int         `json:"rounds"`
+	RoundEndTime           int         `json:"roundEndTime"`
+	WordSelectCountSetting int         `json:"WordSelectCount"`
+	DrawingTimeSetting     int         `json:"drawingTimeSetting"`
+	AllowDrawing           bool        `json:"allowDrawing"`
 }
 
 // Player represents a participant in a Lobby.
@@ -232,6 +243,7 @@ type EditableLobbySettings struct {
 	// Public defines whether the lobby is being broadcast to clients asking
 	// for available lobbies.
 	Public bool `json:"public"`
+	TimerStart bool `json:"timerStart"`
 	// MaxPlayers defines the maximum amount of players in a single lobby.
 	MaxPlayers         int `json:"maxPlayers"`
 	CustomWordsPerTurn int `json:"customWordsPerTurn"`
@@ -244,4 +256,5 @@ type EditableLobbySettings struct {
 	// DrawingTime is the amount of seconds that each player has available to
 	// finish their drawing.
 	DrawingTime int `json:"drawingTime"`
+	WordSelectCount int `json:"wordSelectCount"`
 }

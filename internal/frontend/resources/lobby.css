@@ -47,6 +47,19 @@
     padding-bottom: 0.4rem;
 }
 
+#word-char-count-container {
+    font-size: .75rem;
+    vertical-align: top;
+    font-weight: bold;
+}
+
+#message-char-count {
+    font-weight: bold;
+    width: 1.5rem;
+    padding-top: 0.75rem;
+    background-color: white;
+}
+
 .guess-letter-underline {
     border-bottom: 0.3rem black solid;
 }

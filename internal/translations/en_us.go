@@ -35,6 +35,8 @@ func initEnglishTranslation() Translation {
 	translation.put("word-language", "Word-Language")
 	translation.put("drawing-time-setting", "Drawing Time")
 	translation.put("rounds-setting", "Rounds")
+	translation.put("word-select-count-setting", "Word select count")
+	translation.put("timer-start-setting", "Start timer after word chosen.")
 	translation.put("max-players-setting", "Maximum Players")
 	translation.put("public-lobby-setting", "Public Lobby")
 	translation.put("custom-words", "Custom Words")
@@ -106,6 +108,8 @@ func initEnglishTranslation() Translation {
 	translation.put("contact", "Contact")
 	translation.put("submit-feedback", "Feedback")
 	translation.put("stats", "Status")
+
+	translation.put("copy", "Copy")
 
 	RegisterTranslation("en", translation)
 	RegisterTranslation("en-de", translation)

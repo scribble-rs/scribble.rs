@@ -1919,6 +1919,8 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame16(in *jlexe
 		switch key {
 		case "public":
 			out.Public = bool(in.Bool())
+		case "timerStart":
+			out.TimerStart = bool(in.Bool())
 		case "maxPlayers":
 			out.MaxPlayers = int(in.Int())
 		case "customWordsPerTurn":
@@ -1929,6 +1931,8 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame16(in *jlexe
 			out.Rounds = int(in.Int())
 		case "drawingTime":
 			out.DrawingTime = int(in.Int())
+		case "wordSelectCount":
+			out.WordSelectCount = int(in.Int())
 		default:
 			in.SkipRecursive()
 		}
@@ -1947,6 +1951,11 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame16(out *jwri
 		const prefix string = ",\"public\":"
 		out.RawString(prefix[1:])
 		out.Bool(bool(in.Public))
+	}
+	{
+		const prefix string = ",\"timerStart\":"
+		out.RawString(prefix[1:])
+		out.Bool(bool(in.TimerStart))
 	}
 	{
 		const prefix string = ",\"maxPlayers\":"
@@ -1973,6 +1982,12 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame16(out *jwri
 		out.RawString(prefix)
 		out.Int(int(in.DrawingTime))
 	}
+	{
+		const prefix string = ",\"wordSelectCount\":"
+		out.RawString(prefix)
+		out.Int(int(in.WordSelectCount))
+	}
+
 	out.RawByte('}')
 }
 

@@ -53,6 +53,8 @@ func easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalApi(in *jlexer.L
 			out.Rounds = int(in.Int())
 		case "drawingTime":
 			out.DrawingTime = int(in.Int())
+		case "wordSelectCount":
+			out.WordSelectCount = int(in.Int())
 		case "maxClientsPerIp":
 			out.MaxClientsPerIP = int(in.Int())
 		case "customWords":
@@ -110,6 +112,11 @@ func easyjson102f8a2fEncodeGithubComScribbleRsScribbleRsInternalApi(out *jwriter
 		const prefix string = ",\"drawingTime\":"
 		out.RawString(prefix)
 		out.Int(int(in.DrawingTime))
+	}
+	{
+		const prefix string = ",\"wordSelectCount\":"
+		out.RawString(prefix)
+		out.Int(int(in.WordSelectCount))
 	}
 	{
 		const prefix string = ",\"maxClientsPerIp\":"
@@ -264,6 +271,8 @@ func easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalApi2(in *jlexer.
 			}
 		case "public":
 			out.Public = bool(in.Bool())
+		case "timerStart":
+			out.TimerStart = bool(in.Bool())
 		case "maxPlayers":
 			out.MaxPlayers = int(in.Int())
 		case "customWordsPerTurn":
@@ -278,6 +287,10 @@ func easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalApi2(in *jlexer.
 			out.MinDrawingTime = int(in.Int())
 		case "maxDrawingTime":
 			out.MaxDrawingTime = int(in.Int())
+		case "minWordSelectCount":
+			out.MinWordSelectCount = int(in.Int())
+		case "maxWordSelectCount":
+			out.MaxWordSelectCount = int(in.Int())
 		case "minRounds":
 			out.MinRounds = int(in.Int())
 		case "maxRounds":
@@ -349,6 +362,11 @@ func easyjson102f8a2fEncodeGithubComScribbleRsScribbleRsInternalApi2(out *jwrite
 		out.Bool(bool(in.Public))
 	}
 	{
+		const prefix string = ",\"timerStart\":"
+		out.RawString(prefix)
+		out.Bool(bool(in.TimerStart))
+	}
+	{
 		const prefix string = ",\"maxPlayers\":"
 		out.RawString(prefix)
 		out.Int(int(in.MaxPlayers))
@@ -382,6 +400,16 @@ func easyjson102f8a2fEncodeGithubComScribbleRsScribbleRsInternalApi2(out *jwrite
 		const prefix string = ",\"maxDrawingTime\":"
 		out.RawString(prefix)
 		out.Int(int(in.MaxDrawingTime))
+	}
+	{
+		const prefix string = ",\"minWordSelectCount\":"
+		out.RawString(prefix)
+		out.Int(int(in.MinWordSelectCount))
+	}
+	{
+		const prefix string = ",\"maxWordSelectCount\":"
+		out.RawString(prefix)
+		out.Int(int(in.MaxWordSelectCount))
 	}
 	{
 		const prefix string = ",\"minRounds\":"

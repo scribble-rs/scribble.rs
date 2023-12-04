@@ -216,8 +216,9 @@ func Test_wordSelectionEvent(t *testing.T) {
 	lobby := &Lobby{
 		mutex: &sync.Mutex{},
 		EditableLobbySettings: EditableLobbySettings{
-			DrawingTime: 10,
-			Rounds:      10,
+			DrawingTime:     10,
+			WordSelectCount: 3,
+			Rounds:          10,
 		},
 		words: []string{"abc", "def", "ghi"},
 	}
@@ -312,8 +313,9 @@ func Test_kickDrawer(t *testing.T) {
 	lobby := &Lobby{
 		mutex: &sync.Mutex{},
 		EditableLobbySettings: EditableLobbySettings{
-			DrawingTime: 10,
-			Rounds:      10,
+			DrawingTime:     10,
+			wordSelectCount: 3,
+			Rounds:          10,
 		},
 		words: []string{"a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a"},
 	}

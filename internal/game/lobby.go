@@ -37,6 +37,8 @@ var (
 		MaxClientsPerIPLimit:  24,
 		MinCustomWordsPerTurn: 1,
 		MaxCustomWordsPerTurn: 3,
+		MinWordSelectCount:    1,
+		MaxWordSelectCount:    5,
 	}
 	SupportedLanguages = map[string]string{
 		"english_gb": "English (GB)",
@@ -71,6 +73,8 @@ type SettingBounds struct {
 	MaxClientsPerIPLimit  int `json:"maxClientsPerIpLimit"`
 	MinCustomWordsPerTurn int `json:"minCustomWordsPerTurn"`
 	MaxCustomWordsPerTurn int `json:"maxCustomWordsPerTurn"`
+	MinWordSelectCount    int `json:"minWordSelectCount"`
+	MaxWordSelectCount    int `json:"maxWordSelectCount"`
 }
 
 func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player) error {
@@ -154,6 +158,18 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 		}
 	} else if eventType == EventTypeChooseWord {
 		var wordChoice IntDataEvent
+
+        if lobby.TimerStart {
+            startRoundTimer(lobby)
+
+            lobby.WriteObject(player, Event{
+                Type: EventTypeWordChosen,
+                Data: &WordChosenEvent{
+                    RoundEndTime: int(lobby.roundEndTime - getTimeAsMillis()),
+                },
+            })
+        }
+
 		if err := easyjson.Unmarshal(payload, &wordChoice); err != nil {
 			return fmt.Errorf("error decoding data: %w", err)
 		}
@@ -170,9 +186,21 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 		if player.State == Drawing {
 			lobby.selectWord(chosenIndex)
 
-			wordHintData := &Event{Type: EventTypeUpdateWordHint, Data: lobby.wordHints}
+			wordHintData := &Event{
+			    Type: EventTypeUpdateWordHint,
+			    Data: &WordHintData{
+			        WordHints: lobby.wordHints,
+			        RoundEndTime: int(lobby.roundEndTime - getTimeAsMillis()),
+			    },
+			};
 			lobby.broadcastConditional(wordHintData, IsGuessing)
-			wordHintDataRevealed := &Event{Type: EventTypeUpdateWordHint, Data: lobby.wordHintsShown}
+			wordHintDataRevealed := &Event{
+                Type: EventTypeUpdateWordHint,
+                Data: &WordHintData{
+                    WordHints: lobby.wordHintsShown,
+                    RoundEndTime: int(lobby.roundEndTime - getTimeAsMillis()),
+                },
+            };
 			lobby.broadcastConditional(wordHintDataRevealed, IsNotGuessing)
 		}
 	} else if eventType == EventTypeKickVote {
@@ -220,6 +248,13 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 	}
 
 	return nil
+}
+
+func startRoundTimer(lobby *Lobby) {
+    // We use milliseconds for higher accuracy
+    lobby.roundEndTime = getTimeAsMillis() + int64(lobby.DrawingTime)*1000
+    lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
+    go startTurnTimeTicker(lobby, lobby.timeLeftTicker)
 }
 
 func handleMessage(message string, sender *Player, lobby *Lobby) {
@@ -275,7 +310,14 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 				advanceLobby(lobby)
 			} else {
 				// Since the word has been guessed correctly, we reveal it.
-				lobby.WriteObject(sender, Event{Type: EventTypeUpdateWordHint, Data: lobby.wordHintsShown})
+				lobby.WriteObject(sender, Event{
+                    Type: EventTypeUpdateWordHint,
+                    Data: &WordHintData{
+                        WordHints: lobby.wordHints,
+                        RoundEndTime: int(lobby.roundEndTime - getTimeAsMillis()),
+                    },
+                });
+
 				recalculateRanks(lobby)
 				lobby.Broadcast(&Event{Type: EventTypeUpdatePlayers, Data: lobby.players})
 			}
@@ -648,22 +690,22 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 	lobby.ClearDrawing()
 	newDrawer.State = Drawing
 	lobby.State = Ongoing
-	lobby.wordChoice = GetRandomWords(3, lobby)
+	lobby.wordChoice = GetRandomWords(lobby.WordSelectCount, lobby)
 
-	// We use milliseconds for higher accuracy
-	lobby.roundEndTime = getTimeAsMillis() + int64(lobby.DrawingTime)*1000
-	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
-	go startTurnTimeTicker(lobby, lobby.timeLeftTicker)
 
-	lobby.Broadcast(&Event{
-		Type: EventTypeNextTurn,
-		Data: &NextTurn{
-			Round:        lobby.Round,
-			Players:      lobby.players,
-			RoundEndTime: int(lobby.roundEndTime - getTimeAsMillis()),
-			PreviousWord: previousWord,
-		},
-	})
+    if !lobby.TimerStart {
+        startRoundTimer(lobby)
+    }
+
+    lobby.Broadcast(&Event{
+        Type: EventTypeNextTurn,
+        Data: &NextTurn{
+            Round:        lobby.Round,
+            Players:      lobby.players,
+            RoundEndTime: int(lobby.roundEndTime - getTimeAsMillis()),
+            PreviousWord: previousWord,
+        },
+    })
 
 	lobby.WriteObject(newDrawer, &Event{Type: EventTypeYourTurn, Data: lobby.wordChoice})
 }
@@ -711,12 +753,12 @@ func determineNextDrawer(lobby *Lobby) (*Player, bool) {
 // timeLeftTicker and executes a tickLogic on each tick. This method
 // blocks until the turn ends.
 func startTurnTimeTicker(lobby *Lobby, ticker *time.Ticker) {
-	for {
-		<-ticker.C
-		if !lobby.tickLogic(ticker) {
-			break
-		}
-	}
+    for {
+        <-ticker.C
+        if !lobby.tickLogic(ticker) {
+            break
+        }
+    }
 }
 
 // tickLogic checks whether the lobby needs to proceed to the next round and
@@ -762,9 +804,12 @@ func (lobby *Lobby) tickLogic(expectedTicker *time.Ticker) bool {
 				if lobby.wordHints[randomIndex].Character == 0 {
 					lobby.wordHints[randomIndex].Character = []rune(lobby.CurrentWord)[randomIndex]
 					wordHintData := &Event{
-						Type: EventTypeUpdateWordHint,
-						Data: lobby.wordHints,
-					}
+                        Type: EventTypeUpdateWordHint,
+                        Data: &WordHintData{
+                            WordHints: lobby.wordHints,
+                            RoundEndTime: int(lobby.roundEndTime - getTimeAsMillis()),
+                        },
+                    };
 					lobby.broadcastConditional(wordHintData, IsGuessing)
 					break
 				}
@@ -868,8 +913,8 @@ func (lobby *Lobby) selectWord(wordChoiceIndex int) {
 func CreateLobby(
 	cfg *config.Config,
 	playerName, chosenLanguage string,
-	publicLobby bool,
-	drawingTime, rounds, maxPlayers, customWordsPerTurn, clientsPerIPLimit int,
+	publicLobby, timerStart bool,
+	drawingTime, wordSelectCount, rounds, maxPlayers, customWordsPerTurn, clientsPerIPLimit int,
 	customWords []string,
 ) (*Player, *Lobby, error) {
 	lobby := &Lobby{
@@ -877,10 +922,12 @@ func CreateLobby(
 		EditableLobbySettings: EditableLobbySettings{
 			Rounds:             rounds,
 			DrawingTime:        drawingTime,
+			WordSelectCount:    wordSelectCount,
 			MaxPlayers:         maxPlayers,
 			CustomWordsPerTurn: customWordsPerTurn,
 			ClientsPerIPLimit:  clientsPerIPLimit,
 			Public:             publicLobby,
+			TimerStart:         timerStart,
 		},
 		CustomWords:    customWords,
 		currentDrawing: make([]any, 0),
@@ -928,18 +975,19 @@ func generateReadyData(lobby *Lobby, player *Player) *Ready {
 		AllowDrawing: player.State == Drawing,
 		PlayerName:   player.Name,
 
-		GameState:          lobby.State,
-		OwnerID:            lobby.Owner.ID,
-		Round:              lobby.Round,
-		Rounds:             lobby.Rounds,
-		DrawingTimeSetting: lobby.DrawingTime,
-		WordHints:          lobby.GetAvailableWordHints(player),
-		Players:            lobby.players,
-		CurrentDrawing:     lobby.currentDrawing,
+		GameState:              lobby.State,
+		OwnerID:                lobby.Owner.ID,
+		Round:                  lobby.Round,
+		Rounds:                 lobby.Rounds,
+		DrawingTimeSetting:     lobby.DrawingTime,
+		WordSelectCountSetting: lobby.WordSelectCount,
+		WordHints:              lobby.GetAvailableWordHints(player),
+		Players:                lobby.players,
+		CurrentDrawing:         lobby.currentDrawing,
 	}
 
 	if lobby.State != Ongoing {
-		// Clients should interpret 0 as "time over", unless the gamestate isn't "ongoing"
+// 		Clients should interpret 0 as "time over", unless the gamestate isn't "ongoing"
 		ready.RoundEndTime = 0
 	} else {
 		ready.RoundEndTime = int(lobby.roundEndTime - getTimeAsMillis())
