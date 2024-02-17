@@ -18,6 +18,7 @@ var (
 		"german":     "de",
 		"french":     "fr",
 		"dutch":      "nl",
+		"ukrainian":  "ua",
 	}
 
 	//go:embed words/*
