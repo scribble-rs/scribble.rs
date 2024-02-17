@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"html/template"
 	"log"
@@ -50,7 +51,7 @@ func NewHandler(cfg *config.Config) (*SSRHandler, error) {
 		}
 	}
 
-	basePageConfig.CacheBust = fmt.Sprintf("%x", hash.Sum(nil))
+	basePageConfig.CacheBust = hex.EncodeToString(hash.Sum(nil))
 
 	handler := &SSRHandler{
 		cfg:            cfg,

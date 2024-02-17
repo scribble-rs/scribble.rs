@@ -258,7 +258,7 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 	// If the length difference is too big, we can't have a correct or close
 	// guess. This stems from the fact that the Levenshtein distance is gonna
 	// be at least the length difference. Since we are only hinting the user at
-	// at a distance of 1, we can save time.
+	// a distance of 1, we can save time.
 	if dif := len(normInput) - len(normSearched); dif > 1 || dif < -1 {
 		lobby.broadcastMessage(trimmedMessage, sender)
 		return
@@ -907,7 +907,7 @@ func CreateLobby(
 	// Necessary to correctly treat words from player, however, custom words
 	// might be treated incorrectly, as they might not be the same language as
 	// the one specified for the lobby. If for example you chose 100 french
-	// custom words, but keep english_us as the lobby langauge, the casing rules
+	// custom words, but keep english_us as the lobby language, the casing rules
 	// will most likely be faulty.
 	lobby.lowercaser = wordlistData[chosenLanguage].lowercaser()
 
