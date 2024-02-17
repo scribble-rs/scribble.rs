@@ -74,6 +74,7 @@ func ParseCustomWords(value string) ([]string, error) {
 		return nil, nil
 	}
 
+	// FIXME Is there a better solution than using english?
 	lowercaser := cases.Lower(language.English)
 	result := strings.Split(trimmedValue, ",")
 	for index, item := range result {

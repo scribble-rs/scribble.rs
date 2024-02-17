@@ -7,18 +7,45 @@ import (
 	"strings"
 
 	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
+type languageData struct {
+	languageCode string
+	lowercaser   func() cases.Caser
+}
+
 var (
-	wordListCache       = make(map[string][]string)
-	languageIdentifiers = map[string]string{
-		"english_gb": "en_gb",
-		"english":    "en_us",
-		"italian":    "it",
-		"german":     "de",
-		"french":     "fr",
-		"dutch":      "nl",
-		"ukrainian":  "ua",
+	wordListCache = make(map[string][]string)
+	wordlistData  = map[string]languageData{
+		"english_gb": {
+			languageCode: "en_gb",
+			lowercaser:   func() cases.Caser { return cases.Lower(language.BritishEnglish) },
+		},
+		"english": {
+			languageCode: "en_us",
+			lowercaser:   func() cases.Caser { return cases.Lower(language.AmericanEnglish) },
+		},
+		"italian": {
+			languageCode: "it",
+			lowercaser:   func() cases.Caser { return cases.Lower(language.Italian) },
+		},
+		"german": {
+			languageCode: "de",
+			lowercaser:   func() cases.Caser { return cases.Lower(language.German) },
+		},
+		"french": {
+			languageCode: "fr",
+			lowercaser:   func() cases.Caser { return cases.Lower(language.French) },
+		},
+		"dutch": {
+			languageCode: "nl",
+			lowercaser:   func() cases.Caser { return cases.Lower(language.Dutch) },
+		},
+		"ukrainian": {
+			languageCode: "ua",
+			lowercaser:   func() cases.Caser { return cases.Lower(language.Ukrainian) },
+		},
 	}
 
 	//go:embed words/*
@@ -26,7 +53,7 @@ var (
 )
 
 func getLanguageIdentifier(language string) string {
-	return languageIdentifiers[language]
+	return wordlistData[language].languageCode
 }
 
 // readWordListInternal exists for testing purposes, it allows passing a custom

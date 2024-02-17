@@ -21,8 +21,6 @@ import (
 	petname "github.com/Bios-Marcel/go-petname"
 	"github.com/agnivade/levenshtein"
 	"github.com/gofrs/uuid"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 var (
@@ -906,8 +904,12 @@ func CreateLobby(
 
 	lobby.Wordpack = chosenLanguage
 
-	// Necessary to correctly treat words from player, however, custom words might be treated incorrectly.
-	lobby.lowercaser = cases.Lower(language.Make(getLanguageIdentifier(chosenLanguage)))
+	// Necessary to correctly treat words from player, however, custom words
+	// might be treated incorrectly, as they might not be the same language as
+	// the one specified for the lobby. If for example you chose 100 french
+	// custom words, but keep english_us as the lobby langauge, the casing rules
+	// will most likely be faulty.
+	lobby.lowercaser = wordlistData[chosenLanguage].lowercaser()
 
 	// customWords are lowercased afterwards, as they are direct user input.
 	if len(customWords) > 0 {
