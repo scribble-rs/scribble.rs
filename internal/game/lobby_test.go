@@ -223,7 +223,7 @@ func Test_wordSelectionEvent(t *testing.T) {
 	}
 	wordHintEvents := make(map[uuid.UUID][]*WordHint)
 	var wordChoice []string
-	lobby.WriteObject = func(player *Player, message easyjson.Marshaler) error {
+	lobby.WriteObject = func(_ *Player, message easyjson.Marshaler) error {
 		event, ok := message.(*Event)
 		if ok {
 			if event.Type == EventTypeYourTurn {

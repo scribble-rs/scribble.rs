@@ -150,7 +150,7 @@ func Test_getRandomWords(t *testing.T) {
 }
 
 func Test_getRandomWordsReloading(t *testing.T) {
-	wordList, err := readWordListInternal(cases.Lower(language.English), "test", func(language string) (string, error) {
+	wordList, err := readWordListInternal(cases.Lower(language.English), "test", func(_ string) (string, error) {
 		return "a\nb\nc", nil
 	})
 	if err != nil {

@@ -167,7 +167,7 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 
 	playerName := api.GetPlayername(request)
 
-	player, lobby, err := game.CreateLobby(handler.cfg, playerName, language,
+	player, lobby, err := game.CreateLobby(playerName, language,
 		publicLobby, drawingTime, rounds, maxPlayers, customWordsPerTurn,
 		clientsPerIPLimit, customWords)
 	if err != nil {

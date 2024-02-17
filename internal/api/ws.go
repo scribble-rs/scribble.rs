@@ -141,10 +141,10 @@ func (c *socketHandler) OnMessage(socket *gws.Conn, message *gws.Message) {
 	}
 
 	bytes := message.Bytes()
-	wsListen(lobby, player, socket, bytes)
+	wsListen(lobby, player, bytes)
 }
 
-func wsListen(lobby *game.Lobby, player *game.Player, socket *gws.Conn, data []byte) {
+func wsListen(lobby *game.Lobby, player *game.Player, data []byte) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Printf("Error occurred in wsListen.\n\tError: %s\n\tPlayer: %s(%s)\nStack %s\n", err, player.Name, player.ID, string(debug.Stack()))

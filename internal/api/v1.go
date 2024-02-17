@@ -127,7 +127,7 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 	}
 
 	playerName := GetPlayername(request)
-	player, lobby, err := game.CreateLobby(handler.cfg, playerName, language,
+	player, lobby, err := game.CreateLobby(playerName, language,
 		publicLobby, drawingTime, rounds, maxPlayers, customWordsPerTurn,
 		clientsPerIPLimit, customWords)
 	if err != nil {
