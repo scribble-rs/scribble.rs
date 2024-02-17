@@ -46,6 +46,9 @@ linters:
     - musttag
     - goerr113
 
+    # Broken
+    - goimports
+
 linters-settings:
   govet:
     enable:
