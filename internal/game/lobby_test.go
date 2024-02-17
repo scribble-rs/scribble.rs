@@ -38,7 +38,7 @@ func noOpWritePreparedMessage(_ *Player, _ *gws.Broadcaster) error {
 }
 
 func Test_CalculateVotesNeededToKick(t *testing.T) {
-	t.Run("Check necessary kick vote amount for players", func(test *testing.T) {
+	t.Run("Check necessary kick vote amount for players", func(t *testing.T) {
 		expectedResults := map[int]int{
 			// Kinda irrelevant since you can't kick yourself, but who cares.
 			1:  2,
@@ -64,7 +64,7 @@ func Test_CalculateVotesNeededToKick(t *testing.T) {
 }
 
 func Test_RemoveAccents(t *testing.T) {
-	t.Run("Check removing accented characters", func(test *testing.T) {
+	t.Run("Check removing accented characters", func(t *testing.T) {
 		expectedResults := map[string]string{
 			"é":     "e",
 			"É":     "E",

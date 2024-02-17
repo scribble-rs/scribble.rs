@@ -157,7 +157,7 @@ func Test_getRandomWordsReloading(t *testing.T) {
 		panic(err)
 	}
 
-	t.Run("test reload with 3 words and 0 custom words and 0 chance", func(t2 *testing.T) {
+	t.Run("test reload with 3 words and 0 custom words and 0 chance", func(t *testing.T) {
 		lobby := &Lobby{
 			words: wordList,
 			EditableLobbySettings: EditableLobbySettings{
@@ -177,7 +177,7 @@ func Test_getRandomWordsReloading(t *testing.T) {
 		}
 	})
 
-	t.Run("test reload with 3 words and 0 custom words and 100 chance", func(t2 *testing.T) {
+	t.Run("test reload with 3 words and 0 custom words and 100 chance", func(t *testing.T) {
 		lobby := &Lobby{
 			words: wordList,
 			EditableLobbySettings: EditableLobbySettings{
@@ -197,7 +197,7 @@ func Test_getRandomWordsReloading(t *testing.T) {
 		}
 	})
 
-	t.Run("test reload with 3 words and 1 custom words and 0 chance", func(t2 *testing.T) {
+	t.Run("test reload with 3 words and 1 custom words and 0 chance", func(t *testing.T) {
 		lobby := &Lobby{
 			words: wordList,
 			EditableLobbySettings: EditableLobbySettings{
