@@ -88,7 +88,7 @@ func main() {
 	}
 
 	address := fmt.Sprintf("%s:%d", cfg.NetworkAddress, cfg.Port)
-	log.Println("Started, listening on:", address)
+	log.Println("Started, listening on: http://" + address)
 
 	httpServer := &http.Server{
 		Addr:              address,
