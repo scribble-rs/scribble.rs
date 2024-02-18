@@ -18,8 +18,6 @@ linters:
     - wsl
     # Demands a newline before each return
     - nlreturn
-    # Demands t.Parallel to be called in tests
-    - paralleltest
     # Magic numbers
     - gomnd
     # Functionlength and linelength

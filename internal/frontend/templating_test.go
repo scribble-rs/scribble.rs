@@ -12,6 +12,8 @@ import (
 )
 
 func Test_templateLobbyPage(t *testing.T) {
+	t.Parallel()
+
 	var buffer bytes.Buffer
 	err := pageTemplates.ExecuteTemplate(&buffer,
 		"lobby-page", &lobbyPageData{
@@ -29,6 +31,8 @@ func Test_templateLobbyPage(t *testing.T) {
 }
 
 func Test_templateErrorPage(t *testing.T) {
+	t.Parallel()
+
 	var buffer bytes.Buffer
 	err := pageTemplates.ExecuteTemplate(&buffer,
 		"error-page", &errorPageData{
@@ -43,6 +47,8 @@ func Test_templateErrorPage(t *testing.T) {
 }
 
 func Test_templateRobotPage(t *testing.T) {
+	t.Parallel()
+
 	var buffer bytes.Buffer
 	err := pageTemplates.ExecuteTemplate(&buffer,
 		"robot-page", &lobbyPageData{
@@ -62,6 +68,8 @@ func Test_templateRobotPage(t *testing.T) {
 }
 
 func Test_templateLobbyCreatePage(t *testing.T) {
+	t.Parallel()
+
 	handler, err := NewHandler(&config.Config{})
 	require.NoError(t, err)
 	createPageData := handler.createDefaultLobbyCreatePageData()

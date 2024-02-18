@@ -6,6 +6,8 @@ import (
 )
 
 func Test_parsePlayerName(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		value   string
@@ -19,7 +21,10 @@ func Test_parsePlayerName(t *testing.T) {
 		{"name with space in the middle", "Hello World", "Hello World", false},
 	}
 	for _, testCase := range tests {
+		testCase := testCase
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
 			got, err := ParsePlayerName(testCase.value)
 			if (err != nil) != testCase.wantErr {
 				t.Errorf("parsePlayerName() error = %v, wantErr %v", err, testCase.wantErr)
@@ -33,6 +38,8 @@ func Test_parsePlayerName(t *testing.T) {
 }
 
 func Test_parseDrawingTime(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		value   string
@@ -48,7 +55,10 @@ func Test_parseDrawingTime(t *testing.T) {
 		{"something valid", "150", 150, false},
 	}
 	for _, testCase := range tests {
+		testCase := testCase
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
 			got, err := ParseDrawingTime(testCase.value)
 			if (err != nil) != testCase.wantErr {
 				t.Errorf("parseDrawingTime() error = %v, wantErr %v", err, testCase.wantErr)
@@ -62,6 +72,8 @@ func Test_parseDrawingTime(t *testing.T) {
 }
 
 func Test_parseRounds(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		value   string
@@ -77,7 +89,10 @@ func Test_parseRounds(t *testing.T) {
 		{"something valid", "15", 15, false},
 	}
 	for _, testCase := range tests {
+		testCase := testCase
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
 			got, err := ParseRounds(testCase.value)
 			if (err != nil) != testCase.wantErr {
 				t.Errorf("parseRounds() error = %v, wantErr %v", err, testCase.wantErr)
@@ -91,6 +106,8 @@ func Test_parseRounds(t *testing.T) {
 }
 
 func Test_parseMaxPlayers(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		value   string
@@ -106,7 +123,10 @@ func Test_parseMaxPlayers(t *testing.T) {
 		{"something valid", "15", 15, false},
 	}
 	for _, testCase := range tests {
+		testCase := testCase
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
 			got, err := ParseMaxPlayers(testCase.value)
 			if (err != nil) != testCase.wantErr {
 				t.Errorf("parseMaxPlayers() error = %v, wantErr %v", err, testCase.wantErr)
@@ -120,6 +140,8 @@ func Test_parseMaxPlayers(t *testing.T) {
 }
 
 func Test_parseCustomWords(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		value   string
@@ -137,7 +159,10 @@ func Test_parseCustomWords(t *testing.T) {
 		{"sentence and word", "What a great day, hello ", []string{"what a great day", "hello"}, false},
 	}
 	for _, testCase := range tests {
+		testCase := testCase
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
 			got, err := ParseCustomWords(testCase.value)
 			if (err != nil) != testCase.wantErr {
 				t.Errorf("parseCustomWords() error = %v, wantErr %v", err, testCase.wantErr)
@@ -151,6 +176,8 @@ func Test_parseCustomWords(t *testing.T) {
 }
 
 func Test_parseCustomWordsPerTurn(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		value   string
@@ -167,7 +194,10 @@ func Test_parseCustomWordsPerTurn(t *testing.T) {
 		{"something valid", "2", 2, false},
 	}
 	for _, testCase := range tests {
+		testCase := testCase
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
 			got, err := ParseCustomWordsPerTurn(testCase.value)
 			if (err != nil) != testCase.wantErr {
 				t.Errorf("parseCustomWordsPerTurn() error = %v, wantErr %v", err, testCase.wantErr)
@@ -181,6 +211,8 @@ func Test_parseCustomWordsPerTurn(t *testing.T) {
 }
 
 func Test_parseBoolean(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		value   string
@@ -198,7 +230,10 @@ func Test_parseBoolean(t *testing.T) {
 		{"false mixed casing", "FalsE", false, false},
 	}
 	for _, testCase := range tests {
+		testCase := testCase
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
 			got, err := ParseBoolean("name", testCase.value)
 			if (err != nil) != testCase.wantErr {
 				t.Errorf("parseBoolean() error = %v, wantErr %v", err, testCase.wantErr)

@@ -8,6 +8,8 @@ import (
 )
 
 func TestCreateLobby(t *testing.T) {
+	t.Parallel()
+
 	data := api.CreateLobbyData(&game.Lobby{
 		LobbyID: "TEST",
 	})

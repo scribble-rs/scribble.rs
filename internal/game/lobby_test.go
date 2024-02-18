@@ -38,64 +38,66 @@ func noOpWritePreparedMessage(_ *Player, _ *gws.Broadcaster) error {
 }
 
 func Test_CalculateVotesNeededToKick(t *testing.T) {
-	t.Run("Check necessary kick vote amount for players", func(t *testing.T) {
-		expectedResults := map[int]int{
-			// Kinda irrelevant since you can't kick yourself, but who cares.
-			1:  2,
-			2:  2,
-			3:  2,
-			4:  2,
-			5:  3,
-			6:  3,
-			7:  4,
-			8:  4,
-			9:  5,
-			10: 5,
-		}
+	t.Parallel()
 
-		for playerCount, expctedRequiredVotes := range expectedResults {
-			lobby := createLobbyWithDemoPlayers(playerCount)
-			result := calculateVotesNeededToKick(nil, lobby)
-			if result != expctedRequiredVotes {
-				t.Errorf("Error. Necessary vote amount was %d, but should've been %d", result, expctedRequiredVotes)
-			}
+	expectedResults := map[int]int{
+		// Kinda irrelevant since you can't kick yourself, but who cares.
+		1:  2,
+		2:  2,
+		3:  2,
+		4:  2,
+		5:  3,
+		6:  3,
+		7:  4,
+		8:  4,
+		9:  5,
+		10: 5,
+	}
+
+	for playerCount, expctedRequiredVotes := range expectedResults {
+		lobby := createLobbyWithDemoPlayers(playerCount)
+		result := calculateVotesNeededToKick(nil, lobby)
+		if result != expctedRequiredVotes {
+			t.Errorf("Error. Necessary vote amount was %d, but should've been %d", result, expctedRequiredVotes)
 		}
-	})
+	}
 }
 
 func Test_RemoveAccents(t *testing.T) {
-	t.Run("Check removing accented characters", func(t *testing.T) {
-		expectedResults := map[string]string{
-			"é":     "e",
-			"É":     "E",
-			"à":     "a",
-			"À":     "A",
-			"ç":     "c",
-			"Ç":     "C",
-			"ö":     "oe",
-			"Ö":     "OE",
-			"œ":     "oe",
-			"\n":    "\n",
-			"\t":    "\t",
-			"\r":    "\r",
-			"":      "",
-			"·":     "·",
-			"?:!":   "?:!",
-			"ac-ab": "acab",
-			//nolint:gocritic
-			"ac - _ab-- ": "acab",
-		}
+	t.Parallel()
 
-		for k, v := range expectedResults {
-			result := sanitize.CleanText(k)
-			if result != v {
-				t.Errorf("Error. Char was %s, but should've been %s", result, v)
-			}
+	expectedResults := map[string]string{
+		"é":     "e",
+		"É":     "E",
+		"à":     "a",
+		"À":     "A",
+		"ç":     "c",
+		"Ç":     "C",
+		"ö":     "oe",
+		"Ö":     "OE",
+		"œ":     "oe",
+		"\n":    "\n",
+		"\t":    "\t",
+		"\r":    "\r",
+		"":      "",
+		"·":     "·",
+		"?:!":   "?:!",
+		"ac-ab": "acab",
+		//nolint:gocritic
+		"ac - _ab-- ": "acab",
+	}
+
+	for k, v := range expectedResults {
+		result := sanitize.CleanText(k)
+		if result != v {
+			t.Errorf("Error. Char was %s, but should've been %s", result, v)
 		}
-	})
+	}
 }
 
 func Test_simplifyText(t *testing.T) {
+	t.Parallel()
+
 	// We only test the replacement we do ourselves. We won't test
 	// the "sanitize", or furthermore our expectations of it for now.
 
@@ -121,7 +123,10 @@ func Test_simplifyText(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			if got := sanitize.CleanText(tt.input); got != tt.want {
 				t.Errorf("simplifyText() = %v, want %v", got, tt.want)
 			}
@@ -130,6 +135,8 @@ func Test_simplifyText(t *testing.T) {
 }
 
 func Test_recalculateRanks(t *testing.T) {
+	t.Parallel()
+
 	lobby := &Lobby{
 		mutex: &sync.Mutex{},
 	}
@@ -173,6 +180,8 @@ func Test_recalculateRanks(t *testing.T) {
 }
 
 func Test_calculateGuesserScore(t *testing.T) {
+	t.Parallel()
+
 	lastScore := calculateGuesserScore(0, 0, 115, 120)
 	if lastScore >= maxBaseScore {
 		t.Errorf("Score should have declined, but was bigger than or "+
@@ -195,6 +204,8 @@ func Test_calculateGuesserScore(t *testing.T) {
 }
 
 func Test_handleNameChangeEvent(t *testing.T) {
+	t.Parallel()
+
 	lobby := &Lobby{}
 	lobby.WriteObject = noOpWriteObject
 	lobby.WritePreparedMessage = noOpWritePreparedMessage
@@ -213,6 +224,8 @@ func getUnexportedField(field reflect.Value) any {
 }
 
 func Test_wordSelectionEvent(t *testing.T) {
+	t.Parallel()
+
 	lobby := &Lobby{
 		mutex: &sync.Mutex{},
 		EditableLobbySettings: EditableLobbySettings{
@@ -309,6 +322,8 @@ func Test_wordSelectionEvent(t *testing.T) {
 }
 
 func Test_kickDrawer(t *testing.T) {
+	t.Parallel()
+
 	lobby := &Lobby{
 		mutex: &sync.Mutex{},
 		EditableLobbySettings: EditableLobbySettings{

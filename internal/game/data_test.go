@@ -7,6 +7,8 @@ import (
 )
 
 func TestOccupiedPlayerCount(t *testing.T) {
+	t.Parallel()
+
 	lobby := &Lobby{
 		mutex: &sync.Mutex{},
 	}

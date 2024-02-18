@@ -2,6 +2,7 @@ package game
 
 import (
 	"embed"
+	"errors"
 	"fmt"
 	"math/rand"
 	"strings"
@@ -16,8 +17,8 @@ type languageData struct {
 }
 
 var (
-	wordListCache = make(map[string][]string)
-	wordlistData  = map[string]languageData{
+	ErrUnknownWordList = errors.New("wordlist unknown")
+	wordlistData       = map[string]languageData{
 		"english_gb": {
 			languageCode: "en_gb",
 			lowercaser:   func() cases.Caser { return cases.Lower(language.BritishEnglish) },
@@ -64,23 +65,19 @@ func readWordListInternal(
 	wordlistSupplier func(string) (string, error),
 ) ([]string, error) {
 	languageIdentifier := getLanguageIdentifier(chosenLanguage)
-	words, available := wordListCache[languageIdentifier]
-	if !available {
-		wordListFile, err := wordlistSupplier(languageIdentifier)
-		if err != nil {
-			return nil, fmt.Errorf("error invoking wordlistSupplier: %w", err)
-		}
-
-		// Wordlists are guaranteed not to contain any carriage returns (\r).
-		words = strings.Split(lowercaser.String(wordListFile), "\n")
-		wordListCache[languageIdentifier] = words
+	if languageIdentifier == "" {
+		return nil, ErrUnknownWordList
 	}
 
-	// We don't shuffle the wordList directory, as the cache isn't threadsafe.
-	shuffledWords := make([]string, len(words))
-	copy(shuffledWords, words)
-	shuffleWordList(shuffledWords)
-	return shuffledWords, nil
+	wordListFile, err := wordlistSupplier(languageIdentifier)
+	if err != nil {
+		return nil, fmt.Errorf("error invoking wordlistSupplier: %w", err)
+	}
+
+	// Wordlists are guaranteed not to contain any carriage returns (\r).
+	words := strings.Split(lowercaser.String(wordListFile), "\n")
+	shuffleWordList(words)
+	return words, nil
 }
 
 // readDefaultWordList reads the wordlist for the given language from the filesystem.
@@ -100,10 +97,21 @@ func readDefaultWordList(lowercaser cases.Caser, chosenLanguage string) ([]strin
 	})
 }
 
+func reloadLobbyWords(lobby *Lobby) ([]string, error) {
+	return readDefaultWordList(lobby.lowercaser, lobby.Wordpack)
+}
+
 // GetRandomWords gets a custom amount of random words for the passed Lobby.
 // The words will be chosen from the custom words and the default
 // dictionary, depending on the settings specified by the lobbies creator.
 func GetRandomWords(wordCount int, lobby *Lobby) []string {
+	return getRandomWords(wordCount, lobby, reloadLobbyWords)
+}
+
+// getRandomWords exists for test purposes, allowing to define a custom
+// reloader, allowing us to specify custom wordlists in the tests without
+// running into a panic on reload.
+func getRandomWords(wordCount int, lobby *Lobby, reloadWords func(lobby *Lobby) ([]string, error)) []string {
 	words := make([]string, wordCount)
 
 	for customWordsLeft, i := lobby.CustomWordsPerTurn, 0; i < wordCount; i++ {
@@ -111,7 +119,7 @@ func GetRandomWords(wordCount int, lobby *Lobby) []string {
 			customWordsLeft--
 			words[i] = popCustomWord(lobby)
 		} else {
-			words[i] = popWordpackWord(lobby)
+			words[i] = popWordpackWord(lobby, reloadWords)
 		}
 	}
 
@@ -128,10 +136,10 @@ func popCustomWord(lobby *Lobby) string {
 // popWordpackWord gets X words from the wordpack. The major difference to
 // popCustomWords is, that the wordlist gets reset and reshuffeled once every
 // item has been popped.
-func popWordpackWord(lobby *Lobby) string {
+func popWordpackWord(lobby *Lobby, reloadWords func(lobby *Lobby) ([]string, error)) string {
 	if len(lobby.words) == 0 {
 		var err error
-		lobby.words, err = readDefaultWordList(lobby.lowercaser, lobby.Wordpack)
+		lobby.words, err = reloadWords(lobby)
 		if err != nil {
 			// Since this list should've been successfully read once before, we
 			// can "safely" panic if this happens, assuming that there's a

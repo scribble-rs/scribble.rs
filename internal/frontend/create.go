@@ -4,7 +4,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 
@@ -26,12 +25,6 @@ func NewHandler(cfg *config.Config) (*SSRHandler, error) {
 	basePageConfig := &BasePageConfig{}
 	if cfg.RootPath != "" {
 		basePageConfig.RootPath = "/" + cfg.RootPath
-	}
-
-	var err error
-	pageTemplates, err = template.ParseFS(templateFS, "templates/*")
-	if err != nil {
-		return nil, fmt.Errorf("error loading templates: %w", err)
 	}
 
 	entries, err := frontendResourcesFS.ReadDir("resources")

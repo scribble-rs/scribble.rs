@@ -2,16 +2,18 @@ package game
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 	"sync"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
 
 func Test_wordListsContainNoCarriageReturns(t *testing.T) {
+	t.Parallel()
+
 	for _, entry := range wordlistData {
 		fileName := entry.languageCode
 		fileBytes, err := wordFS.ReadFile("words/" + fileName)
@@ -24,18 +26,22 @@ func Test_wordListsContainNoCarriageReturns(t *testing.T) {
 }
 
 func Test_readWordList(t *testing.T) {
+	t.Parallel()
+
 	t.Run("test invalid language file", func(t *testing.T) {
-		_, err := readDefaultWordList(cases.Lower(language.English), "owO")
-		if err == nil {
-			t.Errorf("Reading word list didn't return an error, even though the language doesn't exist.")
-		}
+		t.Parallel()
+
+		words, err := readDefaultWordList(cases.Lower(language.English), "nonexistent")
+		assert.ErrorIs(t, err, ErrUnknownWordList)
+		assert.Empty(t, words)
 	})
 
 	for language := range wordlistData {
-		t.Run(fmt.Sprintf("Testing language file from embedded data for %s", language), func(t *testing.T) {
+		language := language
+		t.Run(language, func(t *testing.T) {
+			t.Parallel()
+
 			testWordList(t, language)
-		})
-		t.Run(fmt.Sprintf("Testing language file from in-memory cached data for %s", language), func(t *testing.T) {
 			testWordList(t, language)
 		})
 	}
@@ -72,7 +78,11 @@ func testWordList(t *testing.T, chosenLanguage string) {
 }
 
 func Test_getRandomWords(t *testing.T) {
+	t.Parallel()
+
 	t.Run("Test getRandomWords with 3 words in list", func(t *testing.T) {
+		t.Parallel()
+
 		lobby := &Lobby{
 			CurrentWord: "",
 			EditableLobbySettings: EditableLobbySettings{
@@ -91,6 +101,8 @@ func Test_getRandomWords(t *testing.T) {
 	})
 
 	t.Run("Test getRandomWords with 3 words in list and 3 more in custom word list, but with 0 chance", func(t *testing.T) {
+		t.Parallel()
+
 		lobby := &Lobby{
 			CurrentWord: "",
 			words:       []string{"a", "b", "c"},
@@ -111,6 +123,8 @@ func Test_getRandomWords(t *testing.T) {
 	})
 
 	t.Run("Test getRandomWords with 3 words in list and 100% custom word chance, but without custom words", func(t *testing.T) {
+		t.Parallel()
+
 		lobby := &Lobby{
 			CurrentWord: "",
 			words:       []string{"a", "b", "c"},
@@ -130,6 +144,8 @@ func Test_getRandomWords(t *testing.T) {
 	})
 
 	t.Run("Test getRandomWords with 3 words in list and 100% custom word chance, with 3 custom words", func(t *testing.T) {
+		t.Parallel()
+
 		lobby := &Lobby{
 			CurrentWord: "",
 			words:       []string{"a", "b", "c"},
@@ -150,14 +166,15 @@ func Test_getRandomWords(t *testing.T) {
 }
 
 func Test_getRandomWordsReloading(t *testing.T) {
-	wordList, err := readWordListInternal(cases.Lower(language.English), "test", func(_ string) (string, error) {
-		return "a\nb\nc", nil
-	})
-	if err != nil {
-		panic(err)
-	}
+	t.Parallel()
+
+	loadWordList := func() []string { return []string{"a", "b", "c"} }
+	reloadWordList := func(_ *Lobby) ([]string, error) { return loadWordList(), nil }
+	wordList := loadWordList()
 
 	t.Run("test reload with 3 words and 0 custom words and 0 chance", func(t *testing.T) {
+		t.Parallel()
+
 		lobby := &Lobby{
 			words: wordList,
 			EditableLobbySettings: EditableLobbySettings{
@@ -170,7 +187,7 @@ func Test_getRandomWordsReloading(t *testing.T) {
 		// Running this 10 times, expecting it to get 3 words each time, even
 		// though our pool has only got a size of 3.
 		for i := 0; i < 10; i++ {
-			words := GetRandomWords(3, lobby)
+			words := getRandomWords(3, lobby, reloadWordList)
 			if len(words) != 3 {
 				t.Errorf("Test failed, incorrect wordcount: %d", len(words))
 			}
@@ -178,6 +195,8 @@ func Test_getRandomWordsReloading(t *testing.T) {
 	})
 
 	t.Run("test reload with 3 words and 0 custom words and 100 chance", func(t *testing.T) {
+		t.Parallel()
+
 		lobby := &Lobby{
 			words: wordList,
 			EditableLobbySettings: EditableLobbySettings{
@@ -190,7 +209,7 @@ func Test_getRandomWordsReloading(t *testing.T) {
 		// Running this 10 times, expecting it to get 3 words each time, even
 		// though our pool has only got a size of 3.
 		for i := 0; i < 10; i++ {
-			words := GetRandomWords(3, lobby)
+			words := getRandomWords(3, lobby, reloadWordList)
 			if len(words) != 3 {
 				t.Errorf("Test failed, incorrect wordcount: %d", len(words))
 			}
@@ -198,6 +217,8 @@ func Test_getRandomWordsReloading(t *testing.T) {
 	})
 
 	t.Run("test reload with 3 words and 1 custom words and 0 chance", func(t *testing.T) {
+		t.Parallel()
+
 		lobby := &Lobby{
 			words: wordList,
 			EditableLobbySettings: EditableLobbySettings{
@@ -210,7 +231,7 @@ func Test_getRandomWordsReloading(t *testing.T) {
 		// Running this 10 times, expecting it to get 3 words each time, even
 		// though our pool has only got a size of 3.
 		for i := 0; i < 10; i++ {
-			words := GetRandomWords(3, lobby)
+			words := getRandomWords(3, lobby, reloadWordList)
 			if len(words) != 3 {
 				t.Errorf("Test failed, incorrect wordcount: %d", len(words))
 			}
