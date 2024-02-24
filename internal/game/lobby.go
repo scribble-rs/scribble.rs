@@ -907,7 +907,7 @@ func CreateLobby(
 	// the one specified for the lobby. If for example you chose 100 french
 	// custom words, but keep english_us as the lobby language, the casing rules
 	// will most likely be faulty.
-	lobby.lowercaser = wordlistData[chosenLanguage].lowercaser()
+	lobby.lowercaser = WordlistData[chosenLanguage].Lowercaser()
 
 	// customWords are lowercased afterwards, as they are direct user input.
 	if len(customWords) > 0 {

@@ -14,8 +14,8 @@ import (
 func Test_wordListsContainNoCarriageReturns(t *testing.T) {
 	t.Parallel()
 
-	for _, entry := range wordlistData {
-		fileName := entry.languageCode
+	for _, entry := range WordlistData {
+		fileName := entry.LanguageCode
 		fileBytes, err := wordFS.ReadFile("words/" + fileName)
 		if err != nil {
 			t.Errorf("language file '%s' could not be read: %s", fileName, err)
@@ -36,7 +36,7 @@ func Test_readWordList(t *testing.T) {
 		assert.Empty(t, words)
 	})
 
-	for language := range wordlistData {
+	for language := range WordlistData {
 		language := language
 		t.Run(language, func(t *testing.T) {
 			t.Parallel()
@@ -50,7 +50,7 @@ func Test_readWordList(t *testing.T) {
 func testWordList(t *testing.T, chosenLanguage string) {
 	t.Helper()
 
-	lowercaser := wordlistData[chosenLanguage].lowercaser()
+	lowercaser := WordlistData[chosenLanguage].Lowercaser()
 	words, err := readDefaultWordList(lowercaser, chosenLanguage)
 	if err != nil {
 		t.Errorf("Error reading language %s: %s", chosenLanguage, err)

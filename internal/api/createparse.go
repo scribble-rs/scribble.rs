@@ -8,7 +8,6 @@ import (
 
 	"github.com/scribble-rs/scribble.rs/internal/game"
 	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 // ParsePlayerName checks if the given value is a valid playername. Currently
@@ -25,15 +24,15 @@ func ParsePlayerName(value string) (string, error) {
 
 // ParseLanguage checks whether the given value is part of the
 // game.SupportedLanguages array. The input is trimmed and lowercased.
-func ParseLanguage(value string) (string, error) {
+func ParseLanguage(value string) (*game.LanguageData, string, error) {
 	toLower := strings.ToLower(strings.TrimSpace(value))
-	for languageKey := range game.SupportedLanguages {
+	for languageKey, data := range game.WordlistData {
 		if toLower == languageKey {
-			return languageKey, nil
+			return &data, languageKey, nil
 		}
 	}
 
-	return "", errors.New("the given language doesn't match any supported language")
+	return nil, "", errors.New("the given language doesn't match any supported language")
 }
 
 // ParseDrawingTime checks whether the given value is an integer between
@@ -68,14 +67,12 @@ func ParseMaxPlayers(value string) (int, error) {
 //	wordone,,wordtwo
 //	,
 //	wordone,
-func ParseCustomWords(value string) ([]string, error) {
+func ParseCustomWords(lowercaser cases.Caser, value string) ([]string, error) {
 	trimmedValue := strings.TrimSpace(value)
 	if trimmedValue == "" {
 		return nil, nil
 	}
 
-	// FIXME Is there a better solution than using english?
-	lowercaser := cases.Lower(language.English)
 	result := strings.Split(trimmedValue, ",")
 	for index, item := range result {
 		trimmedItem := lowercaser.String(strings.TrimSpace(item))

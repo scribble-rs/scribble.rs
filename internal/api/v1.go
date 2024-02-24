@@ -17,6 +17,8 @@ import (
 	"github.com/scribble-rs/scribble.rs/internal/config"
 	"github.com/scribble-rs/scribble.rs/internal/game"
 	"github.com/scribble-rs/scribble.rs/internal/state"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 var ErrLobbyNotExistent = errors.New("the requested lobby doesn't exist")
@@ -86,14 +88,21 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 		return
 	}
 
-	language, languageInvalid := ParseLanguage(request.Form.Get("language"))
+	languageData, languageKey, languageInvalid := ParseLanguage(request.Form.Get("language"))
 	drawingTime, drawingTimeInvalid := ParseDrawingTime(request.Form.Get("drawing_time"))
 	rounds, roundsInvalid := ParseRounds(request.Form.Get("rounds"))
 	maxPlayers, maxPlayersInvalid := ParseMaxPlayers(request.Form.Get("max_players"))
-	customWords, customWordsInvalid := ParseCustomWords(request.Form.Get("custom_words"))
 	customWordsPerTurn, customWordsPerTurnInvalid := ParseCustomWordsPerTurn(request.Form.Get("custom_words_per_turn"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(request.Form.Get("clients_per_ip_limit"))
 	publicLobby, publicLobbyInvalid := ParseBoolean("public", request.Form.Get("public"))
+
+	var lowercaser cases.Caser
+	if languageInvalid != nil {
+		lowercaser = cases.Lower(language.English)
+	} else {
+		lowercaser = languageData.Lowercaser()
+	}
+	customWords, customWordsInvalid := ParseCustomWords(lowercaser, request.Form.Get("custom_words"))
 
 	var requestErrors []string
 	if languageInvalid != nil {
@@ -127,7 +136,7 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 	}
 
 	playerName := GetPlayername(request)
-	player, lobby, err := game.CreateLobby(playerName, language,
+	player, lobby, err := game.CreateLobby(playerName, languageKey,
 		publicLobby, drawingTime, rounds, maxPlayers, customWordsPerTurn,
 		clientsPerIPLimit, customWords)
 	if err != nil {

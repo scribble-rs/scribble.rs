@@ -3,6 +3,9 @@ package api
 import (
 	"reflect"
 	"testing"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 func Test_parsePlayerName(t *testing.T) {
@@ -163,7 +166,7 @@ func Test_parseCustomWords(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 
-			got, err := ParseCustomWords(testCase.value)
+			got, err := ParseCustomWords(cases.Lower(language.English), testCase.value)
 			if (err != nil) != testCase.wantErr {
 				t.Errorf("parseCustomWords() error = %v, wantErr %v", err, testCase.wantErr)
 				return

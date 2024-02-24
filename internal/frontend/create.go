@@ -13,6 +13,8 @@ import (
 	"github.com/scribble-rs/scribble.rs/internal/game"
 	"github.com/scribble-rs/scribble.rs/internal/state"
 	"github.com/scribble-rs/scribble.rs/internal/translations"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // This file contains the API for the official web client.
@@ -98,14 +100,21 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 		return
 	}
 
-	language, languageInvalid := api.ParseLanguage(request.Form.Get("language"))
+	languageData, languageKey, languageInvalid := api.ParseLanguage(request.Form.Get("language"))
 	drawingTime, drawingTimeInvalid := api.ParseDrawingTime(request.Form.Get("drawing_time"))
 	rounds, roundsInvalid := api.ParseRounds(request.Form.Get("rounds"))
 	maxPlayers, maxPlayersInvalid := api.ParseMaxPlayers(request.Form.Get("max_players"))
-	customWords, customWordsInvalid := api.ParseCustomWords(request.Form.Get("custom_words"))
 	customWordsPerTurn, customWordsPerTurnInvalid := api.ParseCustomWordsPerTurn(request.Form.Get("custom_words_per_turn"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := api.ParseClientsPerIPLimit(request.Form.Get("clients_per_ip_limit"))
 	publicLobby, publicLobbyInvalid := api.ParseBoolean("public", request.Form.Get("public"))
+
+	var lowercaser cases.Caser
+	if languageInvalid != nil {
+		lowercaser = cases.Lower(language.English)
+	} else {
+		lowercaser = languageData.Lowercaser()
+	}
+	customWords, customWordsInvalid := api.ParseCustomWords(lowercaser, request.Form.Get("custom_words"))
 
 	// Prevent resetting the form, since that would be annoying as hell.
 	pageData := LobbyCreatePageData{
@@ -162,7 +171,7 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 
 	playerName := api.GetPlayername(request)
 
-	player, lobby, err := game.CreateLobby(playerName, language,
+	player, lobby, err := game.CreateLobby(playerName, languageKey,
 		publicLobby, drawingTime, rounds, maxPlayers, customWordsPerTurn,
 		clientsPerIPLimit, customWords)
 	if err != nil {
