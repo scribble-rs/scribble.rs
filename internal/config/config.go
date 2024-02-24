@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/caarlos0/env/v9"
+	"github.com/caarlos0/env/v10"
 	"github.com/subosito/gotenv"
 )
 
