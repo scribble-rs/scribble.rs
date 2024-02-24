@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,7 +12,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/gorilla/websocket"
+	"github.com/lxzan/gws"
 	"github.com/scribble-rs/scribble.rs/internal/api"
 )
 
@@ -82,12 +81,21 @@ type SimPlayer struct {
 	Id          string
 	Name        string
 	Usersession string
-	ws          *websocket.Conn
+	ws          *gws.Conn
 	rand        *rand.Rand
 }
 
+func (s *SimPlayer) WriteJSON(value any) error {
+	bytes, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+
+	return s.ws.WriteMessage(gws.OpcodeText, bytes)
+}
+
 func (s *SimPlayer) SendRandomStroke() {
-	if err := s.ws.WriteJSON(map[string]any{
+	if err := s.WriteJSON(map[string]any{
 		"fromX": rand.Float64(),
 		"fromY": rand.Float64(),
 		"toX":   rand.Float64(),
@@ -104,7 +112,7 @@ func (s *SimPlayer) SendRandomStroke() {
 }
 
 func (s *SimPlayer) SendRandomMessage() {
-	if err := s.ws.WriteJSON(map[string]any{
+	if err := s.WriteJSON(map[string]any{
 		"type": "message",
 		"data": uuid.Must(uuid.NewV4()).String(),
 	}); err != nil {
@@ -142,12 +150,12 @@ func JoinPlayer(lobbyId string) (*SimPlayer, error) {
 		return nil, errors.New("no usersession")
 	}
 
-	dialer := *websocket.DefaultDialer
-	dialer.Subprotocols = []string{"json"}
-	dialer.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	headers := make(http.Header)
 	headers.Set("usersession", session)
-	wsConnection, response, err := dialer.Dial("ws://"+lobbyUrl+"/ws", headers)
+	wsConnection, response, err := gws.NewClient(gws.BuiltinEventHandler{}, &gws.ClientOption{
+		Addr:          "ws://" + lobbyUrl + "/ws",
+		RequestHeader: headers,
+	})
 	if response != nil && response.StatusCode != http.StatusSwitchingProtocols {
 		bytes, err := io.ReadAll(response.Body)
 		if err != nil {
@@ -160,16 +168,6 @@ func JoinPlayer(lobbyId string) (*SimPlayer, error) {
 		return nil, fmt.Errorf("error establishing websocket connection: %w", err)
 	}
 
-	// Sink messages
-	go func() {
-		m := make(map[string]any)
-		for {
-			if err := wsConnection.ReadJSON(&m); err != nil {
-				log.Println("error receiving")
-			}
-		}
-	}()
-
 	return &SimPlayer{
 		Usersession: session,
 		ws:          wsConnection,
@@ -178,24 +176,22 @@ func JoinPlayer(lobbyId string) (*SimPlayer, error) {
 }
 
 func main() {
-	for i := 0; i < 10; i++ {
-		lobby, err := PostLobby()
-		if err != nil {
-			panic(err)
-		}
-		log.Println("Lobby:", lobby.LobbyID)
-	}
-
-	// player, err := JoinPlayer(lobby.LobbyID)
+	// lobby, err := PostLobby()
 	// if err != nil {
 	// 	panic(err)
 	// }
+	// log.Println("Lobby:", lobby.LobbyID)
 
-	// start := time.Now()
-	// for i := 0; i < 1_000_000; i++ {
-	// 	player.SendRandomStroke()
-	// 	player.SendRandomMessage()
-	// }
+	player, err := JoinPlayer("4cf284ff-8e18-4dc7-86a9-d2c2ed14227f")
+	if err != nil {
+		panic(err)
+	}
 
-	// log.Println(time.Since(start).Seconds())
+	start := time.Now()
+	for i := 0; i < 1_000_000; i++ {
+		player.SendRandomStroke()
+		player.SendRandomMessage()
+	}
+
+	log.Println(time.Since(start).Seconds())
 }

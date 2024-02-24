@@ -10,7 +10,6 @@ require (
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-chi/cors v1.2.1
 	github.com/gofrs/uuid v4.4.0+incompatible
-	github.com/gorilla/websocket v1.5.0
 	github.com/lxzan/gws v1.6.13
 	github.com/mailru/easyjson v0.7.7
 	github.com/stretchr/testify v1.8.4
