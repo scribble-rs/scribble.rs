@@ -6,7 +6,7 @@ import (
 	"time"
 
 	discordemojimap "github.com/Bios-Marcel/discordemojimap/v2"
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v5"
 	"github.com/lxzan/gws"
 	easyjson "github.com/mailru/easyjson"
 	"golang.org/x/text/cases"

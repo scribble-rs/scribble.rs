@@ -19,7 +19,7 @@ import (
 	discordemojimap "github.com/Bios-Marcel/discordemojimap/v2"
 	petname "github.com/Bios-Marcel/go-petname"
 	"github.com/agnivade/levenshtein"
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v5"
 )
 
 var (

@@ -7,7 +7,7 @@ import (
 	"testing"
 	"unsafe"
 
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v5"
 	"github.com/lxzan/gws"
 	easyjson "github.com/mailru/easyjson"
 	"github.com/scribble-rs/scribble.rs/internal/sanitize"

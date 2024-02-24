@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v5"
 	"github.com/lxzan/gws"
 	"github.com/scribble-rs/scribble.rs/internal/api"
 )
