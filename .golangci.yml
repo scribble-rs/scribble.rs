@@ -20,13 +20,14 @@ linters:
     - nlreturn
     # Magic numbers
     - gomnd
-    # Functionlength and linelength
+    # function, line and variable length
     - funlen
     - lll
+    - varnamelen
     # testpackages must be named _test for reduced visibility to package
     # details.
     - testpackage
-
+      
     ## Useful, but we won't use it for now, maybe later
     # Allows us to define rules for dependencies
     - depguard

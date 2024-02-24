@@ -1,6 +1,7 @@
 package frontend
 
 import (
+	//nolint:gosec //We just use this for cache busting, so it's secure enough
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
@@ -32,6 +33,7 @@ func NewHandler(cfg *config.Config) (*SSRHandler, error) {
 		return nil, fmt.Errorf("error reading resource directory: %w", err)
 	}
 
+	//nolint:gosec //We just use this for cache busting, so it's secure enough
 	hash := md5.New()
 	for _, entry := range entries {
 		bytes, err := frontendResourcesFS.ReadFile("resources/" + entry.Name())
