@@ -21,9 +21,9 @@ var (
 	ErrPlayerNotConnected = errors.New("player not connected")
 
 	upgrader = gws.NewUpgrader(&socketHandler{}, &gws.ServerOption{
-		ReadAsyncEnabled: true,
-		CompressEnabled:  true,
-		Recovery:         gws.Recovery,
+		Recovery:          gws.Recovery,
+		ParallelEnabled:   true,
+		PermessageDeflate: gws.PermessageDeflate{Enabled: true},
 	})
 )
 
@@ -141,13 +141,13 @@ func (c *socketHandler) OnMessage(socket *gws.Conn, message *gws.Message) {
 	}
 
 	bytes := message.Bytes()
-	wsListen(lobby, player, bytes)
+	handleIncommingEvent(lobby, player, bytes)
 }
 
-func wsListen(lobby *game.Lobby, player *game.Player, data []byte) {
+func handleIncommingEvent(lobby *game.Lobby, player *game.Player, data []byte) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Printf("Error occurred in wsListen.\n\tError: %s\n\tPlayer: %s(%s)\nStack %s\n", err, player.Name, player.ID, string(debug.Stack()))
+			log.Printf("Error occurred in incomming event listener.\n\tError: %s\n\tPlayer: %s(%s)\nStack %s\n", err, player.Name, player.ID, string(debug.Stack()))
 			// FIXME Should this lead to a disconnect?
 		}
 	}()
@@ -186,7 +186,12 @@ func WriteObject(player *game.Player, object easyjson.Marshaler) error {
 
 	// We write async, as broadcast always uses the queue. If we use write, the
 	// order will become messed up, potentially causing issues in the frontend.
-	return socket.WriteAsync(gws.OpcodeText, bytes)
+	socket.WriteAsync(gws.OpcodeText, bytes, func(err error) {
+		if err != nil {
+			log.Println("Error responding to player:", err.Error())
+		}
+	})
+	return nil
 }
 
 func WritePreparedMessage(player *game.Player, message *gws.Broadcaster) error {
