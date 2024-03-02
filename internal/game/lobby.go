@@ -272,7 +272,6 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 			sender.LastScore = calculateGuesserScore(lobby.hintCount, lobby.hintsLeft, secondsLeft, lobby.DrawingTime)
 			sender.Score += sender.LastScore
 
-			lobby.scoreEarnedByGuessers += sender.LastScore
 			sender.State = Standby
 
 			lobby.Broadcast(&Event{Type: EventTypeCorrectGuess, Data: sender.ID})
@@ -492,7 +491,6 @@ func kickPlayer(lobby *Lobby, playerToKick *Player, playerToKickIndex int) {
 			otherPlayer.Score -= otherPlayer.LastScore
 			otherPlayer.LastScore = 0
 		}
-		lobby.scoreEarnedByGuessers = 0
 
 		advanceLobbyPredefineDrawer(lobby, roundOver, newDrawer)
 	} else {
@@ -580,24 +578,30 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 
 	// The drawer can potentially be null if kicked or the game just started.
 	if drawer := lobby.Drawer(); drawer != nil {
-		if lobby.scoreEarnedByGuessers <= 0 {
-			drawer.LastScore = 0
-		} else {
-			// Average score, but minus one player, since the own score is 0 and doesn't count.
-			playerCount := lobby.GetConnectedPlayerCount()
-			// If the drawer isn't connected though, we mustn't subtract from the count.
-			if drawer.Connected {
-				playerCount--
+		// The drawer can get points even if disconnected. But if they are
+		// connected, we need to ignore them when calculating their score.
+		var (
+			playerCount int
+			scoreSum    int
+		)
+		for _, player := range lobby.GetPlayers() {
+			if player != drawer &&
+				// If the player has guessed, we want to take them into account,
+				// even if they aren't connected anymore. If the player is
+				// connected, but hasn't guessed, it is still as well, as the
+				// drawing must've not been good enough to be guessable.
+				(player.Connected || player.LastScore > 0) {
+				scoreSum += player.LastScore
 			}
-
-			var averageScore int
-			if playerCount > 0 {
-				averageScore = lobby.scoreEarnedByGuessers / playerCount
-			}
-
-			drawer.LastScore = averageScore
-			drawer.Score += drawer.LastScore
 		}
+
+		var averageScore int
+		if playerCount > 0 {
+			averageScore = scoreSum / playerCount
+		}
+
+		drawer.LastScore = averageScore
+		drawer.Score += drawer.LastScore
 	}
 
 	// We need this for the next-turn / game-over event, in order to allow the
@@ -609,7 +613,6 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 	if lobby.DrawingTimeNew != 0 {
 		lobby.DrawingTime = lobby.DrawingTimeNew
 	}
-	lobby.scoreEarnedByGuessers = 0
 
 	for _, otherPlayer := range lobby.players {
 		// If the round ends and people still have guessing, that means the

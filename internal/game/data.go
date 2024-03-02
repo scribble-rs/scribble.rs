@@ -64,8 +64,7 @@ type Lobby struct {
 	// This is a UTC unix-timestamp in milliseconds.
 	roundEndTime int64
 
-	timeLeftTicker        *time.Ticker
-	scoreEarnedByGuessers int
+	timeLeftTicker *time.Ticker
 	// currentDrawing represents the state of the current canvas. The elements
 	// consist of LineEvent and FillEvent. Please do not modify the contents
 	// of this array an only move AppendLine and AppendFill on the respective
