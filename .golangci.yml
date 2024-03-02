@@ -27,6 +27,9 @@ linters:
     # testpackages must be named _test for reduced visibility to package
     # details.
     - testpackage
+    # I don't really care about cyclopmatic complexity
+    - cyclop
+    - gocognit
       
     ## Useful, but we won't use it for now, maybe later
     # Allows us to define rules for dependencies
@@ -45,12 +48,15 @@ linters:
     - musttag
     - goerr113
 
+    ## Provides no real value
+    - testifylint
+
     # Broken
     - goimports
 
 linters-settings:
   govet:
-    enable:
+    disable:
       - fieldalignment
 
   gocritic:

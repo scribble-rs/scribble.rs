@@ -13,8 +13,8 @@ import (
 )
 
 type LanguageData struct {
-	LanguageCode string
 	Lowercaser   func() cases.Caser
+	LanguageCode string
 }
 
 var (
@@ -224,12 +224,10 @@ func CheckGuess(a, b string) int {
 				//   abc ~ bc
 				//   abcde ~ abde
 				bSize = 0
-			} else {
+			} else if distance == 1 {
 				// We'd reach a diff of 2 now. Needs to happen after transposition
 				// though, as transposition could still prove us wrong.
-				if distance == 1 {
-					return DistantGuess
-				}
+				return DistantGuess
 			}
 
 			distance++

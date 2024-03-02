@@ -289,6 +289,8 @@ func Benchmark_proximity_custom(b *testing.B) {
 // }
 
 func Test_CheckGuess_Negative(t *testing.T) {
+	t.Parallel()
+
 	type testCase struct {
 		a, b string
 	}
@@ -326,12 +328,16 @@ func Test_CheckGuess_Negative(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(fmt.Sprintf("%s ~ %s", c.a, c.b), func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, 2, CheckGuess(c.a, c.b))
 		})
 	}
 }
 
 func Test_CheckGuess_Positive(t *testing.T) {
+	t.Parallel()
+
 	type testCase struct {
 		a, b string
 		dist int
@@ -397,6 +403,8 @@ func Test_CheckGuess_Positive(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(fmt.Sprintf("%s ~ %s", c.a, c.b), func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, c.dist, CheckGuess(c.a, c.b))
 		})
 	}
