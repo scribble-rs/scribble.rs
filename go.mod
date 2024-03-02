@@ -11,7 +11,7 @@ require (
 	github.com/gofrs/uuid/v5 v5.0.0
 	github.com/lxzan/gws v1.8.1
 	github.com/mailru/easyjson v0.7.7
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	github.com/subosito/gotenv v1.6.0
 	golang.org/x/text v0.14.0
 )
