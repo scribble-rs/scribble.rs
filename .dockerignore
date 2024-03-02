@@ -3,10 +3,11 @@
 # potentially speeds up the build.
 *
 
-# Go Code
+# All non-test Go Code
 !internal/
-!pkg
-!cmd
+!pkg/
+!cmd/
+**_test.go
 
 # Go Modules
 !go.mod
