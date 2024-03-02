@@ -89,22 +89,25 @@ func (c *socketHandler) OnOpen(socket *gws.Conn) {
 	c.resetDeadline(socket)
 }
 
-func (c *socketHandler) OnClose(socket *gws.Conn, err error) {
-	val, ok := socket.Session().Load("player")
-	if ok {
-		if player, ok := val.(*game.Player); ok {
-			lobby, ok := socket.Session().Load("lobby")
-			if ok {
-				if lobby, ok := lobby.(*game.Lobby); ok {
-					lobby.OnPlayerDisconnect(player)
-				}
-			}
+func extract(x any, _ bool) any {
+	return x
+}
 
-			player.SetWebsocket(nil)
-		}
+func (c *socketHandler) OnClose(socket *gws.Conn, _ error) {
+	defer socket.Session().Delete("player")
+	defer socket.Session().Delete("lobby")
+
+	player, ok := extract(socket.Session().Load("player")).(*game.Player)
+	if !ok {
+		return
 	}
-	socket.Session().Delete("player")
-	socket.Session().Delete("lobby")
+	lobby, ok := extract(socket.Session().Load("lobby")).(*game.Lobby)
+	if !ok {
+		return
+	}
+
+	lobby.OnPlayerDisconnect(player)
+	player.SetWebsocket(nil)
 }
 
 func (c *socketHandler) OnPing(socket *gws.Conn, _ []byte) {
@@ -120,22 +123,11 @@ func (c *socketHandler) OnMessage(socket *gws.Conn, message *gws.Message) {
 	defer message.Close()
 	defer c.resetDeadline(socket)
 
-	val, ok := socket.Session().Load("player")
+	player, ok := extract(socket.Session().Load("player")).(*game.Player)
 	if !ok {
 		return
 	}
-
-	player, ok := val.(*game.Player)
-	if !ok {
-		return
-	}
-
-	val, ok = socket.Session().Load("lobby")
-	if !ok {
-		return
-	}
-
-	lobby, ok := val.(*game.Lobby)
+	lobby, ok := extract(socket.Session().Load("lobby")).(*game.Lobby)
 	if !ok {
 		return
 	}
