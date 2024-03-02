@@ -1,6 +1,6 @@
 module github.com/scribble-rs/scribble.rs
 
-go 1.21.3
+go 1.22.0
 
 require (
 	github.com/Bios-Marcel/discordemojimap/v2 v2.0.6-0.20231020161444-8c7f7fa6e5a6

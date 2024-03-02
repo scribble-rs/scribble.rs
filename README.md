@@ -59,7 +59,7 @@ in running a native Windows container.
 ## Building / Running
 
 Dependencies:
-  * [go](https://go.dev/doc/install) version 1.21 or later
+  * [go](https://go.dev/doc/install) version 1.22 or later
   * [git](https://git-scm.com/) (You can also download a .zip from Github)
 
 In order to download and build, open a terminal and execute:

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math/rand"
+	"math/rand/v2"
 	"net/http"
 	"strings"
 	"time"
@@ -82,7 +82,6 @@ type SimPlayer struct {
 	Name        string
 	Usersession string
 	ws          *gws.Conn
-	rand        *rand.Rand
 }
 
 func (s *SimPlayer) WriteJSON(value any) error {
@@ -101,9 +100,9 @@ func (s *SimPlayer) SendRandomStroke() {
 		"toX":   rand.Float64(),
 		"toY":   rand.Float64(),
 		"color": map[string]any{
-			"r": rand.Intn(255),
-			"g": rand.Intn(255),
-			"b": rand.Intn(255),
+			"r": rand.Int32N(255),
+			"g": rand.Int32N(255),
+			"b": rand.Int32N(255),
 		},
 		"lineWidth": 5,
 	}); err != nil {
@@ -171,7 +170,6 @@ func JoinPlayer(lobbyId string) (*SimPlayer, error) {
 	return &SimPlayer{
 		Usersession: session,
 		ws:          wsConnection,
-		rand:        rand.New(rand.NewSource(time.Now().Unix())),
 	}, nil
 }
 

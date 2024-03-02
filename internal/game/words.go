@@ -4,7 +4,7 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"math/rand"
+	"math/rand/v2"
 	"strings"
 	"unicode/utf8"
 
