@@ -13,6 +13,45 @@ import (
 	"github.com/scribble-rs/scribble.rs/internal/sanitize"
 )
 
+func Benchmark_handleIncommingEvent(b *testing.B) {
+	b.StopTimer()
+	payloadMessage := []byte(`{"type": "message", "data": "Hello world :sun: :smile:!"}`)
+	payloadCloseGuess := []byte(`{"type": "message", "word4"}`)
+
+	// Lobby with owner / drawing player
+	// We prompt for custom words to be able to have a predictabele close guess.
+	playerA, lobby, err := CreateLobby("player_a", "english", true, 120, 10, 10, 3, 10, []string{"word1", "word2", "word3"})
+	if err != nil {
+		b.Fatal("error creating lobby", err)
+	}
+
+	// Necessary to prevent NPEs
+	lobby.WriteObject = noOpWriteObject
+	lobby.WritePreparedMessage = noOpWritePreparedMessage
+
+	// Guessing player
+	playerB := lobby.JoinPlayer("player_b")
+
+	// More players for more CPU usage
+	_ = lobby.JoinPlayer("player_c")
+	_ = lobby.JoinPlayer("player_d")
+	_ = lobby.JoinPlayer("player_e")
+	_ = lobby.JoinPlayer("player_f")
+	_ = lobby.JoinPlayer("player_g")
+
+	// No Event Data required
+	lobby.HandleEvent("start", nil, playerA)
+	lobby.HandleEvent("choose-word", []byte(`{"type": "choose-word", "data": "1" `), playerA)
+
+	b.StartTimer()
+
+	for i := 0; i < b.N; i++ {
+		// Message using guessing player, to trigger more computational tasks
+		lobby.HandleEvent("message", payloadMessage, playerB)
+		lobby.HandleEvent("message", payloadCloseGuess, playerB)
+	}
+}
+
 func createLobbyWithDemoPlayers(playercount int) *Lobby {
 	owner := &Player{}
 	lobby := &Lobby{
