@@ -18,7 +18,6 @@ import (
 
 	discordemojimap "github.com/Bios-Marcel/discordemojimap/v2"
 	petname "github.com/Bios-Marcel/go-petname"
-	"github.com/agnivade/levenshtein"
 	"github.com/gofrs/uuid/v5"
 )
 
@@ -263,10 +262,10 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 		return
 	}
 
-	// Since correct guess are probably the least common case, we'll always
+	// Since correct guesses are probably the least common case, we'll always
 	// calculate the distance, as usually have to do it anyway.
-	switch levenshtein.ComputeDistance(normInput, normSearched) {
-	case 0:
+	switch CheckGuess(normInput, normSearched) {
+	case EqualGuess:
 		{
 			secondsLeft := int(lobby.roundEndTime/1000 - time.Now().UTC().Unix())
 
@@ -287,7 +286,7 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 				lobby.Broadcast(&Event{Type: EventTypeUpdatePlayers, Data: lobby.players})
 			}
 		}
-	case 1:
+	case CloseGuess:
 		{
 			// In cases of a close guess, we still send the message to everyone.
 			// This allows other players to guess the word by watching what the

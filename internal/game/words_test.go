@@ -2,6 +2,7 @@ package game
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"sync"
 	"testing"
@@ -247,4 +248,156 @@ func arrayContains(array []string, item string) bool {
 	}
 
 	return false
+}
+
+var poximityBenchCases = [][]string{
+	{"", ""},
+	{"a", "a"},
+	{"ab", "ab"},
+	{"abc", "abc"},
+	{"abc", "abcde"},
+	{"cde", "abcde"},
+	{"a", "abcdefghijklmnop"},
+	{"cde", "abcde"},
+	{"cheese", "wheel"},
+	{"abcdefg", "bcdefgh"},
+}
+
+func Benchmark_proximity_custom(b *testing.B) {
+	for _, benchCase := range poximityBenchCases {
+		b.Run(fmt.Sprint(benchCase[0], " ", benchCase[1]), func(b *testing.B) {
+			var sink int
+			for i := 0; i < b.N; i++ {
+				sink = CheckGuess(benchCase[0], benchCase[1])
+			}
+			_ = sink
+		})
+	}
+}
+
+// We've replaced levensthein with the implementation from proximity_custom
+// func Benchmark_proximity_levensthein(b *testing.B) {
+// 	for _, benchCase := range poximityBenchCases {
+// 		b.Run(fmt.Sprint(benchCase[0], " ", benchCase[1]), func(b *testing.B) {
+// 			var sink int
+// 			for i := 0; i < b.N; i++ {
+// 				sink = levenshtein.ComputeDistance(benchCase[0], benchCase[1])
+// 			}
+// 			_ = sink
+// 		})
+// 	}
+// }
+
+func Test_CheckGuess_Negative(t *testing.T) {
+	type testCase struct {
+		a, b string
+	}
+
+	cases := []testCase{
+		{
+			a: "abc",
+			b: "abcde",
+		},
+		{
+			a: "abc",
+			b: "01abc",
+		},
+		{
+			a: "abc",
+			b: "a",
+		},
+		{
+			a: "abc",
+			b: "c",
+		},
+		{
+			a: "abc",
+			b: "c",
+		},
+		{
+			a: "hallo",
+			b: "welt",
+		},
+		{
+			a: "abcd",
+			b: "badc",
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(fmt.Sprintf("%s ~ %s", c.a, c.b), func(t *testing.T) {
+			assert.Equal(t, 2, CheckGuess(c.a, c.b))
+		})
+	}
+}
+
+func Test_CheckGuess_Positive(t *testing.T) {
+	type testCase struct {
+		a, b string
+		dist int
+	}
+
+	cases := []testCase{
+		{
+			a:    "abc",
+			b:    "abc",
+			dist: EqualGuess,
+		},
+		{
+			a:    "abc",
+			b:    "abcd",
+			dist: CloseGuess,
+		},
+		{
+			a:    "abc",
+			b:    "ab",
+			dist: CloseGuess,
+		},
+		{
+			a:    "abc",
+			b:    "bc",
+			dist: CloseGuess,
+		},
+		{
+			a:    "abcde",
+			b:    "abde",
+			dist: CloseGuess,
+		},
+		{
+			a:    "abc",
+			b:    "adc",
+			dist: CloseGuess,
+		},
+		{
+			a:    "abc",
+			b:    "acb",
+			dist: CloseGuess,
+		},
+		{
+			a:    "abcd",
+			b:    "acbd",
+			dist: CloseGuess,
+		},
+		{
+			a:    "abcd",
+			b:    "bacd",
+			dist: CloseGuess,
+		},
+		{
+			a:    "cheese",
+			b:    "wheel",
+			dist: DistantGuess,
+		},
+		{
+			a:    "a",
+			b:    "bcdefg",
+			dist: DistantGuess,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(fmt.Sprintf("%s ~ %s", c.a, c.b), func(t *testing.T) {
+			assert.Equal(t, c.dist, CheckGuess(c.a, c.b))
+		})
+	}
 }

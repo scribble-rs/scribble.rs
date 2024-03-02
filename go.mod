@@ -5,7 +5,6 @@ go 1.21.3
 require (
 	github.com/Bios-Marcel/discordemojimap/v2 v2.0.6-0.20231020161444-8c7f7fa6e5a6
 	github.com/Bios-Marcel/go-petname v0.0.1
-	github.com/agnivade/levenshtein v1.1.1
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/go-chi/chi/v5 v5.0.12
 	github.com/go-chi/cors v1.2.1
