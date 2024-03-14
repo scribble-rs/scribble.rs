@@ -18,9 +18,12 @@ The site will not display any ads or share any data with third parties.
 
 ## Play now
 
-Feel free to play on [scribblers.fly.dev](https://scribblers.fly.dev). Note
+There are some community hosted versions of the game (feel free to host your own instance and add it here!):
+ - [scribblers.fly.dev](https://scribblers.fly.dev) (Official instance, Note
 that the instance may not respond instantly, as it automatically shuts down
-if no traffic is received.
+if no traffic is received.)
+ - [scribble.bixilon.de](https://scribble.bixilon.de) (community instance maintained by @Bixilon)
+
 
 ## Configuration
 
