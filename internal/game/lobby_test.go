@@ -11,6 +11,7 @@ import (
 	"github.com/lxzan/gws"
 	easyjson "github.com/mailru/easyjson"
 	"github.com/scribble-rs/scribble.rs/internal/sanitize"
+	"github.com/stretchr/testify/require"
 )
 
 func createLobbyWithDemoPlayers(playercount int) *Lobby {
@@ -380,4 +381,131 @@ func Test_kickDrawer(t *testing.T) {
 	if lobby.Drawer() != chantal {
 		t.Errorf("Drawer should've been c, but was %s", lobby.Drawer().Name)
 	}
+}
+
+func Test_calculateDrawerScore(t *testing.T) {
+	t.Run("only disconnected players, with score", func(t *testing.T) {
+		drawer := &Player{State: Drawing}
+		lobby := Lobby{
+			players: []*Player{
+				drawer,
+				{
+					Connected: false,
+					LastScore: 100,
+				},
+				{
+					Connected: false,
+					LastScore: 200,
+				},
+			},
+		}
+
+		require.Equal(t, 150, lobby.calculateDrawerScore())
+	})
+	t.Run("only disconnected players, with no score", func(t *testing.T) {
+		drawer := &Player{State: Drawing}
+		lobby := Lobby{
+			players: []*Player{
+				drawer,
+				{
+					Connected: false,
+					LastScore: 0,
+				},
+				{
+					Connected: false,
+					LastScore: 0,
+				},
+			},
+		}
+
+		require.Equal(t, 0, lobby.calculateDrawerScore())
+	})
+	t.Run("connected players, but no score", func(t *testing.T) {
+		drawer := &Player{State: Drawing}
+		lobby := Lobby{
+			players: []*Player{
+				drawer,
+				{
+					Connected: true,
+					LastScore: 0,
+				},
+				{
+					Connected: true,
+					LastScore: 0,
+				},
+			},
+		}
+
+		require.Equal(t, 0, lobby.calculateDrawerScore())
+	})
+	t.Run("connected players", func(t *testing.T) {
+		drawer := &Player{State: Drawing}
+		lobby := Lobby{
+			players: []*Player{
+				drawer,
+				{
+					Connected: true,
+					LastScore: 100,
+				},
+				{
+					Connected: true,
+					LastScore: 200,
+				},
+			},
+		}
+
+		require.Equal(t, 150, lobby.calculateDrawerScore())
+	})
+	t.Run("some connected players, some disconnected, some without score", func(t *testing.T) {
+		drawer := &Player{State: Drawing}
+		lobby := Lobby{
+			players: []*Player{
+				drawer,
+				{
+					Connected: true,
+					LastScore: 100,
+				},
+				{
+					Connected: false,
+					LastScore: 200,
+				},
+				{
+					Connected: true,
+					LastScore: 0,
+				},
+				{
+					Connected: false,
+					LastScore: 0,
+				},
+			},
+		}
+
+		require.Equal(t, 100, lobby.calculateDrawerScore())
+	})
+	t.Run("some connected players, some disconnected", func(t *testing.T) {
+		drawer := &Player{State: Drawing}
+		lobby := Lobby{
+			players: []*Player{
+				drawer,
+				{
+					Connected: true,
+					LastScore: 100,
+				},
+				{
+					Connected: true,
+					LastScore: 200,
+				},
+				{
+					Connected: false,
+					LastScore: 300,
+				},
+				{
+					Connected: false,
+					LastScore: 400,
+				},
+			},
+		}
+
+		require.Equal(t, 250, lobby.calculateDrawerScore())
+	})
 }

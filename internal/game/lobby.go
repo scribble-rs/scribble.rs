@@ -565,6 +565,33 @@ func handleNameChangeEvent(caller *Player, lobby *Lobby, name string) {
 	}
 }
 
+func (lobby *Lobby) calculateDrawerScore() int {
+	// The drawer can get points even if disconnected. But if they are
+	// connected, we need to ignore them when calculating their score.
+	var (
+		playerCount int
+		scoreSum    int
+	)
+	for _, player := range lobby.GetPlayers() {
+		if player.State != Drawing &&
+			// If the player has guessed, we want to take them into account,
+			// even if they aren't connected anymore. If the player is
+			// connected, but hasn't guessed, it is still as well, as the
+			// drawing must've not been good enough to be guessable.
+			(player.Connected || player.LastScore > 0) {
+			scoreSum += player.LastScore
+			playerCount++
+		}
+	}
+
+	var averageScore int
+	if playerCount > 0 {
+		averageScore = scoreSum / playerCount
+	}
+
+	return averageScore
+}
+
 // advanceLobbyPredefineDrawer is required in cases where the drawer is removed
 // from the game.
 func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player) {
@@ -578,30 +605,9 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 
 	// The drawer can potentially be null if kicked or the game just started.
 	if drawer := lobby.Drawer(); drawer != nil {
-		// The drawer can get points even if disconnected. But if they are
-		// connected, we need to ignore them when calculating their score.
-		var (
-			playerCount int
-			scoreSum    int
-		)
-		for _, player := range lobby.GetPlayers() {
-			if player != drawer &&
-				// If the player has guessed, we want to take them into account,
-				// even if they aren't connected anymore. If the player is
-				// connected, but hasn't guessed, it is still as well, as the
-				// drawing must've not been good enough to be guessable.
-				(player.Connected || player.LastScore > 0) {
-				scoreSum += player.LastScore
-			}
-		}
-
-		var averageScore int
-		if playerCount > 0 {
-			averageScore = scoreSum / playerCount
-		}
-
-		drawer.LastScore = averageScore
-		drawer.Score += drawer.LastScore
+		newDrawerScore := lobby.calculateDrawerScore()
+		drawer.LastScore = newDrawerScore
+		drawer.Score += newDrawerScore
 	}
 
 	// We need this for the next-turn / game-over event, in order to allow the
