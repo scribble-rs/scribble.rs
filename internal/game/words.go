@@ -48,6 +48,10 @@ var (
 			LanguageCode: "ua",
 			Lowercaser:   func() cases.Caser { return cases.Lower(language.Ukrainian) },
 		},
+		"russian": {
+			LanguageCode: "ru",
+			Lowercaser:   func() cases.Caser { return cases.Lower(language.Russian) },
+		},
 	}
 
 	//go:embed words/*

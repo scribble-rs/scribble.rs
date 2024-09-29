@@ -42,6 +42,7 @@ var (
 		"french":     "French",
 		"dutch":      "Dutch",
 		"ukrainian":  "Ukrainian",
+		"russian":    "Russian",
 	}
 )
 
