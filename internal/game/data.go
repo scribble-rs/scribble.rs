@@ -140,6 +140,7 @@ const (
 	Guessing PlayerState = "guessing"
 	Drawing  PlayerState = "drawing"
 	Standby  PlayerState = "standby"
+	Ready    PlayerState = "ready"
 )
 
 // GetPlayer searches for a player, identifying them by usersession.
@@ -179,7 +180,6 @@ func createPlayer(name string) *Player {
 		userSession:  uuid.Must(uuid.NewV4()),
 		votedForKick: make(map[uuid.UUID]bool),
 		socketMutex:  &sync.Mutex{},
-		State:        Guessing,
 	}
 }
 
