@@ -156,7 +156,7 @@ func (v *StringDataEvent) UnmarshalJSON(data []byte) error {
 func (v *StringDataEvent) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame1(l, v)
 }
-func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame2(in *jlexer.Lexer, out *Ready) {
+func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame2(in *jlexer.Lexer, out *ReadyEvent) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -298,7 +298,7 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame2(in *jlexer
 		in.Consumed()
 	}
 }
-func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame2(out *jwriter.Writer, in Ready) {
+func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame2(out *jwriter.Writer, in ReadyEvent) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -413,26 +413,26 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame2(out *jwrit
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v Ready) MarshalJSON() ([]byte, error) {
+func (v ReadyEvent) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
 	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame2(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v Ready) MarshalEasyJSON(w *jwriter.Writer) {
+func (v ReadyEvent) MarshalEasyJSON(w *jwriter.Writer) {
 	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame2(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *Ready) UnmarshalJSON(data []byte) error {
+func (v *ReadyEvent) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
 	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame2(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *Ready) UnmarshalEasyJSON(l *jlexer.Lexer) {
+func (v *ReadyEvent) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame2(l, v)
 }
 func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame3(in *jlexer.Lexer, out *RGBColor) {
@@ -1316,7 +1316,7 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame12(in *jlexe
 		in.Skip()
 		return
 	}
-	out.Ready = new(Ready)
+	out.ReadyEvent = new(ReadyEvent)
 	in.Delim('{')
 	for !in.IsDelim('}') {
 		key := in.UnsafeFieldName(false)

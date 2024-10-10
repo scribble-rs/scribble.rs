@@ -106,34 +106,29 @@
                             <span class="dialog-title">{{.Translation.Get "start-the-game"}}</span>
                             <div class="center-dialog-content">
                                 <div style="display: flex; flex-direction: column;">
-                                    {{.Translation.Get "change-your-name"}}:
-                                    <div style="display: flex; flex-direction: row;">
+                                    <div style="display: flex; flex-direction: row;
+                                    align-items: center;">
+                                        {{.Translation.Get "change-your-name"}}:
                                         <input class="namechange-field" type="text"
                                             id="namechange-field-start-dialog"></input>
                                         <button class="dialog-button namechange-apply-button"
                                             onclick="changeName(document.getElementById('namechange-field-start-dialog').value)">{{.Translation.Get "apply"}}</button>
                                     </div>
+                                    <div style="display: flex; flex-direction: row;
+                                    align-items: center;">
+                                        Ready&nbsp;<span id="ready-count">0</span>/<span id="ready-needed">0</span>
+                                    </div>
+                                    Once all players are ready, the game will start.
+                                    <div>
+                                        <span for="ready-state">Ready</span>
+                                        <input type="checkbox" name="ready-state" id="ready-state"
+                                            onchange="toggleReadiness()">
+                                    </div>
                                 </div>
                             </div>
                             <div class="button-center-wrapper">
-                                <button class="dialog-button"
-                                    onclick="startGame()">{{.Translation.Get "start"}}</button>
-                            </div>
-                        </div>
-
-                        <div id="unstarted-dialog" class="center-dialog">
-                            <span class="dialog-title">{{.Translation.Get "game-not-started-title"}}</span>
-                            <div class="center-dialog-content">
-                                <div style="display: flex; flex-direction: column;">
-                                    <p>{{.Translation.Get "waiting-for-host-to-start"}}</p>
-                                    {{.Translation.Get "change-your-name"}}:
-                                    <div style="display: flex; flex-direction: row;">
-                                        <input class="namechange-field" type="text"
-                                            id="namechange-field-unstarted-dialog"></input>
-                                        <button class="dialog-button namechange-apply-button"
-                                            onclick="changeName(document.getElementById('namechange-field-unstarted-dialog').value)">{{.Translation.Get "apply"}}</button>
-                                    </div>
-                                </div>
+                                <button id="force-start-button" class="dialog-button"
+                                    onclick="startGame()">{{.Translation.Get "force-start"}}</button>
                             </div>
                         </div>
 
@@ -475,7 +470,7 @@
         //players could be killed and even cause the lobby being closed. Since
         //that's very frustrating, we want to avoid that.
         window.setInterval(() => {
-            socket.send(JSON.stringify({ type: "keep-alive" }));
+            socket.send(JSON.stringify({type: "keep-alive"}));
         }, 5000);
 
         //Makes sure that the server notices that the player disconnects.
@@ -501,11 +496,9 @@
 
         const centerDialogs = document.getElementById("center-dialogs");
 
-        const unstartedDialog = document.getElementById("unstarted-dialog");
         const waitChooseDialog = document.getElementById("waitchoose-dialog");
         const waitChooseDrawerSpan = document.getElementById("waitchoose-drawer");
         const namechangeDialog = document.getElementById("namechange-dialog");
-        const namechangeFieldUnstartedDialog = document.getElementById("namechange-field-unstarted-dialog");
         const namechangeFieldStartDialog = document.getElementById("namechange-field-start-dialog");
         const namechangeField = document.getElementById("namechange-field");
 
@@ -514,6 +507,7 @@
         const lobbySettingsDialog = document.getElementById("lobbysettings-dialog");
 
         const startDialog = document.getElementById("start-dialog");
+        const forceStartButton = document.getElementById("force-start-button");
         const gameOverDialog = document.getElementById("game-over-dialog");
         const gameOverDialogTitle = document.getElementById("game-over-dialog-title");
         const gameOverScoreboard = document.getElementById("game-over-scoreboard");
@@ -652,7 +646,6 @@
 
         function setUsernameLocally(name) {
             ownName = name;
-            namechangeFieldUnstartedDialog.value = name;
             namechangeFieldStartDialog.value = name;
             namechangeField.value = name;
         }
@@ -714,8 +707,8 @@
         //The drawing board has a base size. This base size results in a certain ratio
         //that the actual canvas has to be resized accordingly too. This is needed
         //since not every client has the same screensize.
-        const baseWidth = {{.DrawingBoardBaseWidth }};
-        const baseHeight = {{.DrawingBoardBaseHeight }};
+        const baseWidth = {{.DrawingBoardBaseWidth}};
+        const baseHeight = {{.DrawingBoardBaseHeight}};
         const boardRatio = baseWidth / baseHeight;
 
         // Moving this here to extract the context after resizing
@@ -830,7 +823,7 @@
         function hexStringToRgbColorObject(hexString) {
             const hexColorsRegex = /#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})/i;
             const match = hexString.match(hexColorsRegex)
-            return { r: parseInt(match[1], 16), g: parseInt(match[2], 16), b: parseInt(match[3], 16) };
+            return {r: parseInt(match[1], 16), g: parseInt(match[2], 16), b: parseInt(match[3], 16)};
         }
 
         function rgbColorObjectToHexString(color) {
@@ -844,7 +837,7 @@
             return Number(number).toString(16).padStart(2, "0");
         }
 
-        const rubberColor = { r: 255, g: 255, b: 255 };
+        const rubberColor = {r: 255, g: 255, b: 255};
 
         function updateCursor() {
             if (allowDrawing) {
@@ -891,10 +884,10 @@
             );
 
             if (hsp > 127.5) {
-                return { r: 0, g: 0, b: 0 };
+                return {r: 0, g: 0, b: 0};
             }
 
-            return { r: 255, g: 255, b: 255 };
+            return {r: 255, g: 255, b: 255};
         }
 
         function setCircleCursor(innerColor, size) {
@@ -913,6 +906,12 @@
             const innerColorCSS = "rgb(" + innerColor.r + "," + innerColor.g + "," + innerColor.b + ")";
             const outerColorCSS = "rgb(" + outerColor.r + "," + outerColor.g + "," + outerColor.b + ")";
             return `<circle cx="` + circleRadius + `" cy="` + circleRadius + `" r="` + circleRadius + `" style="fill: ` + innerColorCSS + `; stroke: ` + outerColorCSS + `;"/>`;
+        }
+
+        function toggleReadiness() {
+            socket.send(JSON.stringify({
+                type: "toggle-readiness",
+            }));
         }
 
         function startGame() {
@@ -1069,7 +1068,6 @@
                     //As soon as a turn starts, the round should be ongoing, so we make
                     //sure that all types of dialogs, that indicate the game isn't
                     //ongoing, are not visible anymore.
-                    unstartedDialog.style.visibility = "hidden";
                     startDialog.style.visibility = "hidden";
                     restartButton.style.display = "none";
                     gameOverDialog.style.visibility = "hidden";
@@ -1210,10 +1208,11 @@
             updateCursor();
 
             if (ready.gameState === "unstarted") {
+                startDialog.style.visibility = "visible";
                 if (ownerID === ownID) {
-                    startDialog.style.visibility = "visible";
+                    forceStartButton.style.display = "block";
                 } else {
-                    unstartedDialog.style.visibility = "visible";
+                    forceStartButton.style.display = "none";
                 }
             } else if (ready.gameState === "gameOver") {
                 gameOverDialog.style.visibility = "visible";
@@ -1358,6 +1357,26 @@
         //applyPlayers takes the players passed, assigns them to cachedPlayers,
         //refreshes the scoreboard and updates the drawerID and drawerName variables.
         function applyPlayers(players) {
+            const matchOngoing = lobby.State === "ongoing";
+            if (!matchOngoing) {
+                let readyPlayers = 0;
+                let readyPlayersRequired = 0;
+
+                players.forEach(player => {
+                    if (!player.connected) {
+                        return;
+                    }
+
+                    readyPlayersRequired = readyPlayersRequired + 1;
+                    if (player.state === "ready") {
+                        readyPlayers = readyPlayers + 1;
+                    }
+                });
+
+                document.getElementById("ready-count").innerText = readyPlayers.toString();
+                document.getElementById("ready-needed").innerText = readyPlayersRequired.toString();
+            }
+
             playerContainer.innerHTML = "";
             cachedPlayers = players;
             players.forEach(player => {
@@ -1369,8 +1388,27 @@
                 const playerDiv = document.createElement("div");
 
                 playerDiv.classList.add("player");
-                if (player.state === "standby") {
-                    playerDiv.classList.add("player-done");
+
+                if (matchOngoing) {
+                    if (player.state === "standby") {
+                        playerDiv.classList.add("player-done");
+                    }
+
+                    if (player.state === "drawing") {
+                        drawerID = player.id;
+                        drawerName = player.name;
+
+                        const playerStateImage = createPlayerStateImageNode("{{.RootPath}}/resources/pencil.svg?cache_bust={{.CacheBust}}");
+                        playerStateImage.style.transform = "scaleX(-1)";
+                        scoreAndStatusDiv.appendChild(playerStateImage);
+                    } else if (player.state === "standby") {
+                        const playerStateImage = createPlayerStateImageNode("{{.RootPath}}/resources/checkmark.svg?cache_bust={{.CacheBust}}");
+                        scoreAndStatusDiv.appendChild(playerStateImage);
+                    }
+                } else {
+                    if (player.state === "ready") {
+                        playerDiv.classList.add("player-ready");
+                    }
                 }
 
                 const rankSpan = document.createElement("span");
@@ -1404,19 +1442,6 @@
                 lastPlayerscoreSpan.classList.add("last-turn-score");
                 lastPlayerscoreSpan.innerText = '{{.Translation.Get "last-turn"}}'.format(player.lastScore);
                 playerscoreDiv.appendChild(lastPlayerscoreSpan);
-
-
-                if (player.state === "drawing") {
-                    drawerID = player.id;
-                    drawerName = player.name;
-
-                    const playerStateImage = createPlayerStateImageNode("{{.RootPath}}/resources/pencil.svg?cache_bust={{.CacheBust}}");
-                    playerStateImage.style.transform = "scaleX(-1)";
-                    scoreAndStatusDiv.appendChild(playerStateImage);
-                } else if (player.state === "standby") {
-                    const playerStateImage = createPlayerStateImageNode("{{.RootPath}}/resources/checkmark.svg?cache_bust={{.CacheBust}}");
-                    scoreAndStatusDiv.appendChild(playerStateImage);
-                }
 
                 playerContainer.appendChild(playerDiv);
             });

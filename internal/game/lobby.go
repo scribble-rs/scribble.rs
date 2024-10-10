@@ -185,22 +185,31 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 		}
 
 		handleKickVoteEvent(lobby, player, toKickID)
-	} else if eventType == EventTypeStart {
-		if lobby.State != Ongoing && player == lobby.Owner {
-			// We are reseting each players score, since players could
-			// technically be player a second game after the last one
-			// has already ended.
-			for _, otherPlayer := range lobby.players {
-				otherPlayer.Score = 0
-				otherPlayer.LastScore = 0
-				// Everyone has the same score and therefore the same rank.
-				otherPlayer.Rank = 1
+	} else if eventType == EventTypeToggleReadiness {
+		if lobby.State != Ongoing {
+			if player.State == Standby {
+				player.State = Ready
+			} else {
+				player.State = Standby
 			}
 
-			// Cause advanceLobby to start at round 1, starting the game anew.
-			lobby.Round = 0
+			allPlayersReady := true
+			for _, otherPlayer := range lobby.players {
+				if otherPlayer.State == Standby {
+					allPlayersReady = false
+					break
+				}
+			}
 
-			advanceLobby(lobby)
+			if allPlayersReady {
+				startGame(lobby)
+			} else {
+				lobby.Broadcast(&Event{Type: EventTypeUpdatePlayers, Data: lobby.players})
+			}
+		}
+	} else if eventType == EventTypeStart {
+		if lobby.State != Ongoing && player == lobby.Owner {
+			startGame(lobby)
 		}
 	} else if eventType == EventTypeNameChange {
 		var message StringDataEvent
@@ -393,6 +402,23 @@ func (lobby *Lobby) broadcastConditional(data easyjson.Marshaler, condition func
 			lobby.WritePreparedMessage(player, message)
 		}
 	}
+}
+
+func startGame(lobby *Lobby) {
+	// We are reseting each players score, since players could
+	// technically be player a second game after the last one
+	// has already ended.
+	for _, otherPlayer := range lobby.players {
+		otherPlayer.Score = 0
+		otherPlayer.LastScore = 0
+		// Everyone has the same score and therefore the same rank.
+		otherPlayer.Rank = 1
+	}
+
+	// Cause advanceLobby to start at round 1, starting the game anew.
+	lobby.Round = 0
+
+	advanceLobby(lobby)
 }
 
 func handleKickVoteEvent(lobby *Lobby, player *Player, toKickID uuid.UUID) {
@@ -649,7 +675,7 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 					Type: EventTypeGameOver,
 					Data: &GameOverEvent{
 						PreviousWord: previousWord,
-						Ready:        readyData,
+						ReadyEvent:   readyData,
 					},
 				})
 			}
@@ -926,6 +952,9 @@ func CreateLobby(
 	}
 
 	player := createPlayer(playerName)
+	// Since the lobby is new and we aren't ready yet, the state needs to be
+	// standby.
+	player.State = Standby
 
 	lobby.players = append(lobby.players, player)
 	lobby.Owner = player
@@ -941,8 +970,8 @@ func generatePlayerName() string {
 	return petname.Generate(3, petname.Title, petname.None)
 }
 
-func generateReadyData(lobby *Lobby, player *Player) *Ready {
-	ready := &Ready{
+func generateReadyData(lobby *Lobby, player *Player) *ReadyEvent {
+	ready := &ReadyEvent{
 		PlayerID:     player.ID,
 		AllowDrawing: player.State == Drawing,
 		PlayerName:   player.Name,
@@ -1020,7 +1049,7 @@ func (lobby *Lobby) GetAvailableWordHints(player *Player) []*WordHint {
 	// The draw simple gets every character as a word-hint. We basically abuse
 	// the hints for displaying the word, instead of having yet another GUI
 	// element that wastes space.
-	if player.State == Drawing || player.State == Standby {
+	if player.State != Guessing {
 		return lobby.wordHintsShown
 	}
 
@@ -1032,6 +1061,13 @@ func (lobby *Lobby) GetAvailableWordHints(player *Player) []*WordHint {
 func (lobby *Lobby) JoinPlayer(playerName string) *Player {
 	player := createPlayer(playerName)
 
+	if lobby.State == Ongoing {
+		// Joining an existing game will mark you as a guesser, as someone is
+		// always drawing, given there is no pause-state.
+		player.State = Guessing
+	} else {
+		player.State = Standby
+	}
 	lobby.players = append(lobby.players, player)
 
 	return player

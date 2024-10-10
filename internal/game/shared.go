@@ -19,10 +19,11 @@ import (
 
 // Eevnts that are just incomming from the client.
 const (
-	EventTypeStart          = "start"
-	EventTypeRequestDrawing = "request-drawing"
-	EventTypeChooseWord     = "choose-word"
-	EventTypeUndo           = "undo"
+	EventTypeStart           = "start"
+	EventTypeToggleReadiness = "toggle-readiness"
+	EventTypeRequestDrawing  = "request-drawing"
+	EventTypeChooseWord      = "choose-word"
+	EventTypeUndo            = "undo"
 )
 
 // Events that are outgoing only.
@@ -148,7 +149,7 @@ type NameChangeEvent struct {
 // is usually part of the "next-turn" event, which we don't send, since the
 // game is over already.
 type GameOverEvent struct {
-	*Ready
+	*ReadyEvent
 	PreviousWord string `json:"previousWord"`
 }
 
@@ -175,10 +176,10 @@ type OutgoingMessage struct {
 	AuthorID uuid.UUID `json:"authorId"`
 }
 
-// Ready represents the initial state that a user needs upon connection.
+// ReadyEvent represents the initial state that a user needs upon connection.
 // This includes all the necessary things for properly running a client
 // without receiving any more data.
-type Ready struct {
+type ReadyEvent struct {
 	WordHints          []*WordHint `json:"wordHints"`
 	PlayerName         string      `json:"playerName"`
 	Players            []*Player   `json:"players"`
