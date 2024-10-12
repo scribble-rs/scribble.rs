@@ -187,7 +187,7 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 		handleKickVoteEvent(lobby, player, toKickID)
 	} else if eventType == EventTypeToggleReadiness {
 		if lobby.State != Ongoing {
-			if player.State == Standby {
+			if player.State != Ready {
 				player.State = Ready
 			} else {
 				player.State = Standby
@@ -195,7 +195,7 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 
 			allPlayersReady := true
 			for _, otherPlayer := range lobby.players {
-				if otherPlayer.State == Standby {
+				if otherPlayer.State != Ready {
 					allPlayersReady = false
 					break
 				}
@@ -1037,6 +1037,11 @@ func (lobby *Lobby) OnPlayerDisconnect(player *Player) {
 
 	player.disconnectTime = &disconnectTime
 	lobby.LastPlayerDisconnectTime = &disconnectTime
+
+	// Reset from potentially ready to standby
+	if lobby.State != Ongoing {
+		player.State = Standby
+	}
 
 	recalculateRanks(lobby)
 	lobby.Broadcast(&Event{Type: EventTypeUpdatePlayers, Data: lobby.players})

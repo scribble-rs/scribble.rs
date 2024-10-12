@@ -1,3 +1,25 @@
+.ready-check-box-wrapper {
+    display: flex;
+    align-self: center;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.ready-check-box {
+    padding: 0.5rem 1rem 0.5rem 1rem;
+    background-color: white;
+}
+
+.ready-check-box:has(input[type="checkbox"]:checked) {
+    background-color: rgb(255, 224, 66);
+}
+
+.ready-needed,
+.ready-count {
+    font-family: monospace;
+    font-size: 1rem;
+}
+
 #lobby-header {
     grid-column-start: 1;
     grid-column-end: 4;
@@ -500,11 +522,8 @@ input[type="button"]:active,
 
 .namechange-field {
     width: 100%;
+    height: 100%;
     box-sizing: border-box;
-}
-
-.namechange-apply-button {
-    margin-left: 0.5rem;
 }
 
 #waitchoose-drawer {

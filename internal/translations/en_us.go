@@ -5,8 +5,9 @@ func initEnglishTranslation() Translation {
 
 	translation.put("requires-js", "This website requires JavaScript to run properly.")
 
-	translation.put("start-the-game", "Start the game")
+	translation.put("start-the-game", "Ready up!")
 	translation.put("force-start", "Force Start")
+	translation.put("force-restart", "Force Restart")
 	translation.put("game-not-started-title", "Game hasn't started")
 	translation.put("waiting-for-host-to-start", "Please wait for your lobby host to start the game.")
 

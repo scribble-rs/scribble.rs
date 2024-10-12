@@ -105,24 +105,23 @@
                         <div id="start-dialog" class="center-dialog">
                             <span class="dialog-title">{{.Translation.Get "start-the-game"}}</span>
                             <div class="center-dialog-content">
-                                <div style="display: flex; flex-direction: column;">
-                                    <div style="display: flex; flex-direction: row;
-                                    align-items: center;">
+                                <div style="display: flex; flex-direction:
+                                    column; gap: 0.5rem;">
+                                    <div style="display: flex; flex-direction:
+                                        row; gap: 0.5rem; align-items: center;">
                                         {{.Translation.Get "change-your-name"}}:
                                         <input class="namechange-field" type="text"
                                             id="namechange-field-start-dialog"></input>
-                                        <button class="dialog-button namechange-apply-button"
+                                        <button class="dialog-button"
                                             onclick="changeName(document.getElementById('namechange-field-start-dialog').value)">{{.Translation.Get "apply"}}</button>
                                     </div>
-                                    <div style="display: flex; flex-direction: row;
-                                    align-items: center;">
-                                        Ready&nbsp;<span id="ready-count">0</span>/<span id="ready-needed">0</span>
-                                    </div>
-                                    Once all players are ready, the game will start.
-                                    <div>
-                                        <span for="ready-state">Ready</span>
-                                        <input type="checkbox" name="ready-state" id="ready-state"
-                                            onchange="toggleReadiness()">
+                                    <div class="ready-check-box-wrapper">
+                                        <label class="ready-check-box" for="ready-state-start">
+                                            Ready
+                                            <input type="checkbox" name="ready-state-start" id="ready-state-start"
+                                                onchange="toggleReadiness()">
+                                            (<span class="ready-count">0</span>/<span class="ready-needed">0</span>)
+                                        </label>
                                     </div>
                                 </div>
                             </div>
@@ -196,8 +195,17 @@
                             <div class="center-dialog-content">
                                 <div id="game-over-scoreboard"></div>
                             </div>
+                            <div class="ready-check-box-wrapper">
+                                <label class="ready-check-box" for="ready-state-game-over">
+                                    Ready
+                                    <input type="checkbox" name="ready-state-game-over" id="ready-state-game-over"
+                                        onchange="toggleReadiness()">
+                                    (<span class="ready-count">0</span>/<span class="ready-needed">0</span>)
+                                </label>
+                            </div>
                             <div class="button-center-wrapper">
-                                <button id="restart-button" class="dialog-button" onclick="startGame()">Restart</button>
+                                <button id="restart-button" class="dialog-button" onclick="startGame()">{{.Translation.Get
+                                    "force-restart"}}</button>
                             </div>
                         </div>
 
@@ -1063,6 +1071,14 @@
                 } else if (parsed.type === "clear-drawing-board") {
                     clear(context);
                 } else if (parsed.type === "next-turn") {
+                    if (gameState === "ongoing") {
+                        //The previous turn has ended.
+                        showRoundEndMessage(parsed.data.previousWord);
+                    } else {
+                        //First turn, the game starts
+                        gameState = "ongoing";
+                    }
+
                     setRoundEndTime(parsed.data.roundEndTime);
 
                     //As soon as a turn starts, the round should be ongoing, so we make
@@ -1095,14 +1111,6 @@
 
                     allowDrawing = false;
                     updateCursor();
-
-                    if (gameState === "ongoing") {
-                        //The previous turn has ended.
-                        showRoundEndMessage(parsed.data.previousWord);
-                    } else {
-                        //First turn, the game starts
-                        gameState = "ongoing";
-                    }
                 } else if (parsed.type === "your-turn") {
                     playWav('{{.RootPath}}/resources/your-turn.wav?cache_bust={{.CacheBust}}');
                     //This dialog could potentially stay visible from last
@@ -1184,11 +1192,12 @@
         }
 
         function handleReadyEvent(ready) {
-            setRoundEndTime(ready.roundEndTime);
             ownerID = ready.ownerId;
+            ownID = ready.playerId;
+
+            setRoundEndTime(ready.roundEndTime);
             setUsernameLocally(ready.playerName);
             allowDrawing = ready.allowDrawing;
-            ownID = ready.playerId;
             round = ready.round;
             rounds = ready.rounds;
             gameState = ready.gameState;
@@ -1357,7 +1366,7 @@
         //applyPlayers takes the players passed, assigns them to cachedPlayers,
         //refreshes the scoreboard and updates the drawerID and drawerName variables.
         function applyPlayers(players) {
-            const matchOngoing = lobby.State === "ongoing";
+            const matchOngoing = gameState === "ongoing";
             if (!matchOngoing) {
                 let readyPlayers = 0;
                 let readyPlayersRequired = 0;
@@ -1371,10 +1380,22 @@
                     if (player.state === "ready") {
                         readyPlayers = readyPlayers + 1;
                     }
+
+                    if (player.id === ownID) {
+                        document.getElementById("ready-state-start").checked = player.state === "ready";
+                        document.getElementById("ready-state-game-over").checked = player.state === "ready";
+                    }
                 });
 
-                document.getElementById("ready-count").innerText = readyPlayers.toString();
-                document.getElementById("ready-needed").innerText = readyPlayersRequired.toString();
+                const readyCounts = document.getElementsByClassName("ready-count");
+                const reaadyNeededs = document.getElementsByClassName("ready-needed");
+
+                Array.from(readyCounts).forEach((element) => {
+                    element.innerText = readyPlayers.toString();
+                });
+                Array.from(reaadyNeededs).forEach((element) => {
+                    element.innerText = readyPlayersRequired.toString();
+                });
             }
 
             playerContainer.innerHTML = "";
@@ -1389,12 +1410,18 @@
 
                 playerDiv.classList.add("player");
 
+                const scoreAndStatusDiv = document.createElement("div");
+                scoreAndStatusDiv.classList.add("score-and-status");
+                playerDiv.appendChild(scoreAndStatusDiv);
+
+                const playerscoreDiv = document.createElement("div");
+                playerscoreDiv.classList.add("playerscore-group");
+                scoreAndStatusDiv.appendChild(playerscoreDiv);
+
                 if (matchOngoing) {
                     if (player.state === "standby") {
                         playerDiv.classList.add("player-done");
-                    }
-
-                    if (player.state === "drawing") {
+                    } else if (player.state === "drawing") {
                         drawerID = player.id;
                         drawerName = player.name;
 
@@ -1424,14 +1451,6 @@
                     playernameSpan.classList.add("playername-self");
                 }
                 playerDiv.appendChild(playernameSpan);
-
-                const scoreAndStatusDiv = document.createElement("div");
-                scoreAndStatusDiv.classList.add("score-and-status");
-                playerDiv.appendChild(scoreAndStatusDiv);
-
-                const playerscoreDiv = document.createElement("div");
-                playerscoreDiv.classList.add("playerscore-group");
-                scoreAndStatusDiv.appendChild(playerscoreDiv);
 
                 const playerscoreSpan = document.createElement("span");
                 playerscoreSpan.classList.add("playerscore");
