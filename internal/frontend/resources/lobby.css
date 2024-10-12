@@ -1,14 +1,36 @@
+.ready-check-box-wrapper {
+    display: flex;
+    align-self: center;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.ready-check-box {
+    padding: 0.5rem 1rem 0.5rem 1rem;
+    background-color: white;
+}
+
+.ready-check-box:has(input[type="checkbox"]:checked) {
+    background-color: rgb(255, 224, 66);
+}
+
+.ready-needed,
+.ready-count {
+    font-family: monospace;
+    font-size: 1rem;
+}
+
 #lobby-header {
     grid-column-start: 1;
     grid-column-end: 4;
     grid-row: 1;
 
-    display:grid;
+    display: grid;
     grid-template-columns: 15rem auto 18rem;
     grid-gap: 5px;
 }
 
-#lobby-header > * {
+#lobby-header>* {
     background-color: white;
     height: 100%;
     align-items: center;
@@ -22,7 +44,8 @@
     font-size: 0;
 }
 
-#round-container, #time-left {
+#round-container,
+#time-left {
     font-size: 1.5rem;
     align-self: center;
     display: flex;
@@ -57,7 +80,7 @@
     font-size: 1.5rem;
 }
 
-.guess-letter + .guess-letter {
+.guess-letter+.guess-letter {
     margin-left: 0.5rem;
 }
 
@@ -180,7 +203,7 @@
 
 .close-guess-message {
     font-weight: bold;
-    color:rgb(25, 166, 166);
+    color: rgb(25, 166, 166);
 }
 
 .message-input-form {
@@ -227,7 +250,7 @@
     margin-top: 1em;
 }
 
-.dialog-button + .dialog-button {
+.dialog-button+.dialog-button {
     margin-left: 0.25rem;
 }
 
@@ -256,8 +279,8 @@ input[type="button"]:active,
     width: 1.7rem;
     height: 1.7rem;
     /** Without these two, the button has too much height. */
-    display: inline-block; 
-    vertical-align: middle; 
+    display: inline-block;
+    vertical-align: middle;
 }
 
 .dot {
@@ -265,7 +288,7 @@ input[type="button"]:active,
     border-radius: 50%;
 }
 
-.line-width-button + .line-width-button-content {
+.line-width-button+.line-width-button-content {
     height: 50px;
     width: 50px;
     display: flex;
@@ -277,7 +300,7 @@ input[type="button"]:active,
     background-color: rgb(218, 218, 218);
 }
 
-.line-width-button:checked + .line-width-button-content {
+.line-width-button:checked+.line-width-button-content {
     background-color: rgb(243, 132, 247);
 }
 
@@ -303,7 +326,7 @@ input[type="button"]:active,
     background-color: rgb(218, 218, 218);
 }
 
-.canvas-button > img {
+.canvas-button>img {
     display: inline-block;
     vertical-align: middle;
 }
@@ -389,7 +412,7 @@ input[type="button"]:active,
     grid-template-rows: 1fr 1fr;
 }
 
-.player + .player {
+.player+.player {
     margin-top: 5px;
 }
 
@@ -406,6 +429,10 @@ input[type="button"]:active,
 
 .player-done {
     background-color: rgb(141, 224, 15);
+}
+
+.player-ready {
+    background-color: rgb(255, 224, 66);
 }
 
 .rank {
@@ -439,6 +466,7 @@ input[type="button"]:active,
 #kick-dialog-players {
     flex: 1;
 }
+
 .kick-player-button {
     width: 100%;
     border: none;
@@ -446,7 +474,7 @@ input[type="button"]:active,
     padding-bottom: 1rem;
 }
 
-.kick-player-button + .kick-player-button {
+.kick-player-button+.kick-player-button {
     margin-top: 0.5rem;
 }
 
@@ -458,7 +486,7 @@ input[type="button"]:active,
     background-color: rgb(245, 245, 245);
 }
 
-.gameover-scoreboard-entry + .gameover-scoreboard-entry {
+.gameover-scoreboard-entry+.gameover-scoreboard-entry {
     margin-top: 0.5rem;
 }
 
@@ -475,7 +503,7 @@ input[type="button"]:active,
 }
 
 .gameover-scoreboard-name {
-    flex:1;
+    flex: 1;
     text-align: center;
 }
 
@@ -494,39 +522,32 @@ input[type="button"]:active,
 
 .namechange-field {
     width: 100%;
+    height: 100%;
     box-sizing: border-box;
-}
-
-.namechange-apply-button {
-    margin-left: 0.5rem;
 }
 
 #waitchoose-drawer {
     font-weight: bold;
 }
 
-@media only screen
-  and (min-device-width: 375px)
-  and (max-device-width: 812px)
-  and (orientation: landscape)
-  and (display-mode: fullscreen) {
+@media only screen and (min-device-width: 375px) and (max-device-width: 812px) and (orientation: landscape) and (display-mode: fullscreen) {
     html {
         font-size: 0.8rem;
     }
+
     .dialog-title {
         font-size: 1.75rem;
     }
 }
 
-@media only screen
-and (min-device-width: 375px)
-and (max-device-width: 812px) {
+@media only screen and (min-device-width: 375px) and (max-device-width: 812px) {
     .dialog-title {
         font-size: 1.75rem;
     }
 }
 
-@media only screen and (orientation: portrait), (max-aspect-ratio: 4/3) {
+@media only screen and (orientation: portrait),
+(max-aspect-ratio: 4/3) {
     #lobby {
         grid-template-columns: 2fr 3fr;
         grid-template-rows: min-content min-content min-content auto;
@@ -540,14 +561,15 @@ and (max-device-width: 812px) {
         grid-row: 1;
     }
 
-    #round-container, #time-left {
+    #round-container,
+    #time-left {
         font-size: 1.2rem;
     }
 
     #time-left-value {
         min-width: 2.4rem;
         width: 2.4rem;
-    }    
+    }
 
     .header-button-image {
         width: 1.2rem;

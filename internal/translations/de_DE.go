@@ -5,8 +5,9 @@ func initGermanTranslation() {
 
 	translation.put("requires-js", "Diese Website benötigt JavaScript um korrekt zu funktionieren.")
 
-	translation.put("start-the-game", "Starte das Spiel")
-	translation.put("start", "Starten")
+	translation.put("start-the-game", "Mach dich bereit!")
+	translation.put("force-start", "Start erzwingen")
+	translation.put("force-restart", "Neustart erzwingen")
 	translation.put("game-not-started-title", "Warte auf Spielstart")
 	translation.put("waiting-for-host-to-start", "Bitte warte bis der Lobby Besitzer das Spiel startet.")
 
@@ -14,7 +15,7 @@ func initGermanTranslation() {
 
 	translation.put("round", "Runde")
 	translation.put("toggle-soundeffects", "Sound ein- / ausschalten")
-	translation.put("change-your-name", "Benutzernamen editieren")
+	translation.put("change-your-name", "Benutzername")
 	translation.put("randomize", "Zufälliger Name")
 	translation.put("apply", "Anwenden")
 	translation.put("save", "Speichern")
