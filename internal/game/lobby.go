@@ -186,30 +186,10 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 
 		handleKickVoteEvent(lobby, player, toKickID)
 	} else if eventType == EventTypeToggleReadiness {
-		if lobby.State != Ongoing {
-			if player.State != Ready {
-				player.State = Ready
-			} else {
-				player.State = Standby
-			}
-
-			allPlayersReady := true
-			for _, otherPlayer := range lobby.players {
-				if otherPlayer.State != Ready {
-					allPlayersReady = false
-					break
-				}
-			}
-
-			if allPlayersReady {
-				startGame(lobby)
-			} else {
-				lobby.Broadcast(&Event{Type: EventTypeUpdatePlayers, Data: lobby.players})
-			}
-		}
+		lobby.handleToggleReadinessEvent(player)
 	} else if eventType == EventTypeStart {
 		if lobby.State != Ongoing && player == lobby.Owner {
-			startGame(lobby)
+			lobby.startGame()
 		}
 	} else if eventType == EventTypeNameChange {
 		var message StringDataEvent
@@ -227,6 +207,32 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 	}
 
 	return nil
+}
+
+func (lobby *Lobby) handleToggleReadinessEvent(player *Player) {
+	if lobby.State != Ongoing {
+		if player.State != Ready {
+			player.State = Ready
+		} else {
+			player.State = Standby
+		}
+
+		if lobby.readyToStart() {
+			lobby.startGame()
+		} else {
+			lobby.Broadcast(&Event{Type: EventTypeUpdatePlayers, Data: lobby.players})
+		}
+	}
+}
+
+func (lobby *Lobby) readyToStart() bool {
+	for _, otherPlayer := range lobby.players {
+		if otherPlayer.Connected && otherPlayer.State != Ready {
+			return false
+		}
+	}
+
+	return true
 }
 
 func handleMessage(message string, sender *Player, lobby *Lobby) {
@@ -404,7 +410,7 @@ func (lobby *Lobby) broadcastConditional(data easyjson.Marshaler, condition func
 	}
 }
 
-func startGame(lobby *Lobby) {
+func (lobby *Lobby) startGame() {
 	// We are reseting each players score, since players could
 	// technically be player a second game after the last one
 	// has already ended.
@@ -1045,8 +1051,17 @@ func (lobby *Lobby) OnPlayerDisconnect(player *Player) {
 	// Reset from potentially ready to standby
 	if lobby.State != Ongoing {
 		player.State = Standby
+		if lobby.readyToStart() {
+			lobby.startGame()
+			// Rank Calculation and sending out player updates happend anyway,
+			// so there's no need to keep going.
+			return
+		}
 	}
 
+	// Necessary to prevent gaps in the ranking. While players preserve their
+	// points when disconnecting, they shouldn't preserve their ranking. Upon
+	// reconnecting, the ranking will be recalculated though.
 	recalculateRanks(lobby)
 	lobby.Broadcast(&Event{Type: EventTypeUpdatePlayers, Data: lobby.players})
 }
