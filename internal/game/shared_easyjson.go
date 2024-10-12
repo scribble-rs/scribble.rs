@@ -538,6 +538,8 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame4(in *jlexer
 			out.Name = string(in.String())
 		case "state":
 			out.State = PlayerState(in.String())
+		case "spectate_requested":
+			out.SpectateToggleRequested = bool(in.Bool())
 		case "score":
 			out.Score = int(in.Int())
 		case "lastScore":
@@ -573,6 +575,11 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame4(out *jwrit
 		const prefix string = ",\"state\":"
 		out.RawString(prefix)
 		out.String(string(in.State))
+	}
+	{
+		const prefix string = ",\"spectate_requested\":"
+		out.RawString(prefix)
+		out.Bool(bool(in.SpectateToggleRequested))
 	}
 	{
 		const prefix string = ",\"score\":"

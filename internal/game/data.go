@@ -137,10 +137,11 @@ func (player *Player) GetUserSession() uuid.UUID {
 type PlayerState string
 
 const (
-	Guessing PlayerState = "guessing"
-	Drawing  PlayerState = "drawing"
-	Standby  PlayerState = "standby"
-	Ready    PlayerState = "ready"
+	Guessing   PlayerState = "guessing"
+	Drawing    PlayerState = "drawing"
+	Standby    PlayerState = "standby"
+	Ready      PlayerState = "ready"
+	Spectating PlayerState = "spectating"
 )
 
 // GetPlayer searches for a player, identifying them by usersession.

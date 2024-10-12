@@ -21,6 +21,7 @@ import (
 const (
 	EventTypeStart           = "start"
 	EventTypeToggleReadiness = "toggle-readiness"
+	EventTypeToggleSpectate  = "toggle-spectate"
 	EventTypeRequestDrawing  = "request-drawing"
 	EventTypeChooseWord      = "choose-word"
 	EventTypeUndo            = "undo"
@@ -210,6 +211,11 @@ type Player struct {
 	// Name is the players displayed name
 	Name  string      `json:"name"`
 	State PlayerState `json:"state"`
+	// SpectateToggleRequested is used for state changes between spectator and
+	// player. We want to prevent people from switching in and out of the Player
+	// state. While this will allow people to skip being the drawer, it will
+	// also cause them to lose points for that round.
+	SpectateToggleRequested bool `json:"spectate_requested"`
 	// Rank is the current ranking of the player in his Lobby
 	// Score is the points that the player got in the current Lobby.
 	Score     int `json:"score"`

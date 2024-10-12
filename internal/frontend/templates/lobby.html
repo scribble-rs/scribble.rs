@@ -916,6 +916,12 @@
             return `<circle cx="` + circleRadius + `" cy="` + circleRadius + `" r="` + circleRadius + `" style="fill: ` + innerColorCSS + `; stroke: ` + outerColorCSS + `;"/>`;
         }
 
+        function toggleSpectate() {
+            socket.send(JSON.stringify({
+                type: "toggle-spectate",
+            }));
+        }
+
         function toggleReadiness() {
             socket.send(JSON.stringify({
                 type: "toggle-readiness",
@@ -1372,7 +1378,7 @@
                 let readyPlayersRequired = 0;
 
                 players.forEach(player => {
-                    if (!player.connected) {
+                    if (!player.connected || player.state === "spectating") {
                         return;
                     }
 
@@ -1402,7 +1408,7 @@
             cachedPlayers = players;
             players.forEach(player => {
                 //We don't wanna show the disconnected players.
-                if (!player.connected) {
+                if (!player.connected || player.state === "spectating") {
                     return;
                 }
 

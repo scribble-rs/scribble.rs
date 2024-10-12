@@ -86,7 +86,13 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 	// use mapstructure instead. It's cheaper in terms of CPU usage and
 	// memory usage. There are benchmarks to prove this in json_test.go.
 
-	if eventType == EventTypeMessage {
+	if eventType == EventTypeToggleSpectate {
+		player.SpectateToggleRequested = !player.SpectateToggleRequested
+		if player.SpectateToggleRequested && lobby.State != Ongoing {
+			player.State = Spectating
+			lobby.Broadcast(&Event{Type: EventTypeUpdatePlayers, Data: lobby.players})
+		}
+	} else if eventType == EventTypeMessage {
 		var message StringDataEvent
 		if err := easyjson.Unmarshal(payload, &message); err != nil {
 			return fmt.Errorf("invalid data received: '%s'", string(payload))
@@ -171,7 +177,7 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 			wordHintData := &Event{Type: EventTypeUpdateWordHint, Data: lobby.wordHints}
 			lobby.broadcastConditional(wordHintData, IsGuessing)
 			wordHintDataRevealed := &Event{Type: EventTypeUpdateWordHint, Data: lobby.wordHintsShown}
-			lobby.broadcastConditional(wordHintDataRevealed, IsNotGuessing)
+			lobby.broadcastConditional(wordHintDataRevealed, IsAllowedToSeeHints)
 		}
 	} else if eventType == EventTypeKickVote {
 		var kickEvent StringDataEvent
@@ -210,7 +216,7 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 }
 
 func (lobby *Lobby) handleToggleReadinessEvent(player *Player) {
-	if lobby.State != Ongoing {
+	if lobby.State != Ongoing && player.State != Spectating {
 		if player.State != Ready {
 			player.State = Ready
 		} else {
@@ -261,7 +267,7 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 	if sender.State != Guessing {
 		lobby.broadcastConditional(
 			newMessageEvent(EventTypeNonGuessingPlayerMessage, trimmedMessage, sender),
-			IsNotGuessing,
+			IsAllowedToSeeHints,
 		)
 		return
 	}
@@ -356,8 +362,8 @@ func ExcludePlayer(toExclude *Player) func(*Player) bool {
 	}
 }
 
-func IsNotGuessing(player *Player) bool {
-	return player.State != Guessing
+func IsAllowedToSeeHints(player *Player) bool {
+	return player.State != Guessing && player.State != Spectating
 }
 
 func IsGuessing(player *Player) bool {
@@ -607,6 +613,9 @@ func (lobby *Lobby) calculateDrawerScore() int {
 	)
 	for _, player := range lobby.GetPlayers() {
 		if player.State != Drawing &&
+			// Switch to spectating is only possible after score calculation, so
+			// this can't be used to manipulate score.
+			player.State != Spectating &&
 			// If the player has guessed, we want to take them into account,
 			// even if they aren't connected anymore. If the player is
 			// connected, but hasn't guessed, it is still as well, as the
@@ -654,14 +663,27 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 	}
 
 	for _, otherPlayer := range lobby.players {
-		// If the round ends and people still have guessing, that means the
+		if otherPlayer.SpectateToggleRequested {
+			otherPlayer.SpectateToggleRequested = false
+			if otherPlayer.State == Spectating {
+				otherPlayer.State = Guessing
+			} else {
+				otherPlayer.State = Spectating
+			}
+		}
+
+		// If the round ends and people are still guessing, that means the
 		// "LastScore" value for the next turn has to be "no score earned".
-		if otherPlayer.State == Guessing {
+		// We also reset spectating players, to prevent any score fuckups.
+		if otherPlayer.State == Guessing || otherPlayer.State == Spectating {
 			otherPlayer.LastScore = 0
 		}
-		// Initially all players are in guessing state, as the drawer gets
-		// defined further at the bottom.
-		otherPlayer.State = Guessing
+
+		if otherPlayer.State != Spectating {
+			// Initially all players are in guessing state, as the drawer gets
+			// defined further at the bottom.
+			otherPlayer.State = Guessing
+		}
 	}
 
 	recalculateRanks(lobby)
@@ -730,10 +752,12 @@ func determineNextDrawer(lobby *Lobby) (*Player, bool) {
 		if player.State == Drawing {
 			// If we have someone that's drawing, take the next one
 			for i := index + 1; i < len(lobby.players); i++ {
-				player := lobby.players[i]
-				if player.Connected {
-					return player, false
+				nextPlayer := lobby.players[i]
+				if nextPlayer.State == Spectating || !nextPlayer.Connected {
+					continue
 				}
+
+				return nextPlayer, false
 			}
 
 			// No player below the current drawer has been found, therefore we
@@ -744,9 +768,18 @@ func determineNextDrawer(lobby *Lobby) (*Player, bool) {
 
 	// We prefer the first connected player.
 	for _, player := range lobby.players {
-		if player.Connected {
-			return player, true
+		if player.State == Spectating || !player.Connected {
+			continue
 		}
+		return player, true
+	}
+
+	// Alternatively we prefer the first non-spectating player
+	for _, player := range lobby.players {
+		if player.State == Spectating {
+			continue
+		}
+		return player, true
 	}
 
 	// If no player is connected, we simply chose the first player.
@@ -844,19 +877,16 @@ func recalculateRanks(lobby *Lobby) {
 	lastScore := math.MaxInt32
 	var lastRank int
 	for _, player := range sortedPlayers {
-		if !player.Connected {
+		if !player.Connected && player.State != Spectating {
 			continue
 		}
 
 		if player.Score < lastScore {
 			lastRank++
-			player.Rank = lastRank
 			lastScore = player.Score
-		} else {
-			// Since the players are already sorted from high to low, we only
-			// have the cases higher or equal.
-			player.Rank = lastRank
 		}
+
+		player.Rank = lastRank
 	}
 }
 
