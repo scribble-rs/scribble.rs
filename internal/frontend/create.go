@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gofrs/uuid/v5"
 	"github.com/scribble-rs/scribble.rs/internal/api"
 	"github.com/scribble-rs/scribble.rs/internal/config"
 	"github.com/scribble-rs/scribble.rs/internal/game"
@@ -171,7 +172,7 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 
 	playerName := api.GetPlayername(request)
 
-	player, lobby, err := game.CreateLobby(playerName, languageKey,
+	player, lobby, err := game.CreateLobby(uuid.Nil, playerName, languageKey,
 		publicLobby, drawingTime, rounds, maxPlayers, customWordsPerTurn,
 		clientsPerIPLimit, customWords)
 	if err != nil {

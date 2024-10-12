@@ -908,13 +908,17 @@ func (lobby *Lobby) selectWord(wordChoiceIndex int) {
 // CreateLobby creates a new lobby including the initial player (owner) and
 // optionally returns an error, if any occurred during creation.
 func CreateLobby(
+	desiredLobbyId uuid.UUID,
 	playerName, chosenLanguage string,
 	publicLobby bool,
 	drawingTime, rounds, maxPlayers, customWordsPerTurn, clientsPerIPLimit int,
 	customWords []string,
 ) (*Player, *Lobby, error) {
+	if desiredLobbyId == uuid.Nil {
+		desiredLobbyId = uuid.Must(uuid.NewV4())
+	}
 	lobby := &Lobby{
-		LobbyID: uuid.Must(uuid.NewV4()).String(),
+		LobbyID: desiredLobbyId.String(),
 		EditableLobbySettings: EditableLobbySettings{
 			Rounds:             rounds,
 			DrawingTime:        drawingTime,
