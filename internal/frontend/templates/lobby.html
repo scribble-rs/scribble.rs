@@ -46,6 +46,11 @@
                             <img src="{{.RootPath}}/resources/fullscreen.svg?cache_bust={{.CacheBust}}"
                                 class="header-button-image" />
                         </button>
+                        <button onclick="toggleSpectate()" class="dialog-button header-button"
+                            alt="{{.Translation.Get "toggle-spectate"}}" title="{{.Translation.Get "toggle-spectate"}}">
+                            <img src="{{.RootPath}}/resources/spectate.svg?cache_bust={{.CacheBust}}"
+                                class="header-button-image" />
+                        </button>
                     </div>
                     <div id="word-container"></div>
                     <div>
@@ -541,7 +546,7 @@
         function showDialog(id, title, contentNode, buttonBar) {
             const newDialog = document.createElement("div");
             newDialog.classList.add("center-dialog");
-            if (id !== null && id !== "") {
+            if (id && id !== "") {
                 newDialog.id = id;
             }
 
@@ -561,6 +566,37 @@
 
             newDialog.style.visibility = "visible";
             centerDialogs.appendChild(newDialog);
+        }
+
+        // Shows an information dialog with a button that closes the dialog and
+        // removes it from the DOM.
+        function showInfoDialog(title, message, buttonText) {
+            const dialogId = "info_dialog";
+            closeDialog(dialogId);
+
+            const closeButton = createDialogButton(buttonText);
+            closeButton.addEventListener("click", event => {
+                closeDialog(dialogId)
+            })
+
+            const messageNode = document.createElement("span");
+            messageNode.innerText = message;
+
+            showDialog(dialogId, title, messageNode, createDialogButtonBar(closeButton));
+        }
+
+        function createDialogButton(text) {
+            const button = document.createElement("button");
+            button.innerText = text;
+            button.classList.add("dialog-button");
+            return button;
+        }
+
+        function createDialogButtonBar(...buttons) {
+            const buttonBar = document.createElement("div");
+            buttonBar.classList.add("button-center-wrapper");
+            buttons.forEach(button => buttonBar.appendChild(button));
+            return buttonBar;
         }
 
         function closeDialog(id) {
@@ -590,16 +626,12 @@
             const controlsTextThree = document.createElement("p");
             controlsTextThree.innerHTML = '{{printf (.Translation.Get "switch-pencil-sizes") "<kbd>1</kbd>" "<kbd>4</kbd>"}}';
 
-            const closeButton = document.createElement("button");
-            closeButton.innerText = '{{.Translation.Get "close"}}';
-            closeButton.classList.add("dialog-button");
+            const closeButton = createDialogButton('{{.Translation.Get "close"}}');
             closeButton.addEventListener("click", event => {
                 closeDialog(helpDialogId)
             })
 
-            const buttonBar = document.createElement("div");
-            buttonBar.classList.add("button-center-wrapper");
-            buttonBar.appendChild(closeButton);
+            const buttonBar = createDialogButtonBar(closeButton);
 
             const dialogContent = document.createElement("div");
             dialogContent.appendChild(controlsLabel)
@@ -748,6 +780,8 @@
         const fillBucket = 2;
 
         let allowDrawing = false;
+        let spectating = false;
+        let spectateRequested = false;
 
         //Initially, we require some values to avoid running into nullpointers
         //or undefined errors. The specific values don't really matter.
@@ -916,6 +950,57 @@
             return `<circle cx="` + circleRadius + `" cy="` + circleRadius + `" r="` + circleRadius + `" style="fill: ` + innerColorCSS + `; stroke: ` + outerColorCSS + `;"/>`;
         }
 
+        function toggleSpectate() {
+            socket.send(JSON.stringify({
+                type: "toggle-spectate",
+            }));
+            if (gameState === "ongoing") {
+            }
+        }
+
+        function setSpectateMode(requestedValue, spectatingValue) {
+            const modeUnchanged = spectatingValue === spectating;
+            const requestUnchanged = requestedValue === spectateRequested;
+            if (modeUnchanged && requestUnchanged) {
+                return;
+            }
+
+            if (spectateRequested && !requestedValue && modeUnchanged) {
+                showInfoDialog(
+                    '{{.Translation.Get "spectation-request-cancelled-title"}}',
+                    '{{.Translation.Get "spectation-request-cancelled-text"}}',
+                    "Okay");
+            } else if (spectateRequested && !requestedValue && modeUnchanged) {
+                showInfoDialog(
+                    '{{.Translation.Get "participation-request-cancelled-title"}}',
+                    '{{.Translation.Get "participation-request-cancelled-text"}}',
+                    "Okay");
+            } else if (!spectateRequested && requestedValue && !spectatingValue) {
+                showInfoDialog(
+                    '{{.Translation.Get "spectation-requested-title"}}',
+                    '{{.Translation.Get "spectation-requested-text"}}',
+                    "Okay");
+            } else if (!spectateRequested && requestedValue && spectatingValue) {
+                showInfoDialog(
+                    '{{.Translation.Get "participation-requested-title"}}',
+                    '{{.Translation.Get "participation-requested-text"}}',
+                    "Okay");
+            } else if (spectatingValue && !spectating) {
+                showInfoDialog(
+                    '{{.Translation.Get "now-spectating-title"}}',
+                    '{{.Translation.Get "now-spectating-text"}}',
+                    "Okay");
+            } else if (!spectatingValue && spectating) {
+                showInfoDialog(
+                    '{{.Translation.Get "now-participating-title"}}',
+                    '{{.Translation.Get "now-participating-text"}}',
+                    "Okay");
+            }
+
+            spectateRequested = requestedValue;
+            spectating = spectatingValue;
+        }
+
         function toggleReadiness() {
             socket.send(JSON.stringify({
                 type: "toggle-readiness",
@@ -975,13 +1060,23 @@
             return false;
         }
 
+        function setAllowDrawing(value) {
+            allowDrawing = value;
+            updateCursor();
+
+            if (allowDrawing) {
+                document.getElementById("toolbox").style.display = "flex";
+            } else {
+                document.getElementById("toolbox").style.display = "none";
+            }
+        }
+
         function chooseWord(index) {
             socket.send(JSON.stringify({
                 type: "choose-word",
                 data: index
             }));
-            allowDrawing = true;
-            updateCursor();
+            setAllowDrawing(true);
             wordDialog.style.visibility = "hidden";
         }
 
@@ -1026,7 +1121,7 @@
                 } else if (parsed.type === "update-players") {
                     applyPlayers(parsed.data);
                 } else if (parsed.type === "name-change") {
-                    const player = getPlayer(parsed.data.playerId);
+                    const player = getCachedPlayer(parsed.data.playerId);
                     if (player !== null) {
                         player.name = parsed.data.playerName;
                     }
@@ -1047,7 +1142,7 @@
                     if (parsed.data === ownID) {
                         appendMessage("correct-guess-message", null, '{{.Translation.Get "correct-guess"}}');
                     } else {
-                        const player = getPlayer(parsed.data)
+                        const player = getCachedPlayer(parsed.data)
                         if (player !== null) {
                             appendMessage("correct-guess-message-other-player", null, '{{.Translation.Get "correct-guess-other-player"}}'.format(player.name));
                         }
@@ -1109,8 +1204,7 @@
                     //We clear this, since there's no word chosen right now.
                     wordContainer.innerHTML = "";
 
-                    allowDrawing = false;
-                    updateCursor();
+                    setAllowDrawing(false);
                 } else if (parsed.type === "your-turn") {
                     playWav('{{.RootPath}}/resources/your-turn.wav?cache_bust={{.CacheBust}}');
                     //This dialog could potentially stay visible from last
@@ -1164,7 +1258,11 @@
             }
         }
 
-        function getPlayer(playerID) {
+        function getCachedPlayer(playerID) {
+            if (!cachedPlayers) {
+                return null;
+            }
+
             for (let i = 0; i < cachedPlayers.length; i++) {
                 let player = cachedPlayers[i];
                 if (player.id === playerID) {
@@ -1197,7 +1295,7 @@
 
             setRoundEndTime(ready.roundEndTime);
             setUsernameLocally(ready.playerName);
-            allowDrawing = ready.allowDrawing;
+            setAllowDrawing(ready.allowDrawing);
             round = ready.round;
             rounds = ready.rounds;
             gameState = ready.gameState;
@@ -1214,7 +1312,6 @@
             if (ready.wordHints && ready.wordHints.length) {
                 applyWordHints(ready.wordHints);
             }
-            updateCursor();
 
             if (ready.gameState === "unstarted") {
                 startDialog.style.visibility = "visible";
@@ -1372,7 +1469,7 @@
                 let readyPlayersRequired = 0;
 
                 players.forEach(player => {
-                    if (!player.connected) {
+                    if (!player.connected || player.state === "spectating") {
                         return;
                     }
 
@@ -1399,10 +1496,30 @@
             }
 
             playerContainer.innerHTML = "";
-            cachedPlayers = players;
             players.forEach(player => {
                 //We don't wanna show the disconnected players.
                 if (!player.connected) {
+                    return;
+                }
+
+                if (player.id === ownID) {
+                    setSpectateMode(player.spectateToggleRequested, player.state === "spectating");
+                }
+
+                const oldPlayer = getCachedPlayer(player.id);
+                if (oldPlayer && oldPlayer.state === "spectating" && player.state !== "spectating") {
+                    appendMessage(
+                        "system-message",
+                        '{{.Translation.Get "system"}}',
+                        `${player.name} is now participating`);
+                } else if (oldPlayer && oldPlayer.state !== "spectating" && player.state === "spectating") {
+                    appendMessage(
+                        "system-message",
+                        '{{.Translation.Get "system"}}',
+                        `${player.name} is now spectating`);
+                }
+
+                if (player.state === "spectating") {
                     return;
                 }
 
@@ -1464,6 +1581,10 @@
 
                 playerContainer.appendChild(playerDiv);
             });
+
+            // We do this at the end, so we can access the old values while
+            // iterating over the new ones
+            cachedPlayers = players;
         }
 
         function createPlayerStateImageNode(path) {

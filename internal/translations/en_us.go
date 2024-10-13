@@ -11,6 +11,21 @@ func initEnglishTranslation() Translation {
 	translation.put("game-not-started-title", "Game hasn't started")
 	translation.put("waiting-for-host-to-start", "Please wait for your lobby host to start the game.")
 
+	translation.put("now-spectating-title", "You are now spectating")
+	translation.put("now-spectating-text", "You can leave the spectator mode by pressing the eye button at the top.")
+	translation.put("now-participating-title", "You are now participating")
+	translation.put("now-participating-text", "You can enter the spectator mode by pressing the eye button at the top.")
+
+	translation.put("spectation-requested-title", "Spectator mode requested")
+	translation.put("spectation-requested-text", "You'll be a spectator after this turn.")
+	translation.put("participation-requested-title", "Participation requested")
+	translation.put("participation-requested-text", "You'll be participating after this turn.")
+
+	translation.put("spectation-request-cancelled-title", "Spectator mode requested cancelled")
+	translation.put("spectation-request-cancelled-text", "Your spectation request has been cancelled, you will keep participating.")
+	translation.put("participation-request-cancelled-title", "Participation requested cancelled")
+	translation.put("participation-request-cancelled-text", "Your partiticpation request has been cancelled, you will keep spectating.")
+
 	translation.put("round", "Round")
 	translation.put("toggle-soundeffects", "Toggle soundeffects")
 	translation.put("change-your-name", "Username")
@@ -18,6 +33,7 @@ func initEnglishTranslation() Translation {
 	translation.put("apply", "Apply")
 	translation.put("save", "Save")
 	translation.put("toggle-fullscreen", "Toggle fullscreen")
+	translation.put("toggle-spectate", "Toggle spectator mode")
 	translation.put("show-help", "Show help")
 	translation.put("votekick-a-player", "Vote to kick a player")
 
