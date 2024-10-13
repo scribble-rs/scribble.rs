@@ -11,6 +11,21 @@ func initGermanTranslation() {
 	translation.put("game-not-started-title", "Warte auf Spielstart")
 	translation.put("waiting-for-host-to-start", "Bitte warte bis der Lobby Besitzer das Spiel startet.")
 
+	translation.put("now-spectating-title", "Du schaust nun zu")
+	translation.put("now-spectating-text", "Du kannst den Zuschauermodus verlassen, indem du das Auge oben betätigst.")
+	translation.put("now-participating-title", "Du nimmst nun teil")
+	translation.put("now-participating-text", "Du kannst den Zuschauermodus betreten, indem du das Auge oben betätigst.")
+
+	translation.put("spectation-requested-title", "Zuschauermodus angefragt")
+	translation.put("spectation-requested-text", "Nach diesem Zug wirst du zum Zuschauer.")
+	translation.put("participation-requested-title", "Teilnahme angefragt")
+	translation.put("participation-requested-text", "Nach diesem Zug wirst du wieder teilnehmen.")
+
+	translation.put("spectation-request-cancelled-title", "Zuschauermodusanfrage zurückgezogen")
+	translation.put("spectation-request-cancelled-text", "Deine Zuschauermodusanfrage wurde zurückgezogen, du nimmst weiterhin teil.")
+	translation.put("participation-request-cancelled-title", "Teilnahmeanfrage zurückgezogen")
+	translation.put("participation-request-cancelled-text", "Deine Teilnahmeanfrage wurde zurückgezogen, du schaust weiterhin zu.")
+
 	translation.put("last-turn", "(Letzter Zug: %s)")
 
 	translation.put("round", "Runde")
@@ -20,6 +35,7 @@ func initGermanTranslation() {
 	translation.put("apply", "Anwenden")
 	translation.put("save", "Speichern")
 	translation.put("toggle-fullscreen", "Vollbild aktivieren / deaktivieren")
+	translation.put("toggle-spectate", "Zuschauermodus aktivieren / deaktivieren")
 	translation.put("show-help", "Hilfe anzeigen")
 	translation.put("votekick-a-player", "Stimme dafür ab, einen Spieler rauszuwerfen")
 

@@ -215,7 +215,7 @@ type Player struct {
 	// player. We want to prevent people from switching in and out of the Player
 	// state. While this will allow people to skip being the drawer, it will
 	// also cause them to lose points for that round.
-	SpectateToggleRequested bool `json:"spectate_requested"`
+	SpectateToggleRequested bool `json:"spectateToggleRequested"`
 	// Rank is the current ranking of the player in his Lobby
 	// Score is the points that the player got in the current Lobby.
 	Score     int `json:"score"`

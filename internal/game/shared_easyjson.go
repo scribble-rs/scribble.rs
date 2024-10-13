@@ -538,7 +538,7 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame4(in *jlexer
 			out.Name = string(in.String())
 		case "state":
 			out.State = PlayerState(in.String())
-		case "spectate_requested":
+		case "spectateToggleRequested":
 			out.SpectateToggleRequested = bool(in.Bool())
 		case "score":
 			out.Score = int(in.Int())
@@ -577,7 +577,7 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame4(out *jwrit
 		out.String(string(in.State))
 	}
 	{
-		const prefix string = ",\"spectate_requested\":"
+		const prefix string = ",\"spectateToggleRequested\":"
 		out.RawString(prefix)
 		out.Bool(bool(in.SpectateToggleRequested))
 	}

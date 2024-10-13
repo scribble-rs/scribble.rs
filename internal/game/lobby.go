@@ -89,9 +89,18 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 	if eventType == EventTypeToggleSpectate {
 		player.SpectateToggleRequested = !player.SpectateToggleRequested
 		if player.SpectateToggleRequested && lobby.State != Ongoing {
-			player.State = Spectating
-			lobby.Broadcast(&Event{Type: EventTypeUpdatePlayers, Data: lobby.players})
+			if player.State == Spectating {
+				player.State = Standby
+			} else {
+				player.State = Spectating
+			}
+
+			// Since we apply the state instantly, we reset it instantly as
+			// well.
+			player.SpectateToggleRequested = false
 		}
+
+		lobby.Broadcast(&Event{Type: EventTypeUpdatePlayers, Data: lobby.players})
 	} else if eventType == EventTypeMessage {
 		var message StringDataEvent
 		if err := easyjson.Unmarshal(payload, &message); err != nil {
@@ -175,9 +184,9 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 			lobby.selectWord(chosenIndex)
 
 			wordHintData := &Event{Type: EventTypeUpdateWordHint, Data: lobby.wordHints}
-			lobby.broadcastConditional(wordHintData, IsGuessing)
+			lobby.broadcastConditional(wordHintData, IsAllowedToSeeHints)
 			wordHintDataRevealed := &Event{Type: EventTypeUpdateWordHint, Data: lobby.wordHintsShown}
-			lobby.broadcastConditional(wordHintDataRevealed, IsAllowedToSeeHints)
+			lobby.broadcastConditional(wordHintDataRevealed, IsAllowedToSeeRevealedHints)
 		}
 	} else if eventType == EventTypeKickVote {
 		var kickEvent StringDataEvent
@@ -267,7 +276,7 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 	if sender.State != Guessing {
 		lobby.broadcastConditional(
 			newMessageEvent(EventTypeNonGuessingPlayerMessage, trimmedMessage, sender),
-			IsAllowedToSeeHints,
+			IsAllowedToSeeRevealedHints,
 		)
 		return
 	}
@@ -362,12 +371,12 @@ func ExcludePlayer(toExclude *Player) func(*Player) bool {
 	}
 }
 
-func IsAllowedToSeeHints(player *Player) bool {
-	return player.State != Guessing && player.State != Spectating
+func IsAllowedToSeeRevealedHints(player *Player) bool {
+	return player.State == Standby || player.State == Drawing
 }
 
-func IsGuessing(player *Player) bool {
-	return player.State == Guessing
+func IsAllowedToSeeHints(player *Player) bool {
+	return player.State == Guessing || player.State == Spectating
 }
 
 func newMessageEvent(messageType, message string, sender *Player) *Event {
@@ -663,15 +672,6 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 	}
 
 	for _, otherPlayer := range lobby.players {
-		if otherPlayer.SpectateToggleRequested {
-			otherPlayer.SpectateToggleRequested = false
-			if otherPlayer.State == Spectating {
-				otherPlayer.State = Guessing
-			} else {
-				otherPlayer.State = Spectating
-			}
-		}
-
 		// If the round ends and people are still guessing, that means the
 		// "LastScore" value for the next turn has to be "no score earned".
 		// We also reset spectating players, to prevent any score fuckups.
@@ -679,18 +679,32 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 			otherPlayer.LastScore = 0
 		}
 
-		if otherPlayer.State != Spectating {
-			// Initially all players are in guessing state, as the drawer gets
-			// defined further at the bottom.
-			otherPlayer.State = Guessing
+		if otherPlayer.SpectateToggleRequested {
+			otherPlayer.SpectateToggleRequested = false
+			if otherPlayer.State != Spectating {
+				otherPlayer.State = Spectating
+			} else {
+				otherPlayer.State = Guessing
+			}
+			continue
 		}
+
+		if otherPlayer.State == Spectating {
+			continue
+		}
+
+		// Initially all players are in guessing state, as the drawer gets
+		// defined further at the bottom.
+		otherPlayer.State = Guessing
 	}
 
 	recalculateRanks(lobby)
 
 	if roundOver {
-		// Game over
-		if lobby.Round == lobby.Rounds {
+		// Game over, meaning all rounds have been played out. Alternatively
+		// We can reach this state if all players are spectating and or are not
+		// connected anymore.
+		if lobby.Round == lobby.Rounds || newDrawer == nil {
 			lobby.State = GameOver
 
 			for _, player := range lobby.players {
@@ -744,6 +758,15 @@ func advanceLobby(lobby *Lobby) {
 	advanceLobbyPredefineDrawer(lobby, roundOver, newDrawer)
 }
 
+func (player *Player) desiresToDraw() bool {
+	// If a player is in standby, it would break the gameloop. However, if the
+	// player desired to change anyway, then it is fine.
+	if player.State == Spectating {
+		return player.SpectateToggleRequested
+	}
+	return !player.SpectateToggleRequested
+}
+
 // determineNextDrawer returns the next person that's supposed to be drawing, but
 // doesn't tell the lobby yet. The boolean signals whether the current round
 // is over.
@@ -753,7 +776,7 @@ func determineNextDrawer(lobby *Lobby) (*Player, bool) {
 			// If we have someone that's drawing, take the next one
 			for i := index + 1; i < len(lobby.players); i++ {
 				nextPlayer := lobby.players[i]
-				if nextPlayer.State == Spectating || !nextPlayer.Connected {
+				if !nextPlayer.desiresToDraw() || !nextPlayer.Connected {
 					continue
 				}
 
@@ -766,26 +789,16 @@ func determineNextDrawer(lobby *Lobby) (*Player, bool) {
 		}
 	}
 
-	// We prefer the first connected player.
+	// We prefer the first connected player and non-spectating.
 	for _, player := range lobby.players {
-		if player.State == Spectating || !player.Connected {
+		if !player.desiresToDraw() || !player.Connected {
 			continue
 		}
 		return player, true
 	}
 
-	// Alternatively we prefer the first non-spectating player
-	for _, player := range lobby.players {
-		if player.State == Spectating {
-			continue
-		}
-		return player, true
-	}
-
-	// If no player is connected, we simply chose the first player.
-	// Safe, since the lobby can't be empty, as leaving doesn't remove players
-	// from the array, but only sets them to a disconnected state.
-	return lobby.players[0], true
+	// If no player is available, we will simply end the game.
+	return nil, true
 }
 
 // startTurnTimeTicker executes a loop that listens to the lobbies
@@ -846,7 +859,7 @@ func (lobby *Lobby) tickLogic(expectedTicker *time.Ticker) bool {
 						Type: EventTypeUpdateWordHint,
 						Data: lobby.wordHints,
 					}
-					lobby.broadcastConditional(wordHintData, IsGuessing)
+					lobby.broadcastConditional(wordHintData, IsAllowedToSeeHints)
 					break
 				}
 			}
