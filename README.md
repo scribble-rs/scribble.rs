@@ -97,7 +97,7 @@ In order to download and build, open a terminal and execute:
 ```shell
 git clone https://github.com/scribble-rs/scribble.rs.git
 cd scribble.rs
-go build ./cmd/scribblers .
+go build ./cmd/scribblers
 ```
 
 This will produce a portable binary called `scribblers` or `scribblers.exe` if
