@@ -47,17 +47,44 @@ For more up-to-date configuration, read the
 
 ## Docker
 
-Alternatively there's a docker container:
+It is recommended that you run the server via Docker, as this will rule out
+almost all compatibility issues.
+
+Starting from v0.8.5, docker images are only built on tagged pushes. Each git
+tag becomes a docker tag, however `latest` will always point to the latest
+version released via GitHub.
+
+### Linux Docker
+
+Download the image:
 
 ```shell
 docker pull biosmarcel/scribble.rs:latest
 ```
 
-Starting from v0.8.5, docker images are only built on tagged pushes. Each git
-tag becomes a docker tag, however `latest` will always point to the latest tag.
+### Windows Docker
 
-There's also `biosmarcel/scribble.rs:windows-latest` in case you are interested
-in running a native Windows container.
+Only use this one if you want to run a native Windows container. Otherwise use
+the Linux variant, as that's the default mode on Windows:
+
+```shell
+docker pull biosmarcel/scribble.rs:windows-latest
+```
+
+### Running the Docker container
+
+Run the following, replacing `<port>` with the port you want the container to be
+reachable from outside:
+
+```shell
+docker run --pull always --env PORT=<port> -p <port>:8080 biosmarcel/scribble.rs:latest
+```
+
+For example:
+
+```shell
+docker run --pull always --env PORT=80 -p 80:8080 biosmarcel/scribble.rs:latest
+```
 
 ## Building / Running
 
@@ -84,13 +111,8 @@ you can find the latest stable release.
 Alternatively each commit uploads artifacts which will be available for a
 certain time.
 
-### Changing default port
-
-The default port is `8080`. To override it, run:
-
-```shell
-docker run --pull always --env PORT=<port> -p <port>:<port> biosmarcel/scribble.rs:latest
-```
+**Note that these binaries might not necessarily be compatible with your
+system. In this case, please use Docker or compile them yourself.**
 
 ## nginx 
 
