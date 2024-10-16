@@ -32,66 +32,66 @@
                         </div>
                         {{end}}
                         <form id="lobby-create" action="{{.RootPath}}/ssrCreateLobby" method="POST">
-                            <span class="lobby-create-label">
+                            <label class="lobby-create-label" for="language">
                                 {{.Translation.Get "word-language"}}
-                            </span>
-                            <select class="input-item" name="language" placeholder="Choose your language">
+                            </label>
+                            <select class="input-item" name="language" id="language" placeholder="Choose your language">
                                 {{$language := .Language}}
                                 {{range $k, $v := .Languages}}
                                 <option value="{{$k}}" {{if eq $k $language}}selected="selected" {{end}}>{{$v}}</option>
                                 {{end}}
                             </select>
-                            <span class="lobby-create-label">
+                            <label class="lobby-create-label" for="drawing_time">
                                 {{.Translation.Get "drawing-time-setting"}}
-                            </span>
+                            </label>
                             <div class="number-input">
                                 <button class="number-decrement" type="button">-</button>
-                                <input size="4" type="number" name="drawing_time" min="{{.MinDrawingTime}}"
-                                    max="{{.MaxDrawingTime}}" value="{{.DrawingTime}}">
+                                <input size="4" type="number" name="drawing_time" id="drawing_time"
+                                    min="{{.MinDrawingTime}}" max="{{.MaxDrawingTime}}" value="{{.DrawingTime}}">
                                 <button class="number-increment" type="button">+</button>
                             </div>
-                            <span class="lobby-create-label">
+                            <label class="lobby-create-label" for="rounds">
                                 {{.Translation.Get "rounds-setting"}}
-                            </span>
+                            </label>
                             <div class="number-input">
                                 <button class="number-decrement" type="button">-</button>
-                                <input size="4" type="number" name="rounds" min="{{.MinRounds}}" max="{{.MaxRounds}}"
-                                    value="{{.Rounds}}">
+                                <input size="4" type="number" name="rounds" id="rounds" min="{{.MinRounds}}"
+                                    max="{{.MaxRounds}}" value="{{.Rounds}}">
                                 <button class="number-increment" type="button">+</button>
                             </div>
-                            <span class="lobby-create-label">
+                            <label class="lobby-create-label" for="max_players">
                                 {{.Translation.Get "max-players-setting"}}
-                            </span>
+                            </label>
                             <div class="number-input">
                                 <button class="number-decrement" type="button">-</button>
-                                <input size="4" type="number" name="max_players" min="{{.MinMaxPlayers}}"
-                                    max="{{.MaxMaxPlayers}}" value="{{.MaxPlayers}}">
+                                <input size="4" type="number" name="max_players" id="max_players"
+                                    min="{{.MinMaxPlayers}}" max="{{.MaxMaxPlayers}}" value="{{.MaxPlayers}}">
                                 <button class="number-increment" type="button">+</button>
                             </div>
-                            <span class="lobby-create-label">
+                            <label class="lobby-create-label" for="clients_per_ip_limit">
                                 {{.Translation.Get "players-per-ip-limit-setting"}}
-                            </span>
+                            </label>
                             <div class="number-input">
                                 <button class="number-decrement" type="button">-</button>
-                                <input size="4" type="number" name="clients_per_ip_limit"
+                                <input size="4" type="number" name="clients_per_ip_limit" id="clients_per_ip_limit"
                                     min="{{.MinClientsPerIPLimit}}" max="{{.MaxClientsPerIPLimit}}"
                                     value="{{.ClientsPerIPLimit}}">
                                 <button class="number-increment" type="button">+</button>
                             </div>
-                            <span class="lobby-create-label">
+                            <label class="lobby-create-label" for="custom_words_per_turn">
                                 {{.Translation.Get "custom-words-per-turn-setting"}}
-                            </span>
+                            </label>
                             <div class="number-input">
                                 <button class="number-decrement" type="button">-</button>
-                                <input size="4" type="number" name="custom_words_per_turn"
+                                <input size="4" type="number" name="custom_words_per_turn" id="custom_words_per_turn"
                                     min="{{.MinCustomWordsPerTurn}}" max="{{.MaxCustomWordsPerTurn}}"
                                     value="{{.CustomWordsPerTurn}}">
                                 <button class="number-increment" type="button">+</button>
                             </div>
-                            <span class="lobby-create-label">
+                            <label class="lobby-create-label" for="custom_words">
                                 {{.Translation.Get "custom-words"}}
-                            </span>
-                            <textarea class="input-item" name="custom_words"
+                            </label>
+                            <textarea class="input-item" name="custom_words" id="custom_words"
                                 placeholder="Comma, separated, word, list, here">{{.CustomWords}}</textarea>
                             <input type="checkbox" id="public-check-box" name="public" value="true"
                                 style="display: none" checked>
