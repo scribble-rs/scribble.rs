@@ -1,48 +1,11 @@
-html, body {
-    height: 100vh;
-}
-
-body {
-    font-family: 'Montserrat';
-    margin: 0;
-}
-
-body, body::backdrop, body:fullscreen {
-    background-color: #badeb8;
-}
-
 .content-wrapper {
     display: flex;
     flex-direction: column;
     height: 100%;
 }
 
-footer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0.1rem;
-    background-color: lightslategray;
-    color: white;
-}
-
-.footer-item + .footer-item {
-    margin-left: 1rem;
-}
-
-a {
-    text-decoration: none;
-}
-
-a:link, a:visited {
-    color: inherit;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-h1, h2 {
+h1,
+h2 {
     margin: 0;
     text-align: center;
     color: rgb(248, 148, 164);
@@ -84,29 +47,14 @@ ul {
     row-gap: 10px;
 }
 
-.input-container > b {
+.input-container>b {
     align-self: baseline;
 }
 
-.input-container > input[type="checkbox"] {
+.input-container>input[type="checkbox"] {
     /* By default checkboxes seem to have a bigger margin on the left. */
     margin-left: 0;
     margin-right: 0;
-}
-
-.percent-slider {
-    display: flex !important /* important required due to media query override */;
-}
-
-.percent-slider > input {
-    justify-self: center;
-    width: 100%;
-    margin-left: 0.5em;
-    margin-right: 0.5em;
-}
-
-.percent-slider > span {
-    align-self: center;
 }
 
 kbd {
@@ -123,12 +71,12 @@ kbd {
     white-space: nowrap;
 }
 
-@media only screen
-    and (min-device-width: 375px) and (max-device-width: 812px),
-    (orientation: portrait) or (max-aspect-ratio: 4/3) {
+@media only screen and (min-device-width: 375px) and (max-device-width: 812px),
+(orientation: portrait) or (max-aspect-ratio: 4/3) {
     h1 {
         font-size: 4rem;
     }
+
     h2 {
         font-size: 2rem;
     }
@@ -140,10 +88,12 @@ kbd {
         width: 100%;
         row-gap: 5px;
     }
-    .input-container > input[type="checkbox"] {
+
+    .input-container>input[type="checkbox"] {
         width: initial;
     }
-    .input-container > * {
+
+    .input-container>* {
         width: 100%;
         /* These two prevent blow-out of the input elements */
         display: block;

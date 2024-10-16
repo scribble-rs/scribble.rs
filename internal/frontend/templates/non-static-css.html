@@ -2,32 +2,8 @@
 {{/* The reason being that we need to be able to define the RootPath here. */}}
 {{define "non-static-css-decl"}}
 <style>
-    @font-face {
-        font-family: 'Montserrat';
-        font-weight: normal;
-        src: local('Monserrat'),
-        url({{.RootPath}}/resources/Montserrat-Regular.otf?cache_bust={{.CacheBust}}) format("opentype");
-    }
-
-    @font-face {
-        font-family: 'Montserrat';
-        font-weight: bold;
-        src: local('Monserrat Bold'),
-        url({{.RootPath}}/resources/Montserrat-Bold.otf?cache_bust={{.CacheBust}}) format("opentype");
-    }
-
-    .content-wrapper::before {
-        content: ' ';
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100vw;
-        height: 100vh;
-        opacity: 0.20;
-        background-image: url('{{.RootPath}}/resources/background.png?cache_bust={{.CacheBust}}');
-        background-size: 400px 400px;
-        background-repeat: repeat;
-        z-index: -1;
+    :root {
+        --scribble-background: url('{{.RootPath}}/resources/background.png?cache_bust={{.CacheBust}}');
     }
 </style>
 {{end}}

@@ -1,0 +1,70 @@
+:root {
+    --pane-background: #eee5e9;
+    --component-base-color: #4485ff;
+    --component-hover-background: #5499f3;
+    --component-hover-lighter-background: #96c4ff;
+    --component-focus-background: #509cff;
+    --component-active-background: #2966b6;
+    --outline--color: #1f6bf8;
+    --component-border-radius: 0.5rem;
+
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+
+    color: #222;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+}
+
+html,
+body {
+    height: 100vh;
+}
+
+body,
+body::backdrop,
+body:fullscreen {
+    margin: 0;
+    background: linear-gradient(90deg, rgba(46, 46, 175, 1) 0%, rgba(37, 79, 191, 1) 42%, rgba(0, 170, 255, 1) 100%);
+}
+
+body::before {
+    content: ' ';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    opacity: 0.50;
+    background: var(--scribble-background) repeat;
+    background-size: 400px 400px;
+    background-repeat: repeat;
+    z-index: -1;
+}
+
+footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.1rem;
+    background-color: lightslategray;
+    color: white;
+}
+
+.footer-item+.footer-item {
+    margin-left: 1rem;
+}
+
+a:link,
+a:visited {
+    color: inherit;
+}
+
+a:hover {
+    text-decoration: underline;
+}

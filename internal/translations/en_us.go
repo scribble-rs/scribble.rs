@@ -49,7 +49,7 @@ func initEnglishTranslation() Translation {
 	translation.put("change-lobby-settings-title", "Lobby settings")
 	translation.put("lobby-settings-changed", "Lobby settings changed")
 	translation.put("advanced-settings", "Advanced settings")
-	translation.put("word-language", "Word-Language")
+	translation.put("word-language", "Language")
 	translation.put("drawing-time-setting", "Drawing Time")
 	translation.put("rounds-setting", "Rounds")
 	translation.put("max-players-setting", "Maximum Players")
@@ -62,6 +62,8 @@ func initEnglishTranslation() Translation {
 	translation.put("input-contains-invalid-data", "Your input contains invalid data:")
 	translation.put("please-fix-invalid-input", "Correct the invalid input and try again.")
 	translation.put("create-lobby", "Create Lobby")
+	translation.put("create-public-lobby", "Create Public Lobby")
+	translation.put("create-private-lobby", "Create Private Lobby")
 
 	translation.put("players", "Players")
 	translation.put("refresh", "Refresh")

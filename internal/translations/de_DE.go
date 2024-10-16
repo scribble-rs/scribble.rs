@@ -43,7 +43,7 @@ func initGermanTranslation() {
 	translation.put("change-lobby-settings-title", "Lobby-Einstellungen")
 	translation.put("lobby-settings-changed", "Lobby-Einstelungen verändert")
 	translation.put("advanced-settings", "Erweiterte Einstellungen")
-	translation.put("word-language", "Sprache der Wörter")
+	translation.put("word-language", "Sprache")
 	translation.put("drawing-time-setting", "Zeichenzeit")
 	translation.put("rounds-setting", "Runden")
 	translation.put("max-players-setting", "Maximale Spieler")
@@ -56,6 +56,8 @@ func initGermanTranslation() {
 	translation.put("input-contains-invalid-data", "Deine Eingaben enthalten invalide Daten:")
 	translation.put("please-fix-invalid-input", "Bitte korrigiere deine Eingaben und versuche es erneut.")
 	translation.put("create-lobby", "Lobby erstellen")
+	translation.put("create-public-lobby", "Public Lobby erstellen")
+	translation.put("create-private-lobby", "Private Lobby erstellen")
 
 	translation.put("players", "Spieler")
 	translation.put("refresh", "Aktualisieren")

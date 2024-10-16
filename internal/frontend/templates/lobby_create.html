@@ -7,240 +7,335 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {{template "non-static-css-decl" .}}
-    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/base.css?cache_bust={{.CacheBust}}" />
+    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/root.css?cache_bust={{.CacheBust}}" />
     <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/lobby_create.css?cache_bust={{.CacheBust}}" />
     {{template "favicon-decl" .}}
 </head>
 
 <body>
-    <div class="content-wrapper">
-        <noscript><span class="noscript">{{.Translation.Get "requires-js"}}</span></noscript>
-
-        <img id="logo" src="{{.RootPath}}/resources/logo.svg?cache_bust={{.CacheBust}}">
-
-        <div class="tab-header">
-            <label for="create-lobby-tab-button">
-                <input id="create-lobby-tab-button" class="custom-check-or-radio tab-button" type="radio"
-                    onclick="openTab('create-lobby')" name="tab" checked>
-                <div class="tab-label">{{.Translation.Get "create-lobby"}}</div>
-            </label>
-            <label for="join-lobby-tab-button">
-                <input id="join-lobby-tab-button" class="custom-check-or-radio tab-button" type="radio"
-                    onclick="openTab('join-lobby')" name="tab">
-                <div class="tab-label">{{.Translation.Get "join-lobby"}}</div>
-            </label>
-        </div>
-
-        <div id="create-lobby" class="tab-content">
-            <div class="center-container">
-                <div class="content-container">
-                    {{if .Errors}}
-                    <div class="error-list">
-                        {{.Translation.Get "input-contains-invalid-data"}}
-                        <ul>
+    <div id="app">
+        <div class="home">
+            <img id="logo" src="{{.RootPath}}/resources/logo.svg?cache_bust={{.CacheBust}}" alt="Scribble.rs logo">
+            <div id="home-choices">
+                <div class="home-choice">
+                    <div class="home-choice-inner">
+                        <div class="home-choice-header">
+                            <div class="home-choice-title">
+                                {{.Translation.Get "create-lobby"}}
+                            </div>
+                        </div>
+                        {{if .Errors}}
+                        <div class="lobby-create-errors">
                             {{range .Errors}}
-                            <li>{{.}}</li>
+                            <div class="error">{{.}}</div>
                             {{end}}
-                        </ul>
-                        <br />
-                        {{.Translation.Get "please-fix-invalid-input"}}
+                        </div>
+                        {{end}}
+                        <form id="lobby-create" action="{{.RootPath}}/ssrCreateLobby" method="POST">
+                            <span class="lobby-create-label">
+                                {{.Translation.Get "word-language"}}
+                            </span>
+                            <select class="input-item" name="language" placeholder="Choose your language">
+                                {{$language := .Language}}
+                                {{range $k, $v := .Languages}}
+                                <option value="{{$k}}" {{if eq $k $language}}selected="selected" {{end}}>{{$v}}</option>
+                                {{end}}
+                            </select>
+                            <span class="lobby-create-label">
+                                {{.Translation.Get "drawing-time-setting"}}
+                            </span>
+                            <div class="number-input">
+                                <button class="number-decrement" type="button">-</button>
+                                <input size="4" type="number" name="drawing_time" min="{{.MinDrawingTime}}"
+                                    max="{{.MaxDrawingTime}}" value="{{.DrawingTime}}">
+                                <button class="number-increment" type="button">+</button>
+                            </div>
+                            <span class="lobby-create-label">
+                                {{.Translation.Get "rounds-setting"}}
+                            </span>
+                            <div class="number-input">
+                                <button class="number-decrement" type="button">-</button>
+                                <input size="4" type="number" name="rounds" min="{{.MinRounds}}" max="{{.MaxRounds}}"
+                                    value="{{.Rounds}}">
+                                <button class="number-increment" type="button">+</button>
+                            </div>
+                            <span class="lobby-create-label">
+                                {{.Translation.Get "max-players-setting"}}
+                            </span>
+                            <div class="number-input">
+                                <button class="number-decrement" type="button">-</button>
+                                <input size="4" type="number" name="max_players" min="{{.MinMaxPlayers}}"
+                                    max="{{.MaxMaxPlayers}}" value="{{.MaxPlayers}}">
+                                <button class="number-increment" type="button">+</button>
+                            </div>
+                            <span class="lobby-create-label">
+                                {{.Translation.Get "players-per-ip-limit-setting"}}
+                            </span>
+                            <div class="number-input">
+                                <button class="number-decrement" type="button">-</button>
+                                <input size="4" type="number" name="clients_per_ip_limit"
+                                    min="{{.MinClientsPerIPLimit}}" max="{{.MaxClientsPerIPLimit}}"
+                                    value="{{.ClientsPerIPLimit}}">
+                                <button class="number-increment" type="button">+</button>
+                            </div>
+                            <span class="lobby-create-label">
+                                {{.Translation.Get "custom-words-per-turn-setting"}}
+                            </span>
+                            <div class="number-input">
+                                <button class="number-decrement" type="button">-</button>
+                                <input size="4" type="number" name="custom_words_per_turn"
+                                    min="{{.MinCustomWordsPerTurn}}" max="{{.MaxCustomWordsPerTurn}}"
+                                    value="{{.CustomWordsPerTurn}}">
+                                <button class="number-increment" type="button">+</button>
+                            </div>
+                            <span class="lobby-create-label">
+                                {{.Translation.Get "custom-words"}}
+                            </span>
+                            <textarea class="input-item" name="custom_words"
+                                placeholder="Comma, separated, word, list, here">{{.CustomWords}}</textarea>
+                            <input type="checkbox" id="public-check-box" name="public" value="true"
+                                style="display: none" checked>
+                        </form>
+                        <div class="create-buttons">
+                            <button id="create-public" form="lobby-create" type="submit" class="create-button">
+                                {{.Translation.Get "create-public-lobby"}}
+                            </button>
+                            <button form="lobby-create" type="submit" class="create-button">
+                                {{.Translation.Get "create-private-lobby"}}
+                            </button>
+                        </div>
                     </div>
-
-                    {{end}}
-                    <form id="lobby-create" class="input-container" action="{{.RootPath}}/ssrCreateLobby" method="POST">
-                        <b>{{.Translation.Get "word-language"}}</b>
-                        <select class="input-item" name="language" placeholder="Choose your language">
-                            {{$language := .Language}}
-                            {{range $k, $v := .Languages}}
-                            <option value="{{$k}}" {{if eq $k $language}}selected="selected" {{end}}>{{$v}}</option>
-                            {{end}}
-                        </select>
-                        <b>{{.Translation.Get "drawing-time-setting"}}</b>
-                        <input class="input-item" type="number" name="drawing_time" min="{{.MinDrawingTime}}"
-                            max="{{.MaxDrawingTime}}" value="{{.DrawingTime}}" />
-                        <b>{{.Translation.Get "rounds-setting"}}</b>
-                        <input class="input-item" type="number" name="rounds" min="{{.MinRounds}}" max="{{.MaxRounds}}"
-                            value="{{.Rounds}}" />
-                        <b>{{.Translation.Get "max-players-setting"}}</b>
-                        <input class="input-item" type="number" name="max_players" min="{{.MinMaxPlayers}}"
-                            max="{{.MaxMaxPlayers}}" value="{{.MaxPlayers}}" />
-                        <b>{{.Translation.Get "public-lobby-setting"}}</b>
-                        <input class="input-item" type="checkbox" name="public" value="true"
-                            {{if eq .Public "true"}}checked{{end}} />
-                        <b>{{.Translation.Get "players-per-ip-limit-setting"}}</b>
-                        <input class="input-item" type="number" name="clients_per_ip_limit"
-                            min="{{.MinClientsPerIPLimit}}" max="{{.MaxClientsPerIPLimit}}"
-                            value="{{.ClientsPerIPLimit}}" />
-                        <b>{{.Translation.Get "custom-words-per-turn-setting"}}</b>
-                        <input class="input-item" style="align-self: baseline" type="number"
-                            name="custom_words_per_turn" min="{{.MinCustomWordsPerTurn}}"
-                            max="{{.MaxCustomWordsPerTurn}}" value="{{.CustomWordsPerTurn}}" />
-                        <b>{{.Translation.Get "custom-words"}}</b>
-                        <textarea class="input-item" name="custom_words"
-                            placeholder="{{.Translation.Get "custom-words-info"}}">{{.CustomWords}}</textarea>
-                        <button type="submit" class="create-button" form="lobby-create">
-                            {{.Translation.Get "create-lobby"}}
-                        </button>
-                    </form>
                 </div>
-            </div>
-        </div>
-
-        <div id="join-lobby" class="tab-content">
-            <div class="join-lobby-data">
-                <div class="table-wrapper-wrapper">
-                    <button id="refresh-button" onclick="loadLobbyTable()">{{.Translation.Get "refresh"}}</button>
-                    <div class="table-wrapper">
-                        <table id="lobby-table">
-                            <thead>
-                                <tr>
-                                    <th>{{.Translation.Get "word-language"}}</th>
-                                    <th>{{.Translation.Get "rounds-setting"}}</th>
-                                    <th>{{.Translation.Get "players"}}</th>
-                                    <th>{{.Translation.Get "drawing-time-setting"}}</th>
-                                    <th>{{.Translation.Get "custom-words"}}</th>
-                                </tr>
-                            </thead>
-                            <tbody id="lobby-table-body">
-                            </tbody>
-                        </table>
+                <div class="home-choice">
+                    <div class="home-choice-inner">
+                        <div class="home-choice-header">
+                            <div class="home-choice-title">
+                                {{.Translation.Get "join-lobby"}}
+                            </div>
+                            <button onclick="refresh_lobby_list()">
+                                {{.Translation.Get "refresh"}}
+                            </button>
+                        </div>
+                        <div id="lobby-list-placeholder-text" class="lobby-list-placeholder"></div>
+                        <div id="lobby-list-placeholder-loading" class="lobby-list-placeholder">
+                            <svg class="reload-spinner" fill="#000000" height="48" viewBox="0 0 24 24" width="48"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                            </svg>
+                        </div>
+                        <div id="lobby-list"></div>
                     </div>
-                </div>
-                <div class="lobby-details">
-                    <span class="lobby-detail">{{.Translation.Get "word-language"}}:</span>
-                    <span id="wordpack-detail"></span>
-                    <span class="lobby-detail">{{.Translation.Get "rounds-setting"}}:</span>
-                    <span id="rounds-detail"></span>
-                    <span class="lobby-detail">{{.Translation.Get "players"}}:</span>
-                    <span id="players-detail"></span>
-                    <span class="lobby-detail">{{.Translation.Get "drawing-time-setting"}}:</span>
-                    <span id="drawing-time-detail"></span>
-                    <span class="lobby-detail">{{.Translation.Get "custom-words"}}:</span>
-                    <span id="custom-words-detail"></span>
-                    <span class="lobby-detail">{{.Translation.Get "players-per-ip-limit-setting"}}:</span>
-                    <span id="max-clients-ip-detail"></span>
-                    <button id="join-button" onclick="onJoin()" disabled>{{.Translation.Get "join-lobby"}}</button>
                 </div>
             </div>
         </div>
 
         {{template "footer" .}}
-    </div>
 
-    <script type="text/javascript">
-        let lobbyTableLoaded = false;
-        let lobbyTableBody = document.getElementById("lobby-table-body");
-        let selectedLobby;
-
-        let createLobbyTabButton = document.getElementById("create-lobby-tab-button");
-        let joinLobbyTabButton = document.getElementById("join-lobby-tab-button");
-
-        let joinButton = document.getElementById("join-button");
-
-        let wordpackDetail = document.getElementById("wordpack-detail");
-        let roundsDetail = document.getElementById("rounds-detail");
-        let playersDetail = document.getElementById("players-detail");
-        let drawingTimeDetail = document.getElementById("drawing-time-detail");
-        let customWordsDetail = document.getElementById("custom-words-detail");
-        let maxClientsIPDetail = document.getElementById("max-clients-ip-detail");
-
-        function onJoin() {
-            window.open("{{.RootPath}}/ssrEnterLobby/" + selectedLobby, "_self");
-        }
-
-        function loadLobbyTable() {
-            lobbyTableLoaded = true;
-
-            if (lobbyTableBody.childNodes.length > 0) {
-                for (let i = lobbyTableBody.childNodes.length - 1; i >= 0; i--) {
-                    lobbyTableBody.removeChild(lobbyTableBody.childNodes.item(i));
-                }
-            }
-
-            fetch("{{.RootPath}}/v1/lobby")
-                .then((response) => {
-                    return response.json();
+        <script type="text/javascript">
+            Array
+                .from(document.getElementsByClassName("number-input"))
+                .forEach(number_input => {
+                    const input = number_input.children.item(1);
+                    const decrement_button = number_input.children.item(0);
+                    decrement_button.addEventListener("click", function () {
+                        input.stepDown();
+                    })
+                    const increment_button = number_input.children.item(2);
+                    increment_button.addEventListener("click", function () {
+                        input.stepUp();
+                    })
                 })
-                .then((data) => {
-                    //Initially remove all data and disable join button, as we don't know
-                    //whether we'll have any data after fetching.
-                    showLobbyDetails(null);
 
-                    data.forEach(lobby => {
-                        const wordpackCell = document.createElement("td");
-                        wordpackCell.innerText = lobby.wordpack;
-                        const roundsCell = document.createElement("td");
-                        roundsCell.innerText = lobby.round + "/" + lobby.rounds;
-                        const playersCell = document.createElement("td");
-                        playersCell.innerText = lobby.playerCount + "/" + lobby.maxPlayers;
-                        const drawingTimeCell = document.createElement("td");
-                        drawingTimeCell.innerText = lobby.drawingTime.toString();
-                        const customWordsCell = document.createElement("td");
-                        customWordsCell.innerText = lobby.customWords ? '{{.Translation.Get "yes"}}' : '{{.Translation.Get "no"}}';
+            // We'll keep using the ssr endpoint for now. With this listener, we
+            // can fake in the form data for "public" depending on which button
+            // we submitted via. This is a dirty hack, but works for now.
+            document
+                .getElementById("lobby-create")
+                .addEventListener("submit", (event) => {
+                    const check_box = document.getElementById("public-check-box");
+                    if (event.submitter.id === "create-public") {
+                        check_box.value = "true";
+                        check_box.setAttribute("checked", "");
+                    } else {
+                        check_box.value = "false";
+                        check_box.removeAttribute("checked");
+                    }
 
-                        const newRow = document.createElement("tr");
-                        newRow.appendChild(wordpackCell);
-                        newRow.appendChild(roundsCell);
-                        newRow.appendChild(playersCell);
-                        newRow.appendChild(drawingTimeCell);
-                        newRow.appendChild(customWordsCell);
-
-                        lobbyTableBody.appendChild(newRow);
-
-                        let clickHandler = function () {
-                            lobbyTableBody.childNodes.forEach(row => {
-                                row.setAttribute("selected", "false");
-                            });
-                            newRow.setAttribute("selected", "true");
-                            selectedLobby = lobby.lobbyId;
-                            showLobbyDetails(lobby);
-                        };
-                        newRow.addEventListener("click", clickHandler, false);
-                    });
+                    return true;
                 });
-        }
 
-        function showLobbyDetails(lobby) {
-            if (lobby === null) {
-                wordpackDetail.innerText = "";
-                roundsDetail.innerText = "";
-                playersDetail.innerText = "";
-                drawingTimeDetail.innerText = "";
-                customWordsDetail.innerText = "";
-                maxClientsIPDetail.innerText = "";
-                joinButton.disabled = true;
-            } else {
-                wordpackDetail.innerText = lobby.wordpack;
-                roundsDetail.innerText = lobby.round + "/" + lobby.rounds;
-                playersDetail.innerText = lobby.playerCount + "/" + lobby.maxPlayers;
-                drawingTimeDetail.innerText = lobby.drawingTime.toString();
-                customWordsDetail.innerText = lobby.customWords ? '{{.Translation.Get "yes"}}' : '{{.Translation.Get "no"}}';
-                maxClientsIPDetail.innerText = lobby.maxClientsPerIp;
-                joinButton.disabled = false;
-            }
-        }
+            const lobby_list_placeholder =
+                document.getElementById("lobby-list-placeholder-text");
+            const lobby_list_loading_placeholder =
+                document.getElementById("lobby-list-placeholder-loading");
+            const lobby_list = document.getElementById("lobby-list");
 
-        function openTab(tabId) {
-            if (tabId === "join-lobby") {
-                loadLobbyTable();
-            }
+            lobby_list_placeholder.innerHTML = "<b>There are no lobbies yet.</b>";
 
-            //Initially hide all tabs except for our target tab
-            const tabs = document.getElementsByClassName("tab-content");
-            for (let i = 0; i < tabs.length; i++) {
-                tabs[i].style.display = "none";
-            }
+            const getLobbies = () => {
+                return new Promise((resolve, reject) => {
+                    fetch('{{.RootPath}}/v1/lobby').
+                        then((response) => {
+                            response.json().then(resolve);
+                        }).
+                        catch(reject);
+                })
+            };
 
-            //Show the newly selected tab.
-            document.getElementById(tabId).style.display = "flex";
-        }
+            const set_lobby_list_placeholder = (text, visible) => {
+                if (visible) {
+                    lobby_list_placeholder.style.display = "flex";
+                    lobby_list_placeholder.innerHTML = "<b>" + text + "<b>";
+                } else {
+                    lobby_list_placeholder.style.display = "none";
+                }
+            };
 
-        if (createLobbyTabButton.checked) {
-            openTab('create-lobby');
-        } else if (joinLobbyTabButton.checked) {
-            openTab('join-lobby');
-        }
-    </script>
+            const set_lobby_list_loading = (loading) => {
+                if (loading) {
+                    set_lobby_list_placeholder("", false);
+                    lobby_list_loading_placeholder.style.display = "flex";
+                } else {
+                    lobby_list_loading_placeholder.style.display = "none";
+                }
+            };
+
+            const language_to_flag = (language) => {
+                switch (language) {
+                    case "english":
+                        return "\u{1f1fa}\u{1f1f8}";
+                    case "english_gb":
+                        return "\u{1f1ec}\u{1f1e7}";
+                    case "german":
+                        return "\u{1f1e9}\u{1f1ea}";
+                    case "ukrainian":
+                        return "\u{1f1fa}\u{1f1e6}";
+                    case "russian":
+                        return "\u{1f1f7}\u{1f1fa}";
+                    case "italian":
+                        return "\u{1f1ee}\u{1f1f9}";
+                    case "french":
+                        return "\u{1f1eb}\u{1f1f7}";
+                    case "dutch":
+                        return "\u{1f1f3}\u{1f1f1}";
+                }
+            };
+
+            const remove_icon_loading_class = (img) => {
+                img.classList.remove("lobby-list-icon-loading");
+            };
+
+            const set_lobbies = (lobbies, visible) => {
+                const new_lobby_nodes = lobbies.map((lobby) => {
+                    const lobby_list_item = document.createElement("div");
+                    lobby_list_item.className = "lobby-list-item";
+
+                    const lobby_list_rows = document.createElement("div");
+                    lobby_list_rows.className = "lobby-list-rows";
+
+                    const lobby_list_row_a = document.createElement("div");
+                    lobby_list_row_a.className = "lobby-list-row";
+
+                    const language_flag = document.createElement("span");
+                    language_flag.className = "language-flag";
+                    language_flag.innerText = language_to_flag(lobby.wordpack);
+                    lobby_list_row_a.appendChild(language_flag);
+
+                    const new_custom_tag = (text) => {
+                        const tag = document.createElement("span");
+                        tag.className = "custom-tag";
+                        tag.innerText = text;
+                        return tag;
+                    };
+                    if (lobby.customWords) {
+                        lobby_list_row_a.appendChild(new_custom_tag(
+                            '{{.Translation.Get "custom-words"}}'
+                        ));
+                    }
+                    if (lobby.state === "ongoing") {
+                        lobby_list_row_a.appendChild(new_custom_tag(
+                            'Ongoing'
+                        ));
+                    }
+                    if (lobby.state === "gameover") {
+                        lobby_list_row_a.appendChild(new_custom_tag(
+                            'Game Over'
+                        ));
+                    }
+
+                    const lobby_list_row_b = document.createElement("div");
+                    lobby_list_row_b.className = "lobby-list-row";
+
+                    const create_info_pair = (icon, text) => {
+                        const element = document.createElement("div");
+                        element.className = "lobby-list-item-info-pair";
+
+                        const image = document.createElement("img");
+                        image.className = "lobby-list-item-icon lobby-list-icon-loading";
+                        image.setAttribute("loading", "lazy");
+                        image.setAttribute("onLoad",
+                            "remove_icon_loading_class(this)");
+                        image.setAttribute("src", icon);
+
+                        const span = document.createElement("span");
+                        span.innerText = text;
+
+                        element.replaceChildren(image, span);
+                        return element;
+                    };
+                    const user_pair = create_info_pair(
+                        "{{.RootPath}}/resources/user.svg?cache_bust={{.CacheBust}}",
+                        `${lobby.playerCount}/${lobby.maxPlayers}`);
+                    const round_pair = create_info_pair(
+                        "{{.RootPath}}/resources/round.svg?cache_bust={{.CacheBust}}",
+                        `${lobby.round}/${lobby.rounds}`);
+                    const time_pair = create_info_pair(
+                        "{{.RootPath}}/resources/clock.svg?cache_bust={{.CacheBust}}",
+                        `${lobby.drawingTime}`);
+
+                    lobby_list_row_b.replaceChildren(user_pair, round_pair, time_pair);
+
+                    lobby_list_rows.replaceChildren(lobby_list_row_a, lobby_list_row_b);
+
+                    const join_button = document.createElement("button");
+                    join_button.className = "join-button";
+                    join_button.innerText = "Join";
+                    join_button.addEventListener("click", (event) => {
+                        window.location.href =
+                            `{{.RootPath}}/ssrEnterLobby/${lobby.lobbyId}`;
+                    });
+
+                    lobby_list_item.replaceChildren(lobby_list_rows, join_button);
+
+                    return lobby_list_item;
+                });
+                lobby_list.replaceChildren(...new_lobby_nodes);
+
+                if (lobbies && lobbies.length > 0 && visible) {
+                    lobby_list.style.display = "flex";
+                    set_lobby_list_placeholder("", false);
+                } else {
+                    lobby_list.style.display = "none";
+                    set_lobby_list_placeholder("There are no lobbies.", true);
+                }
+            };
+
+            const refresh_lobby_list = () => {
+                set_lobbies([], false);
+                set_lobby_list_loading(true);
+
+                getLobbies().then((data) => {
+                    set_lobbies(data, true);
+                }).catch((err) => {
+                    set_lobby_list_placeholder(err, true);
+                }).finally(() => {
+                    set_lobby_list_loading(false);
+                });
+            };
+
+            refresh_lobby_list();
+        </script>
 </body>
 
 </html>
