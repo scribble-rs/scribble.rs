@@ -538,6 +538,15 @@
         let sound = localStorage.getItem("sound") !== "false";
         updateSoundIcon();
 
+        const set_dummy_word_hints = () => {
+            // Dummy wordhint to prevent layout changes.
+            applyWordHints([{
+                character: 'D',
+                underline: true,
+            }], true);
+        };
+        set_dummy_word_hints();
+
         function showTextDialog(id, title, message) {
             const messageNode = document.createElement("span");
             messageNode.innerText = message;
@@ -1194,6 +1203,8 @@
                     updateRoundsDisplay();
                     applyPlayers(parsed.data.players);
 
+                    set_dummy_word_hints();
+
                     //Even though we always hide the dialog in the "your-turn"
                     //event handling, it will be shortly visible if we it here.
                     if (drawerID !== ownID) {
@@ -1201,9 +1212,6 @@
                         waitChooseDrawerSpan.innerText = drawerName;
                         waitChooseDialog.style.visibility = "visible";
                     }
-
-                    //We clear this, since there's no word chosen right now.
-                    wordContainer.innerHTML = "";
 
                     setAllowDrawing(false);
                 } else if (parsed.type === "your-turn") {
@@ -1312,6 +1320,8 @@
             }
             if (ready.wordHints && ready.wordHints.length) {
                 applyWordHints(ready.wordHints);
+            } else {
+                set_dummy_word_hints();
             }
 
             if (ready.gameState === "unstarted") {
@@ -1600,9 +1610,15 @@
             maxRoundSpan.innerText = rounds;
         }
 
-        function applyWordHints(wordHints) {
-            wordContainer.innerHTML = "";
-            wordHints.forEach(hint => {
+        function applyWordHints(wordHints, dummy) {
+            // We abuse the container to prevent the layout from jumping.
+            if (!dummy) {
+                wordContainer.style.visibility = "visible";
+            } else {
+                wordContainer.style.visibility = "hidden";
+            }
+
+            wordContainer.replaceChildren(...wordHints.map(hint => {
                 const hintSpan = document.createElement("span");
                 hintSpan.classList.add("guess-letter");
                 if (hint.character === 0) {
@@ -1615,8 +1631,8 @@
                     hintSpan.innerText = String.fromCharCode(hint.character);
                 }
 
-                wordContainer.appendChild(hintSpan);
-            });
+                return hintSpan;
+            }));
         }
 
         function applyDrawData(drawElements) {
