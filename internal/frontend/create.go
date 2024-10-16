@@ -131,6 +131,7 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 			ClientsPerIPLimit:  request.Form.Get("clients_per_ip_limit"),
 			Language:           request.Form.Get("language"),
 		},
+		Languages: game.SupportedLanguages,
 	}
 
 	if languageInvalid != nil {
