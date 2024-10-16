@@ -36,6 +36,12 @@ jobs:
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
+        env:
+          # Disable CGO to get "more static" binaries. They aren't really static ...
+          # since it can still happen that part of the stdlib access certain libs, but
+          # whatever, this will probs do for our usecase. (Can't quite remember
+          # anymore, but I have had issues with this in the past) :D
+          CGO_ENABLED: 0
         with:
           name: ${{ matrix.binary_name }}
           path: ./${{ matrix.binary_name }}
