@@ -8,6 +8,7 @@
 .ready-check-box {
     padding: 0.5rem 1rem 0.5rem 1rem;
     background-color: white;
+    border-radius: var(--component-border-radius);
 }
 
 .ready-check-box:has(input[type="checkbox"]:checked) {
@@ -36,6 +37,7 @@
     align-items: center;
     padding-left: 0.2rem;
     padding-right: 0.2rem;
+    border-radius: var(--component-border-radius);
 }
 
 #lobby-header-center-element {
@@ -120,6 +122,7 @@
     width: 100%;
     height: 100%;
     user-select: none;
+    border-radius: var(--component-border-radius);
 }
 
 #center-dialogs {
@@ -154,6 +157,7 @@
     justify-content: center;
     align-items: center;
     overflow: hidden;
+    border-radius: var(--component-border-radius);
 }
 
 .center-dialog-content {
@@ -176,6 +180,7 @@
     overflow-y: scroll;
     background-color: white;
     flex: 1;
+    border-radius: var(--component-border-radius) var(--component-border-radius) 0 0;
 }
 
 .chat-name {
@@ -212,13 +217,13 @@
 
 #message-input {
     flex: 1;
-    border: 0;
     padding: 10px;
-    margin-top: 5px
+    margin-top: 5px;
+    border: 0;
+    border-radius: 0 0 var(--component-border-radius) var(--component-border-radius);
 }
 
-#message-input:focus {
-    outline: none;
+input[type="text"]:focus {
     background-color: rgb(250, 211, 252);
 }
 
@@ -241,6 +246,7 @@
     border: none;
     background-color: white;
     padding: 0.5rem 1rem 0.5rem 1rem;
+    border-radius: var(--component-border-radius);
 }
 
 .button-center-wrapper {
@@ -306,6 +312,7 @@ input[type="button"]:active,
 
 #color-picker {
     border: 0;
+    border-radius: var(--component-border-radius);
     background-color: rgb(218, 218, 218);
     height: 50px;
     width: 50px;
@@ -324,6 +331,7 @@ input[type="button"]:active,
     border: 0;
     padding: 0;
     background-color: rgb(218, 218, 218);
+    border-radius: var(--component-border-radius);
 }
 
 .canvas-button>img {
@@ -340,6 +348,8 @@ input[type="button"]:active,
     display: flex;
     flex-direction: column;
     height: 48px;
+    border-radius: var(--component-border-radius);
+    overflow: hidden;
 }
 
 .color-button-row {
@@ -387,12 +397,13 @@ input[type="button"]:active,
     align-self: flex-start;
 }
 
-.toolbox-group:last-child {
-    margin-right: 0;
-}
-
 .pencil-sizes-container {
     display: flex;
+    gap: 2.5px;
+}
+
+.line-width-button-content {
+    border-radius: var(--component-border-radius);
 }
 
 #player-container {
@@ -409,6 +420,7 @@ input[type="button"]:active,
     display: grid;
     grid-template-columns: fit-content(100%) auto;
     grid-template-rows: 1fr 1fr;
+    border-radius: var(--component-border-radius);
 }
 
 .player+.player {
@@ -468,9 +480,6 @@ input[type="button"]:active,
 
 .kick-player-button {
     width: 100%;
-    border: none;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
 }
 
 .kick-player-button+.kick-player-button {

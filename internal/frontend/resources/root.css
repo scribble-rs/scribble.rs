@@ -20,6 +20,10 @@
     -webkit-text-size-adjust: 100%;
 }
 
+* {
+    outline: none;
+}
+
 html,
 body {
     height: 100vh;

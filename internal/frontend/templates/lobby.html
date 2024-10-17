@@ -229,7 +229,7 @@
                 </div>
             </div>
 
-            <div id="toolbox">
+            <div id="toolbox" style="display: none;">
                 <input id="color-picker" class="toolbox-group" type="color" onchange="setColorFromColorPicker()"
                     value="#000000" alt="{{.Translation.Get "change-active-color"}}"
                     title="{{.Translation.Get "change-active-color"}}">
@@ -661,6 +661,7 @@
                     if (player.id !== ownID && player.connected) {
                         const playerKickEntry = document.createElement("button");
                         playerKickEntry.classList.add("kick-player-button");
+                        playerKickEntry.classList.add("dialog-button");
                         playerKickEntry.onclick = () => onVotekickPlayer(player.id);
                         playerKickEntry.innerText = player.name;
                         kickDialogPlayers.appendChild(playerKickEntry);
@@ -964,8 +965,6 @@
             socket.send(JSON.stringify({
                 type: "toggle-spectate",
             }));
-            if (gameState === "ongoing") {
-            }
         }
 
         function setSpectateMode(requestedValue, spectatingValue) {
