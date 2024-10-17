@@ -3,47 +3,6 @@
     margin: 0;
 }
 
-select,
-input,
-button,
-textarea {
-    color: rgb(238, 230, 230);
-    background-color: var(--component-base-color);
-    border-radius: var(--component-border-radius);
-    border: 2px hidden var(--outline--color);
-}
-
-input:hover,
-button:hover,
-select:hover,
-textarea:hover {
-    background-color: var(--component-hover-background);
-}
-
-input:focus,
-button:focus,
-select:focus,
-textarea:focus {
-    background-color: var(--component-focus-background);
-}
-
-button:active {
-    background-color: var(--component-active-background);
-}
-
-input,
-select {
-    padding-left: 0.35rem;
-    padding-right: 0.35rem;
-}
-
-textarea {
-    padding-left: 0.40rem;
-    padding-top: 0.20rem;
-    min-width: 0;
-    resize: none;
-}
-
 #app {
     display: flex;
     flex-direction: column;
@@ -242,6 +201,9 @@ textarea {
     height: 3rem;
     width: 5rem;
     font-size: 1.5rem;
+    /* Since the buttons are the same color as the background, we use a boder,
+     * even though it isn't consistent. */
+    border: 1px solid gray;
 }
 
 .custom-tag {
@@ -285,7 +247,6 @@ textarea {
 .create-button {
     height: 2rem;
     flex: 1;
-    background-color: color-mix(in srgb, var(--component-base-color), #000 25%)
 }
 
 .number-input {
@@ -294,7 +255,7 @@ textarea {
     padding: 0;
     background-color: var(--component-base-color);
     border-radius: var(--component-border-radius);
-    border: 2px hidden var(--outline--color);
+    border: 2px hidden;
 }
 
 .number-input>button {

@@ -1,11 +1,10 @@
 :root {
     --pane-background: #eee5e9;
-    --component-base-color: #4485ff;
-    --component-hover-background: #5499f3;
-    --component-hover-lighter-background: #96c4ff;
-    --component-focus-background: #509cff;
-    --component-active-background: #2966b6;
-    --outline--color: #1f6bf8;
+    --component-base-color: #ffffff;
+    --component-hover-background: rgb(250, 211, 252) !important;
+    --component-hover-lighter-background: rgb(252, 231, 253) !important;
+    --component-focus-background: rgb(244, 183, 247);
+    --component-active-background: rgb(192, 58, 200);
     --component-border-radius: 0.5rem;
 
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -71,4 +70,78 @@ a:visited {
 
 a:hover {
     text-decoration: underline;
+}
+
+h1,
+h2 {
+    margin: 0;
+    text-align: center;
+    color: rgb(248, 148, 164);
+}
+
+h1 {
+    font-size: 6rem;
+}
+
+h2 {
+    font-size: 4rem;
+}
+
+ul {
+    margin: 0;
+}
+
+select,
+input,
+button,
+textarea {
+    background-color: var(--component-base-color);
+    border-radius: var(--component-border-radius);
+    border: 2px hidden;
+}
+
+input:hover,
+button:hover,
+select:hover,
+textarea:hover {
+    background-color: var(--component-hover-background);
+}
+
+input:focus,
+button:focus,
+select:focus,
+textarea:focus {
+    background-color: var(--component-focus-background);
+}
+
+button:active {
+    background-color: var(--component-active-background);
+}
+
+input,
+select {
+    padding-left: 0.35rem;
+    padding-right: 0.35rem;
+}
+
+textarea {
+    padding-left: 0.40rem;
+    padding-top: 0.20rem;
+    min-width: 0;
+    resize: none;
+}
+
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.noscript {
+    display: flex;
+    font-size: 2.5rem;
+    font-weight: bold;
+    justify-content: center;
+    border-bottom: 1rem solid black;
+    padding: 10px;
 }

@@ -1,3 +1,81 @@
+.noscript {
+    display: flex;
+    font-size: 2.5rem;
+    font-weight: bold;
+    justify-content: center;
+    border-bottom: 1rem solid black;
+    padding: 10px;
+}
+
+.custom-check-or-radio {
+    /* Little hack in order to hide the original components of the check/radio button */
+    opacity: 0.0;
+    position: absolute;
+}
+
+.input-container {
+    justify-content: center;
+    align-items: center;
+    display: inline-grid;
+    grid-template-columns: auto auto auto auto;
+    column-gap: 20px;
+    row-gap: 10px;
+}
+
+.input-container>b {
+    align-self: baseline;
+}
+
+.input-container>input[type="checkbox"] {
+    /* By default checkboxes seem to have a bigger margin on the left. */
+    margin-left: 0;
+    margin-right: 0;
+}
+
+kbd {
+    background-color: #eee;
+    border-radius: 3px;
+    border: 1px solid #b4b4b4;
+    box-shadow: 0 1px 1px rgb(0 0 0 / 20%), 0 2px 0 0 rgb(255 255 255 / 70%) inset;
+    color: #333;
+    display: inline-block;
+    font-size: .85em;
+    font-weight: 700;
+    line-height: 1;
+    padding: 2px 4px;
+    white-space: nowrap;
+}
+
+@media only screen and (min-device-width: 375px) and (max-device-width: 812px),
+(orientation: portrait) or (max-aspect-ratio: 4/3) {
+    h1 {
+        font-size: 4rem;
+    }
+
+    h2 {
+        font-size: 2rem;
+    }
+
+    .input-container {
+        align-items: start;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        row-gap: 5px;
+    }
+
+    .input-container>input[type="checkbox"] {
+        width: initial;
+    }
+
+    .input-container>* {
+        width: 100%;
+        /* These two prevent blow-out of the input elements */
+        display: block;
+        box-sizing: border-box;
+    }
+}
+
 .ready-check-box-wrapper {
     display: flex;
     align-self: center;
@@ -223,10 +301,6 @@
     border-radius: 0 0 var(--component-border-radius) var(--component-border-radius);
 }
 
-input[type="text"]:focus {
-    background-color: rgb(250, 211, 252);
-}
-
 .dialog-title {
     margin-bottom: 1rem;
     font-size: 2.75rem;
@@ -240,6 +314,7 @@ input[type="text"]:focus {
     flex-direction: row;
     margin-left: 20px;
     margin-right: 20px;
+    gap: 0.25rem;
 }
 
 .dialog-button {
@@ -254,25 +329,16 @@ input[type="text"]:focus {
     align-items: center;
     justify-content: center;
     margin-top: 1em;
+    gap: 0.25rem;
 }
 
-.dialog-button+.dialog-button {
-    margin-left: 0.25rem;
-}
-
-button:hover,
-input[type="button"]:hover,
 .line-width-button-content:hover,
 #color-picker:hover {
-    /** Important insures it won't be prevented by a 'transparent' main color*/
-    background-color: rgb(244, 183, 247) !important;
+    background-color: var(--component-hover-background);
 }
 
-button:active,
-input[type="button"]:active,
 #color-picker:active {
-    /** Important insures it won't be prevented by a 'transparent' main color*/
-    background-color: rgb(243, 132, 247) !important;
+    background-color: var(--component-active-background);
 }
 
 .header-button {
@@ -303,17 +369,17 @@ input[type="button"]:active,
 }
 
 .line-width-button-content {
-    background-color: rgb(218, 218, 218);
+    background-color: var(--component-base-color);
 }
 
 .line-width-button:checked+.line-width-button-content {
-    background-color: rgb(243, 132, 247);
+    background-color: var(--component-active-background);
 }
 
 #color-picker {
     border: 0;
     border-radius: var(--component-border-radius);
-    background-color: rgb(218, 218, 218);
+    background-color: var(--component-base-color);
     height: 50px;
     width: 50px;
     padding: 0;
@@ -330,8 +396,6 @@ input[type="button"]:active,
     width: 50px;
     border: 0;
     padding: 0;
-    background-color: rgb(218, 218, 218);
-    border-radius: var(--component-border-radius);
 }
 
 .canvas-button>img {
@@ -361,6 +425,7 @@ input[type="button"]:active,
     height: 24px;
     width: 24px;
     border: 0;
+    border-radius: 0;
 }
 
 .color-button::-moz-focus-inner {
@@ -613,4 +678,25 @@ input[type="button"]:active,
     #message-container {
         max-height: 5rem;
     }
+}
+
+#menu {
+    position: absolute;
+    inset: unset;
+    border: 1px solid gray;
+    border-radius: var(--component-border-radius);
+}
+
+.menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 5px;
+}
+
+.menu-item {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    font-size: 1rem !important;
 }
