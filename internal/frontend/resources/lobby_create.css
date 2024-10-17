@@ -52,12 +52,6 @@ textarea {
     max-height: 100vh;
 }
 
-@media (max-width: 850px) and (orientation: portrait) {
-    main {
-        margin: 1.5vh;
-    }
-}
-
 /*root end*/
 
 #logo {
@@ -96,7 +90,7 @@ textarea {
     padding: 1.5rem;
     border-radius: 1.3rem;
     overflow: hidden;
-    width: min(35vw, 35rem);
+    width: min(42.5vw, 35rem);
     height: 55vh;
 }
 
@@ -107,21 +101,20 @@ textarea {
     flex: 1;
 }
 
-@media (max-width: 850px) and (orientation: landscape) {
-    .home {
-        padding: 0.5vw;
+@media (max-width: 1000px) or (orientation: portrait) {
+    textarea.input-item {
+        height: 3rem;
+    }
+
+    #lobby-join-choice {
+        flex: 1;
+        margin-bottom: 1rem;
     }
 
     .home-choice {
-        width: 39vw;
+        height: initial;
     }
 
-    #home-choices {
-        gap: 1vw;
-    }
-}
-
-@media (max-width: 850px) and (orientation: portrait) {
     #logo {
         width: 95vw;
         max-height: 10vh;
@@ -267,6 +260,8 @@ textarea {
     row-gap: 0.5rem;
     overflow-y: auto;
     padding-right: 0.5rem;
+    flex: 1;
+    grid-template-rows: max-content max-content max-content max-content max-content max-content auto;
 }
 
 .lobby-create-label {
@@ -292,16 +287,6 @@ textarea {
     height: 2rem;
     flex: 1;
     background-color: color-mix(in srgb, var(--component-base-color), #000 25%)
-}
-
-textarea.input-item {
-    height: 5rem;
-}
-
-@media (max-width: 850px) and (orientation: portrait) {
-    textarea.input-item {
-        height: 3rem;
-    }
 }
 
 .number-input {
