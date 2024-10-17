@@ -30,7 +30,7 @@ func initGermanTranslation() {
 
 	translation.put("round", "Runde")
 	translation.put("toggle-soundeffects", "Sound ein- / ausschalten")
-	translation.put("change-your-name", "Benutzername")
+	translation.put("change-your-name", "Anzeigename")
 	translation.put("randomize", "Zufälliger Name")
 	translation.put("apply", "Anwenden")
 	translation.put("save", "Speichern")

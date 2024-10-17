@@ -28,7 +28,7 @@ func initEnglishTranslation() Translation {
 
 	translation.put("round", "Round")
 	translation.put("toggle-soundeffects", "Toggle soundeffects")
-	translation.put("change-your-name", "Username")
+	translation.put("change-your-name", "Nickname")
 	translation.put("randomize", "Randomize")
 	translation.put("apply", "Apply")
 	translation.put("save", "Save")
