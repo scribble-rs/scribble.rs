@@ -241,6 +241,12 @@ func (lobby *Lobby) handleToggleReadinessEvent(player *Player) {
 }
 
 func (lobby *Lobby) readyToStart() bool {
+	// Otherwise the game will start and gameover instantly. This can happen
+	// if a lobby is created and the owner refreshes.
+	if !lobby.HasConnectedPlayers() {
+		return false
+	}
+
 	for _, otherPlayer := range lobby.players {
 		if otherPlayer.Connected && otherPlayer.State != Ready {
 			return false
