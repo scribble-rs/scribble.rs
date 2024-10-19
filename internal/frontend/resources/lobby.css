@@ -252,6 +252,8 @@ kbd {
     grid-column: 3;
     grid-row-start: 2;
     grid-row-end: 3;
+    height: 0;
+    min-height: 100%;
 }
 
 #message-container {
@@ -483,6 +485,8 @@ kbd {
     grid-column: 1;
     grid-row: 2;
     overflow-y: auto;
+    height: 0;
+    min-height: 100%;
 }
 
 .player {
@@ -654,6 +658,10 @@ kbd {
         width: 32px;
         height: 32px;
     }
+
+    #message-container {
+        max-height: 5rem;
+    }
 }
 
 
@@ -712,15 +720,15 @@ kbd {
     #player-container {
         grid-column: 1;
         grid-row: 4;
+        height: auto;
+        min-height: auto;
     }
 
     #chat {
         grid-column: 2;
         grid-row: 4;
-    }
-
-    #message-container {
-        max-height: 5rem;
+        height: auto;
+        min-height: auto;
     }
 }
 
