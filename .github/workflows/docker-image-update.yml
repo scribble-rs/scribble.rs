@@ -13,6 +13,7 @@ jobs:
       max-parallel: 3
       matrix:
         os: [ubuntu-latest, windows-2022]
+        buildArgs: VERSION=${{ github.ref_name }}
         include:
         - os: ubuntu-latest
           platforms: linux/amd64,linux/arm/v7,linux/arm64
@@ -39,6 +40,7 @@ jobs:
 
           dockerfile: ${{ matrix.file }}
           image: biosmarcel/scribble.rs
+          buildArgs: ${{ matrix.buildArgs }}
           platform: ${{ matrix.platforms }}
           tags:  ${{ matrix.tags }}
 

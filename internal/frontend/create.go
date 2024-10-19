@@ -14,6 +14,7 @@ import (
 	"github.com/scribble-rs/scribble.rs/internal/game"
 	"github.com/scribble-rs/scribble.rs/internal/state"
 	"github.com/scribble-rs/scribble.rs/internal/translations"
+	"github.com/scribble-rs/scribble.rs/internal/version"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
@@ -26,7 +27,9 @@ type SSRHandler struct {
 }
 
 func NewHandler(cfg *config.Config) (*SSRHandler, error) {
-	basePageConfig := &BasePageConfig{}
+	basePageConfig := &BasePageConfig{
+		Version: version.Version,
+	}
 	if cfg.RootPath != "" {
 		basePageConfig.RootPath = "/" + cfg.RootPath
 	}

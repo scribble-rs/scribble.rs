@@ -31,6 +31,8 @@ func init() {
 // BasePageConfig is data that all pages require to function correctly, no matter
 // whether error page or lobby page.
 type BasePageConfig struct {
+	// Version is the source code version of this build.
+	Version string `json:"version"`
 	// RootPath is the path directly after the domain and before the
 	// scribble.rs paths. For example if you host scribblers on painting.com
 	// but already host a different website, then your API paths might have to

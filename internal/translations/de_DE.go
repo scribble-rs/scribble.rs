@@ -117,7 +117,6 @@ func initGermanTranslation() {
 	// Footer
 	translation.put("source-code", "Source Code")
 	translation.put("help", "Hilfe")
-	translation.put("contact", "Kontakt")
 	translation.put("submit-feedback", "Feedback")
 	translation.put("stats", "Status")
 

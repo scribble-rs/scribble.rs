@@ -18,6 +18,7 @@ import (
 	"github.com/scribble-rs/scribble.rs/internal/config"
 	"github.com/scribble-rs/scribble.rs/internal/frontend"
 	"github.com/scribble-rs/scribble.rs/internal/state"
+	"github.com/scribble-rs/scribble.rs/internal/version"
 )
 
 func main() {
@@ -25,6 +26,8 @@ func main() {
 	if err != nil {
 		log.Fatalln("error loading configuration:", err)
 	}
+
+	log.Printf("Starting Scribble.rs version '%s'\n", version.Version)
 
 	if cfg.CPUProfilePath != "" {
 		log.Println("Starting CPU profiling ....")

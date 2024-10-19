@@ -13,10 +13,13 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download -x
 
+# Import that this comes after mod download, as it breaks caching.
+ARG VERSION="dev"
+
 # Copy actual codebase, since we only have the go.mod and go.sum so far.
 COPY . /app/
 ENV CGO_ENABLED=0
-RUN go build -trimpath -ldflags "-w -s" -tags timetzdata -o ./scribblers ./cmd/scribblers
+RUN go build -trimpath -ldflags "-w -s -X 'github.com/scribble-rs/scribble.rs/internal/version.Version=$VERSION'" -tags timetzdata -o ./scribblers ./cmd/scribblers
 
 #
 # Runner
