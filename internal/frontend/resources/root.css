@@ -50,17 +50,22 @@ body::before {
     z-index: -1;
 }
 
-footer {
+footer,
+.help-footer {
     display: flex;
     justify-content: center;
     align-items: center;
+    gap: 1rem;
+}
+
+footer {
     padding: 0.1rem;
     background-color: lightslategray;
     color: white;
 }
 
-.footer-item+.footer-item {
-    margin-left: 1rem;
+.help-footer {
+    flex-wrap: wrap;
 }
 
 a:link,

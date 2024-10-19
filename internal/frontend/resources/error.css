@@ -12,7 +12,8 @@
     border-radius: 1rem;
 }
 
-.error-title, .error-message {
+.error-title,
+.error-message {
     display: block;
 }
 
@@ -25,7 +26,9 @@
     margin: 2vw;
 }
 
-.go-back, .go-back:link, .go-back:visited {
+.go-back,
+.go-back:link,
+.go-back:visited {
     display: block;
     font-size: 3rem;
     color: rgb(248, 148, 164);

@@ -5,7 +5,7 @@
 <head>
     <title>Scribble.rs - Game</title>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=0.75 maximum-scale=0.75, user-scalable=0">
+    <meta name="viewport" content="width=device-width, initial-scale=1 maximum-scale=1, user-scalable=0">
     {{template "non-static-css-decl" .}}
     <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/root.css?cache_bust={{.CacheBust}}" />
     <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/lobby.css?cache_bust={{.CacheBust}}" />
@@ -19,7 +19,8 @@
         <div id="lobby">
             <div id="lobby-header">
                 <div id="round-container">
-                    <span>{{.Translation.Get "round"}}&nbsp;</span>
+                    <img src=" {{.RootPath}}/resources/round.svg?cache_bust={{.CacheBust}}" class="header-button-image"
+                        alt="{{.Translation.Get "round"}}" title="{{.Translation.Get "round"}}" />
                     <span id="rounds"></span>
                     <span id="max-rounds"></span>
                 </div>
@@ -140,17 +141,17 @@
                                         <button class="dialog-button"
                                             onclick="changeName(document.getElementById('namechange-field-start-dialog').value)">{{.Translation.Get "apply"}}</button>
                                     </div>
-                                    <div class="ready-check-box-wrapper">
-                                        <label class="ready-check-box" for="ready-state-start">
-                                            Ready
-                                            <input type="checkbox" name="ready-state-start" id="ready-state-start"
-                                                onchange="toggleReadiness()">
-                                            (<span class="ready-count">0</span>/<span class="ready-needed">0</span>)
-                                        </label>
-                                    </div>
                                 </div>
                             </div>
-                            <div class="button-center-wrapper">
+                            <div class="button-bar">
+                                <div class="ready-check-box-wrapper">
+                                    <label class="ready-check-box" for="ready-state-start">
+                                        Ready
+                                        <input type="checkbox" name="ready-state-start" id="ready-state-start"
+                                            onchange="toggleReadiness()">
+                                        (<span class="ready-count">0</span>/<span class="ready-needed">0</span>)
+                                    </label>
+                                </div>
                                 <button id="force-start-button" class="dialog-button"
                                     onclick="startGame()">{{.Translation.Get "force-start"}}</button>
                             </div>
@@ -171,7 +172,7 @@
                                     <input class="namechange-field" type="text" id="namechange-field"></input>
                                 </form>
                             </div>
-                            <div class="button-center-wrapper">
+                            <div class="button-bar">
                                 <button class="dialog-button" type="submit"
                                     form="username-form">{{.Translation.Get "save"}}</button>
                                 <button class="dialog-button" type="button"
@@ -206,7 +207,7 @@
                                         max="{{.MaxClientsPerIPLimit}}" value="{{.ClientsPerIPLimit}}" />
                                 </div>
                             </div>
-                            <div class="button-center-wrapper">
+                            <div class="button-bar">
                                 <button class="dialog-button" onclick="saveLobbySettings()">
                                     {{.Translation.Get "save-settings"}}
                                 </button>
@@ -220,15 +221,15 @@
                             <div class="center-dialog-content">
                                 <div id="game-over-scoreboard"></div>
                             </div>
-                            <div class="ready-check-box-wrapper">
-                                <label class="ready-check-box" for="ready-state-game-over">
-                                    Ready
-                                    <input type="checkbox" name="ready-state-game-over" id="ready-state-game-over"
-                                        onchange="toggleReadiness()">
-                                    (<span class="ready-count">0</span>/<span class="ready-needed">0</span>)
-                                </label>
-                            </div>
-                            <div class="button-center-wrapper">
+                            <div class="button-bar">
+                                <div class="ready-check-box-wrapper">
+                                    <label class="ready-check-box" for="ready-state-game-over">
+                                        Ready
+                                        <input type="checkbox" name="ready-state-game-over" id="ready-state-game-over"
+                                            onchange="toggleReadiness()">
+                                        (<span class="ready-count">0</span>/<span class="ready-needed">0</span>)
+                                    </label>
+                                </div>
                                 <button id="restart-button" class="dialog-button" onclick="startGame()">{{.Translation.Get
                                     "force-restart"}}</button>
                             </div>
@@ -239,7 +240,7 @@
                             <div class="center-dialog-content">
                                 <div id="kick-dialog-players"></div>
                             </div>
-                            <div class="button-center-wrapper">
+                            <div class="button-bar">
                                 <button onclick="hideKickDialog()"
                                     class="dialog-button">{{.Translation.Get "close"}}</button>
                             </div>
@@ -325,7 +326,7 @@
                             class="line-width-button-content">
                             <img title="{{.Translation.Get "use-pencil"}}" alt="{{.Translation.Get "use-pencil"}}"
                                 src="{{.RootPath}}/resources/pencil.svg?cache_bust={{.CacheBust}}"
-                                style="transform: scaleX(-1)" width="40px" height="40px" />
+                                style="transform: scaleX(-1)" />
                         </div>
                     </label>
                     <label for="tool-type-fill">
@@ -336,8 +337,7 @@
                             class="line-width-button-content">
                             <img alt="{{.Translation.Get "use-fill-bucket"}}"
                                 title="{{.Translation.Get "use-fill-bucket"}}"
-                                src="{{.RootPath}}/resources/fill.svg?cache_bust={{.CacheBust}}" width="40px"
-                                height="40px" />
+                                src="{{.RootPath}}/resources/fill.svg?cache_bust={{.CacheBust}}" />
                         </div>
                     </label>
                     <label for="tool-type-rubber">
@@ -347,8 +347,7 @@
                             onmouseup="document.getElementById('tool-type-rubber').click()"
                             class="line-width-button-content">
                             <img alt="{{.Translation.Get "use-eraser"}}" title="{{.Translation.Get "use-eraser"}}"
-                                src="{{.RootPath}}/resources/rubber.svg?cache_bust={{.CacheBust}}" width="40px"
-                                height="40px" />
+                                src="{{.RootPath}}/resources/rubber.svg?cache_bust={{.CacheBust}}" />
                         </div>
                     </label>
                 </div>
@@ -402,13 +401,13 @@
                 <button class="canvas-button toolbox-group" onclick="clearCanvasAndSendEvent()"
                     alt="{{.Translation.Get "clear-canvas"}}" title="{{.Translation.Get "clear-canvas"}}">
                     <img alt="{{.Translation.Get "clear-canvas"}}" title="{{.Translation.Get "clear-canvas"}}"
-                        src="{{.RootPath}}/resources/trash.svg?cache_bust={{.CacheBust}}" width="40px" height="40px" />
+                        src="{{.RootPath}}/resources/trash.svg?cache_bust={{.CacheBust}}" />
                 </button>
                 <!--We won't make this button easier to click, as there's no going back. -->
                 <button class="canvas-button toolbox-group" onclick="undoAndSendEvent()"
                     alt="{{.Translation.Get "undo"}}" title="{{.Translation.Get "undo"}}">
                     <img alt="{{.Translation.Get "undo"}}" title="{{.Translation.Get "undo"}}"
-                        src="{{.RootPath}}/resources/undo.svg?cache_bust={{.CacheBust}}" width="40px" height="40px" />
+                        src="{{.RootPath}}/resources/undo.svg?cache_bust={{.CacheBust}}" />
                 </button>
             </div>
 
@@ -420,8 +419,6 @@
                 </form>
             </div>
         </div>
-
-        {{template "footer" .}}
     </div>
 
     <script type="text/javascript" src="{{.RootPath}}/resources/floodfill.js?cache_bust={{.CacheBust}}"></script>
@@ -629,7 +626,7 @@
 
         function createDialogButtonBar(...buttons) {
             const buttonBar = document.createElement("div");
-            buttonBar.classList.add("button-center-wrapper");
+            buttonBar.classList.add("button-bar");
             buttons.forEach(button => buttonBar.appendChild(button));
             return buttonBar;
         }
@@ -666,6 +663,10 @@
                 closeDialog(helpDialogId)
             })
 
+            const footer = document.createElement("div");
+            footer.className = "help-footer";
+            footer.innerHTML = `{{template "footer" . }}`;
+
             const buttonBar = createDialogButtonBar(closeButton);
 
             const dialogContent = document.createElement("div");
@@ -673,6 +674,7 @@
             dialogContent.appendChild(controlsTextOne);
             dialogContent.appendChild(controlsTextTwo);
             dialogContent.appendChild(controlsTextThree);
+            dialogContent.appendChild(footer);
 
             showDialog(helpDialogId, '{{.Translation.Get "help"}}', dialogContent, buttonBar);
         }
@@ -1649,13 +1651,13 @@
 
             wordContainer.replaceChildren(...wordHints.map(hint => {
                 const hintSpan = document.createElement("span");
-                hintSpan.classList.add("guess-letter");
+                hintSpan.classList.add("hint");
                 if (hint.character === 0) {
-                    hintSpan.classList.add("guess-letter-underline");
+                    hintSpan.classList.add("hint-underline");
                     hintSpan.innerHTML = "&nbsp;";
                 } else {
                     if (hint.underline) {
-                        hintSpan.classList.add("guess-letter-underline");
+                        hintSpan.classList.add("hint-underline");
                     }
                     hintSpan.innerText = String.fromCharCode(hint.character);
                 }

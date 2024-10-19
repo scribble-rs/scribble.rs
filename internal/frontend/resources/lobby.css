@@ -42,11 +42,12 @@ kbd {
     font-size: .85em;
     font-weight: 700;
     line-height: 1;
+    vertical-align: middle;
     padding: 2px 4px;
     white-space: nowrap;
 }
 
-@media only screen and (min-device-width: 375px) and (max-device-width: 812px),
+@media only screen and (max-width: 812px),
 (orientation: portrait) or (max-aspect-ratio: 4/3) {
     h1 {
         font-size: 4rem;
@@ -79,8 +80,6 @@ kbd {
 .ready-check-box-wrapper {
     display: flex;
     align-self: center;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
 }
 
 .ready-check-box {
@@ -113,8 +112,8 @@ kbd {
     background-color: white;
     height: 100%;
     align-items: center;
-    padding-left: 0.2rem;
-    padding-right: 0.2rem;
+    padding: 0.1rem 0.2rem;
+    box-sizing: border-box;
     border-radius: var(--component-border-radius);
 }
 
@@ -131,6 +130,10 @@ kbd {
     display: flex;
 }
 
+#rounds {
+    margin-left: 0.25rem;
+}
+
 #rounds::after {
     content: '/';
 }
@@ -143,25 +146,22 @@ kbd {
 
 #word-container {
     flex: 1;
-    justify-content: baseline;
-    justify-items: center;
-    align-self: center;
+    display: flex;
+    justify-content: center;
     text-align: center;
-    padding-bottom: 0.4rem;
+    column-gap: 0.5rem;
 }
 
-.guess-letter-underline {
-    border-bottom: 0.3rem black solid;
+.hint-underline {
+    border-bottom: 0.2rem black solid;
+    padding-bottom: 0.1rem;
 }
 
-.guess-letter {
+.hint {
     font-family: monospace;
     font-weight: bold;
     font-size: 1.5rem;
-}
-
-.guess-letter+.guess-letter {
-    margin-left: 0.5rem;
+    line-height: 1.4rem;
 }
 
 #lobby {
@@ -324,7 +324,7 @@ kbd {
     border-radius: var(--component-border-radius);
 }
 
-.button-center-wrapper {
+.button-bar {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -360,12 +360,18 @@ kbd {
     border-radius: 50%;
 }
 
-.line-width-button+.line-width-button-content {
-    height: 50px;
+.line-width-button-content {
     width: 50px;
+    height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.line-width-button-content>*,
+.canvas-button>* {
+    width: 40px;
+    height: 40px;
 }
 
 .line-width-button-content {
@@ -603,21 +609,53 @@ kbd {
     font-weight: bold;
 }
 
-@media only screen and (min-device-width: 375px) and (max-device-width: 812px) and (orientation: landscape) and (display-mode: fullscreen) {
+@media only screen and (max-width: 812px) and (orientation: landscape) {
     html {
         font-size: 0.8rem;
     }
 
-    .dialog-title {
-        font-size: 1.75rem;
+    #lobby-header,
+    #lobby {
+        grid-template-columns: 12rem auto 15rem;
     }
 }
 
-@media only screen and (min-device-width: 375px) and (max-device-width: 812px) {
+@media only screen and (max-width: 812px) {
+    .center-dialog {
+        padding: 0.5rem;
+    }
+
+    .button-bar {
+        margin-top: 0.5em;
+    }
+
     .dialog-title {
         font-size: 1.75rem;
     }
+
+    .color-button-container {
+        height: 38px;
+    }
+
+    .color-button {
+        width: 19px;
+        height: 19px;
+    }
+
+    #color-picker,
+    .canvas-button,
+    .line-width-button-content {
+        width: 40px;
+        height: 40px;
+    }
+
+    .line-width-button-content>*,
+    .canvas-button>* {
+        width: 32px;
+        height: 32px;
+    }
 }
+
 
 @media only screen and (orientation: portrait),
 (max-aspect-ratio: 4/3) {
@@ -636,7 +674,7 @@ kbd {
 
     #round-container,
     #time-left {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
     }
 
     #time-left-value {
@@ -649,8 +687,13 @@ kbd {
         height: 1.2rem;
     }
 
-    .guess-letter {
-        font-size: 1.2rem;
+    .hint {
+        font-size: 1.1rem;
+        line-height: 1.1rem;
+    }
+
+    .hint-underline {
+        border-bottom-width: 0.15rem;
     }
 
     #drawing-board-wrapper {
@@ -663,6 +706,7 @@ kbd {
         grid-row: 3;
         grid-column-start: 1;
         grid-column-end: 3;
+        column-gap: 5px;
     }
 
     #player-container {
