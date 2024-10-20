@@ -8,7 +8,6 @@ import (
 	"math/rand/v2"
 	"sort"
 	"strings"
-	"sync"
 	"time"
 	"unicode/utf8"
 
@@ -988,7 +987,6 @@ func CreateLobby(
 		CustomWords:    customWords,
 		currentDrawing: make([]any, 0),
 		State:          Unstarted,
-		mutex:          &sync.Mutex{},
 	}
 
 	if len(customWords) > 1 {

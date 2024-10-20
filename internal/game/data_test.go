@@ -1,7 +1,6 @@
 package game
 
 import (
-	"sync"
 	"testing"
 	"time"
 )
@@ -9,9 +8,7 @@ import (
 func TestOccupiedPlayerCount(t *testing.T) {
 	t.Parallel()
 
-	lobby := &Lobby{
-		mutex: &sync.Mutex{},
-	}
+	lobby := &Lobby{}
 	if lobby.GetOccupiedPlayerSlots() != 0 {
 		t.Errorf("Occupied player count expected to be 0, but was %d", lobby.GetOccupiedPlayerSlots())
 	}

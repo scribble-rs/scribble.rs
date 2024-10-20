@@ -3,7 +3,6 @@ package game
 import (
 	"encoding/json"
 	"reflect"
-	"sync"
 	"testing"
 	"unsafe"
 
@@ -19,7 +18,6 @@ func createLobbyWithDemoPlayers(playercount int) *Lobby {
 	lobby := &Lobby{
 		Owner:   owner,
 		creator: owner,
-		mutex:   &sync.Mutex{},
 	}
 	for i := 0; i < playercount; i++ {
 		lobby.players = append(lobby.players, &Player{
@@ -36,6 +34,16 @@ func noOpWriteObject(_ *Player, _ easyjson.Marshaler) error {
 
 func noOpWritePreparedMessage(_ *Player, _ *gws.Broadcaster) error {
 	return nil
+}
+
+func Test_Locking(t *testing.T) {
+	t.Parallel()
+
+	lobby := &Lobby{}
+	lobby.mutex.Lock()
+	if lobby.mutex.TryLock() {
+		t.Error("Mutex shouldn't be aqcuiredable at this point")
+	}
 }
 
 func Test_CalculateVotesNeededToKick(t *testing.T) {
@@ -138,9 +146,7 @@ func Test_simplifyText(t *testing.T) {
 func Test_recalculateRanks(t *testing.T) {
 	t.Parallel()
 
-	lobby := &Lobby{
-		mutex: &sync.Mutex{},
-	}
+	lobby := &Lobby{}
 	lobby.players = append(lobby.players, &Player{
 		ID:        uuid.Must(uuid.NewV4()),
 		Score:     1,
@@ -228,7 +234,6 @@ func Test_wordSelectionEvent(t *testing.T) {
 	t.Parallel()
 
 	lobby := &Lobby{
-		mutex: &sync.Mutex{},
 		EditableLobbySettings: EditableLobbySettings{
 			DrawingTime: 10,
 			Rounds:      10,
@@ -326,7 +331,6 @@ func Test_kickDrawer(t *testing.T) {
 	t.Parallel()
 
 	lobby := &Lobby{
-		mutex: &sync.Mutex{},
 		EditableLobbySettings: EditableLobbySettings{
 			DrawingTime: 10,
 			Rounds:      10,

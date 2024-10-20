@@ -87,7 +87,7 @@ type Lobby struct {
 	// it is empty.
 	LastPlayerDisconnectTime *time.Time
 
-	mutex *sync.Mutex
+	mutex sync.Mutex
 
 	WriteObject          func(*Player, easyjson.Marshaler) error
 	WritePreparedMessage func(*Player, *gws.Broadcaster) error
