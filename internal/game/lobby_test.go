@@ -513,3 +513,30 @@ func Test_calculateDrawerScore(t *testing.T) {
 		require.Equal(t, 250, lobby.calculateDrawerScore())
 	})
 }
+
+func Test_NoPrematureGameOver(t *testing.T) {
+	t.Parallel()
+
+	player, lobby, err := CreateLobby(uuid.Nil, "test", "english", false, 120, 4, 4, 3, 1, nil)
+	require.NoError(t, err)
+
+	lobby.WriteObject = noOpWriteObject
+	lobby.WritePreparedMessage = noOpWritePreparedMessage
+
+	require.Equal(t, Unstarted, lobby.State)
+	require.Equal(t, Standby, player.State)
+
+	// The socket won't be called anyway, so its fine.
+	player.ws = &gws.Conn{}
+	player.Connected = true
+
+	lobby.OnPlayerDisconnect(player)
+	require.False(t, player.Connected)
+	require.Equal(t, Standby, player.State)
+	require.Equal(t, Unstarted, lobby.State)
+
+	lobby.OnPlayerConnectUnsynchronized(player)
+	require.True(t, player.Connected)
+	require.Equal(t, Standby, player.State)
+	require.Equal(t, Unstarted, lobby.State)
+}

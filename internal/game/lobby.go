@@ -1100,6 +1100,8 @@ func (lobby *Lobby) OnPlayerDisconnect(player *Player) {
 
 	// Reset from potentially ready to standby
 	if lobby.State != Ongoing {
+		// FIXME Should we not set spectators to standby? Currently there's no
+		// indication you are spectating right now.
 		player.State = Standby
 		if lobby.readyToStart() {
 			lobby.startGame()
