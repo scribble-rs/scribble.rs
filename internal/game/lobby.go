@@ -243,17 +243,20 @@ func (lobby *Lobby) handleToggleReadinessEvent(player *Player) {
 func (lobby *Lobby) readyToStart() bool {
 	// Otherwise the game will start and gameover instantly. This can happen
 	// if a lobby is created and the owner refreshes.
-	if !lobby.HasConnectedPlayers() {
-		return false
-	}
+	var hasConnectedPlayers bool
 
 	for _, otherPlayer := range lobby.players {
-		if otherPlayer.Connected && otherPlayer.State != Ready {
+		if !otherPlayer.Connected {
+			continue
+		}
+
+		if otherPlayer.State != Ready {
 			return false
 		}
+		hasConnectedPlayers = true
 	}
 
-	return true
+	return hasConnectedPlayers
 }
 
 func handleMessage(message string, sender *Player, lobby *Lobby) {
@@ -1156,6 +1159,7 @@ func (lobby *Lobby) canDraw(player *Player) bool {
 func (lobby *Lobby) Shutdown() {
 	lobby.mutex.Lock()
 	defer lobby.mutex.Unlock()
+	log.Println("Lobby Shutdown: Mutex aqcuired")
 
 	lobby.Broadcast(&EventTypeOnly{Type: EventTypeShutdown})
 }
