@@ -31,17 +31,17 @@ jobs:
 
       - name: Build artifact
         shell: bash
-        run: |
-          go build -trimpath -ldflags "-w -s -X 'github.com/scribble-rs/scribble.rs/internal/version.Version=$VERSION'" -o ${{ matrix.binary_name }} ./cmd/scribblers
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
         env:
           # Disable CGO to get "more static" binaries. They aren't really static ...
           # since it can still happen that part of the stdlib access certain libs, but
           # whatever, this will probs do for our usecase. (Can't quite remember
           # anymore, but I have had issues with this in the past) :D
           CGO_ENABLED: 0
+        run: |
+          go build -trimpath -ldflags "-w -s -X 'github.com/scribble-rs/scribble.rs/internal/version.Version=$VERSION'" -o ${{ matrix.binary_name }} ./cmd/scribblers
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.binary_name }}
           path: ./${{ matrix.binary_name }}
