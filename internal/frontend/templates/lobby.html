@@ -28,7 +28,7 @@
                 <div id="lobby-header-center-element">
                     <div>
                         <div>
-                            <button popovertarget="menu" alt="Show menu" title="Show menu">
+                            <button id="menu-button" popovertarget="menu" alt="Show menu" title="Show menu">
                                 <img src="{{.RootPath}}/resources/menu.svg?cache_bust={{.CacheBust}}"
                                     class="header-button-image" />
                             </button>
@@ -569,8 +569,24 @@
             showDialog(id, title, messageNode);
         }
 
+        const menu = document.getElementById("menu");
         function hideMenu() {
-            document.getElementById("menu").hidePopover();
+            menu.hidePopover();
+        }
+
+        // Since chromes implementation of the popup is dumb, we can't position
+        // it correctly without javascript.
+        if (!navigator.userAgent.toLowerCase().includes('firefox')) {
+            const menu_button = document.getElementById("menu-button");
+            menu.addEventListener("toggle", (event) => {
+                if (event.newState === "open") {
+                    const bounds = menu_button.getBoundingClientRect();
+                    // Technically this won't correctly handle the scrolling
+                    // position, but we'll cope for now.
+                    menu.style.top = bounds.bottom + "px"
+                    menu.style.left = bounds.left + "px"
+                }
+            });
         }
 
         function showDialog(id, title, contentNode, buttonBar) {
