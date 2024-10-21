@@ -13,17 +13,18 @@ jobs:
       max-parallel: 3
       matrix:
         os: [ubuntu-latest, windows-2022]
-        buildArgs: VERSION=${{ github.ref_name }}
         include:
         - os: ubuntu-latest
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           file: linux.Dockerfile
+          buildArgs: VERSION=${{ github.event.workflow_run.head_branch }}
           tags: latest, ${{ github.event.workflow_run.head_branch }}
           multiPlatform: true
 
         - os: windows-2022
           platforms: windows/amd64
           file: windows.Dockerfile
+          buildArgs: VERSION=${{ github.event.workflow_run.head_branch }}
           tags: windows-latest, windows-${{ github.event.workflow_run.head_branch }}
           multiPlatform: false
 

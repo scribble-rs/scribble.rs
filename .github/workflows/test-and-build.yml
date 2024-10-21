@@ -18,6 +18,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Workaround to get tags, getting git describe to work.
+          fetch-depth: 0
 
       - name: Install Go
         uses: actions/setup-go@v5
@@ -38,7 +41,7 @@ jobs:
           # anymore, but I have had issues with this in the past) :D
           CGO_ENABLED: 0
         run: |
-          go build -trimpath -ldflags "-w -s -X 'github.com/scribble-rs/scribble.rs/internal/version.Version=$VERSION'" -o ${{ matrix.binary_name }} ./cmd/scribblers
+          go build -trimpath -ldflags "-w -s -X 'github.com/scribble-rs/scribble.rs/internal/version.Version=$(git describe --tags --dirty)'" -o ${{ matrix.binary_name }} ./cmd/scribblers
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
