@@ -659,12 +659,13 @@ kbd {
         width: 32px;
         height: 32px;
     }
+}
 
+@media only screen and (max-width: 812px) and (not (orientation: landscape)) {
     #message-container {
         max-height: 5rem;
     }
 }
-
 
 @media only screen and (orientation: portrait),
 (max-aspect-ratio: 4/3) {
