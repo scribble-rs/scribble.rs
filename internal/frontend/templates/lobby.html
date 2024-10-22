@@ -1925,6 +1925,22 @@
         //must've clicked it at least once in order for that to work.
         window.addEventListener("keydown", onKeyDown);
 
+        function debounce(func, timeout) {
+            let timer;
+            return (...args) => {
+                clearTimeout(timer);
+                timer = setTimeout(() => {func.apply(this, args);}, timeout);
+            };
+        }
+
+        // We debounce this with a relatively small wait time, to prevent spamming
+        // hardcore, but also to ensure we do not draw any bullshit.
+        const requestDrawingDebounced = debounce(() => {
+            socket.send(JSON.stringify({
+                type: "request-drawing",
+            }));
+        }, 50);
+
         function handleCanvasResize() {
             if (drawingBoard.width === drawingBoard.clientWidth && drawingBoard.height === drawingBoard.clientHeight) {
                 return false;
@@ -1945,9 +1961,7 @@
                 //Since the canvas gets cleared, we request the drawing again.
                 //Saving it locally would be wasteful and might slow down some
                 //clients due to a lot of memory allocation.
-                socket.send(JSON.stringify({
-                    type: "request-drawing",
-                }));
+                requestDrawingDebounced();
             }
         }, false);
 
