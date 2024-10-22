@@ -291,12 +291,7 @@ kbd {
     color: rgb(25, 166, 166);
 }
 
-.message-input-form {
-    display: flex;
-}
-
 #message-input {
-    flex: 1;
     padding: 10px;
     margin-top: 5px;
     border: 0;

@@ -420,10 +420,8 @@
 
             <div id="chat">
                 <div id="message-container"></div>
-                <form class="message-input-form" onsubmit="return sendMessage()">
-                    <input id="message-input" type="text" autocomplete="off"
-                        placeholder="{{.Translation.Get "message-input-placeholder"}}" />
-                </form>
+                <input id="message-input" type="text" autocomplete="off" onkeypress="sendMessage(event)"
+                    placeholder="{{.Translation.Get "message-input-placeholder"}}" />
             </div>
         </div>
     </div>
@@ -1098,31 +1096,40 @@
         //Used to restore the last message on arrow up.
         let lastMessage = "";
 
-        function sendMessage() {
-            lastMessage = messageInput.value;
+        const encoder = new TextEncoder();
+        function sendMessage(event) {
+            if (event.keyCode !== 13) {
+                return;
+            }
+            if (!messageInput.value) {
+                return;
+            }
 
-            //We first check if there's more than 10000 characters and only if
-            //there isn't, we check for more than 10000 bytes, as that's
-            //potentially slower.
-            if (messageInput.value.length > 10000
-                || (new TextEncoder().encode(messageInput.value)).length > 10000) {
+            // While the backend already checks for message length, we want to
+            // prevent the loss of input and omit the event / clear here.
+            if (encoder.encode(messageInput.value).length > 10000) {
                 appendMessage("system-message", '{{.Translation.Get "system"}}',
                     '{{.Translation.Get "message-too-long"}}');
                 //We keep the messageInput content, since it could've been
                 //something important and we don't want the user having to
                 //rewrite it. Instead they can send it via some other means
                 //or shorten it a bit.
-            } else {
-                socket.send(JSON.stringify({
-                    type: "message",
-                    data: messageInput.value
-                }));
-                messageInput.value = "";
+                return;
             }
 
-            // Necessary in order to keep the page from submitting.
-            return false;
+            socket.send(JSON.stringify({
+                type: "message",
+                data: messageInput.value
+            }));
+            lastMessage = messageInput.value;
+            messageInput.value = "";
         }
+
+        messageInput.addEventListener("keydown", function (event) {
+            if (event.keyCode === 38 /* arrow up */ && messageInput.value.length === 0) {
+                messageInput.value = lastMessage;
+            }
+        });
 
         function setAllowDrawing(value) {
             allowDrawing = value;
@@ -1159,12 +1166,6 @@
                 childList: true,
                 subtree: false
             });
-
-        messageInput.addEventListener("keydown", function (event) {
-            if (event.keyCode === 38 /* arrow up */ && messageInput.value.length === 0) {
-                messageInput.value = lastMessage;
-            }
-        });
 
         let ownID, ownerID, ownName, drawerID, drawerName;
         let round = 0;
