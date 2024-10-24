@@ -163,9 +163,6 @@ func handleIncommingEvent(lobby *game.Lobby, player *game.Player, data []byte) {
 }
 
 func WriteObject(player *game.Player, object easyjson.Marshaler) error {
-	player.GetWebsocketMutex().Lock()
-	defer player.GetWebsocketMutex().Unlock()
-
 	socket := player.GetWebsocket()
 	if socket == nil || !player.Connected {
 		return ErrPlayerNotConnected
@@ -187,9 +184,6 @@ func WriteObject(player *game.Player, object easyjson.Marshaler) error {
 }
 
 func WritePreparedMessage(player *game.Player, message *gws.Broadcaster) error {
-	player.GetWebsocketMutex().Lock()
-	defer player.GetWebsocketMutex().Unlock()
-
 	socket := player.GetWebsocket()
 	if socket == nil || !player.Connected {
 		return ErrPlayerNotConnected

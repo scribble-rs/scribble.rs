@@ -120,15 +120,6 @@ func (player *Player) SetWebsocket(socket *gws.Conn) {
 	player.ws = socket
 }
 
-// GetWebsocketMutex returns a mutex for locking the websocket connection.
-// Since gorilla websockets shits it self when two calls happen at
-// the same time, we need a mutex per player, since each player has their
-// own socket. This getter extends to prevent accidentally sending the mutex
-// via the network.
-func (player *Player) GetWebsocketMutex() *sync.Mutex {
-	return player.socketMutex
-}
-
 // GetUserSession returns the players current user session.
 func (player *Player) GetUserSession() uuid.UUID {
 	return player.userSession
@@ -180,7 +171,6 @@ func createPlayer(name string) *Player {
 		ID:           uuid.Must(uuid.NewV4()),
 		userSession:  uuid.Must(uuid.NewV4()),
 		votedForKick: make(map[uuid.UUID]bool),
-		socketMutex:  &sync.Mutex{},
 	}
 }
 

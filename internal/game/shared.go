@@ -2,7 +2,6 @@
 package game
 
 import (
-	"sync"
 	"time"
 
 	"github.com/gofrs/uuid/v5"
@@ -200,7 +199,6 @@ type Player struct {
 	// userSession uniquely identifies the player.
 	userSession uuid.UUID
 	ws          *gws.Conn
-	socketMutex *sync.Mutex
 	// disconnectTime is used to kick a player in case the lobby doesn't have
 	// space for new players. The player with the oldest disconnect.Time will
 	// get kicked.
