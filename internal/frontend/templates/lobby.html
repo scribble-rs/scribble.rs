@@ -1953,23 +1953,24 @@
             return true;
         }
 
+        function clear(context) {
+            context.fillStyle = "#FFFFFF";
+            context.fillRect(0, 0, drawingBoard.width, drawingBoard.height);
+        }
+
         //Call intially to correct initial state
         handleCanvasResize();
 
         window.addEventListener("resize", () => {
             if (handleCanvasResize()) {
+                clear(context);
+
                 //Since the canvas gets cleared, we request the drawing again.
                 //Saving it locally would be wasteful and might slow down some
                 //clients due to a lot of memory allocation.
                 requestDrawingDebounced();
             }
         }, false);
-
-
-        function clear(context) {
-            context.fillStyle = "#FFFFFF";
-            context.fillRect(0, 0, drawingBoard.width, drawingBoard.height);
-        }
 
         function fillAndSendEvent(context, x, y, color) {
             if (fillFlood(context, x, y, color)) {
