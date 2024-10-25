@@ -816,7 +816,7 @@
         const boardRatio = baseWidth / baseHeight;
 
         // Moving this here to extract the context after resizing
-        const context = drawingBoard.getContext("2d");
+        const context = drawingBoard.getContext("2d", {alpha: false});
 
         function scaleUpFactor() {
             return baseWidth / drawingBoard.clientWidth;
@@ -1960,6 +1960,8 @@
 
         //Call intially to correct initial state
         handleCanvasResize();
+        // Clear initially, as it will be black otherwise.
+        clear(context);
 
         window.addEventListener("resize", () => {
             if (handleCanvasResize()) {
@@ -2098,8 +2100,6 @@
             imageData.data[offset] = color.r;
             imageData.data[offset + 1] = color.g;
             imageData.data[offset + 2] = color.b;
-            //We never want transparency, therefore alpha is always 255.
-            imageData.data[offset + 3] = 255;
         }
     </script>
 </body>
