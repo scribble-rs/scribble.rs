@@ -2,7 +2,7 @@
 //Repo: https://github.com/binarymax/floodfill.js
 //MIT License
 
-function floodfill(data, x, y, fillcolor, width, height) {
+function floodfillData(data, x, y, fillcolor, width, height) {
     var length = data.length;
     var i = (x + y * width) * 4;
 
@@ -37,7 +37,7 @@ function floodfill(data, x, y, fillcolor, width, height) {
 
     while (nextQIndex > 0) {
         i = Q[--nextQIndex];
-        if (pixelCompareAndSet(i, targetcolor, fillcolor, data, length)) {
+        if (pixelCompareAndSet(i, targetcolor, fillcolor, data)) {
             e = i;
             w = i;
             mw = Math.floor(i / w2) * w2; //left bound
@@ -84,10 +84,10 @@ function fillUint8ClampedArray(data, x, y, color, width, height) {
     var xi = Math.floor(x);
     var yi = Math.floor(y);
 
-    return floodfill(data, xi, yi, color, width, height);
+    return floodfillData(data, xi, yi, color, width, height);
 };
 
-function fillFlood(ctx, x, y, color) {
+function floodfillContext(ctx, x, y, color) {
     var image = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
     var width = image.width;
     var height = image.height;

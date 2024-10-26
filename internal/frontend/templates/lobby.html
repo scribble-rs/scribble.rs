@@ -1227,7 +1227,7 @@
                 } else if (parsed.type === "line") {
                     drawLine(context, parsed.data.fromX * scaleDownFactor(), parsed.data.fromY * scaleDownFactor(), parsed.data.toX * scaleDownFactor(), parsed.data.toY * scaleDownFactor(), parsed.data.color, parsed.data.lineWidth * scaleDownFactor());
                 } else if (parsed.type === "fill") {
-                    fillFlood(context, parsed.data.x * scaleDownFactor(), parsed.data.y * scaleDownFactor(), parsed.data.color);
+                    floodfillContext(context, parsed.data.x * scaleDownFactor(), parsed.data.y * scaleDownFactor(), parsed.data.color);
                 } else if (parsed.type === "clear-drawing-board") {
                     clear(context);
                 } else if (parsed.type === "next-turn") {
@@ -1975,7 +1975,7 @@
         }, false);
 
         function fillAndSendEvent(context, x, y, color) {
-            if (fillFlood(context, x, y, color)) {
+            if (floodfillContext(context, x, y, color)) {
                 const fillInstruction = {
                     type: "fill",
                     data: {
