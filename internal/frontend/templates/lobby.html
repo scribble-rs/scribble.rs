@@ -818,6 +818,16 @@
         // Moving this here to extract the context after resizing
         const context = drawingBoard.getContext("2d", {alpha: false});
 
+        // One might one wonder what the fuck is going here. I'll enlighten you!
+        // The data you put into a canvas, might not necessarily be what comes out
+        // of it again. Some browser (*cough* firefox *cough*) seem to put little
+        // off by one / two errors into the data, when reading it back out.
+        // Apparently this helps against some type of fingerprinting. In order to
+        // combat this, we do not use the canvas as a source of truth, but
+        // permanently hold a virtual canvas buffer that we can operate on when
+        // filling or drawing.
+        let imageData;
+
         function scaleUpFactor() {
             return baseWidth / drawingBoard.clientWidth;
         }
@@ -1693,7 +1703,7 @@
         function applyDrawData(drawElements) {
             clear(context);
             const scaleFactor = scaleDownFactor();
-            const canvasData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
+            imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
 
             // This implementation directly access the canvas data and does not
             // put it back into the canvas context directly. This saved us not
@@ -1729,7 +1739,7 @@
                             const newY1 = y1 + iy - offset;
                             const newX2 = x2 + ix - offset;
                             const newY2 = y2 + iy - offset;
-                            drawBresenhamLine(canvasData, newX1, newY1, newX2, newY2, color);
+                            drawBresenhamLine(imageData, newX1, newY1, newX2, newY2, color);
                         }
                     }
                 }
@@ -1740,10 +1750,10 @@
                     const drawData = drawElement.data;
                     if (drawElement.type === "fill") {
                         fillUint8ClampedArray(
-                            canvasData.data,
+                            imageData.data,
                             drawData.x * scaleFactor, drawData.y * scaleFactor,
                             drawData.color,
-                            canvasData.width, canvasData.height);
+                            imageData.width, imageData.height);
                     } else if (drawElement.type === "line") {
                         _drawLine(
                             drawData.fromX * scaleFactor, drawData.fromY * scaleFactor,
@@ -1755,7 +1765,7 @@
                     }
                 });
 
-            context.putImageData(canvasData, 0, 0);
+            context.putImageData(imageData, 0, 0);
         }
 
         let lastX = 0;
@@ -1948,6 +1958,7 @@
 
             drawingBoard.width = drawingBoard.clientWidth;
             drawingBoard.height = drawingBoard.clientHeight;
+            imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
             setLineWidth(localLineWidthUnscaled);
 
             return true;
@@ -1956,6 +1967,7 @@
         function clear(context) {
             context.fillStyle = "#FFFFFF";
             context.fillRect(0, 0, drawingBoard.width, drawingBoard.height);
+            imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
         }
 
         //Call intially to correct initial state
@@ -1975,7 +1987,8 @@
         }, false);
 
         function fillAndSendEvent(context, x, y, color) {
-            if (floodfillContext(context, x, y, color)) {
+            if (floodfillData(imageData.data, x, y, color, imageData.width, imageData.height)) {
+                context.putImageData(imageData, 0, 0);
                 const fillInstruction = {
                     type: "fill",
                     data: {
@@ -2031,21 +2044,27 @@
 
             const circleMap = generateCircleMap(Math.floor(lineWidth / 2));
             const offset = Math.floor(circleMap.length / 2);
-            const imageData = context.getImageData(left, top, right - left, bottom - top);
 
             for (let ix = 0; ix < circleMap.length; ix++) {
                 for (let iy = 0; iy < circleMap[ix].length; iy++) {
                     if (circleMap[ix][iy] === 1 || (x1 === x2 && y1 === y2 && circleMap[ix][iy] === 2)) {
-                        const newX1 = x1 + ix - offset - left;
-                        const newY1 = y1 + iy - offset - top;
-                        const newX2 = x2 + ix - offset - left;
-                        const newY2 = y2 + iy - offset - top;
+                        const newX1 = x1 + ix - offset;
+                        const newY1 = y1 + iy - offset;
+                        const newX2 = x2 + ix - offset;
+                        const newY2 = y2 + iy - offset;
                         drawBresenhamLine(imageData, newX1, newY1, newX2, newY2, color);
                     }
                 }
             }
 
-            context.putImageData(imageData, left, top);
+            const targetX = left;
+            const targetY = top;
+            const sourceX = left;
+            const sourceY = top;
+            const sourceWidth = right - left;
+            const sourceHeight = bottom - top;
+            //context.putImageData(imageData, targetX, targetY, sourceX, sourceY, sourceWidth, sourceHeight);
+            context.putImageData(imageData, 0, 0, 0, 0, right, bottom);
         }
 
         function drawBresenhamLine(imageData, x1, y1, x2, y2, color) {

@@ -11,10 +11,9 @@ function floodfillData(data, x, y, fillcolor, width, height) {
         return false;
     }
 
-    var targetcolor = [data[i], data[i + 1], data[i + 2]];
-
     //We check whether the target pixel is already the desired color, since
     //filling wouldn't change any of the pixels in this case.
+    var targetcolor = [data[i], data[i + 1], data[i + 2]];
     if (
         targetcolor[0] === fillcolor.r &&
         targetcolor[1] === fillcolor.g &&
@@ -64,7 +63,6 @@ function pixelCompare(i, targetcolor, data) {
 
 function pixelCompareAndSet(i, targetcolor, fillcolor, data) {
     if (pixelCompare(i, targetcolor, data)) {
-        //fill the color
         data[i] = fillcolor.r;
         data[i + 1] = fillcolor.g;
         data[i + 2] = fillcolor.b;
@@ -86,19 +84,3 @@ function fillUint8ClampedArray(data, x, y, color, width, height) {
 
     return floodfillData(data, xi, yi, color, width, height);
 };
-
-function floodfillContext(ctx, x, y, color) {
-    var image = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
-    var width = image.width;
-    var height = image.height;
-
-    if (width > 0 && height > 0) {
-        const hasFilled = fillUint8ClampedArray(image.data, x, y, color, width, height);
-        if (hasFilled) {
-            ctx.putImageData(image, 0, 0);
-        }
-        return hasFilled;
-    }
-
-    return false;
-}
