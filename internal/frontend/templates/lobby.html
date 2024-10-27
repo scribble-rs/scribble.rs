@@ -1703,7 +1703,6 @@
         function applyDrawData(drawElements) {
             clear(context);
             const scaleFactor = scaleDownFactor();
-            imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
 
             // This implementation directly access the canvas data and does not
             // put it back into the canvas context directly. This saved us not
@@ -1967,6 +1966,7 @@
         function clear(context) {
             context.fillStyle = "#FFFFFF";
             context.fillRect(0, 0, drawingBoard.width, drawingBoard.height);
+            // Refetch, as we don't manually fill here.
             imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
         }
 
