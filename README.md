@@ -76,14 +76,17 @@ Run the following, replacing `<port>` with the port you want the container to be
 reachable from outside:
 
 ```shell
-docker run --pull always --env PORT=<port> -p <port>:8080 biosmarcel/scribble.rs:latest
+docker run --pull always --env PORT=8080 -p <port>:8080 biosmarcel/scribble.rs:latest
 ```
 
 For example:
 
 ```shell
-docker run --pull always --env PORT=80 -p 80:8080 biosmarcel/scribble.rs:latest
+docker run --pull always --env PORT=8080 -p 80:8080 biosmarcel/scribble.rs:latest
 ```
+
+Note that you can change `8080` too, but it is the internal port of the
+container and you shouldn't have to change it under normal circumstances.
 
 ## Building / Running
 
