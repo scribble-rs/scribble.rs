@@ -1465,7 +1465,7 @@
                 }
             } else if (ready.gameState === "ongoing") {
                 // Lack of wordHints implies that word has been chosen yet.
-                if (ready.wordHints === null && drawerID !== ownID) {
+                if (!ready.wordHints && drawerID !== ownID) {
                     waitChooseDrawerSpan.innerText = drawerName;
                     waitChooseDialog.style.visibility = "visible";
                 }
@@ -1573,6 +1573,14 @@
 
             playerContainer.innerHTML = "";
             players.forEach(player => {
+                // Makes sure that the "is choosing" a word dialog doesn't show
+                // "undefined" as the player name. Can happen, if the player
+                // disconnects after being assigned the drawer.
+                if (matchOngoing && player.state === "drawing") {
+                    drawerID = player.id;
+                    drawerName = player.name;
+                }
+
                 //We don't wanna show the disconnected players.
                 if (!player.connected) {
                     return;
@@ -1615,9 +1623,6 @@
                     if (player.state === "standby") {
                         playerDiv.classList.add("player-done");
                     } else if (player.state === "drawing") {
-                        drawerID = player.id;
-                        drawerName = player.name;
-
                         const playerStateImage = createPlayerStateImageNode("{{.RootPath}}/resources/pencil.svg?cache_bust={{.CacheBust}}");
                         playerStateImage.style.transform = "scaleX(-1)";
                         scoreAndStatusDiv.appendChild(playerStateImage);
