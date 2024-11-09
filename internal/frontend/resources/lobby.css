@@ -88,7 +88,7 @@ kbd {
 
 .ready-check-box {
     padding: 0.5rem 1rem 0.5rem 1rem;
-    background-color: white;
+    background-color: var(--component-base-color);
     border-radius: var(--component-border-radius);
 }
 
@@ -320,14 +320,13 @@ kbd {
 
 .dialog-button {
     border: none;
-    background-color: white;
+    background-color: var(--component-base-color);
     padding: 0.5rem 1rem 0.5rem 1rem;
-    border-radius: var(--component-border-radius);
 }
 
 .button-bar {
     display: flex;
-    align-items: center;
+    align-items: stretch;
     justify-content: center;
     margin-top: 1em;
     gap: 0.25rem;
