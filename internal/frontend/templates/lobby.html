@@ -257,9 +257,6 @@
             </div>
 
             <div id="toolbox" style="display: none;">
-                <input id="color-picker" class="toolbox-group" type="color" onchange="setColorFromColorPicker()"
-                    value="#000000" alt="{{.Translation.Get "change-active-color"}}"
-                    title="{{.Translation.Get "change-active-color"}}">
                 <div class="color-button-container toolbox-group" alt="{{.Translation.Get "change-active-color"}}"
                     title="{{.Translation.Get "change-active-color"}}">
                     <!-- These buttons use !important for their color in order
@@ -358,7 +355,7 @@
                         </div>
                     </label>
                 </div>
-                <div class="pencil-sizes-container toolbox-group">
+                <div id="size-buttons" class="pencil-sizes-container toolbox-group">
                     <label for="size-8-button">
                         <input id="size-8-button" class="custom-check-or-radio line-width-button"
                             onchange="setLineWidth(8)" type="radio" name="line-width" checked>
@@ -526,8 +523,6 @@
         const maxRoundSpan = document.getElementById("max-rounds");
         const timeLeftValue = document.getElementById("time-left-value");
         const drawingBoard = document.getElementById("drawing-board");
-
-        const colorPicker = document.getElementById("color-picker");
 
         const centerDialogs = document.getElementById("center-dialogs");
 
@@ -868,75 +863,85 @@
         const sizeButton16 = document.getElementById("size-16-button");
         const sizeButton24 = document.getElementById("size-24-button");
         const sizeButton32 = document.getElementById("size-32-button");
+        const sizeButtons = document.getElementById("size-buttons");
 
         const toolButtonPen = document.getElementById("tool-type-pencil");
         const toolButtonRubber = document.getElementById("tool-type-rubber");
         const toolButtonFill = document.getElementById("tool-type-fill");
 
-        //We use the states present in UI elements, since in case of
-        //hitting F5(Refresh), the browser will not reset these states to the
-        //initial values defined in the HTML.
-        //The necessary cursor update implicitly happens with setLineWidth.
-        let localColor = hexStringToRgbColorObject(colorPicker.value);
-
         if (sizeButton8.checked) {
-            setLineWidth(8);
+            setLineWidthNoUpdate(8);
         } else if (sizeButton16.checked) {
-            setLineWidth(16);
+            setLineWidthNoUpdate(16);
         } else if (sizeButton24.checked) {
-            setLineWidth(24);
+            setLineWidthNoUpdate(24);
         } else if (sizeButton32.checked) {
-            setLineWidth(32);
+            setLineWidthNoUpdate(32);
         }
 
         if (toolButtonPen.checked) {
-            chooseTool(pen);
+            chooseToolNoUpdate(pen);
         } else if (toolButtonFill.checked) {
-            chooseTool(fillBucket);
+            chooseToolNoUpdate(fillBucket);
         } else if (toolButtonRubber.checked) {
-            chooseTool(rubber);
+            chooseToolNoUpdate(rubber);
         }
 
-        function setColorFromColorPicker() {
-            setColorWithoutUpdatingColorPicker(colorPicker.value);
-        }
+        let localColor;
+        setColorNoUpdate(sessionStorage.getItem("local_color") ?? "#000000");
 
-        function setColor(color) {
-            colorPicker.value = color;
-            setColorWithoutUpdatingColorPicker(color);
-        }
+        updateDrawingStateUI();
 
-        function setColorWithoutUpdatingColorPicker(color) {
-            localColor = hexStringToRgbColorObject(color);
+        function setColor(colorAsHex) {
+            setColorNoUpdate(colorAsHex);
 
+            // If we select a new color, we assume we don't want to use the
+            // rubber anymore and automatically switch to the pen.
             if (localTool === rubber) {
-                //Hack to correct selection. Doesn't automatically trigger chooseTool(pen).
+                // Clicking the button programmatically won't trigger its
                 toolButtonPen.click();
+
+                // updateDrawingStateUI is implicit
                 chooseTool(pen);
-                //Cursor update is implicit.
             } else {
-                updateCursor();
+                updateDrawingStateUI();
             }
         }
 
+        function setColorNoUpdate(colorAsHex) {
+            localColor = hexStringToRgbColorObject(colorAsHex);
+            sessionStorage.setItem("local_color", colorAsHex);
+        }
+
         function setLineWidth(value) {
+            setLineWidthNoUpdate(value);
+            updateDrawingStateUI();
+        }
+
+        function setLineWidthNoUpdate(value) {
             localLineWidthUnscaled = value;
             localLineWidth = value * scaleDownFactor();
-            updateCursor();
         }
 
         function chooseTool(value) {
+            chooseToolNoUpdate(value);
+            updateDrawingStateUI();
+        }
+
+        function chooseToolNoUpdate(value) {
             if (value === pen || value === rubber || value === fillBucket) {
                 localTool = value;
             } else {
                 //If this ends up with an invalid value, we use the pencil.
                 localTool = pen;
             }
-            updateCursor();
         }
 
         //We accept both #RRGGBB and RRGGBB. Both are treated case insensitive.
         function hexStringToRgbColorObject(hexString) {
+            if (!hexString) {
+                return {r: 0, g: 0, b: 0};
+            }
             const hexColorsRegex = /#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})/i;
             const match = hexString.match(hexColorsRegex)
             return {r: parseInt(match[1], 16), g: parseInt(match[2], 16), b: parseInt(match[3], 16)};
@@ -954,6 +959,14 @@
         }
 
         const rubberColor = {r: 255, g: 255, b: 255};
+
+        function updateDrawingStateUI() {
+            // Color all buttons, so the player always has a hint as to what the
+            // active color is, since the cursor might not always be visible.
+            sizeButtons.style.setProperty("--dot-color", rgbColorObjectToHexString(localColor));
+
+            updateCursor();
+        }
 
         function updateCursor() {
             if (allowDrawing) {
@@ -1143,7 +1156,7 @@
 
         function setAllowDrawing(value) {
             allowDrawing = value;
-            updateCursor();
+            updateDrawingStateUI();
 
             if (allowDrawing) {
                 document.getElementById("toolbox").style.display = "flex";

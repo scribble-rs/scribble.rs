@@ -1,3 +1,7 @@
+:root {
+    --dot-color: black;
+}
+
 .noscript {
     display: flex;
     font-size: 2.5rem;
@@ -329,13 +333,8 @@ kbd {
     gap: 0.25rem;
 }
 
-.line-width-button-content:hover,
-#color-picker:hover {
+.line-width-button-content:hover {
     background-color: var(--component-hover-background);
-}
-
-#color-picker:active {
-    background-color: var(--component-active-background);
 }
 
 .header-button {
@@ -353,7 +352,8 @@ kbd {
 }
 
 .dot {
-    background-color: black;
+    background-color: var(--dot-color);
+    border: 1px solid black;
     border-radius: 50%;
 }
 
@@ -377,21 +377,6 @@ kbd {
 
 .line-width-button:checked+.line-width-button-content {
     background-color: var(--component-active-background);
-}
-
-#color-picker {
-    border: 0;
-    border-radius: var(--component-border-radius);
-    background-color: var(--component-base-color);
-    height: 50px;
-    width: 50px;
-    padding: 0;
-}
-
-@-moz-document url-prefix() {
-    #color-picker {
-        padding: 5px;
-    }
 }
 
 .canvas-button {
@@ -642,7 +627,6 @@ kbd {
         height: 19px;
     }
 
-    #color-picker,
     .canvas-button,
     .line-width-button-content {
         width: 40px;
