@@ -728,7 +728,8 @@ kbd {
 
 .menu-item {
     display: flex;
+    align-items: center;
     flex-direction: row;
-    gap: 5px;
+    gap: 10px;
     font-size: 1rem !important;
 }
