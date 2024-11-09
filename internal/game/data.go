@@ -165,15 +165,6 @@ func (lobby *Lobby) AppendFill(fill *FillEvent) {
 	lobby.currentDrawing = append(lobby.currentDrawing, fill)
 }
 
-func createPlayer(name string) *Player {
-	return &Player{
-		Name:         SanitizeName(name),
-		ID:           uuid.Must(uuid.NewV4()),
-		userSession:  uuid.Must(uuid.NewV4()),
-		votedForKick: make(map[uuid.UUID]bool),
-	}
-}
-
 // SanitizeName removes invalid characters from the players name, resolves
 // emoji codes, limits the name length and generates a new name if necessary.
 func SanitizeName(name string) string {

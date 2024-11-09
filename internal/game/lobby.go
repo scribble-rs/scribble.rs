@@ -1012,12 +1012,7 @@ func CreateLobby(
 		}
 	}
 
-	player := createPlayer(playerName)
-	// Since the lobby is new and we aren't ready yet, the state needs to be
-	// standby.
-	player.State = Standby
-
-	lobby.players = append(lobby.players, player)
+	player := lobby.JoinPlayer(playerName)
 	lobby.Owner = player
 	lobby.creator = player
 
@@ -1135,8 +1130,13 @@ func (lobby *Lobby) GetAvailableWordHints(player *Player) []*WordHint {
 
 // JoinPlayer creates a new player object using the given name and adds it
 // to the lobbies playerlist. The new players is returned.
-func (lobby *Lobby) JoinPlayer(playerName string) *Player {
-	player := createPlayer(playerName)
+func (lobby *Lobby) JoinPlayer(name string) *Player {
+	player := &Player{
+		Name:         SanitizeName(name),
+		ID:           uuid.Must(uuid.NewV4()),
+		userSession:  uuid.Must(uuid.NewV4()),
+		votedForKick: make(map[uuid.UUID]bool),
+	}
 
 	if lobby.State == Ongoing {
 		// Joining an existing game will mark you as a guesser, as someone is
