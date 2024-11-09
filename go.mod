@@ -13,7 +13,7 @@ require (
 	github.com/mailru/easyjson v0.7.7
 	github.com/stretchr/testify v1.9.0
 	github.com/subosito/gotenv v1.6.0
-	golang.org/x/text v0.19.0
+	golang.org/x/text v0.20.0
 )
 
 require (
