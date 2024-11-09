@@ -1250,7 +1250,15 @@
                 } else if (parsed.type === "line") {
                     drawLine(context, parsed.data.fromX * scaleDownFactor(), parsed.data.fromY * scaleDownFactor(), parsed.data.toX * scaleDownFactor(), parsed.data.toY * scaleDownFactor(), parsed.data.color, parsed.data.lineWidth * scaleDownFactor());
                 } else if (parsed.type === "fill") {
-                    floodfillContext(context, parsed.data.x * scaleDownFactor(), parsed.data.y * scaleDownFactor(), parsed.data.color);
+                    if (floodfillUint8ClampedArray(
+                        imageData.data,
+                        parsed.data.x * scaleDownFactor(),
+                        parsed.data.y * scaleDownFactor(),
+                        parsed.data.color,
+                        imageData.width,
+                        imageData.height)) {
+                        context.putImageData(imageData, 0, 0);
+                    }
                 } else if (parsed.type === "clear-drawing-board") {
                     clear(context);
                 } else if (parsed.type === "next-turn") {
@@ -1766,7 +1774,7 @@
                 .forEach(drawElement => {
                     const drawData = drawElement.data;
                     if (drawElement.type === "fill") {
-                        fillUint8ClampedArray(
+                        floodfillUint8ClampedArray(
                             imageData.data,
                             drawData.x * scaleFactor, drawData.y * scaleFactor,
                             drawData.color,
@@ -2005,7 +2013,7 @@
         }, false);
 
         function fillAndSendEvent(context, x, y, color) {
-            if (floodfillData(imageData.data, x, y, color, imageData.width, imageData.height)) {
+            if (floodfillUint8ClampedArray(imageData.data, x, y, color, imageData.width, imageData.height)) {
                 context.putImageData(imageData, 0, 0);
                 const fillInstruction = {
                     type: "fill",

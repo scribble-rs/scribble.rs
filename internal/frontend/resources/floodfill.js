@@ -71,16 +71,15 @@ function pixelCompareAndSet(i, targetcolor, fillcolor, data) {
     return false;
 };
 
-function fillUint8ClampedArray(data, x, y, color, width, height) {
-    if (!(data instanceof Uint8ClampedArray)) throw new Error("data must be an instance of Uint8ClampedArray");
+function floodfillUint8ClampedArray(data, x, y, color, width, height) {
     if (isNaN(width) || width < 1) throw new Error("argument 'width' must be a positive integer");
     if (isNaN(height) || height < 1) throw new Error("argument 'height' must be a positive integer");
     if (isNaN(x) || x < 0) throw new Error("argument 'x' must be a positive integer");
     if (isNaN(y) || y < 0) throw new Error("argument 'y' must be a positive integer");
     if (width * height * 4 !== data.length) throw new Error("width and height do not fit Uint8ClampedArray dimensions");
 
-    var xi = Math.floor(x);
-    var yi = Math.floor(y);
+    const xi = Math.floor(x);
+    const yi = Math.floor(y);
 
     return floodfillData(data, xi, yi, color, width, height);
 };
