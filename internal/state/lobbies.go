@@ -90,7 +90,7 @@ func GetLobby(id string) *game.Lobby {
 func ShutdownLobbiesGracefully() {
 	globalStateMutex.Lock()
 	defer globalStateMutex.Unlock()
-	log.Println("Shutdown: Mutex aqcuired")
+	log.Println("Shutdown: Mutex acquired")
 
 	for _, lobby := range lobbies {
 		// Since a reconnect requires a lookup to the state, all attempts to

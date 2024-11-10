@@ -217,7 +217,7 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 		// Since the client shouldn't be blocking to wait for the drawing, it's
 		// fine to emit the event if there's no drawing.
 		if len(lobby.currentDrawing) != 0 {
-			lobby.WriteObject(player, Event{Type: EventTypeDrawing, Data: lobby.currentDrawing})
+			_ = lobby.WriteObject(player, Event{Type: EventTypeDrawing, Data: lobby.currentDrawing})
 		}
 	}
 
@@ -320,7 +320,7 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 				advanceLobby(lobby)
 			} else {
 				// Since the word has been guessed correctly, we reveal it.
-				lobby.WriteObject(sender, Event{Type: EventTypeUpdateWordHint, Data: lobby.wordHintsShown})
+				_ = lobby.WriteObject(sender, Event{Type: EventTypeUpdateWordHint, Data: lobby.wordHintsShown})
 				recalculateRanks(lobby)
 				lobby.Broadcast(&Event{Type: EventTypeUpdatePlayers, Data: lobby.players})
 			}
@@ -331,7 +331,7 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 			// This allows other players to guess the word by watching what the
 			// other players are misstyping.
 			lobby.broadcastMessage(trimmedMessage, sender)
-			lobby.WriteObject(sender, Event{Type: EventTypeCloseGuess, Data: trimmedMessage})
+			_ = lobby.WriteObject(sender, Event{Type: EventTypeCloseGuess, Data: trimmedMessage})
 		}
 	default:
 		lobby.broadcastMessage(trimmedMessage, sender)
@@ -1101,7 +1101,7 @@ func (lobby *Lobby) OnPlayerDisconnect(player *Player) {
 		player.State = Standby
 		if lobby.readyToStart() {
 			lobby.startGame()
-			// Rank Calculation and sending out player updates happend anyway,
+			// Rank Calculation and sending out player updates happened anyway,
 			// so there's no need to keep going.
 			return
 		}
@@ -1160,7 +1160,7 @@ func (lobby *Lobby) canDraw(player *Player) bool {
 func (lobby *Lobby) Shutdown() {
 	lobby.mutex.Lock()
 	defer lobby.mutex.Unlock()
-	log.Println("Lobby Shutdown: Mutex aqcuired")
+	log.Println("Lobby Shutdown: Mutex acquired")
 
 	lobby.Broadcast(&EventTypeOnly{Type: EventTypeShutdown})
 }

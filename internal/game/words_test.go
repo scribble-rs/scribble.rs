@@ -37,7 +37,6 @@ func Test_readWordList(t *testing.T) {
 	})
 
 	for language := range WordlistData {
-		language := language
 		t.Run(language, func(t *testing.T) {
 			t.Parallel()
 
@@ -181,7 +180,7 @@ func Test_getRandomWordsReloading(t *testing.T) {
 
 		// Running this 10 times, expecting it to get 3 words each time, even
 		// though our pool has only got a size of 3.
-		for i := 0; i < 10; i++ {
+		for range 10 {
 			words := getRandomWords(3, lobby, reloadWordList)
 			if len(words) != 3 {
 				t.Errorf("Test failed, incorrect wordcount: %d", len(words))
@@ -202,7 +201,7 @@ func Test_getRandomWordsReloading(t *testing.T) {
 
 		// Running this 10 times, expecting it to get 3 words each time, even
 		// though our pool has only got a size of 3.
-		for i := 0; i < 10; i++ {
+		for range 10 {
 			words := getRandomWords(3, lobby, reloadWordList)
 			if len(words) != 3 {
 				t.Errorf("Test failed, incorrect wordcount: %d", len(words))
@@ -223,7 +222,7 @@ func Test_getRandomWordsReloading(t *testing.T) {
 
 		// Running this 10 times, expecting it to get 3 words each time, even
 		// though our pool has only got a size of 3.
-		for i := 0; i < 10; i++ {
+		for range 10 {
 			words := getRandomWords(3, lobby, reloadWordList)
 			if len(words) != 3 {
 				t.Errorf("Test failed, incorrect wordcount: %d", len(words))

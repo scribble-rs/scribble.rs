@@ -24,7 +24,6 @@ func Test_parsePlayerName(t *testing.T) {
 		{"name with space in the middle", "Hello World", "Hello World", false},
 	}
 	for _, testCase := range tests {
-		testCase := testCase
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -58,7 +57,6 @@ func Test_parseDrawingTime(t *testing.T) {
 		{"something valid", "150", 150, false},
 	}
 	for _, testCase := range tests {
-		testCase := testCase
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -92,7 +90,6 @@ func Test_parseRounds(t *testing.T) {
 		{"something valid", "15", 15, false},
 	}
 	for _, testCase := range tests {
-		testCase := testCase
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -126,7 +123,6 @@ func Test_parseMaxPlayers(t *testing.T) {
 		{"something valid", "15", 15, false},
 	}
 	for _, testCase := range tests {
-		testCase := testCase
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -162,7 +158,6 @@ func Test_parseCustomWords(t *testing.T) {
 		{"sentence and word", "What a great day, hello ", []string{"what a great day", "hello"}, false},
 	}
 	for _, testCase := range tests {
-		testCase := testCase
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -197,7 +192,6 @@ func Test_parseCustomWordsPerTurn(t *testing.T) {
 		{"something valid", "2", 2, false},
 	}
 	for _, testCase := range tests {
-		testCase := testCase
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -233,7 +227,6 @@ func Test_parseBoolean(t *testing.T) {
 		{"false mixed casing", "FalsE", false, false},
 	}
 	for _, testCase := range tests {
-		testCase := testCase
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 

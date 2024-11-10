@@ -19,7 +19,7 @@ func createLobbyWithDemoPlayers(playercount int) *Lobby {
 		Owner:   owner,
 		creator: owner,
 	}
-	for i := 0; i < playercount; i++ {
+	for range playercount {
 		lobby.players = append(lobby.players, &Player{
 			Connected: true,
 		})
@@ -42,7 +42,7 @@ func Test_Locking(t *testing.T) {
 	lobby := &Lobby{}
 	lobby.mutex.Lock()
 	if lobby.mutex.TryLock() {
-		t.Error("Mutex shouldn't be aqcuiredable at this point")
+		t.Error("Mutex shouldn't be acquiredable at this point")
 	}
 }
 
@@ -132,7 +132,6 @@ func Test_simplifyText(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -388,7 +387,10 @@ func Test_kickDrawer(t *testing.T) {
 }
 
 func Test_calculateDrawerScore(t *testing.T) {
+	t.Parallel()
+
 	t.Run("only disconnected players, with score", func(t *testing.T) {
+		t.Parallel()
 		drawer := &Player{State: Drawing}
 		lobby := Lobby{
 			players: []*Player{
@@ -407,6 +409,7 @@ func Test_calculateDrawerScore(t *testing.T) {
 		require.Equal(t, 150, lobby.calculateDrawerScore())
 	})
 	t.Run("only disconnected players, with no score", func(t *testing.T) {
+		t.Parallel()
 		drawer := &Player{State: Drawing}
 		lobby := Lobby{
 			players: []*Player{
@@ -425,6 +428,7 @@ func Test_calculateDrawerScore(t *testing.T) {
 		require.Equal(t, 0, lobby.calculateDrawerScore())
 	})
 	t.Run("connected players, but no score", func(t *testing.T) {
+		t.Parallel()
 		drawer := &Player{State: Drawing}
 		lobby := Lobby{
 			players: []*Player{
@@ -443,6 +447,7 @@ func Test_calculateDrawerScore(t *testing.T) {
 		require.Equal(t, 0, lobby.calculateDrawerScore())
 	})
 	t.Run("connected players", func(t *testing.T) {
+		t.Parallel()
 		drawer := &Player{State: Drawing}
 		lobby := Lobby{
 			players: []*Player{
@@ -461,6 +466,7 @@ func Test_calculateDrawerScore(t *testing.T) {
 		require.Equal(t, 150, lobby.calculateDrawerScore())
 	})
 	t.Run("some connected players, some disconnected, some without score", func(t *testing.T) {
+		t.Parallel()
 		drawer := &Player{State: Drawing}
 		lobby := Lobby{
 			players: []*Player{
@@ -487,6 +493,7 @@ func Test_calculateDrawerScore(t *testing.T) {
 		require.Equal(t, 100, lobby.calculateDrawerScore())
 	})
 	t.Run("some connected players, some disconnected", func(t *testing.T) {
+		t.Parallel()
 		drawer := &Player{State: Drawing}
 		lobby := Lobby{
 			players: []*Player{
