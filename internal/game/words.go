@@ -183,13 +183,6 @@ const (
 // to a distance of 2 and also handles transpositions where the runes are
 // directly next to eachother.
 func CheckGuess(a, b string) int {
-	// Simplify logic later on; FIXME Explain
-	if len(a) < len(b) {
-		a, b = b, a
-	} else if a == b {
-		return EqualGuess
-	}
-
 	// We only want to indicate a close guess if:
 	//   * 1 additional character is found (abc ~ abcd)
 	//   * 1 character is missing (abc ~ ab)
@@ -198,6 +191,15 @@ func CheckGuess(a, b string) int {
 
 	if len(a)-len(b) > CloseGuess {
 		return DistantGuess
+	}
+	if a == b {
+		return EqualGuess
+	}
+
+	// If the longer string can't be on both sides, the follow-up logic can
+	// be simpler, so we switch them here.
+	if len(a) < len(b) {
+		a, b = b, a
 	}
 
 	var distance int
