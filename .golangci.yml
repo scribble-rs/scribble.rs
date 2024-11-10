@@ -1,17 +1,10 @@
 linters:
   enable-all: true
   disable:
-    ## These are all deprecated
-    - golint
-    - ifshort
-    - exhaustivestruct
-    - deadcode
-    - nosnakecase
-    - varcheck
-    - interfacer
-    - maligned
-    - structcheck
-    - scopelint
+    ## These are deprecated
+    - execinquery
+    - exportloopref
+    - gomnd
 
     ## These are too strict for our taste
     # Whitespace linter
@@ -19,7 +12,7 @@ linters:
     # Demands a newline before each return
     - nlreturn
     # Magic numbers
-    - gomnd
+    - mnd
     # function, line and variable length
     - funlen
     - lll
@@ -46,7 +39,11 @@ linters:
     # Requires certain types of tags, such as json or mapstructure.
     # While very useful, I don't care right now.
     - musttag
-    - goerr113
+    # Not wrapping errors
+    - err113
+    - wrapcheck
+    # Code duplications
+    - dupl
 
     ## Provides no real value
     - testifylint
@@ -64,12 +61,24 @@ linters-settings:
       # This has false positives and provides little value.
       - ifElseChain
 
+  revive:
+    rules:
+      - name: var-naming
+        disabled: true
+
+  stylecheck:
+    checks: ["all", "-ST1003"]
+
 run:
-  skip-files:
+  exclude-files:
     - ".*_easyjson.go"
 
 issues:
   exclude-rules:
+    - path: translations\\[^e][^n].*?\.go
+      linters:
+        # Too many potential false positives
+        - misspell
     # Exclude some linters from running on tests files. In tests, we often have
     # code that is rather unsafe and only has one purpose, or furthermore things
     # that indicate an issue in production, but are fine for testing only small
