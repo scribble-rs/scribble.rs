@@ -154,6 +154,8 @@ kbd {
     justify-content: center;
     text-align: center;
     column-gap: 0.5rem;
+    width: 0;
+    overflow-x: hidden;
 }
 
 .hint-underline {
