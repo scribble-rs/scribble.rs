@@ -1953,6 +1953,8 @@
             } else if (event.key === "4") {
                 sizeButton32.click();
                 setLineWidth(32);
+            } else if (event.key === 'z' && event.ctrlKey) {
+                undoAndSendEvent();
             }
         }
 
