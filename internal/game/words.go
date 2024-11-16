@@ -4,6 +4,7 @@ import (
 	"embed"
 	"errors"
 	"fmt"
+	"log"
 	"math/rand/v2"
 	"strings"
 	"unicode/utf8"
@@ -96,6 +97,8 @@ func readWordListInternal(
 // a panic before, however, this could enable a user to forcefully crash the
 // whole application.
 func readDefaultWordList(lowercaser cases.Caser, chosenLanguage string) ([]string, error) {
+	log.Printf("Loading wordlist '%s'\n", chosenLanguage)
+	defer log.Printf("Wordlist loaded '%s'\n", chosenLanguage)
 	return readWordListInternal(lowercaser, chosenLanguage, func(key string) (string, error) {
 		wordBytes, err := wordFS.ReadFile("words/" + key)
 		if err != nil {

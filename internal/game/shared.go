@@ -109,7 +109,7 @@ type LineEvent struct {
 		ToX       float32  `json:"toX"`
 		ToY       float32  `json:"toY"`
 		Color     RGBColor `json:"color"`
-		LineWidth float32  `json:"lineWidth"`
+		LineWidth uint8    `json:"lineWidth"`
 	} `json:"data"`
 }
 

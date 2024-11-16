@@ -1826,7 +1826,7 @@
                         const offsetY = (touch.clientY - clientRect.top);
 
                         // drawing functions must check for context boundaries
-                        drawLineAndSendEvent(context, lastX, lastY, offsetX, offsetY, localColor, localLineWidth);
+                        drawLineAndSendEvent(context, lastX, lastY, offsetX, offsetY);
                         lastX = offsetX;
                         lastY = offsetY;
 
@@ -1868,7 +1868,7 @@
                 const offsetY = (event.clientY - clientRect.top);
 
                 // drawing functions must check for context boundaries
-                drawLineAndSendEvent(context, lastX, lastY, offsetX, offsetY, localColor, localLineWidth);
+                drawLineAndSendEvent(context, lastX, lastY, offsetX, offsetY);
                 lastX = offsetX;
                 lastY = offsetY;
             }
@@ -1882,8 +1882,7 @@
                 if (localTool === fillBucket) {
                     fillAndSendEvent(context, event.offsetX, event.offsetY, localColor);
                 } else {
-                    drawLineAndSendEvent(context, event.offsetX, event.offsetY,
-                        event.offsetX, event.offsetY, localColor, localLineWidth);
+                    drawLineAndSendEvent(context, event.offsetX, event.offsetY, event.offsetX, event.offsetY);
                 }
             }
         }
@@ -2029,12 +2028,10 @@
             }
         }
 
-        function drawLineAndSendEvent(context, x1, y1, x2, y2, color, lineWidth) {
-            if (localTool === rubber) {
-                color = rubberColor;
-            }
+        function drawLineAndSendEvent(context, x1, y1, x2, y2) {
+            const color = localTool === rubber ? rubberColor : localColor;
 
-            drawLine(context, x1, y1, x2, y2, color, lineWidth);
+            drawLine(context, x1, y1, x2, y2, color, localLineWidth);
 
             const drawInstruction = {
                 type: "line",
@@ -2044,7 +2041,7 @@
                     toX: scaelUpAndPrepareFloatForServer(x2),
                     toY: scaelUpAndPrepareFloatForServer(y2),
                     color: color,
-                    lineWidth: scaelUpAndPrepareFloatForServer(lineWidth),
+                    lineWidth: localLineWidthUnscaled,
                 }
             };
             socket.send(JSON.stringify(drawInstruction));

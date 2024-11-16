@@ -1074,7 +1074,7 @@ func easyjson9aa6bd57Decode(in *jlexer.Lexer, out *struct {
 	ToX       float32  `json:"toX"`
 	ToY       float32  `json:"toY"`
 	Color     RGBColor `json:"color"`
-	LineWidth float32  `json:"lineWidth"`
+	LineWidth uint8    `json:"lineWidth"`
 }) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
@@ -1105,7 +1105,7 @@ func easyjson9aa6bd57Decode(in *jlexer.Lexer, out *struct {
 		case "color":
 			(out.Color).UnmarshalEasyJSON(in)
 		case "lineWidth":
-			out.LineWidth = float32(in.Float32())
+			out.LineWidth = uint8(in.Uint8())
 		default:
 			in.SkipRecursive()
 		}
@@ -1122,7 +1122,7 @@ func easyjson9aa6bd57Encode(out *jwriter.Writer, in struct {
 	ToX       float32  `json:"toX"`
 	ToY       float32  `json:"toY"`
 	Color     RGBColor `json:"color"`
-	LineWidth float32  `json:"lineWidth"`
+	LineWidth uint8    `json:"lineWidth"`
 }) {
 	out.RawByte('{')
 	first := true
@@ -1155,7 +1155,7 @@ func easyjson9aa6bd57Encode(out *jwriter.Writer, in struct {
 	{
 		const prefix string = ",\"lineWidth\":"
 		out.RawString(prefix)
-		out.Float32(float32(in.LineWidth))
+		out.Uint8(uint8(in.LineWidth))
 	}
 	out.RawByte('}')
 }
