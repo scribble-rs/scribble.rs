@@ -356,15 +356,10 @@ func (handler *V1Handler) getStats(writer http.ResponseWriter, _ *http.Request) 
 	}
 }
 
-var (
-	// CanvasColor is the initially / empty canvas colors value used for
-	// Lobbydata objects.
-	CanvasColor = game.RGBColor{R: 255, G: 255, B: 255}
-	// SuggestedBrushSizes is suggested brush sizes value used for
-	// Lobbydata objects. A unit test makes sure these values are ordered
-	// and within the specified bounds.
-	SuggestedBrushSizes = [4]uint8{8, 16, 24, 32}
-)
+// SuggestedBrushSizes is suggested brush sizes value used for
+// Lobbydata objects. A unit test makes sure these values are ordered
+// and within the specified bounds.
+var SuggestedBrushSizes = [4]uint8{8, 16, 24, 32}
 
 // LobbyData is the data necessary for correctly configuring a lobby.
 // While unofficial clients will probably need all of these values, the
@@ -385,7 +380,7 @@ type LobbyData struct {
 	// MaxBrushSize is the maximum amount of pixels the brush can draw in.
 	MaxBrushSize int `json:"maxBrushSize"`
 	// CanvasColor is the initially (empty) color of the canvas.
-	CanvasColor game.RGBColor `json:"canvasColor"`
+	CanvasColor uint8 `json:"canvasColor"`
 	// SuggestedBrushSizes are suggestions for the different brush sizes
 	// that the user can choose between. These brushes are guaranteed to
 	// be ordered from low to high and stay with the bounds.
@@ -403,7 +398,7 @@ func CreateLobbyData(lobby *game.Lobby) *LobbyData {
 		DrawingBoardBaseHeight: game.DrawingBoardBaseHeight,
 		MinBrushSize:           game.MinBrushSize,
 		MaxBrushSize:           game.MaxBrushSize,
-		CanvasColor:            CanvasColor,
+		CanvasColor:            0, /* White */
 		SuggestedBrushSizes:    SuggestedBrushSizes,
 	}
 }

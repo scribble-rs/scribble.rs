@@ -435,87 +435,7 @@ func (v *ReadyEvent) UnmarshalJSON(data []byte) error {
 func (v *ReadyEvent) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame2(l, v)
 }
-func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame3(in *jlexer.Lexer, out *RGBColor) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeFieldName(false)
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "r":
-			out.R = uint8(in.Uint8())
-		case "g":
-			out.G = uint8(in.Uint8())
-		case "b":
-			out.B = uint8(in.Uint8())
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame3(out *jwriter.Writer, in RGBColor) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"r\":"
-		out.RawString(prefix[1:])
-		out.Uint8(uint8(in.R))
-	}
-	{
-		const prefix string = ",\"g\":"
-		out.RawString(prefix)
-		out.Uint8(uint8(in.G))
-	}
-	{
-		const prefix string = ",\"b\":"
-		out.RawString(prefix)
-		out.Uint8(uint8(in.B))
-	}
-	out.RawByte('}')
-}
-
-// MarshalJSON supports json.Marshaler interface
-func (v RGBColor) MarshalJSON() ([]byte, error) {
-	w := jwriter.Writer{}
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame3(&w, v)
-	return w.Buffer.BuildBytes(), w.Error
-}
-
-// MarshalEasyJSON supports easyjson.Marshaler interface
-func (v RGBColor) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame3(w, v)
-}
-
-// UnmarshalJSON supports json.Unmarshaler interface
-func (v *RGBColor) UnmarshalJSON(data []byte) error {
-	r := jlexer.Lexer{Data: data}
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame3(&r, v)
-	return r.Error()
-}
-
-// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *RGBColor) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame3(l, v)
-}
-func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame4(in *jlexer.Lexer, out *Player) {
+func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame3(in *jlexer.Lexer, out *Player) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -562,7 +482,7 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame4(in *jlexer
 		in.Consumed()
 	}
 }
-func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame4(out *jwriter.Writer, in Player) {
+func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame3(out *jwriter.Writer, in Player) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -612,27 +532,27 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame4(out *jwrit
 // MarshalJSON supports json.Marshaler interface
 func (v Player) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame4(&w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame3(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Player) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame4(w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame3(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Player) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame4(&r, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame3(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Player) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame4(l, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame3(l, v)
 }
-func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame5(in *jlexer.Lexer, out *OwnerChangeEvent) {
+func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame4(in *jlexer.Lexer, out *OwnerChangeEvent) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -667,7 +587,7 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame5(in *jlexer
 		in.Consumed()
 	}
 }
-func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame5(out *jwriter.Writer, in OwnerChangeEvent) {
+func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame4(out *jwriter.Writer, in OwnerChangeEvent) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -687,27 +607,27 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame5(out *jwrit
 // MarshalJSON supports json.Marshaler interface
 func (v OwnerChangeEvent) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame5(&w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame4(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v OwnerChangeEvent) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame5(w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame4(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *OwnerChangeEvent) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame5(&r, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame4(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *OwnerChangeEvent) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame5(l, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame4(l, v)
 }
-func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame6(in *jlexer.Lexer, out *OutgoingMessage) {
+func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame5(in *jlexer.Lexer, out *OutgoingMessage) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -744,7 +664,7 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame6(in *jlexer
 		in.Consumed()
 	}
 }
-func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame6(out *jwriter.Writer, in OutgoingMessage) {
+func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame5(out *jwriter.Writer, in OutgoingMessage) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -769,27 +689,27 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame6(out *jwrit
 // MarshalJSON supports json.Marshaler interface
 func (v OutgoingMessage) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame6(&w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame5(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v OutgoingMessage) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame6(w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame5(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *OutgoingMessage) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame6(&r, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame5(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *OutgoingMessage) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame6(l, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame5(l, v)
 }
-func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame7(in *jlexer.Lexer, out *NextTurn) {
+func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame6(in *jlexer.Lexer, out *NextTurn) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -855,7 +775,7 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame7(in *jlexer
 		in.Consumed()
 	}
 }
-func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame7(out *jwriter.Writer, in NextTurn) {
+func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame6(out *jwriter.Writer, in NextTurn) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -900,27 +820,27 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame7(out *jwrit
 // MarshalJSON supports json.Marshaler interface
 func (v NextTurn) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame7(&w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame6(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v NextTurn) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame7(w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame6(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *NextTurn) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame7(&r, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame6(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *NextTurn) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame7(l, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame6(l, v)
 }
-func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame8(in *jlexer.Lexer, out *NameChangeEvent) {
+func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame7(in *jlexer.Lexer, out *NameChangeEvent) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -955,7 +875,7 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame8(in *jlexer
 		in.Consumed()
 	}
 }
-func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame8(out *jwriter.Writer, in NameChangeEvent) {
+func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame7(out *jwriter.Writer, in NameChangeEvent) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -975,27 +895,27 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame8(out *jwrit
 // MarshalJSON supports json.Marshaler interface
 func (v NameChangeEvent) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame8(&w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame7(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v NameChangeEvent) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame8(w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame7(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *NameChangeEvent) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame8(&r, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame7(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *NameChangeEvent) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame8(l, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame7(l, v)
 }
-func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame9(in *jlexer.Lexer, out *LineEvent) {
+func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame8(in *jlexer.Lexer, out *LineEvent) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -1028,7 +948,7 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame9(in *jlexer
 		in.Consumed()
 	}
 }
-func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame9(out *jwriter.Writer, in LineEvent) {
+func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame8(out *jwriter.Writer, in LineEvent) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1048,33 +968,33 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame9(out *jwrit
 // MarshalJSON supports json.Marshaler interface
 func (v LineEvent) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame9(&w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame8(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v LineEvent) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame9(w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame8(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *LineEvent) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame9(&r, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame8(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *LineEvent) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame9(l, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame8(l, v)
 }
 func easyjson9aa6bd57Decode(in *jlexer.Lexer, out *struct {
-	X     int16    `json:"x"`
-	Y     int16    `json:"y"`
-	X2    int16    `json:"x2"`
-	Y2    int16    `json:"y2"`
-	Color RGBColor `json:"color"`
-	Width uint8    `json:"width"`
+	X     int16 `json:"x"`
+	Y     int16 `json:"y"`
+	X2    int16 `json:"x2"`
+	Y2    int16 `json:"y2"`
+	Color uint8 `json:"color"`
+	Width uint8 `json:"width"`
 }) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
@@ -1103,7 +1023,7 @@ func easyjson9aa6bd57Decode(in *jlexer.Lexer, out *struct {
 		case "y2":
 			out.Y2 = int16(in.Int16())
 		case "color":
-			(out.Color).UnmarshalEasyJSON(in)
+			out.Color = uint8(in.Uint8())
 		case "width":
 			out.Width = uint8(in.Uint8())
 		default:
@@ -1117,12 +1037,12 @@ func easyjson9aa6bd57Decode(in *jlexer.Lexer, out *struct {
 	}
 }
 func easyjson9aa6bd57Encode(out *jwriter.Writer, in struct {
-	X     int16    `json:"x"`
-	Y     int16    `json:"y"`
-	X2    int16    `json:"x2"`
-	Y2    int16    `json:"y2"`
-	Color RGBColor `json:"color"`
-	Width uint8    `json:"width"`
+	X     int16 `json:"x"`
+	Y     int16 `json:"y"`
+	X2    int16 `json:"x2"`
+	Y2    int16 `json:"y2"`
+	Color uint8 `json:"color"`
+	Width uint8 `json:"width"`
 }) {
 	out.RawByte('{')
 	first := true
@@ -1150,7 +1070,7 @@ func easyjson9aa6bd57Encode(out *jwriter.Writer, in struct {
 	{
 		const prefix string = ",\"color\":"
 		out.RawString(prefix)
-		(in.Color).MarshalEasyJSON(out)
+		out.Uint8(uint8(in.Color))
 	}
 	{
 		const prefix string = ",\"width\":"
@@ -1159,7 +1079,7 @@ func easyjson9aa6bd57Encode(out *jwriter.Writer, in struct {
 	}
 	out.RawByte('}')
 }
-func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame10(in *jlexer.Lexer, out *KickVote) {
+func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame9(in *jlexer.Lexer, out *KickVote) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -1198,7 +1118,7 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame10(in *jlexe
 		in.Consumed()
 	}
 }
-func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame10(out *jwriter.Writer, in KickVote) {
+func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame9(out *jwriter.Writer, in KickVote) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1228,27 +1148,27 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame10(out *jwri
 // MarshalJSON supports json.Marshaler interface
 func (v KickVote) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame10(&w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame9(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v KickVote) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame10(w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame9(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *KickVote) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame10(&r, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame9(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *KickVote) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame10(l, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame9(l, v)
 }
-func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame11(in *jlexer.Lexer, out *IntDataEvent) {
+func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame10(in *jlexer.Lexer, out *IntDataEvent) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -1279,7 +1199,7 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame11(in *jlexe
 		in.Consumed()
 	}
 }
-func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame11(out *jwriter.Writer, in IntDataEvent) {
+func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame10(out *jwriter.Writer, in IntDataEvent) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1294,27 +1214,27 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame11(out *jwri
 // MarshalJSON supports json.Marshaler interface
 func (v IntDataEvent) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame11(&w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame10(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v IntDataEvent) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame11(w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame10(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *IntDataEvent) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame11(&r, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame10(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *IntDataEvent) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame11(l, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame10(l, v)
 }
-func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame12(in *jlexer.Lexer, out *GameOverEvent) {
+func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame11(in *jlexer.Lexer, out *GameOverEvent) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -1459,7 +1379,7 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame12(in *jlexe
 		in.Consumed()
 	}
 }
-func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame12(out *jwriter.Writer, in GameOverEvent) {
+func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame11(out *jwriter.Writer, in GameOverEvent) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1581,27 +1501,27 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame12(out *jwri
 // MarshalJSON supports json.Marshaler interface
 func (v GameOverEvent) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame12(&w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame11(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v GameOverEvent) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame12(w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame11(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *GameOverEvent) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame12(&r, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame11(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *GameOverEvent) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame12(l, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame11(l, v)
 }
-func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame13(in *jlexer.Lexer, out *FillEvent) {
+func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame12(in *jlexer.Lexer, out *FillEvent) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -1627,9 +1547,9 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame13(in *jlexe
 			} else {
 				if out.Data == nil {
 					out.Data = new(struct {
-						X     uint16   `json:"x"`
-						Y     uint16   `json:"y"`
-						Color RGBColor `json:"color"`
+						X     uint16 `json:"x"`
+						Y     uint16 `json:"y"`
+						Color uint8  `json:"color"`
 					})
 				}
 				easyjson9aa6bd57Decode1(in, out.Data)
@@ -1646,7 +1566,7 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame13(in *jlexe
 		in.Consumed()
 	}
 }
-func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame13(out *jwriter.Writer, in FillEvent) {
+func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame12(out *jwriter.Writer, in FillEvent) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1670,30 +1590,30 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame13(out *jwri
 // MarshalJSON supports json.Marshaler interface
 func (v FillEvent) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame13(&w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame12(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v FillEvent) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame13(w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame12(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *FillEvent) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame13(&r, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame12(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *FillEvent) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame13(l, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame12(l, v)
 }
 func easyjson9aa6bd57Decode1(in *jlexer.Lexer, out *struct {
-	X     uint16   `json:"x"`
-	Y     uint16   `json:"y"`
-	Color RGBColor `json:"color"`
+	X     uint16 `json:"x"`
+	Y     uint16 `json:"y"`
+	Color uint8  `json:"color"`
 }) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
@@ -1718,7 +1638,7 @@ func easyjson9aa6bd57Decode1(in *jlexer.Lexer, out *struct {
 		case "y":
 			out.Y = uint16(in.Uint16())
 		case "color":
-			(out.Color).UnmarshalEasyJSON(in)
+			out.Color = uint8(in.Uint8())
 		default:
 			in.SkipRecursive()
 		}
@@ -1730,9 +1650,9 @@ func easyjson9aa6bd57Decode1(in *jlexer.Lexer, out *struct {
 	}
 }
 func easyjson9aa6bd57Encode1(out *jwriter.Writer, in struct {
-	X     uint16   `json:"x"`
-	Y     uint16   `json:"y"`
-	Color RGBColor `json:"color"`
+	X     uint16 `json:"x"`
+	Y     uint16 `json:"y"`
+	Color uint8  `json:"color"`
 }) {
 	out.RawByte('{')
 	first := true
@@ -1750,11 +1670,11 @@ func easyjson9aa6bd57Encode1(out *jwriter.Writer, in struct {
 	{
 		const prefix string = ",\"color\":"
 		out.RawString(prefix)
-		(in.Color).MarshalEasyJSON(out)
+		out.Uint8(uint8(in.Color))
 	}
 	out.RawByte('}')
 }
-func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame14(in *jlexer.Lexer, out *EventTypeOnly) {
+func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame13(in *jlexer.Lexer, out *EventTypeOnly) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -1785,7 +1705,7 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame14(in *jlexe
 		in.Consumed()
 	}
 }
-func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame14(out *jwriter.Writer, in EventTypeOnly) {
+func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame13(out *jwriter.Writer, in EventTypeOnly) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1800,27 +1720,27 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame14(out *jwri
 // MarshalJSON supports json.Marshaler interface
 func (v EventTypeOnly) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame14(&w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame13(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v EventTypeOnly) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame14(w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame13(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *EventTypeOnly) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame14(&r, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame13(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *EventTypeOnly) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame14(l, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame13(l, v)
 }
-func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame15(in *jlexer.Lexer, out *Event) {
+func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame14(in *jlexer.Lexer, out *Event) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -1859,7 +1779,7 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame15(in *jlexe
 		in.Consumed()
 	}
 }
-func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame15(out *jwriter.Writer, in Event) {
+func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame14(out *jwriter.Writer, in Event) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1885,27 +1805,27 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame15(out *jwri
 // MarshalJSON supports json.Marshaler interface
 func (v Event) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame15(&w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame14(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Event) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame15(w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame14(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Event) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame15(&r, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame14(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Event) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame15(l, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame14(l, v)
 }
-func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame16(in *jlexer.Lexer, out *EditableLobbySettings) {
+func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame15(in *jlexer.Lexer, out *EditableLobbySettings) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -1946,7 +1866,7 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame16(in *jlexe
 		in.Consumed()
 	}
 }
-func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame16(out *jwriter.Writer, in EditableLobbySettings) {
+func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame15(out *jwriter.Writer, in EditableLobbySettings) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1986,23 +1906,23 @@ func easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame16(out *jwri
 // MarshalJSON supports json.Marshaler interface
 func (v EditableLobbySettings) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame16(&w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame15(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v EditableLobbySettings) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame16(w, v)
+	easyjson9aa6bd57EncodeGithubComScribbleRsScribbleRsInternalGame15(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *EditableLobbySettings) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame16(&r, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame15(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *EditableLobbySettings) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame16(l, v)
+	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame15(l, v)
 }

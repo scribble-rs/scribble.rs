@@ -94,30 +94,32 @@ type WordHint struct {
 	Underline bool `json:"underline"`
 }
 
-// RGBColor represents a 24-bit color consisting of red, green and blue.
-type RGBColor struct {
-	R uint8 `json:"r"`
-	G uint8 `json:"g"`
-	B uint8 `json:"b"`
-}
-
 type LineEvent struct {
 	Type string `json:"type"`
+	// Data contains the coordinates, stroke width and color. The coors here
+	// aren't uint16, as it allows us to easily allow implementing drawing on
+	// the client, where the user drags the line over the canvas border.
+	// If we were to not accept out of bounds values, the lines would be chopped
+	// off before reaching the canvas border.
 	Data struct {
-		X     int16    `json:"x"`
-		Y     int16    `json:"y"`
-		X2    int16    `json:"x2"`
-		Y2    int16    `json:"y2"`
-		Color RGBColor `json:"color"`
-		Width uint8    `json:"width"`
+		X  int16 `json:"x"`
+		Y  int16 `json:"y"`
+		X2 int16 `json:"x2"`
+		Y2 int16 `json:"y2"`
+		// Color is a color index. This was previously an rgb value, but since
+		// the values are always the same, using an index saves bandwidth.
+		Color uint8 `json:"color"`
+		Width uint8 `json:"width"`
 	} `json:"data"`
 }
 
 type FillEvent struct {
 	Data *struct {
-		X     uint16   `json:"x"`
-		Y     uint16   `json:"y"`
-		Color RGBColor `json:"color"`
+		X uint16 `json:"x"`
+		Y uint16 `json:"y"`
+		// Color is a color index. This was previously an rgb value, but since
+		// the values are always the same, using an index saves bandwidth.
+		Color uint8 `json:"color"`
 	} `json:"data"`
 	Type string `json:"type"`
 }

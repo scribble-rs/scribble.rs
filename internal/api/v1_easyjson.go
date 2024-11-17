@@ -255,7 +255,7 @@ func easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalApi2(in *jlexer.
 		case "maxBrushSize":
 			out.MaxBrushSize = int(in.Int())
 		case "canvasColor":
-			(out.CanvasColor).UnmarshalEasyJSON(in)
+			out.CanvasColor = uint8(in.Uint8())
 		case "suggestedBrushSizes":
 			if in.IsNull() {
 				in.Skip()
@@ -336,7 +336,7 @@ func easyjson102f8a2fEncodeGithubComScribbleRsScribbleRsInternalApi2(out *jwrite
 	{
 		const prefix string = ",\"canvasColor\":"
 		out.RawString(prefix)
-		(in.CanvasColor).MarshalEasyJSON(out)
+		out.Uint8(uint8(in.CanvasColor))
 	}
 	{
 		const prefix string = ",\"suggestedBrushSizes\":"
