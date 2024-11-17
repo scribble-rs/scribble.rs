@@ -1241,7 +1241,9 @@
                 } else if (parsed.type === "non-guessing-player-message") {
                     appendMessage("non-guessing-player-message", parsed.data.author, parsed.data.content);
                 } else if (parsed.type === "line") {
-                    drawLine(context, parsed.data.fromX, parsed.data.fromY, parsed.data.toX, parsed.data.toY, parsed.data.color, parsed.data.lineWidth);
+                    drawLine(context, parsed.data.x, parsed.data.y,
+                        parsed.data.x2, parsed.data.y2, parsed.data.color,
+                        parsed.data.width);
                 } else if (parsed.type === "fill") {
                     if (floodfillUint8ClampedArray(
                         imageData.data,
@@ -1773,10 +1775,10 @@
                             imageData.width, imageData.height);
                     } else if (drawElement.type === "line") {
                         _drawLine(
-                            drawData.fromX, drawData.fromY,
-                            drawData.toX, drawData.toY,
+                            drawData.x, drawData.y,
+                            drawData.x2, drawData.y2,
                             drawData.color,
-                            drawData.lineWidth);
+                            drawData.width);
                     } else {
                         console.log("Unknown draw element type: " + drawData.type);
                     }
@@ -2001,12 +2003,12 @@
             const drawInstruction = {
                 type: "line",
                 data: {
-                    fromX: x1Scaled,
-                    fromY: y1Scaled,
-                    toX: x2Scaled,
-                    toY: y2Scaled,
+                    x: x1Scaled,
+                    y: y1Scaled,
+                    x2: x2Scaled,
+                    y2: y2Scaled,
                     color: color,
-                    lineWidth: localLineWidth,
+                    width: localLineWidth,
                 }
             };
             socket.send(JSON.stringify(drawInstruction));

@@ -1069,12 +1069,12 @@ func (v *LineEvent) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame9(l, v)
 }
 func easyjson9aa6bd57Decode(in *jlexer.Lexer, out *struct {
-	FromX     int16    `json:"fromX"`
-	FromY     int16    `json:"fromY"`
-	ToX       int16    `json:"toX"`
-	ToY       int16    `json:"toY"`
-	Color     RGBColor `json:"color"`
-	LineWidth uint8    `json:"lineWidth"`
+	X     int16    `json:"x"`
+	Y     int16    `json:"y"`
+	X2    int16    `json:"x2"`
+	Y2    int16    `json:"y2"`
+	Color RGBColor `json:"color"`
+	Width uint8    `json:"width"`
 }) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
@@ -1094,18 +1094,18 @@ func easyjson9aa6bd57Decode(in *jlexer.Lexer, out *struct {
 			continue
 		}
 		switch key {
-		case "fromX":
-			out.FromX = int16(in.Int16())
-		case "fromY":
-			out.FromY = int16(in.Int16())
-		case "toX":
-			out.ToX = int16(in.Int16())
-		case "toY":
-			out.ToY = int16(in.Int16())
+		case "x":
+			out.X = int16(in.Int16())
+		case "y":
+			out.Y = int16(in.Int16())
+		case "x2":
+			out.X2 = int16(in.Int16())
+		case "y2":
+			out.Y2 = int16(in.Int16())
 		case "color":
 			(out.Color).UnmarshalEasyJSON(in)
-		case "lineWidth":
-			out.LineWidth = uint8(in.Uint8())
+		case "width":
+			out.Width = uint8(in.Uint8())
 		default:
 			in.SkipRecursive()
 		}
@@ -1117,35 +1117,35 @@ func easyjson9aa6bd57Decode(in *jlexer.Lexer, out *struct {
 	}
 }
 func easyjson9aa6bd57Encode(out *jwriter.Writer, in struct {
-	FromX     int16    `json:"fromX"`
-	FromY     int16    `json:"fromY"`
-	ToX       int16    `json:"toX"`
-	ToY       int16    `json:"toY"`
-	Color     RGBColor `json:"color"`
-	LineWidth uint8    `json:"lineWidth"`
+	X     int16    `json:"x"`
+	Y     int16    `json:"y"`
+	X2    int16    `json:"x2"`
+	Y2    int16    `json:"y2"`
+	Color RGBColor `json:"color"`
+	Width uint8    `json:"width"`
 }) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"fromX\":"
+		const prefix string = ",\"x\":"
 		out.RawString(prefix[1:])
-		out.Int16(int16(in.FromX))
+		out.Int16(int16(in.X))
 	}
 	{
-		const prefix string = ",\"fromY\":"
+		const prefix string = ",\"y\":"
 		out.RawString(prefix)
-		out.Int16(int16(in.FromY))
+		out.Int16(int16(in.Y))
 	}
 	{
-		const prefix string = ",\"toX\":"
+		const prefix string = ",\"x2\":"
 		out.RawString(prefix)
-		out.Int16(int16(in.ToX))
+		out.Int16(int16(in.X2))
 	}
 	{
-		const prefix string = ",\"toY\":"
+		const prefix string = ",\"y2\":"
 		out.RawString(prefix)
-		out.Int16(int16(in.ToY))
+		out.Int16(int16(in.Y2))
 	}
 	{
 		const prefix string = ",\"color\":"
@@ -1153,9 +1153,9 @@ func easyjson9aa6bd57Encode(out *jwriter.Writer, in struct {
 		(in.Color).MarshalEasyJSON(out)
 	}
 	{
-		const prefix string = ",\"lineWidth\":"
+		const prefix string = ",\"width\":"
 		out.RawString(prefix)
-		out.Uint8(uint8(in.LineWidth))
+		out.Uint8(uint8(in.Width))
 	}
 	out.RawByte('}')
 }

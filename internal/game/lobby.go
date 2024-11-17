@@ -117,10 +117,10 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 
 			// In case the line is too big, we overwrite the data of the event.
 			// This will prevent clients from lagging due to too thick lines.
-			if line.Data.LineWidth > MaxBrushSize {
-				line.Data.LineWidth = MaxBrushSize
-			} else if line.Data.LineWidth < MinBrushSize {
-				line.Data.LineWidth = MinBrushSize
+			if line.Data.Width > MaxBrushSize {
+				line.Data.Width = MaxBrushSize
+			} else if line.Data.Width < MinBrushSize {
+				line.Data.Width = MinBrushSize
 			}
 
 			now := time.Now()
