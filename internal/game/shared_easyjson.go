@@ -1069,10 +1069,10 @@ func (v *LineEvent) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame9(l, v)
 }
 func easyjson9aa6bd57Decode(in *jlexer.Lexer, out *struct {
-	FromX     float32  `json:"fromX"`
-	FromY     float32  `json:"fromY"`
-	ToX       float32  `json:"toX"`
-	ToY       float32  `json:"toY"`
+	FromX     int16    `json:"fromX"`
+	FromY     int16    `json:"fromY"`
+	ToX       int16    `json:"toX"`
+	ToY       int16    `json:"toY"`
 	Color     RGBColor `json:"color"`
 	LineWidth uint8    `json:"lineWidth"`
 }) {
@@ -1095,13 +1095,13 @@ func easyjson9aa6bd57Decode(in *jlexer.Lexer, out *struct {
 		}
 		switch key {
 		case "fromX":
-			out.FromX = float32(in.Float32())
+			out.FromX = int16(in.Int16())
 		case "fromY":
-			out.FromY = float32(in.Float32())
+			out.FromY = int16(in.Int16())
 		case "toX":
-			out.ToX = float32(in.Float32())
+			out.ToX = int16(in.Int16())
 		case "toY":
-			out.ToY = float32(in.Float32())
+			out.ToY = int16(in.Int16())
 		case "color":
 			(out.Color).UnmarshalEasyJSON(in)
 		case "lineWidth":
@@ -1117,10 +1117,10 @@ func easyjson9aa6bd57Decode(in *jlexer.Lexer, out *struct {
 	}
 }
 func easyjson9aa6bd57Encode(out *jwriter.Writer, in struct {
-	FromX     float32  `json:"fromX"`
-	FromY     float32  `json:"fromY"`
-	ToX       float32  `json:"toX"`
-	ToY       float32  `json:"toY"`
+	FromX     int16    `json:"fromX"`
+	FromY     int16    `json:"fromY"`
+	ToX       int16    `json:"toX"`
+	ToY       int16    `json:"toY"`
 	Color     RGBColor `json:"color"`
 	LineWidth uint8    `json:"lineWidth"`
 }) {
@@ -1130,22 +1130,22 @@ func easyjson9aa6bd57Encode(out *jwriter.Writer, in struct {
 	{
 		const prefix string = ",\"fromX\":"
 		out.RawString(prefix[1:])
-		out.Float32(float32(in.FromX))
+		out.Int16(int16(in.FromX))
 	}
 	{
 		const prefix string = ",\"fromY\":"
 		out.RawString(prefix)
-		out.Float32(float32(in.FromY))
+		out.Int16(int16(in.FromY))
 	}
 	{
 		const prefix string = ",\"toX\":"
 		out.RawString(prefix)
-		out.Float32(float32(in.ToX))
+		out.Int16(int16(in.ToX))
 	}
 	{
 		const prefix string = ",\"toY\":"
 		out.RawString(prefix)
-		out.Float32(float32(in.ToY))
+		out.Int16(int16(in.ToY))
 	}
 	{
 		const prefix string = ",\"color\":"
@@ -1627,8 +1627,8 @@ func easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame13(in *jlexe
 			} else {
 				if out.Data == nil {
 					out.Data = new(struct {
-						X     float32  `json:"x"`
-						Y     float32  `json:"y"`
+						X     uint16   `json:"x"`
+						Y     uint16   `json:"y"`
 						Color RGBColor `json:"color"`
 					})
 				}
@@ -1691,8 +1691,8 @@ func (v *FillEvent) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson9aa6bd57DecodeGithubComScribbleRsScribbleRsInternalGame13(l, v)
 }
 func easyjson9aa6bd57Decode1(in *jlexer.Lexer, out *struct {
-	X     float32  `json:"x"`
-	Y     float32  `json:"y"`
+	X     uint16   `json:"x"`
+	Y     uint16   `json:"y"`
 	Color RGBColor `json:"color"`
 }) {
 	isTopLevel := in.IsStart()
@@ -1714,9 +1714,9 @@ func easyjson9aa6bd57Decode1(in *jlexer.Lexer, out *struct {
 		}
 		switch key {
 		case "x":
-			out.X = float32(in.Float32())
+			out.X = uint16(in.Uint16())
 		case "y":
-			out.Y = float32(in.Float32())
+			out.Y = uint16(in.Uint16())
 		case "color":
 			(out.Color).UnmarshalEasyJSON(in)
 		default:
@@ -1730,8 +1730,8 @@ func easyjson9aa6bd57Decode1(in *jlexer.Lexer, out *struct {
 	}
 }
 func easyjson9aa6bd57Encode1(out *jwriter.Writer, in struct {
-	X     float32  `json:"x"`
-	Y     float32  `json:"y"`
+	X     uint16   `json:"x"`
+	Y     uint16   `json:"y"`
 	Color RGBColor `json:"color"`
 }) {
 	out.RawByte('{')
@@ -1740,12 +1740,12 @@ func easyjson9aa6bd57Encode1(out *jwriter.Writer, in struct {
 	{
 		const prefix string = ",\"x\":"
 		out.RawString(prefix[1:])
-		out.Float32(float32(in.X))
+		out.Uint16(uint16(in.X))
 	}
 	{
 		const prefix string = ",\"y\":"
 		out.RawString(prefix)
-		out.Float32(float32(in.Y))
+		out.Uint16(uint16(in.Y))
 	}
 	{
 		const prefix string = ",\"color\":"

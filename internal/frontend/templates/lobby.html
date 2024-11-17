@@ -114,7 +114,8 @@
 
             <div id="drawing-board-wrapper">
                 <div id="drawing-board-inner-wrapper">
-                    <canvas id="drawing-board"></canvas>
+                    <canvas id="drawing-board" width="{{.DrawingBoardBaseWidth}}"
+                        height="{{.DrawingBoardBaseHeight}}"></canvas>
 
                     <!-- The so called "center dialogs" are divs that float above the canvas.
                     They are are always both horizontally and vertically. They can bever be
@@ -827,21 +828,15 @@
             return baseWidth / drawingBoard.clientWidth;
         }
 
-        //scalesUp the value using scaleUpFactor and reduces the precision.
-        //This makes sense since we absolutely don't need the precision and
-        //we'll reduce network traffic this way.
-        function scaelUpAndPrepareFloatForServer(value) {
-            //We reduce the precision in multiple steps, since we get a string
-            //as an intermediate result. The reason we don't want a string, is
-            //that unmarshalling on the backend won't work with strings for float
-            //values, unless explicitly specified, which however will cause it
-            //not to work without quotes. Example:
-            //  123.213476124918724 -> "123.21" -> 123.21
-            return parseFloat((scaleUpFactor() * value).toFixed(2));
-        }
-
-        function scaleDownFactor() {
-            return drawingBoard.clientWidth / baseWidth;
+        // Will convert the value to the server coordinate space.
+        // The canvas locally can be bigger or smaller. Depending on the base
+        // values and the local values, we'll either have a value slightly
+        // higher or lower than 1.0. Since we draw on a virtual canvas, we have
+        // to use the server coordinate space, which then gets scaled by the
+        // canvas API of the browser, as we have a different clientWidth than
+        // width and clientHeight than height.
+        function convertToServerCoordinate(value) {
+            return Math.round(parseFloat(scaleUpFactor() * value));
         }
 
         const pen = 0;
@@ -856,7 +851,6 @@
         //or undefined errors. The specific values don't really matter.
         let localTool = pen;
         let localLineWidth = 8;
-        let localLineWidthUnscaled = 8;
 
         //Those are not scaled for now, as the whole toolbar would then have to incorrectly size up and down.
         const sizeButton8 = document.getElementById("size-8-button");
@@ -919,8 +913,7 @@
         }
 
         function setLineWidthNoUpdate(value) {
-            localLineWidthUnscaled = value;
-            localLineWidth = value * scaleDownFactor();
+            localLineWidth = value;
         }
 
         function chooseTool(value) {
@@ -1021,7 +1014,7 @@
 
         function setCircleCursor(innerColor, size) {
             const outerColor = getComplementaryCursorColor(innerColor);
-            const circleSize = size * scaleUpFactor();
+            const circleSize = size;
             drawingBoard.style.cursor = `url('data:image/svg+xml;utf8,`
                 + encodeURIComponent(
                     `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="32" height="32">`
@@ -1248,12 +1241,12 @@
                 } else if (parsed.type === "non-guessing-player-message") {
                     appendMessage("non-guessing-player-message", parsed.data.author, parsed.data.content);
                 } else if (parsed.type === "line") {
-                    drawLine(context, parsed.data.fromX * scaleDownFactor(), parsed.data.fromY * scaleDownFactor(), parsed.data.toX * scaleDownFactor(), parsed.data.toY * scaleDownFactor(), parsed.data.color, parsed.data.lineWidth * scaleDownFactor());
+                    drawLine(context, parsed.data.fromX, parsed.data.fromY, parsed.data.toX, parsed.data.toY, parsed.data.color, parsed.data.lineWidth);
                 } else if (parsed.type === "fill") {
                     if (floodfillUint8ClampedArray(
                         imageData.data,
-                        parsed.data.x * scaleDownFactor(),
-                        parsed.data.y * scaleDownFactor(),
+                        parsed.data.x,
+                        parsed.data.y,
                         parsed.data.color,
                         imageData.width,
                         imageData.height)) {
@@ -1728,7 +1721,6 @@
 
         function applyDrawData(drawElements) {
             clear(context);
-            const scaleFactor = scaleDownFactor();
 
             // This implementation directly access the canvas data and does not
             // put it back into the canvas context directly. This saved us not
@@ -1776,15 +1768,15 @@
                     if (drawElement.type === "fill") {
                         floodfillUint8ClampedArray(
                             imageData.data,
-                            drawData.x * scaleFactor, drawData.y * scaleFactor,
+                            drawData.x, drawData.y,
                             drawData.color,
                             imageData.width, imageData.height);
                     } else if (drawElement.type === "line") {
                         _drawLine(
-                            drawData.fromX * scaleFactor, drawData.fromY * scaleFactor,
-                            drawData.toX * scaleFactor, drawData.toY * scaleFactor,
+                            drawData.fromX, drawData.fromY,
+                            drawData.toX, drawData.toY,
                             drawData.color,
-                            drawData.lineWidth * scaleFactor);
+                            drawData.lineWidth);
                     } else {
                         console.log("Unknown draw element type: " + drawData.type);
                     }
@@ -1969,27 +1961,6 @@
             };
         }
 
-        // We debounce this with a relatively small wait time, to prevent spamming
-        // hardcore, but also to ensure we do not draw any bullshit.
-        const requestDrawingDebounced = debounce(() => {
-            socket.send(JSON.stringify({
-                type: "request-drawing",
-            }));
-        }, 50);
-
-        function handleCanvasResize() {
-            if (drawingBoard.width === drawingBoard.clientWidth && drawingBoard.height === drawingBoard.clientHeight) {
-                return false;
-            }
-
-            drawingBoard.width = drawingBoard.clientWidth;
-            drawingBoard.height = drawingBoard.clientHeight;
-            imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
-            setLineWidth(localLineWidthUnscaled);
-
-            return true;
-        }
-
         function clear(context) {
             context.fillStyle = "#FFFFFF";
             context.fillRect(0, 0, drawingBoard.width, drawingBoard.height);
@@ -1997,30 +1968,19 @@
             imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
         }
 
-        //Call intially to correct initial state
-        handleCanvasResize();
         // Clear initially, as it will be black otherwise.
         clear(context);
 
-        window.addEventListener("resize", () => {
-            if (handleCanvasResize()) {
-                clear(context);
-
-                //Since the canvas gets cleared, we request the drawing again.
-                //Saving it locally would be wasteful and might slow down some
-                //clients due to a lot of memory allocation.
-                requestDrawingDebounced();
-            }
-        }, false);
-
         function fillAndSendEvent(context, x, y, color) {
-            if (floodfillUint8ClampedArray(imageData.data, x, y, color, imageData.width, imageData.height)) {
+            const xScaled = convertToServerCoordinate(x);
+            const yScaled = convertToServerCoordinate(y);
+            if (floodfillUint8ClampedArray(imageData.data, xScaled, yScaled, color, imageData.width, imageData.height)) {
                 context.putImageData(imageData, 0, 0);
                 const fillInstruction = {
                     type: "fill",
                     data: {
-                        x: scaelUpAndPrepareFloatForServer(x),
-                        y: scaelUpAndPrepareFloatForServer(y),
+                        x: xScaled,
+                        y: yScaled,
                         color: color
                     },
                 };
@@ -2031,17 +1991,22 @@
         function drawLineAndSendEvent(context, x1, y1, x2, y2) {
             const color = localTool === rubber ? rubberColor : localColor;
 
-            drawLine(context, x1, y1, x2, y2, color, localLineWidth);
+            const x1Scaled = convertToServerCoordinate(x1);
+            const y1Scaled = convertToServerCoordinate(y1);
+            const x2Scaled = convertToServerCoordinate(x2);
+            const y2Scaled = convertToServerCoordinate(y2);
+            drawLine(context, x1Scaled, y1Scaled,
+                x2Scaled, y2Scaled, color, localLineWidth);
 
             const drawInstruction = {
                 type: "line",
                 data: {
-                    fromX: scaelUpAndPrepareFloatForServer(x1),
-                    fromY: scaelUpAndPrepareFloatForServer(y1),
-                    toX: scaelUpAndPrepareFloatForServer(x2),
-                    toY: scaelUpAndPrepareFloatForServer(y2),
+                    fromX: x1Scaled,
+                    fromY: y1Scaled,
+                    toX: x2Scaled,
+                    toY: y2Scaled,
                     color: color,
-                    lineWidth: localLineWidthUnscaled,
+                    lineWidth: localLineWidth,
                 }
             };
             socket.send(JSON.stringify(drawInstruction));

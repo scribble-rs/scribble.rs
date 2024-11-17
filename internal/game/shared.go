@@ -104,10 +104,10 @@ type RGBColor struct {
 type LineEvent struct {
 	Type string `json:"type"`
 	Data struct {
-		FromX     float32  `json:"fromX"`
-		FromY     float32  `json:"fromY"`
-		ToX       float32  `json:"toX"`
-		ToY       float32  `json:"toY"`
+		FromX     int16    `json:"fromX"`
+		FromY     int16    `json:"fromY"`
+		ToX       int16    `json:"toX"`
+		ToY       int16    `json:"toY"`
 		Color     RGBColor `json:"color"`
 		LineWidth uint8    `json:"lineWidth"`
 	} `json:"data"`
@@ -115,8 +115,8 @@ type LineEvent struct {
 
 type FillEvent struct {
 	Data *struct {
-		X     float32  `json:"x"`
-		Y     float32  `json:"y"`
+		X     uint16   `json:"x"`
+		Y     uint16   `json:"y"`
 		Color RGBColor `json:"color"`
 	} `json:"data"`
 	Type string `json:"type"`
