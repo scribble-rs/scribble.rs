@@ -22,6 +22,7 @@ There are some community hosted versions of the game (feel free to host your own
 that the instance may not respond instantly, as it automatically shuts down
 if no traffic is received.)
  - [scribble.bixilon.de](https://scribble.bixilon.de) (community instance maintained by @Bixilon)
+ - [scribble.drifty.win](https://scribble.drifty.win) (community instance maintained by @driftywinds for better latency in Asia)
 
 
 ## Configuration
