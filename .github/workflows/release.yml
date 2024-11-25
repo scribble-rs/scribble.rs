@@ -16,19 +16,19 @@ jobs:
 
     steps:
       - name: Download linux artifact
-        uses: dawidd6/action-download-artifact@v3
+        uses: dawidd6/action-download-artifact@v6
         with:
           workflow: test-and-build.yml
           name: scribblers-linux-x64
 
       - name: Download macos artifact
-        uses: dawidd6/action-download-artifact@v3
+        uses: dawidd6/action-download-artifact@v6
         with:
           workflow: test-and-build.yml
           name: scribblers-macos-x64
 
       - name: Download windows artifact
-        uses: dawidd6/action-download-artifact@v3
+        uses: dawidd6/action-download-artifact@v6
         with:
           workflow: test-and-build.yml
           name: scribblers-x64.exe
