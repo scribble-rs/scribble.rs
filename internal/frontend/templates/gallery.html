@@ -1,0 +1,132 @@
+{{define "gallery-page"}}
+<!DOCTYPE html>
+<html lang="{{.Locale}}">
+
+<head>
+    <title>Scribble.rs - Gallery</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1 maximum-scale=1, user-scalable=0">
+    {{template "non-static-css-decl" .}}
+    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/gallery.css?cache_bust={{.CacheBust}}" />
+    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/root.css?cache_bust={{.CacheBust}}" />
+    {{template "favicon-decl" .}}
+</head>
+
+<body>
+    <div class="app">
+        <noscript><span class="noscript">{{.Translation.Get "requires-js"}}</span></noscript>
+        <div class="top-bar">
+            <button class="prev" onclick="prevDrawing()">Prev</button>
+            <span id="word"></span>
+            <button class="next" onclick="nextDrawing()">Next</button>
+        </div>
+        <!-- FIXME Get from server.-->
+        <canvas id="drawing-board" width="1600" height="900"></canvas>
+    </div>
+
+    <script type="text/javascript" src="{{.RootPath}}/resources/draw.js?cache_bust={{.CacheBust}}">
+    </script>
+    <script type="text/javascript">
+        const getGallery = () => {
+            return new Promise((resolve, reject) => {
+                const cachedGallery = sessionStorage.getItem("cached_gallery")
+                if (cachedGallery) {
+                    resolve(JSON.parse(cachedGallery))
+                    return;
+                }
+
+                fetch('{{.RootPath}}/v1/lobby/{{.LobbyID}}/gallery').
+                    then((response) => {
+                        response
+                            .json()
+                            .then(json => {
+                                sessionStorage.setItem("cached_gallery", JSON.stringify(json));
+                                return json;
+                            })
+                            .then(resolve);
+                    }).
+                    catch(reject);
+            })
+        };
+
+        const word = document.getElementById("word");
+
+        const drawingBoard = document.getElementById("drawing-board");
+        const context = drawingBoard.getContext("2d", {alpha: false});
+        let imageData;
+
+        function clear(context) {
+            context.fillStyle = "#FFFFFF";
+            context.fillRect(0, 0, drawingBoard.width, drawingBoard.height);
+            // Refetch, as we don't manually fill here.
+            imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
+        }
+        clear(context);
+
+        function setDrawing(drawing) {
+            clear(context);
+
+            word.innerText = drawing.word;
+
+            drawing.events.forEach(drawElement => {
+                const drawData = drawElement.data;
+                if (drawElement.type === "fill") {
+                    floodfillUint8ClampedArray(
+                        imageData.data,
+                        drawData.x, drawData.y,
+                        indexToRgbColor(drawData.color),
+                        imageData.width, imageData.height);
+                } else if (drawElement.type === "line") {
+                    drawLineNoPut(
+                        context,
+                        imageData,
+                        drawData.x, drawData.y,
+                        drawData.x2, drawData.y2,
+                        indexToRgbColor(drawData.color),
+                        drawData.width);
+                } else {
+                    console.log("Unknown draw element type: " + drawData.type);
+                }
+            });
+
+            context.putImageData(imageData, 0, 0);
+        }
+
+        let currentIndex = 0;
+        let galleryData;
+
+        getGallery().then(data => {
+            setDrawing(data[0])
+            galleryData = data;
+        });
+
+        function prevDrawing() {
+            if (!galleryData) {
+                return;
+            }
+
+            if (currentIndex <= 0) {
+                return;
+            }
+
+            currentIndex = currentIndex - 1;
+            setDrawing(galleryData[currentIndex]);
+        }
+
+        function nextDrawing() {
+            if (!galleryData) {
+                return;
+            }
+
+            if (currentIndex >= galleryData.length - 1) {
+                return;
+            }
+
+            currentIndex = currentIndex + 1;
+            setDrawing(galleryData[currentIndex]);
+        }
+    </script>
+</body>
+
+</html>
+{{end}}

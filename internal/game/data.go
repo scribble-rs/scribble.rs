@@ -71,6 +71,10 @@ type Lobby struct {
 	// lobby object.
 	currentDrawing []any
 
+	// drawings contains the history of all drawings in the current lobby
+	// accross all rounds and games played.
+	Drawings []GalleryDrawing
+
 	// These variables are used to define the ranges of connected drawing events.
 	// For example a line that has been drawn or a fill that has been executed.
 	// Since we can't trust the client to tell us this, we use the time passed
@@ -91,6 +95,14 @@ type Lobby struct {
 
 	WriteObject          func(*Player, easyjson.Marshaler) error
 	WritePreparedMessage func(*Player, *gws.Broadcaster) error
+}
+
+// GalleryDrawing is a historic entry of a drawing from a past turn.
+type GalleryDrawing struct {
+	// Word is the word that was drawn.
+	Word string `json:"word"`
+	// Events are the events required for recreation of the drawing.
+	Events []any `json:"events"`
 }
 
 // MaxPlayerNameLength defines how long a string can be at max when used

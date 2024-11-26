@@ -1,0 +1,39 @@
+.app {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    box-sizing: border-box;
+    height: 100%;
+}
+
+#drawing-board {
+    border-radius: var(--component-border-radius);
+    min-height: 0;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.top-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0.5rem;
+    background-color: var(--component-base-color);
+    border-radius: var(--component-border-radius);
+}
+
+#word {
+    font-size: 2rem;
+}
+
+.prev,
+.next {
+    font-size: 2rem;
+    border: 1px solid black;
+}
+
+.prev {}
+
+.next {}

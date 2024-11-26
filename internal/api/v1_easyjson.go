@@ -449,3 +449,162 @@ func (v *LobbyData) UnmarshalJSON(data []byte) error {
 func (v *LobbyData) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalApi2(l, v)
 }
+func easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalApi3(in *jlexer.Lexer, out *Gallery) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		in.Skip()
+		*out = nil
+	} else {
+		in.Delim('[')
+		if *out == nil {
+			if !in.IsDelim(']') {
+				*out = make(Gallery, 0, 1)
+			} else {
+				*out = Gallery{}
+			}
+		} else {
+			*out = (*out)[:0]
+		}
+		for !in.IsDelim(']') {
+			var v6 game.GalleryDrawing
+			easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalGame(in, &v6)
+			*out = append(*out, v6)
+			in.WantComma()
+		}
+		in.Delim(']')
+	}
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson102f8a2fEncodeGithubComScribbleRsScribbleRsInternalApi3(out *jwriter.Writer, in Gallery) {
+	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+		out.RawString("null")
+	} else {
+		out.RawByte('[')
+		for v7, v8 := range in {
+			if v7 > 0 {
+				out.RawByte(',')
+			}
+			easyjson102f8a2fEncodeGithubComScribbleRsScribbleRsInternalGame(out, v8)
+		}
+		out.RawByte(']')
+	}
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v Gallery) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson102f8a2fEncodeGithubComScribbleRsScribbleRsInternalApi3(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v Gallery) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson102f8a2fEncodeGithubComScribbleRsScribbleRsInternalApi3(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *Gallery) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalApi3(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *Gallery) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalApi3(l, v)
+}
+func easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalGame(in *jlexer.Lexer, out *game.GalleryDrawing) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "word":
+			out.Word = string(in.String())
+		case "events":
+			if in.IsNull() {
+				in.Skip()
+				out.Events = nil
+			} else {
+				in.Delim('[')
+				if out.Events == nil {
+					if !in.IsDelim(']') {
+						out.Events = make([]interface{}, 0, 4)
+					} else {
+						out.Events = []interface{}{}
+					}
+				} else {
+					out.Events = (out.Events)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v9 interface{}
+					if m, ok := v9.(easyjson.Unmarshaler); ok {
+						m.UnmarshalEasyJSON(in)
+					} else if m, ok := v9.(json.Unmarshaler); ok {
+						_ = m.UnmarshalJSON(in.Raw())
+					} else {
+						v9 = in.Interface()
+					}
+					out.Events = append(out.Events, v9)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson102f8a2fEncodeGithubComScribbleRsScribbleRsInternalGame(out *jwriter.Writer, in game.GalleryDrawing) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"word\":"
+		out.RawString(prefix[1:])
+		out.String(string(in.Word))
+	}
+	{
+		const prefix string = ",\"events\":"
+		out.RawString(prefix)
+		if in.Events == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v10, v11 := range in.Events {
+				if v10 > 0 {
+					out.RawByte(',')
+				}
+				if m, ok := v11.(easyjson.Marshaler); ok {
+					m.MarshalEasyJSON(out)
+				} else if m, ok := v11.(json.Marshaler); ok {
+					out.Raw(m.MarshalJSON())
+				} else {
+					out.Raw(json.Marshal(v11))
+				}
+			}
+			out.RawByte(']')
+		}
+	}
+	out.RawByte('}')
+}

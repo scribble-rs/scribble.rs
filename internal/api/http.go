@@ -19,6 +19,8 @@ func (handler *V1Handler) SetupRoutes(rootPath string, router chi.Router) {
 	router.Get(routePrefix+"/lobby", handler.getLobbies)
 	router.Post(routePrefix+"/lobby", handler.postLobby)
 
+	router.Get(routePrefix+"/lobby/{lobby_id}/gallery", handler.getGallery)
+
 	router.Patch(routePrefix+"/lobby/{lobby_id}", handler.patchLobby)
 	// The websocket is shared between the public API and the official client
 	router.Get(routePrefix+"/lobby/{lobby_id}/ws", handler.websocketUpgrade)

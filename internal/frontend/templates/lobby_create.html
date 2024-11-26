@@ -36,7 +36,7 @@
                             {{end}}
                         </div>
                         {{end}}
-                        <form id="lobby-create" action="{{.RootPath}}/ssrCreateLobby" method="POST">
+                        <form id="lobby-create" action="{{.RootPath}}/create_lobby" method="POST">
                             <label class="lobby-create-label" for="language">
                                 {{.Translation.Get "word-language"}}
                             </label>
@@ -312,7 +312,7 @@
                     join_button.innerText = "Join";
                     join_button.addEventListener("click", (event) => {
                         window.location.href =
-                            `{{.RootPath}}/ssrEnterLobby/${lobby.lobbyId}`;
+                            `{{.RootPath}}/lobby/${lobby.lobbyId}`;
                     });
 
                     lobby_list_item.replaceChildren(lobby_list_rows, join_button);

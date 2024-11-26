@@ -51,6 +51,27 @@ type LobbyEntry struct {
 	CustomWords     bool       `json:"customWords"`
 }
 
+//easyjson:json
+type Gallery []game.GalleryDrawing
+
+func (handler *V1Handler) getGallery(writer http.ResponseWriter, request *http.Request) {
+	lobby := state.GetLobby(chi.URLParam(request, "lobby_id"))
+	if lobby == nil {
+		http.Error(writer, ErrLobbyNotExistent.Error(), http.StatusNotFound)
+		return
+	}
+
+	// FIXME Synchronise access to lobby.Drawings.
+	// The drawings should also be available in an unstarted game.
+
+	if started, _, err := easyjson.MarshalToHTTPResponseWriter(Gallery(lobby.Drawings), writer); err != nil {
+		if !started {
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+}
+
 func (handler *V1Handler) getLobbies(writer http.ResponseWriter, _ *http.Request) {
 	// REMARK: If paging is ever implemented, we might want to maintain order
 	// when deleting lobbies from state in the state package.

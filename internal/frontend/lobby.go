@@ -9,7 +9,6 @@ import (
 	"github.com/scribble-rs/scribble.rs/internal/api"
 	"github.com/scribble-rs/scribble.rs/internal/state"
 	"github.com/scribble-rs/scribble.rs/internal/translations"
-	"golang.org/x/text/language"
 )
 
 type lobbyPageData struct {
@@ -34,7 +33,7 @@ func (handler *SSRHandler) ssrEnterLobby(writer http.ResponseWriter, request *ht
 	}
 
 	userAgent := strings.ToLower(request.UserAgent())
-	if !(strings.Contains(userAgent, "gecko") || strings.Contains(userAgent, "chrome") || strings.Contains(userAgent, "opera") || strings.Contains(userAgent, "safari")) {
+	if !isHumanAgent(userAgent) {
 		err := pageTemplates.ExecuteTemplate(writer, "robot-page", &robotPageData{
 			BasePageConfig: handler.basePageConfig,
 			LobbyData:      api.CreateLobbyData(lobby),
@@ -90,27 +89,4 @@ func (handler *SSRHandler) ssrEnterLobby(writer http.ResponseWriter, request *ht
 			log.Printf("Error templating lobby: %s\n", err)
 		}
 	}
-}
-
-func determineTranslation(r *http.Request) (translations.Translation, string) {
-	languageTags, _, err := language.ParseAcceptLanguage(r.Header.Get("Accept-Language"))
-	if err == nil {
-		for _, languageTag := range languageTags {
-			fullLanguageIdentifier := languageTag.String()
-			fullLanguageIdentifierLowercased := strings.ToLower(fullLanguageIdentifier)
-			translation := translations.GetLanguage(fullLanguageIdentifierLowercased)
-			if translation != nil {
-				return translation, fullLanguageIdentifierLowercased
-			}
-
-			baseLanguageIdentifier, _ := languageTag.Base()
-			baseLanguageIdentifierLowercased := strings.ToLower(baseLanguageIdentifier.String())
-			translation = translations.GetLanguage(baseLanguageIdentifierLowercased)
-			if translation != nil {
-				return translation, baseLanguageIdentifierLowercased
-			}
-		}
-	}
-
-	return translations.DefaultTranslation, "en-us"
 }

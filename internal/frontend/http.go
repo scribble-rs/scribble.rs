@@ -6,9 +6,11 @@ import (
 	"html/template"
 	"net/http"
 	"path"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/scribble-rs/scribble.rs/internal/translations"
+	"golang.org/x/text/language"
 )
 
 var (
@@ -61,8 +63,9 @@ func (handler *SSRHandler) SetupRoutes(router chi.Router) {
 			}),
 		).ServeHTTP,
 	)
-	router.Get("/"+path.Join(handler.cfg.RootPath, "ssrEnterLobby/{lobby_id}"), handler.ssrEnterLobby)
-	router.Post("/"+path.Join(handler.cfg.RootPath, "ssrCreateLobby"), handler.ssrCreateLobby)
+	router.Get("/"+path.Join(handler.cfg.RootPath, "lobby/{lobby_id}/gallery"), handler.ssrGallery)
+	router.Get("/"+path.Join(handler.cfg.RootPath, "lobby/{lobby_id}"), handler.ssrEnterLobby)
+	router.Post("/"+path.Join(handler.cfg.RootPath, "create_lobby"), handler.ssrCreateLobby)
 }
 
 // errorPageData represents the data that error.html requires to be displayed.
@@ -85,4 +88,34 @@ func (handler *SSRHandler) userFacingError(w http.ResponseWriter, errorMessage s
 	if err != nil {
 		panic(err)
 	}
+}
+
+func determineTranslation(r *http.Request) (translations.Translation, string) {
+	languageTags, _, err := language.ParseAcceptLanguage(r.Header.Get("Accept-Language"))
+	if err == nil {
+		for _, languageTag := range languageTags {
+			fullLanguageIdentifier := languageTag.String()
+			fullLanguageIdentifierLowercased := strings.ToLower(fullLanguageIdentifier)
+			translation := translations.GetLanguage(fullLanguageIdentifierLowercased)
+			if translation != nil {
+				return translation, fullLanguageIdentifierLowercased
+			}
+
+			baseLanguageIdentifier, _ := languageTag.Base()
+			baseLanguageIdentifierLowercased := strings.ToLower(baseLanguageIdentifier.String())
+			translation = translations.GetLanguage(baseLanguageIdentifierLowercased)
+			if translation != nil {
+				return translation, baseLanguageIdentifierLowercased
+			}
+		}
+	}
+
+	return translations.DefaultTranslation, "en-us"
+}
+
+func isHumanAgent(userAgent string) bool {
+	return strings.Contains(userAgent, "gecko") ||
+		strings.Contains(userAgent, "chrome") ||
+		strings.Contains(userAgent, "opera") ||
+		strings.Contains(userAgent, "safari")
 }
