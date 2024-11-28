@@ -105,11 +105,11 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 	}
 
 	languageData, languageKey, languageInvalid := ParseLanguage(request.Form.Get("language"))
-	drawingTime, drawingTimeInvalid := ParseDrawingTime(request.Form.Get("drawing_time"))
-	rounds, roundsInvalid := ParseRounds(request.Form.Get("rounds"))
-	maxPlayers, maxPlayersInvalid := ParseMaxPlayers(request.Form.Get("max_players"))
+	drawingTime, drawingTimeInvalid := ParseDrawingTime(handler.cfg, request.Form.Get("drawing_time"))
+	rounds, roundsInvalid := ParseRounds(handler.cfg, request.Form.Get("rounds"))
+	maxPlayers, maxPlayersInvalid := ParseMaxPlayers(handler.cfg, request.Form.Get("max_players"))
 	customWordsPerTurn, customWordsPerTurnInvalid := ParseCustomWordsPerTurn(request.Form.Get("custom_words_per_turn"))
-	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(request.Form.Get("clients_per_ip_limit"))
+	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(handler.cfg, request.Form.Get("clients_per_ip_limit"))
 	publicLobby, publicLobbyInvalid := ParseBoolean("public", request.Form.Get("public"))
 
 	var lowercaser cases.Caser
@@ -174,7 +174,7 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 
 	SetUsersessionCookie(writer, player)
 
-	lobbyData := CreateLobbyData(lobby)
+	lobbyData := CreateLobbyData(handler.cfg, lobby)
 
 	if started, _, err := easyjson.MarshalToHTTPResponseWriter(lobbyData, writer); err != nil {
 		if !started {
@@ -221,7 +221,7 @@ func (handler *V1Handler) postPlayer(writer http.ResponseWriter, request *http.R
 			player.SetLastKnownAddress(GetIPAddressFromRequest(request))
 		}
 
-		lobbyData = CreateLobbyData(lobby)
+		lobbyData = CreateLobbyData(handler.cfg, lobby)
 	})
 
 	if lobbyData != nil {
@@ -280,11 +280,11 @@ func (handler *V1Handler) patchLobby(writer http.ResponseWriter, request *http.R
 	}
 
 	// Editable properties
-	maxPlayers, maxPlayersInvalid := ParseMaxPlayers(request.Form.Get("max_players"))
-	drawingTime, drawingTimeInvalid := ParseDrawingTime(request.Form.Get("drawing_time"))
-	rounds, roundsInvalid := ParseRounds(request.Form.Get("rounds"))
+	maxPlayers, maxPlayersInvalid := ParseMaxPlayers(handler.cfg, request.Form.Get("max_players"))
+	drawingTime, drawingTimeInvalid := ParseDrawingTime(handler.cfg, request.Form.Get("drawing_time"))
+	rounds, roundsInvalid := ParseRounds(handler.cfg, request.Form.Get("rounds"))
 	customWordsPerTurn, customWordsPerTurnInvalid := ParseCustomWordsPerTurn(request.Form.Get("custom_words_per_turn"))
-	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(request.Form.Get("clients_per_ip_limit"))
+	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(handler.cfg, request.Form.Get("clients_per_ip_limit"))
 	publicLobby, publicLobbyInvalid := ParseBoolean("public", request.Form.Get("public"))
 
 	owner := lobby.Owner
@@ -389,9 +389,9 @@ type LobbyData struct {
 
 // CreateLobbyData creates a ready to use LobbyData object containing data
 // from the passed Lobby.
-func CreateLobbyData(lobby *game.Lobby) *LobbyData {
+func CreateLobbyData(cfg *config.Config, lobby *game.Lobby) *LobbyData {
 	return &LobbyData{
-		SettingBounds:          game.LobbySettingBounds,
+		SettingBounds:          cfg.LobbySettingBounds,
 		EditableLobbySettings:  lobby.EditableLobbySettings,
 		LobbyID:                lobby.LobbyID,
 		DrawingBoardBaseWidth:  game.DrawingBoardBaseWidth,

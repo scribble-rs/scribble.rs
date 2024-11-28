@@ -21,7 +21,7 @@ func Test_templateLobbyPage(t *testing.T) {
 				CacheBust: "lol",
 			},
 			LobbyData: &api.LobbyData{
-				SettingBounds: game.LobbySettingBounds,
+				SettingBounds: config.Default.LobbySettingBounds,
 			},
 			Translation: translations.DefaultTranslation,
 		})

@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/scribble-rs/scribble.rs/internal/config"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
@@ -60,7 +61,7 @@ func Test_parseDrawingTime(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 
-			got, err := ParseDrawingTime(testCase.value)
+			got, err := ParseDrawingTime(&config.Default, testCase.value)
 			if (err != nil) != testCase.wantErr {
 				t.Errorf("parseDrawingTime() error = %v, wantErr %v", err, testCase.wantErr)
 				return
@@ -93,7 +94,7 @@ func Test_parseRounds(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 
-			got, err := ParseRounds(testCase.value)
+			got, err := ParseRounds(&config.Default, testCase.value)
 			if (err != nil) != testCase.wantErr {
 				t.Errorf("parseRounds() error = %v, wantErr %v", err, testCase.wantErr)
 				return
@@ -126,7 +127,7 @@ func Test_parseMaxPlayers(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 
-			got, err := ParseMaxPlayers(testCase.value)
+			got, err := ParseMaxPlayers(&config.Default, testCase.value)
 			if (err != nil) != testCase.wantErr {
 				t.Errorf("parseMaxPlayers() error = %v, wantErr %v", err, testCase.wantErr)
 				return

@@ -4,15 +4,18 @@ import (
 	"testing"
 
 	"github.com/scribble-rs/scribble.rs/internal/api"
+	"github.com/scribble-rs/scribble.rs/internal/config"
 	"github.com/scribble-rs/scribble.rs/internal/game"
 )
 
 func TestCreateLobby(t *testing.T) {
 	t.Parallel()
 
-	data := api.CreateLobbyData(&game.Lobby{
-		LobbyID: "TEST",
-	})
+	data := api.CreateLobbyData(
+		&config.Default,
+		&game.Lobby{
+			LobbyID: "TEST",
+		})
 
 	var previousSize uint8
 	for _, suggestedSize := range data.SuggestedBrushSizes {

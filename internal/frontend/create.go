@@ -78,7 +78,7 @@ func (handler *SSRHandler) homePageHandler(writer http.ResponseWriter, request *
 func (handler *SSRHandler) createDefaultLobbyCreatePageData() *LobbyCreatePageData {
 	return &LobbyCreatePageData{
 		BasePageConfig:       handler.basePageConfig,
-		SettingBounds:        game.LobbySettingBounds,
+		SettingBounds:        handler.cfg.LobbySettingBounds,
 		Languages:            game.SupportedLanguages,
 		LobbySettingDefaults: handler.cfg.LobbySettingDefaults,
 	}
@@ -105,11 +105,11 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 	}
 
 	languageData, languageKey, languageInvalid := api.ParseLanguage(request.Form.Get("language"))
-	drawingTime, drawingTimeInvalid := api.ParseDrawingTime(request.Form.Get("drawing_time"))
-	rounds, roundsInvalid := api.ParseRounds(request.Form.Get("rounds"))
-	maxPlayers, maxPlayersInvalid := api.ParseMaxPlayers(request.Form.Get("max_players"))
+	drawingTime, drawingTimeInvalid := api.ParseDrawingTime(handler.cfg, request.Form.Get("drawing_time"))
+	rounds, roundsInvalid := api.ParseRounds(handler.cfg, request.Form.Get("rounds"))
+	maxPlayers, maxPlayersInvalid := api.ParseMaxPlayers(handler.cfg, request.Form.Get("max_players"))
 	customWordsPerTurn, customWordsPerTurnInvalid := api.ParseCustomWordsPerTurn(request.Form.Get("custom_words_per_turn"))
-	clientsPerIPLimit, clientsPerIPLimitInvalid := api.ParseClientsPerIPLimit(request.Form.Get("clients_per_ip_limit"))
+	clientsPerIPLimit, clientsPerIPLimitInvalid := api.ParseClientsPerIPLimit(handler.cfg, request.Form.Get("clients_per_ip_limit"))
 	publicLobby, publicLobbyInvalid := api.ParseBoolean("public", request.Form.Get("public"))
 
 	var lowercaser cases.Caser
@@ -123,7 +123,7 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 	// Prevent resetting the form, since that would be annoying as hell.
 	pageData := LobbyCreatePageData{
 		BasePageConfig: handler.basePageConfig,
-		SettingBounds:  game.LobbySettingBounds,
+		SettingBounds:  handler.cfg.LobbySettingBounds,
 		LobbySettingDefaults: config.LobbySettingDefaults{
 			Public:             request.Form.Get("public"),
 			DrawingTime:        request.Form.Get("drawing_time"),
