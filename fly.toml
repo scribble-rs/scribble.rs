@@ -10,6 +10,9 @@ dockerfile = "linux.Dockerfile"
 [deploy]
 strategy = "canary"
 
+[env]
+  LOBBY_SETTING_BOUNDS_MAX_MAX_PLAYERS=100
+
 [http_service]
 internal_port = 8080
 force_https = true

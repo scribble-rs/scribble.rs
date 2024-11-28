@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/caarlos0/env/v10"
+	"github.com/scribble-rs/scribble.rs/internal/game"
 	"github.com/subosito/gotenv"
 )
 
@@ -53,6 +54,7 @@ type Config struct {
 	// creation page. It doesn't affect the default values of lobbies created
 	// via the API.
 	LobbySettingDefaults LobbySettingDefaults `envPrefix:"LOBBY_SETTING_DEFAULTS_"`
+	LobbySettingBounds   game.SettingBounds   `envPrefix:"LOBBY_SETTING_BOUNDS_"`
 	Port                 uint16               `env:"PORT"`
 	CORS                 CORS                 `envPrefix:"CORS_"`
 	LobbyCleanup         LobbyCleanup         `envPrefix:"LOBBY_CLEANUP_"`
@@ -64,10 +66,22 @@ var Default = Config{
 		Public:             "false",
 		DrawingTime:        "120",
 		Rounds:             "4",
-		MaxPlayers:         "12",
+		MaxPlayers:         "24",
 		CustomWordsPerTurn: "3",
-		ClientsPerIPLimit:  "1",
+		ClientsPerIPLimit:  "2",
 		Language:           "english",
+	},
+	LobbySettingBounds: game.SettingBounds{
+		MinDrawingTime:        60,
+		MaxDrawingTime:        300,
+		MinRounds:             1,
+		MaxRounds:             20,
+		MinMaxPlayers:         2,
+		MaxMaxPlayers:         24,
+		MinClientsPerIPLimit:  1,
+		MaxClientsPerIPLimit:  24,
+		MinCustomWordsPerTurn: 1,
+		MaxCustomWordsPerTurn: 3,
 	},
 	CORS: CORS{
 		AllowedOrigins:   []string{"*"},

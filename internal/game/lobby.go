@@ -20,31 +20,17 @@ import (
 	"github.com/gofrs/uuid/v5"
 )
 
-var (
-	LobbySettingBounds = SettingBounds{
-		MinDrawingTime:        60,
-		MaxDrawingTime:        300,
-		MinRounds:             1,
-		MaxRounds:             20,
-		MinMaxPlayers:         2,
-		MaxMaxPlayers:         24,
-		MinClientsPerIPLimit:  1,
-		MaxClientsPerIPLimit:  24,
-		MinCustomWordsPerTurn: 1,
-		MaxCustomWordsPerTurn: 3,
-	}
-	SupportedLanguages = map[string]string{
-		"english_gb": "English (GB)",
-		"english":    "English (US)",
-		"italian":    "Italian",
-		"german":     "German",
-		"french":     "French",
-		"dutch":      "Dutch",
-		"ukrainian":  "Ukrainian",
-		"russian":    "Russian",
-		"polish":     "Polish",
-	}
-)
+var SupportedLanguages = map[string]string{
+	"english_gb": "English (GB)",
+	"english":    "English (US)",
+	"italian":    "Italian",
+	"german":     "German",
+	"french":     "French",
+	"dutch":      "Dutch",
+	"ukrainian":  "Ukrainian",
+	"russian":    "Russian",
+	"polish":     "Polish",
+}
 
 const (
 	DrawingBoardBaseWidth  = 1600
@@ -59,16 +45,16 @@ const (
 // SettingBounds defines the lower and upper bounds for the user-specified
 // lobby creation input.
 type SettingBounds struct {
-	MinDrawingTime        int `json:"minDrawingTime"`
-	MaxDrawingTime        int `json:"maxDrawingTime"`
-	MinRounds             int `json:"minRounds"`
-	MaxRounds             int `json:"maxRounds"`
-	MinMaxPlayers         int `json:"minMaxPlayers"`
-	MaxMaxPlayers         int `json:"maxMaxPlayers"`
-	MinClientsPerIPLimit  int `json:"minClientsPerIpLimit"`
-	MaxClientsPerIPLimit  int `json:"maxClientsPerIpLimit"`
-	MinCustomWordsPerTurn int `json:"minCustomWordsPerTurn"`
-	MaxCustomWordsPerTurn int `json:"maxCustomWordsPerTurn"`
+	MinDrawingTime        int `json:"minDrawingTime" env:"MIN_DRAWING_TIME"`
+	MaxDrawingTime        int `json:"maxDrawingTime" env:"MAX_DRAWING_TIME"`
+	MinRounds             int `json:"minRounds" env:"MIN_ROUNDS"`
+	MaxRounds             int `json:"maxRounds" env:"MAX_ROUNDS"`
+	MinMaxPlayers         int `json:"minMaxPlayers" env:"MIN_MAX_PLAYERS"`
+	MaxMaxPlayers         int `json:"maxMaxPlayers" env:"MAX_MAX_PLAYERS"`
+	MinClientsPerIPLimit  int `json:"minClientsPerIpLimit" env:"MIN_CLIENTS_PER_IP_LIMIT"`
+	MaxClientsPerIPLimit  int `json:"maxClientsPerIpLimit" env:"MAX_CLIENTS_PER_IP_LIMIT"`
+	MinCustomWordsPerTurn int `json:"minCustomWordsPerTurn" env:"MIN_CUSTOM_WORDS_PER_TURN"`
+	MaxCustomWordsPerTurn int `json:"maxCustomWordsPerTurn" env:"MAX_CUSTOM_WORDS_PER_TURN"`
 }
 
 func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player) error {

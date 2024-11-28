@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/scribble-rs/scribble.rs/internal/config"
 	"github.com/scribble-rs/scribble.rs/internal/game"
 	"golang.org/x/text/cases"
 )
@@ -38,25 +39,25 @@ func ParseLanguage(value string) (*game.LanguageData, string, error) {
 // ParseDrawingTime checks whether the given value is an integer between
 // the lower and upper bound of drawing time. All other invalid
 // input, including empty strings, will return an error.
-func ParseDrawingTime(value string) (int, error) {
-	return parseIntValue(value, game.LobbySettingBounds.MinDrawingTime,
-		game.LobbySettingBounds.MaxDrawingTime, "drawing time")
+func ParseDrawingTime(cfg *config.Config, value string) (int, error) {
+	return parseIntValue(value, cfg.LobbySettingBounds.MinDrawingTime,
+		cfg.LobbySettingBounds.MaxDrawingTime, "drawing time")
 }
 
 // ParseRounds checks whether the given value is an integer between
 // the lower and upper bound of rounds played. All other invalid
 // input, including empty strings, will return an error.
-func ParseRounds(value string) (int, error) {
-	return parseIntValue(value, game.LobbySettingBounds.MinRounds,
-		game.LobbySettingBounds.MaxRounds, "rounds")
+func ParseRounds(cfg *config.Config, value string) (int, error) {
+	return parseIntValue(value, cfg.LobbySettingBounds.MinRounds,
+		cfg.LobbySettingBounds.MaxRounds, "rounds")
 }
 
 // ParseMaxPlayers checks whether the given value is an integer between
 // the lower and upper bound of maximum players per lobby. All other invalid
 // input, including empty strings, will return an error.
-func ParseMaxPlayers(value string) (int, error) {
-	return parseIntValue(value, game.LobbySettingBounds.MinMaxPlayers,
-		game.LobbySettingBounds.MaxMaxPlayers, "max players amount")
+func ParseMaxPlayers(cfg *config.Config, value string) (int, error) {
+	return parseIntValue(value, cfg.LobbySettingBounds.MinMaxPlayers,
+		cfg.LobbySettingBounds.MaxMaxPlayers, "max players amount")
 }
 
 // ParseCustomWords checks whether the given value is a string containing comma
@@ -88,9 +89,9 @@ func ParseCustomWords(lowercaser cases.Caser, value string) ([]string, error) {
 // ParseClientsPerIPLimit checks whether the given value is an integer between
 // the lower and upper bound of maximum clients per IP. All other invalid
 // input, including empty strings, will return an error.
-func ParseClientsPerIPLimit(value string) (int, error) {
-	return parseIntValue(value, game.LobbySettingBounds.MinClientsPerIPLimit,
-		game.LobbySettingBounds.MaxClientsPerIPLimit, "clients per IP limit")
+func ParseClientsPerIPLimit(cfg *config.Config, value string) (int, error) {
+	return parseIntValue(value, cfg.LobbySettingBounds.MinClientsPerIPLimit,
+		cfg.LobbySettingBounds.MaxClientsPerIPLimit, "clients per IP limit")
 }
 
 // ParseCustomWordsPerTurn checks whether the given value is an integer between

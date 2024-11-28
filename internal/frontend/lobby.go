@@ -36,7 +36,7 @@ func (handler *SSRHandler) ssrEnterLobby(writer http.ResponseWriter, request *ht
 	if !isHumanAgent(userAgent) {
 		err := pageTemplates.ExecuteTemplate(writer, "robot-page", &robotPageData{
 			BasePageConfig: handler.basePageConfig,
-			LobbyData:      api.CreateLobbyData(lobby),
+			LobbyData:      api.CreateLobbyData(handler.cfg, lobby),
 		})
 		if err != nil {
 			log.Printf("error templating robot page: %d\n", err)
@@ -75,7 +75,7 @@ func (handler *SSRHandler) ssrEnterLobby(writer http.ResponseWriter, request *ht
 
 		pageData = &lobbyPageData{
 			BasePageConfig: handler.basePageConfig,
-			LobbyData:      api.CreateLobbyData(lobby),
+			LobbyData:      api.CreateLobbyData(handler.cfg, lobby),
 			Translation:    translation,
 			Locale:         locale,
 		}
