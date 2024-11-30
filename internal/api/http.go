@@ -6,12 +6,16 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/scribble-rs/scribble.rs/internal/metrics"
 )
 
 // SetupRoutes registers the /v1/ endpoints with the http package.
 func (handler *V1Handler) SetupRoutes(rootPath string, router chi.Router) {
 	routePrefix := "/" + path.Join(rootPath, "v1")
 
+	metrics.SetupRoute(func(metricsHandler http.HandlerFunc) {
+		router.Get(routePrefix+"/metrics", metricsHandler)
+	})
 	router.Get(routePrefix+"/stats", handler.getStats)
 
 	// These exist only for the public API. We version them in order to ensure
