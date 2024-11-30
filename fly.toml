@@ -4,6 +4,10 @@ app = "scribblers"
 # "fra" is only for paying customers
 primary_region = "ams"
 
+[metrics]
+port = 8080
+path = "/v1/metrics"
+
 [build]
 dockerfile = "linux.Dockerfile"
 

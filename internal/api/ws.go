@@ -14,6 +14,7 @@ import (
 	"github.com/mailru/easyjson"
 
 	"github.com/scribble-rs/scribble.rs/internal/game"
+	"github.com/scribble-rs/scribble.rs/internal/metrics"
 	"github.com/scribble-rs/scribble.rs/internal/state"
 )
 
@@ -62,6 +63,8 @@ func (handler *V1Handler) websocketUpgrade(writer http.ResponseWriter, request *
 			return
 		}
 
+		metrics.TrackPlayerConnect()
+
 		log.Printf("%s(%s) has connected\n", player.Name, player.ID)
 		player.SetWebsocket(socket)
 		socket.Session().Store("player", player)
@@ -106,6 +109,7 @@ func (c *socketHandler) OnClose(socket *gws.Conn, _ error) {
 		return
 	}
 
+	metrics.TrackPlayerDisconnect()
 	lobby.OnPlayerDisconnect(player)
 	player.SetWebsocket(nil)
 }
