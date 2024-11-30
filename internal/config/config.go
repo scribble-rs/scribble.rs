@@ -48,7 +48,11 @@ type Config struct {
 	// scribblers paths. For example if you host scribblers on painting.com
 	// but already host a different website on that domain, then your API paths
 	// might have to look like this: painting.com/scribblers/v1
-	RootPath       string `env:"ROOT_PATH"`
+	RootPath string `env:"ROOT_PATH"`
+	// RootURL is similar to RootPath, but contains only the protocol and
+	// domain. So it could be https://painting.com. This is required for some
+	// non critical functionallity, such as metadata tags.
+	RootURL        string `env:"ROOT_URL"`
 	CPUProfilePath string `env:"CPU_PROFILE_PATH"`
 	// LobbySettingDefaults is used for the server side rendering of the lobby
 	// creation page. It doesn't affect the default values of lobbies created
@@ -138,6 +142,7 @@ func Load() (*Config, error) {
 	}
 
 	// Prevent user error and let the code decide when we need slashes.
+	config.RootURL = strings.TrimSuffix(config.RootURL, "/")
 	config.RootPath = strings.Trim(config.RootPath, "/")
 
 	return &config, nil

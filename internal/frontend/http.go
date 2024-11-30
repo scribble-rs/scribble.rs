@@ -38,6 +38,10 @@ type BasePageConfig struct {
 	// but already host a different website, then your API paths might have to
 	// look like this: painting.com/scribblers/v1.
 	RootPath string `json:"rootPath"`
+	// RootURL is similar to RootPath, but contains only the protocol and
+	// domain. So it could be https://painting.com. This is required for some
+	// non critical functionallity, such as metadata tags.
+	RootURL string `json:"rootUrl"`
 	// CacheBust is a string that is appended to all resources to prevent
 	// browsers from using cached data of a previous version, but still have
 	// long lived max age values.
