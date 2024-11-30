@@ -15,7 +15,8 @@ dockerfile = "linux.Dockerfile"
 strategy = "canary"
 
 [env]
-  LOBBY_SETTING_BOUNDS_MAX_MAX_PLAYERS=100
+  ROOT_URL = "https://scribblers.fly.dev"
+  LOBBY_SETTING_BOUNDS_MAX_MAX_PLAYERS = 100
 
 [http_service]
 internal_port = 8080
