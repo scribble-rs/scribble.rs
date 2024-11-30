@@ -54,6 +54,17 @@
                                 <option value="{{$k}}" {{if eq $k $language}}selected="selected" {{end}}>{{$v}}</option>
                                 {{end}}
                             </select>
+                            <label class="lobby-create-label" for="score_calculation">
+                                {{.Translation.Get "score-calculation"}}
+                            </label>
+                            <select class="input-item" name="score_calculation" id="score_calculation" placeholder="Choose
+                                    how player scores are determined">
+                                {{$scoreCalculation := .ScoreCalculation}}
+                                {{range .ScoreCalculations}}
+                                <option value="{{.}}" {{if eq . $scoreCalculation}}selected="selected" {{end}}>{{ . }}
+                                </option>
+                                {{end}}
+                            </select>
                             <label class="lobby-create-label" for="drawing_time">
                                 {{.Translation.Get "drawing-time-setting"}}
                             </label>

@@ -14,7 +14,7 @@ func TestAddAndRemove(t *testing.T) {
 	require.Empty(t, lobbies, "Lobbies should be empty when test starts")
 
 	createLobby := func() *game.Lobby {
-		player, lobby, err := game.CreateLobby(uuid.Nil, "player", "dutch", true, 100, 10, 10, 3, 1, nil)
+		player, lobby, err := game.CreateLobby(uuid.Nil, "player", "dutch", true, 100, 10, 10, 3, 1, nil, &game.ChillScoring{})
 		require.NoError(t, err)
 		lobby.OnPlayerDisconnect(player)
 		return lobby
