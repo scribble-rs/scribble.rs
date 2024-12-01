@@ -81,6 +81,7 @@ func (handler *SSRHandler) createDefaultLobbyCreatePageData() *LobbyCreatePageDa
 		BasePageConfig:       handler.basePageConfig,
 		SettingBounds:        handler.cfg.LobbySettingBounds,
 		Languages:            game.SupportedLanguages,
+		ScoreCalculations:    game.SupportedScoreCalculations,
 		LobbySettingDefaults: handler.cfg.LobbySettingDefaults,
 	}
 }
@@ -91,10 +92,11 @@ type LobbyCreatePageData struct {
 	config.LobbySettingDefaults
 	game.SettingBounds
 
-	Translation translations.Translation
-	Locale      string
-	Errors      []string
-	Languages   map[string]string
+	Translation       translations.Translation
+	Locale            string
+	Errors            []string
+	Languages         map[string]string
+	ScoreCalculations []string
 }
 
 // ssrCreateLobby allows creating a lobby, optionally returning errors that
@@ -105,6 +107,7 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 		return
 	}
 
+	scoreCalculation, scoreCalculationInvalid := api.ParseScoreCalculation(request.Form.Get("score_calculation"))
 	languageData, languageKey, languageInvalid := api.ParseLanguage(request.Form.Get("language"))
 	drawingTime, drawingTimeInvalid := api.ParseDrawingTime(handler.cfg, request.Form.Get("drawing_time"))
 	rounds, roundsInvalid := api.ParseRounds(handler.cfg, request.Form.Get("rounds"))
@@ -134,10 +137,14 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 			CustomWordsPerTurn: request.Form.Get("custom_words_per_turn"),
 			ClientsPerIPLimit:  request.Form.Get("clients_per_ip_limit"),
 			Language:           request.Form.Get("language"),
+			ScoreCalculation:   request.Form.Get("score_calculation"),
 		},
 		Languages: game.SupportedLanguages,
 	}
 
+	if scoreCalculationInvalid != nil {
+		pageData.Errors = append(pageData.Errors, scoreCalculationInvalid.Error())
+	}
 	if languageInvalid != nil {
 		pageData.Errors = append(pageData.Errors, languageInvalid.Error())
 	}
@@ -179,7 +186,7 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 
 	player, lobby, err := game.CreateLobby(uuid.Nil, playerName, languageKey,
 		publicLobby, drawingTime, rounds, maxPlayers, customWordsPerTurn,
-		clientsPerIPLimit, customWords)
+		clientsPerIPLimit, customWords, scoreCalculation)
 	if err != nil {
 		pageData.Errors = append(pageData.Errors, err.Error())
 		if err := pageTemplates.ExecuteTemplate(writer, "lobby-create-page", pageData); err != nil {

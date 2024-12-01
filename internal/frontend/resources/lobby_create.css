@@ -222,7 +222,7 @@
     overflow-y: auto;
     padding-right: 0.5rem;
     flex: 1;
-    grid-template-rows: max-content max-content max-content max-content max-content max-content auto;
+    grid-template-rows: max-content max-content max-content max-content max-content max-content max-content auto;
 }
 
 .lobby-create-label {

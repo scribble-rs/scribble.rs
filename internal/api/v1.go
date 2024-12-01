@@ -41,6 +41,7 @@ type LobbyEntries []*LobbyEntry
 type LobbyEntry struct {
 	LobbyID         string     `json:"lobbyId"`
 	Wordpack        string     `json:"wordpack"`
+	Scoring         string     `json:"scoring"`
 	State           game.State `json:"state"`
 	PlayerCount     int        `json:"playerCount"`
 	MaxPlayers      int        `json:"maxPlayers"`
@@ -92,6 +93,7 @@ func (handler *V1Handler) getLobbies(writer http.ResponseWriter, _ *http.Request
 			MaxClientsPerIP: lobby.ClientsPerIPLimit,
 			Wordpack:        lobby.Wordpack,
 			State:           lobby.State,
+			Scoring:         lobby.ScoreCalculation.Identifier(),
 		})
 	}
 
@@ -125,6 +127,7 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 		}
 	}
 
+	scoreCalculation, scoreCalculationInvalid := ParseScoreCalculation(request.Form.Get("score_calculation"))
 	languageData, languageKey, languageInvalid := ParseLanguage(request.Form.Get("language"))
 	drawingTime, drawingTimeInvalid := ParseDrawingTime(handler.cfg, request.Form.Get("drawing_time"))
 	rounds, roundsInvalid := ParseRounds(handler.cfg, request.Form.Get("rounds"))
@@ -141,6 +144,9 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 	}
 	customWords, customWordsInvalid := ParseCustomWords(lowercaser, request.Form.Get("custom_words"))
 
+	if scoreCalculationInvalid != nil {
+		requestErrors = append(requestErrors, scoreCalculationInvalid.Error())
+	}
 	if languageInvalid != nil {
 		requestErrors = append(requestErrors, languageInvalid.Error())
 	}
@@ -174,7 +180,7 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 	playerName := GetPlayername(request)
 	player, lobby, err := game.CreateLobby(desiredLobbyId, playerName,
 		languageKey, publicLobby, drawingTime, rounds, maxPlayers,
-		customWordsPerTurn, clientsPerIPLimit, customWords)
+		customWordsPerTurn, clientsPerIPLimit, customWords, scoreCalculation)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return

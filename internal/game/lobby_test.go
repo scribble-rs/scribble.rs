@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"reflect"
 	"testing"
+	"time"
 	"unsafe"
 
 	"github.com/gofrs/uuid/v5"
@@ -185,26 +186,27 @@ func Test_recalculateRanks(t *testing.T) {
 	}
 }
 
-func Test_calculateGuesserScore(t *testing.T) {
+func Test_chillScoring_calculateGuesserScore(t *testing.T) {
 	t.Parallel()
 
-	lastScore := calculateGuesserScore(0, 0, 115, 120)
-	if lastScore >= maxBaseScore {
+	score := ChillScoring.CalculateGuesserScoreInternal(0, 0, 120, time.Now().Add(115*time.Second).UnixMilli())
+	if score >= ChillScoring.MaxScore() {
 		t.Errorf("Score should have declined, but was bigger than or "+
-			"equal to the baseScore. (LastScore: %d; BaseScore: %d)", lastScore, maxBaseScore)
+			"equal to the max score. (LastScore: %d; MaxScore: %d)", score, ChillScoring.MaxScore())
 	}
 
 	lastDecline := -1
 	for secondsLeft := 105; secondsLeft >= 5; secondsLeft -= 10 {
-		newScore := calculateGuesserScore(0, 0, secondsLeft, 120)
-		if newScore > lastScore {
-			t.Errorf("Score with more time taken should be lower. (LastScore: %d; NewScore: %d)", lastScore, newScore)
+		roundEndTime := time.Now().Add(time.Duration(secondsLeft) * time.Second).UnixMilli()
+		newScore := ChillScoring.CalculateGuesserScoreInternal(0, 0, 120, roundEndTime)
+		if newScore > score {
+			t.Errorf("Score with more time taken should be lower. (LastScore: %d; NewScore: %d)", score, newScore)
 		}
-		newDecline := lastScore - newScore
+		newDecline := score - newScore
 		if lastDecline != -1 && newDecline > lastDecline {
 			t.Errorf("Decline should get lower with time taken. (LastDecline: %d; NewDecline: %d)\n", lastDecline, newDecline)
 		}
-		lastScore = newScore
+		score = newScore
 		lastDecline = newDecline
 	}
 }
@@ -334,7 +336,8 @@ func Test_kickDrawer(t *testing.T) {
 			DrawingTime: 10,
 			Rounds:      10,
 		},
-		words: []string{"a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a"},
+		ScoreCalculation: ChillScoring,
+		words:            []string{"a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a"},
 	}
 	lobby.WriteObject = noOpWriteObject
 	lobby.WritePreparedMessage = noOpWritePreparedMessage
@@ -386,7 +389,7 @@ func Test_kickDrawer(t *testing.T) {
 	}
 }
 
-func Test_calculateDrawerScore(t *testing.T) {
+func Test_lobby_calculateDrawerScore(t *testing.T) {
 	t.Parallel()
 
 	t.Run("only disconnected players, with score", func(t *testing.T) {
@@ -404,6 +407,7 @@ func Test_calculateDrawerScore(t *testing.T) {
 					LastScore: 200,
 				},
 			},
+			ScoreCalculation: ChillScoring,
 		}
 
 		require.Equal(t, 150, lobby.calculateDrawerScore())
@@ -423,6 +427,7 @@ func Test_calculateDrawerScore(t *testing.T) {
 					LastScore: 0,
 				},
 			},
+			ScoreCalculation: ChillScoring,
 		}
 
 		require.Equal(t, 0, lobby.calculateDrawerScore())
@@ -442,6 +447,7 @@ func Test_calculateDrawerScore(t *testing.T) {
 					LastScore: 0,
 				},
 			},
+			ScoreCalculation: ChillScoring,
 		}
 
 		require.Equal(t, 0, lobby.calculateDrawerScore())
@@ -461,6 +467,7 @@ func Test_calculateDrawerScore(t *testing.T) {
 					LastScore: 200,
 				},
 			},
+			ScoreCalculation: ChillScoring,
 		}
 
 		require.Equal(t, 150, lobby.calculateDrawerScore())
@@ -488,6 +495,7 @@ func Test_calculateDrawerScore(t *testing.T) {
 					LastScore: 0,
 				},
 			},
+			ScoreCalculation: ChillScoring,
 		}
 
 		require.Equal(t, 100, lobby.calculateDrawerScore())
@@ -515,6 +523,7 @@ func Test_calculateDrawerScore(t *testing.T) {
 					LastScore: 400,
 				},
 			},
+			ScoreCalculation: ChillScoring,
 		}
 
 		require.Equal(t, 250, lobby.calculateDrawerScore())
@@ -524,7 +533,7 @@ func Test_calculateDrawerScore(t *testing.T) {
 func Test_NoPrematureGameOver(t *testing.T) {
 	t.Parallel()
 
-	player, lobby, err := CreateLobby(uuid.Nil, "test", "english", false, 120, 4, 4, 3, 1, nil)
+	player, lobby, err := CreateLobby(uuid.Nil, "test", "english", false, 120, 4, 4, 3, 1, nil, ChillScoring)
 	require.NoError(t, err)
 
 	lobby.WriteObject = noOpWriteObject
