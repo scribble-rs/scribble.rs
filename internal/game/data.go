@@ -42,6 +42,9 @@ type Lobby struct {
 	// are set to the same player. While the owner can change throughout the
 	// game, the creator can't.
 	creator *Player
+	// ScoreCalculation decides how scores for both guessers and drawers are
+	// determined.
+	ScoreCalculation ScoreCalculation
 	// CurrentWord represents the word that was last selected. If no word has
 	// been selected yet or the round is already over, this should be empty.
 	CurrentWord string

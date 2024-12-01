@@ -20,6 +20,11 @@ import (
 	"github.com/gofrs/uuid/v5"
 )
 
+var SupportedScoreCalculations = []string{
+	"chill",
+	"competitive",
+}
+
 var SupportedLanguages = map[string]string{
 	"english_gb": "English (GB)",
 	"english":    "English (US)",
@@ -37,9 +42,6 @@ const (
 	DrawingBoardBaseHeight = 900
 	MinBrushSize           = 8
 	MaxBrushSize           = 32
-
-	maxBaseScore      = 200
-	maxHintBonusScore = 60
 )
 
 // SettingBounds defines the lower and upper bounds for the user-specified
@@ -282,9 +284,7 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 	switch CheckGuess(normInput, normSearched) {
 	case EqualGuess:
 		{
-			secondsLeft := int(lobby.roundEndTime/1000 - time.Now().UTC().Unix())
-
-			sender.LastScore = calculateGuesserScore(lobby.hintCount, lobby.hintsLeft, secondsLeft, lobby.DrawingTime)
+			sender.LastScore = lobby.calculateGuesserScore()
 			sender.Score += sender.LastScore
 
 			sender.State = Standby
@@ -319,24 +319,6 @@ func (lobby *Lobby) wasLastDrawEventFill() bool {
 	}
 	_, isFillEvent := lobby.currentDrawing[len(lobby.currentDrawing)-1].(*FillEvent)
 	return isFillEvent
-}
-
-func calculateGuesserScore(hintCount, hintsLeft, secondsLeft, drawingTime int) int {
-	// The base score is based on the general time taken.
-	// The formula here represents an exponential decline based on the time taken.
-	// This way fast players get more points, however not a lot more.
-	// The bonus gained by guessing before hints are shown is therefore still somewhat relevant.
-	declineFactor := 1.0 / float64(drawingTime)
-	baseScore := int(maxBaseScore * math.Pow(1.0-declineFactor, float64(drawingTime-secondsLeft)))
-
-	// Prevent zero division panic. This could happen with two letter words.
-	if hintCount <= 0 {
-		return baseScore
-	}
-
-	// If all hints are shown, or the word is too short to show hints, the
-	// calculation will basically always be baseScore + 0.
-	return baseScore + hintsLeft*(maxHintBonusScore/hintCount)
 }
 
 func (lobby *Lobby) isAnyoneStillGuessing() bool {
@@ -597,34 +579,12 @@ func handleNameChangeEvent(caller *Player, lobby *Lobby, name string) {
 	}
 }
 
+func (lobby *Lobby) calculateGuesserScore() int {
+	return lobby.ScoreCalculation.CalculateGuesserScore(lobby)
+}
+
 func (lobby *Lobby) calculateDrawerScore() int {
-	// The drawer can get points even if disconnected. But if they are
-	// connected, we need to ignore them when calculating their score.
-	var (
-		playerCount int
-		scoreSum    int
-	)
-	for _, player := range lobby.GetPlayers() {
-		if player.State != Drawing &&
-			// Switch to spectating is only possible after score calculation, so
-			// this can't be used to manipulate score.
-			player.State != Spectating &&
-			// If the player has guessed, we want to take them into account,
-			// even if they aren't connected anymore. If the player is
-			// connected, but hasn't guessed, it is still as well, as the
-			// drawing must've not been good enough to be guessable.
-			(player.Connected || player.LastScore > 0) {
-			scoreSum += player.LastScore
-			playerCount++
-		}
-	}
-
-	var averageScore int
-	if playerCount > 0 {
-		averageScore = scoreSum / playerCount
-	}
-
-	return averageScore
+	return lobby.ScoreCalculation.CalculateDrawerScore(lobby)
 }
 
 // advanceLobbyPredefineDrawer is required in cases where the drawer is removed
@@ -946,6 +906,7 @@ func CreateLobby(
 	publicLobby bool,
 	drawingTime, rounds, maxPlayers, customWordsPerTurn, clientsPerIPLimit int,
 	customWords []string,
+	scoringCalculation ScoreCalculation,
 ) (*Player, *Lobby, error) {
 	if desiredLobbyId == uuid.Nil {
 		desiredLobbyId = uuid.Must(uuid.NewV4())
@@ -960,9 +921,10 @@ func CreateLobby(
 			ClientsPerIPLimit:  clientsPerIPLimit,
 			Public:             publicLobby,
 		},
-		CustomWords:    customWords,
-		currentDrawing: make([]any, 0),
-		State:          Unstarted,
+		CustomWords:      customWords,
+		currentDrawing:   make([]any, 0),
+		State:            Unstarted,
+		ScoreCalculation: scoringCalculation,
 	}
 
 	if len(customWords) > 1 {
@@ -1138,4 +1100,94 @@ func (lobby *Lobby) Shutdown() {
 	log.Println("Lobby Shutdown: Mutex acquired")
 
 	lobby.Broadcast(&EventTypeOnly{Type: EventTypeShutdown})
+}
+
+// ScoreCalculation allows having different scoring systems for
+type ScoreCalculation interface {
+	Identifier() string
+	CalculateGuesserScore(*Lobby) int
+	CalculateDrawerScore(*Lobby) int
+}
+
+var ChillScoring = &adjustableScoringAlgorithm{
+	identifier:                  "chill",
+	baseScore:                   100.0,
+	maxBonusBaseScore:           100.0,
+	bonusBaseScoreDeclineFactor: 2.0,
+	maxHintBonusScore:           60.0,
+}
+
+var CompetitiveScoring = &adjustableScoringAlgorithm{
+	identifier:                  "competitive",
+	baseScore:                   10.0,
+	maxBonusBaseScore:           290.0,
+	bonusBaseScoreDeclineFactor: 3.0,
+	maxHintBonusScore:           120.0,
+}
+
+type adjustableScoringAlgorithm struct {
+	identifier                  string
+	baseScore                   float64
+	maxBonusBaseScore           float64
+	bonusBaseScoreDeclineFactor float64
+	maxHintBonusScore           float64
+}
+
+func (s *adjustableScoringAlgorithm) Identifier() string {
+	return s.identifier
+}
+
+func (s *adjustableScoringAlgorithm) CalculateGuesserScore(lobby *Lobby) int {
+	return s.CalculateGuesserScoreInternal(lobby.hintCount, lobby.hintsLeft, lobby.DrawingTime, lobby.roundEndTime)
+}
+
+func (s *adjustableScoringAlgorithm) MaxScore() int {
+	return int(s.baseScore + s.maxBonusBaseScore + s.maxHintBonusScore)
+}
+
+func (s *adjustableScoringAlgorithm) CalculateGuesserScoreInternal(
+	hintCount, hintsLeft, drawingTime int,
+	roundEndTimeMillis int64,
+) int {
+	secondsLeft := int(roundEndTimeMillis/1000 - time.Now().UTC().Unix())
+
+	declineFactor := s.bonusBaseScoreDeclineFactor / float64(drawingTime)
+	score := int(
+		s.baseScore + s.maxBonusBaseScore*math.Pow(1.0-declineFactor, float64(drawingTime-secondsLeft)))
+
+	// Prevent zero division panic. This could happen with two letter words.
+	if hintCount > 0 {
+		score += hintsLeft * (int(s.maxHintBonusScore) / hintCount)
+	}
+
+	return score
+}
+
+func (s *adjustableScoringAlgorithm) CalculateDrawerScore(lobby *Lobby) int {
+	// The drawer can get points even if disconnected. But if they are
+	// connected, we need to ignore them when calculating their score.
+	var (
+		playerCount int
+		scoreSum    int
+	)
+	for _, player := range lobby.GetPlayers() {
+		if player.State != Drawing &&
+			// Switch to spectating is only possible after score calculation, so
+			// this can't be used to manipulate score.
+			player.State != Spectating &&
+			// If the player has guessed, we want to take them into account,
+			// even if they aren't connected anymore. If the player is
+			// connected, but hasn't guessed, it is still as well, as the
+			// drawing must've not been good enough to be guessable.
+			(player.Connected || player.LastScore > 0) {
+			scoreSum += player.LastScore
+			playerCount++
+		}
+	}
+
+	if playerCount > 0 {
+		return scoreSum / playerCount
+	}
+
+	return 0
 }

@@ -41,6 +41,8 @@ func easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalApi(in *jlexer.L
 			out.LobbyID = string(in.String())
 		case "wordpack":
 			out.Wordpack = string(in.String())
+		case "scoring":
+			out.Scoring = string(in.String())
 		case "state":
 			out.State = game.State(in.String())
 		case "playerCount":
@@ -80,6 +82,11 @@ func easyjson102f8a2fEncodeGithubComScribbleRsScribbleRsInternalApi(out *jwriter
 		const prefix string = ",\"wordpack\":"
 		out.RawString(prefix)
 		out.String(string(in.Wordpack))
+	}
+	{
+		const prefix string = ",\"scoring\":"
+		out.RawString(prefix)
+		out.String(string(in.Scoring))
 	}
 	{
 		const prefix string = ",\"state\":"
