@@ -40,7 +40,9 @@ func ParseScoreCalculation(value string) (game.ScoreCalculation, error) {
 	toLower := strings.ToLower(strings.TrimSpace(value))
 	switch toLower {
 	case "", "chill":
-		return &game.ChillScoring{}, nil
+		return game.ChillScoring, nil
+	case "competitive":
+		return game.CompetitiveScoring, nil
 	}
 
 	return nil, errors.New("the given score calculation doesn't match any supported algorithm")

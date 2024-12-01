@@ -41,6 +41,7 @@ type LobbyEntries []*LobbyEntry
 type LobbyEntry struct {
 	LobbyID         string     `json:"lobbyId"`
 	Wordpack        string     `json:"wordpack"`
+	Scoring         string     `json:"scoring"`
 	State           game.State `json:"state"`
 	PlayerCount     int        `json:"playerCount"`
 	MaxPlayers      int        `json:"maxPlayers"`
@@ -71,6 +72,7 @@ func (handler *V1Handler) getLobbies(writer http.ResponseWriter, _ *http.Request
 			MaxClientsPerIP: lobby.ClientsPerIPLimit,
 			Wordpack:        lobby.Wordpack,
 			State:           lobby.State,
+			Scoring:         lobby.ScoreCalculation.Identifier(),
 		})
 	}
 

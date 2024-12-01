@@ -22,6 +22,7 @@ import (
 
 var SupportedScoreCalculations = []string{
 	"chill",
+	"competitive",
 }
 
 var SupportedLanguages = map[string]string{
@@ -41,9 +42,6 @@ const (
 	DrawingBoardBaseHeight = 900
 	MinBrushSize           = 8
 	MaxBrushSize           = 32
-
-	maxBaseScore      = 200
-	maxHintBonusScore = 60
 )
 
 // SettingBounds defines the lower and upper bounds for the user-specified
@@ -582,11 +580,11 @@ func handleNameChangeEvent(caller *Player, lobby *Lobby, name string) {
 }
 
 func (lobby *Lobby) calculateGuesserScore() int {
-	return lobby.scoreCalculation.CalculateGuesserScore(lobby)
+	return lobby.ScoreCalculation.CalculateGuesserScore(lobby)
 }
 
 func (lobby *Lobby) calculateDrawerScore() int {
-	return lobby.scoreCalculation.CalculateDrawerScore(lobby)
+	return lobby.ScoreCalculation.CalculateDrawerScore(lobby)
 }
 
 // advanceLobbyPredefineDrawer is required in cases where the drawer is removed
@@ -926,7 +924,7 @@ func CreateLobby(
 		CustomWords:      customWords,
 		currentDrawing:   make([]any, 0),
 		State:            Unstarted,
-		scoreCalculation: scoringCalculation,
+		ScoreCalculation: scoringCalculation,
 	}
 
 	if len(customWords) > 1 {
@@ -1111,40 +1109,61 @@ type ScoreCalculation interface {
 	CalculateDrawerScore(*Lobby) int
 }
 
-type ChillScoring struct{}
-
-func (s *ChillScoring) Identifier() string {
-	return "chill"
+var ChillScoring = &adjustableScoringAlgorithm{
+	identifier:                  "chill",
+	baseScore:                   100.0,
+	maxBonusBaseScore:           100.0,
+	bonusBaseScoreDeclineFactor: 2.0,
+	maxHintBonusScore:           60.0,
 }
 
-func (s *ChillScoring) CalculateGuesserScore(lobby *Lobby) int {
-	return s.calculateGuesserScore(lobby.hintCount, lobby.hintsLeft, lobby.DrawingTime, lobby.roundEndTime)
+var CompetitiveScoring = &adjustableScoringAlgorithm{
+	identifier:                  "competitive",
+	baseScore:                   10.0,
+	maxBonusBaseScore:           290.0,
+	bonusBaseScoreDeclineFactor: 3.0,
+	maxHintBonusScore:           120.0,
 }
 
-func (s *ChillScoring) calculateGuesserScore(
+type adjustableScoringAlgorithm struct {
+	identifier                  string
+	baseScore                   float64
+	maxBonusBaseScore           float64
+	bonusBaseScoreDeclineFactor float64
+	maxHintBonusScore           float64
+}
+
+func (s *adjustableScoringAlgorithm) Identifier() string {
+	return s.identifier
+}
+
+func (s *adjustableScoringAlgorithm) CalculateGuesserScore(lobby *Lobby) int {
+	return s.CalculateGuesserScoreInternal(lobby.hintCount, lobby.hintsLeft, lobby.DrawingTime, lobby.roundEndTime)
+}
+
+func (s *adjustableScoringAlgorithm) MaxScore() int {
+	return int(s.baseScore + s.maxBonusBaseScore + s.maxHintBonusScore)
+}
+
+func (s *adjustableScoringAlgorithm) CalculateGuesserScoreInternal(
 	hintCount, hintsLeft, drawingTime int,
 	roundEndTimeMillis int64,
 ) int {
 	secondsLeft := int(roundEndTimeMillis/1000 - time.Now().UTC().Unix())
 
-	// The base score is based on the general time taken.
-	// The formula here represents an exponential decline based on the time taken.
-	// This way fast players get more points, however not a lot more.
-	// The bonus gained by guessing before hints are shown is therefore still somewhat relevant.
-	declineFactor := 1.0 / float64(drawingTime)
-	baseScore := int(maxBaseScore * math.Pow(1.0-declineFactor, float64(drawingTime-secondsLeft)))
+	declineFactor := s.bonusBaseScoreDeclineFactor / float64(drawingTime)
+	score := int(
+		s.baseScore + s.maxBonusBaseScore*math.Pow(1.0-declineFactor, float64(drawingTime-secondsLeft)))
 
 	// Prevent zero division panic. This could happen with two letter words.
-	if hintCount <= 0 {
-		return baseScore
+	if hintCount > 0 {
+		score += hintsLeft * (int(s.maxHintBonusScore) / hintCount)
 	}
 
-	// If all hints are shown, or the word is too short to show hints, the
-	// calculation will basically always be baseScore + 0.
-	return baseScore + hintsLeft*(maxHintBonusScore/hintCount)
+	return score
 }
 
-func (s *ChillScoring) CalculateDrawerScore(lobby *Lobby) int {
+func (s *adjustableScoringAlgorithm) CalculateDrawerScore(lobby *Lobby) int {
 	// The drawer can get points even if disconnected. But if they are
 	// connected, we need to ignore them when calculating their score.
 	var (
