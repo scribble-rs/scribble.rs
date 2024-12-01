@@ -4,6 +4,12 @@
   <a href="https://github.com/scribble-rs/scribble.rs/actions/workflows/test-and-build.yml">
     <img src="https://github.com/scribble-rs/scribble.rs/workflows/Build/badge.svg">
   </a>
+  <a href="https://discord.gg/cE5BKP2UnE">
+    <img src="https://dcbadge.limes.pink/api/server/https://discord.gg/cE5BKP2UnE">
+  </a>
+  <a href="https://ko-fi.com/N4N07DNY">
+    <img src="https://ko-fi.com/img/githubbutton_sm.svg">
+  </a>
 </p>
 
 ![demo](.github/demo.png)
@@ -24,6 +30,25 @@ if no traffic is received.)
  - [scribble.bixilon.de](https://scribble.bixilon.de) (community instance maintained by @Bixilon)
  - [scribble.drifty.win](https://scribble.drifty.win) (community instance maintained by @driftywinds for better latency in Asia)
 
+## Join The Discord
+
+Feel free to join the community Discord server to find people to play, talk, get
+help or whatever else: https://discord.gg/cE5BKP2UnE
+
+## Donation
+
+I haven't really accepted donations for a long time. But I think the project is
+polished enough now to dare taking some money. Right now the hosting is very
+minimal and there's no domain. The server is located in amsterdam and many
+people playing seem to be from outside of europe. So it'd be nice to have a
+decentralised deployment to provide a nice experience for everyone.
+
+So donations would go towards infrastructure and a domain!
+
+In the future I might add some fun little benefits for donators, I have no clear
+vision of it yet though.
+
+You can donate via Ko-Fi: https://ko-fi.com/biosmarcel
 
 ## Configuration
 
