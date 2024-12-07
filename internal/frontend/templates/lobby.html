@@ -1256,6 +1256,7 @@
                     waitChooseDialog.style.visibility = "hidden";
                     setRoundTimeLeft(parsed.data.timeLeft);
                     applyWordHints(parsed.data.hints);
+                    setAllowDrawing(drawerID === ownID);
                 } else if (parsed.type === "next-turn") {
                     if (gameState === "ongoing") {
                         //The previous turn has ended.
