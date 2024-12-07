@@ -127,11 +127,12 @@
                         <div id="word-dialog" class="center-dialog">
                             <span class="dialog-title">{{.Translation.Get "choose-a-word"}}</span>
                             <div class="center-dialog-content">
-                                <div class="word-button-container">
-                                    <button id="word-button-zero" class="dialog-button"
-                                        onclick="chooseWord(0)"></button>
-                                    <button id="word-button-one" class="dialog-button" onclick="chooseWord(1)"></button>
-                                    <button id="word-button-two" class="dialog-button" onclick="chooseWord(2)"></button>
+                                <div style="display: flex; flex-direction: column; gap: 0.5rem; align-items: center">
+                                    <div>
+                                        <span>{{.Translation.Get "word-choice-warning"}}:</span>
+                                        <span id="word-preselected" style="font-weight: bold;"></span>
+                                    </div>
+                                    <div id="word-button-container"> </div>
                                 </div>
                             </div>
                         </div>
@@ -544,9 +545,8 @@
         const gameOverScoreboard = document.getElementById("game-over-scoreboard");
         const restartButton = document.getElementById("restart-button");
         const wordDialog = document.getElementById("word-dialog");
-        const wordButtonZero = document.getElementById("word-button-zero");
-        const wordButtonOne = document.getElementById("word-button-one");
-        const wordButtonTwo = document.getElementById("word-button-two");
+        const wordPreSelected = document.getElementById("word-preselected")
+        const wordButtonContainer = document.getElementById("word-button-container");
 
         const kickDialog = document.getElementById("kick-dialog");
         const kickDialogPlayers = document.getElementById("kick-dialog-players");
@@ -1222,7 +1222,7 @@
                 } else if (parsed.type === "close-guess") {
                     appendMessage("close-guess-message", null, '{{.Translation.Get "close-guess"}}'.format(parsed.data));
                 } else if (parsed.type === "update-wordhint") {
-                    // this event is (also) sent if the drawer has choosen a word, so we can hide the waitChooseDialog
+                    wordDialog.style.visibility = "hidden";
                     waitChooseDialog.style.visibility = "hidden";
                     applyWordHints(parsed.data);
                 } else if (parsed.type === "message") {
@@ -1251,6 +1251,11 @@
                     }
                 } else if (parsed.type === "clear-drawing-board") {
                     clear(context);
+                } else if (parsed.type === "word-chosen") {
+                    wordDialog.style.visibility = "hidden";
+                    waitChooseDialog.style.visibility = "hidden";
+                    setRoundTimeLeft(parsed.data.timeLeft);
+                    applyWordHints(parsed.data.hints);
                 } else if (parsed.type === "next-turn") {
                     if (gameState === "ongoing") {
                         //The previous turn has ended.
@@ -1259,8 +1264,6 @@
                         //First turn, the game starts
                         gameState = "ongoing";
                     }
-
-                    setRoundEndTime(parsed.data.roundEndTime);
 
                     //As soon as a turn starts, the round should be ongoing, so we make
                     //sure that all types of dialogs, that indicate the game isn't
@@ -1277,6 +1280,7 @@
 
                     round = parsed.data.round;
                     updateRoundsDisplay();
+                    setRoundTimeLeft(parsed.data.choiceTimeLeft);
                     applyPlayers(parsed.data.players);
 
                     set_dummy_word_hints();
@@ -1295,7 +1299,7 @@
                     //This dialog could potentially stay visible from last
                     //turn, in case nobody has chosen a word.
                     waitChooseDialog.style.visibility = "hidden";
-                    promptWords(parsed.data[0], parsed.data[1], parsed.data[2]);
+                    promptWords(parsed.data);
                 } else if (parsed.type === "drawing") {
                     applyDrawData(parsed.data);
                 } else if (parsed.type === "kick-vote") {
@@ -1370,7 +1374,7 @@
         //
         //FIXME The only leftover issue is that ping isn't taken into
         //account, however, that's no biggie for now.
-        function setRoundEndTime(timeLeftMs) {
+        function setRoundTimeLeft(timeLeftMs) {
             roundEndTime = Date.now() + timeLeftMs;
         }
 
@@ -1378,7 +1382,7 @@
             ownerID = ready.ownerId;
             ownID = ready.playerId;
 
-            setRoundEndTime(ready.roundEndTime);
+            setRoundTimeLeft(ready.timeLeft);
             setUsernameLocally(ready.playerName);
             setAllowDrawing(ready.allowDrawing);
             round = ready.round;
@@ -1491,10 +1495,15 @@
             }
         }
 
-        function promptWords(wordOne, wordTwo, wordThree) {
-            wordButtonZero.textContent = wordOne;
-            wordButtonOne.textContent = wordTwo;
-            wordButtonTwo.textContent = wordThree;
+        function promptWords(data) {
+            wordPreSelected.textContent = data.words[data.preSelectedWord];
+            wordButtonContainer.replaceChildren(...data.words.map((word, index) => {
+                const button = createDialogButton(word);
+                button.onclick = () => {
+                    chooseWord(index);
+                };
+                return button;
+            }));
             wordDialog.style.visibility = "visible";
         }
 
@@ -1512,7 +1521,7 @@
                 const secondsLeft = Math.max(0, Math.floor(msLeft / 1000));
                 timeLeftValue.innerText = "" + secondsLeft
             } else {
-                timeLeftValue.innerText = "" + drawingTimeSetting;
+                timeLeftValue.innerText = "∞";
             }
         }, 500);
 

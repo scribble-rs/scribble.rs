@@ -247,7 +247,8 @@ func Test_wordSelectionEvent(t *testing.T) {
 		event, ok := message.(*Event)
 		if ok {
 			if event.Type == EventTypeYourTurn {
-				wordChoice = event.Data.([]string)
+				yourTurn := event.Data.(*YourTurn)
+				wordChoice = yourTurn.Words
 			}
 		}
 
@@ -265,12 +266,12 @@ func Test_wordSelectionEvent(t *testing.T) {
 		}
 
 		t.Log(e.Type)
-		if e.Type == "update-wordhint" {
-			var wordHints []*WordHint
-			if err := json.Unmarshal(e.Data, &wordHints); err != nil {
+		if e.Type == "word-chosen" {
+			var event WordChosen
+			if err := json.Unmarshal(e.Data, &event); err != nil {
 				t.Fatal("error unmarshalling word hints:", err)
 			}
-			wordHintEvents[player.ID] = wordHints
+			wordHintEvents[player.ID] = event.Hints
 		}
 		return nil
 	}

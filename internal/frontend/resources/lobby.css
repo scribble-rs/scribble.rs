@@ -312,7 +312,7 @@ kbd {
     text-align: center;
 }
 
-.word-button-container {
+#word-button-container {
     display: flex;
     flex-direction: row;
     margin-left: 20px;
