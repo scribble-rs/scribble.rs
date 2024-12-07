@@ -30,6 +30,7 @@ const (
 const (
 	EventTypeUpdatePlayers            = "update-players"
 	EventTypeUpdateWordHint           = "update-wordhint"
+	EventTypeWordChosen               = "word-chosen"
 	EventTypeCorrectGuess             = "correct-guess"
 	EventTypeCloseGuess               = "close-guess"
 	EventTypeSystemMessage            = "system-message"
@@ -155,6 +156,17 @@ type GameOverEvent struct {
 	PreviousWord string `json:"previousWord"`
 }
 
+type WordChosen struct {
+	TimeLeft int         `json:"timeLeft"`
+	Hints    []*WordHint `json:"hints"`
+}
+
+type YourTurn struct {
+	TimeLeft        int      `json:"timeLeft"`
+	PreSelectedWord int      `json:"preSelectedWord"`
+	Words           []string `json:"words"`
+}
+
 // NextTurn represents the data necessary for displaying the lobby state right
 // after a new turn started. Meaning that no word has been chosen yet and
 // therefore there are no wordhints and no current drawing instructions.
@@ -162,10 +174,10 @@ type NextTurn struct {
 	// PreviousWord signals the last chosen word. If empty, no word has been
 	// chosen. The client can now themselves whether there has been a previous
 	// turn, by looking at the current gamestate.
-	PreviousWord string    `json:"previousWord"`
-	Players      []*Player `json:"players"`
-	Round        int       `json:"round"`
-	RoundEndTime int       `json:"roundEndTime"`
+	PreviousWord   string    `json:"previousWord"`
+	Players        []*Player `json:"players"`
+	ChoiceTimeLeft int       `json:"choiceTimeLeft"`
+	Round          int       `json:"round"`
 }
 
 // OutgoingMessage represents a message in the chatroom.
@@ -191,7 +203,7 @@ type ReadyEvent struct {
 	OwnerID            uuid.UUID   `json:"ownerId"`
 	Round              int         `json:"round"`
 	Rounds             int         `json:"rounds"`
-	RoundEndTime       int         `json:"roundEndTime"`
+	TimeLeft           int         `json:"timeLeft"`
 	DrawingTimeSetting int         `json:"drawingTimeSetting"`
 	AllowDrawing       bool        `json:"allowDrawing"`
 }

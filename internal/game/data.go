@@ -59,7 +59,9 @@ type Lobby struct {
 	hintCount int
 	// Round is the round that the Lobby is currently in. This is a number
 	// between 0 and Rounds. 0 indicates that it hasn't started yet.
-	Round int
+	Round             int
+	wordChoiceEndTime int64
+	preSelectedWord   int
 	// wordChoice represents the current choice of words present to the drawer.
 	wordChoice []string
 	Wordpack   string

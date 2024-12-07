@@ -76,6 +76,7 @@ func initEnglishTranslation() Translation {
 
 	translation.put("message-input-placeholder", "Type your guesses and messages here")
 
+	translation.put("word-choice-warning", "Word if you don't choose in time")
 	translation.put("choose-a-word", "Choose a word")
 	translation.put("waiting-for-word-selection", "Waiting for word selection")
 	// This one doesn't use %s, since we want to make one part bold.
