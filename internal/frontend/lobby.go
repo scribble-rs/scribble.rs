@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/scribble-rs/scribble.rs/internal/api"
 	"github.com/scribble-rs/scribble.rs/internal/state"
 	"github.com/scribble-rs/scribble.rs/internal/translations"
@@ -27,7 +26,7 @@ type robotPageData struct {
 
 // ssrEnterLobby opens a lobby, either opening it directly or asking for a lobby.
 func (handler *SSRHandler) ssrEnterLobby(writer http.ResponseWriter, request *http.Request) {
-	lobby := state.GetLobby(chi.URLParam(request, "lobby_id"))
+	lobby := state.GetLobby(request.PathValue("lobby_id"))
 	if lobby == nil {
 		handler.userFacingError(writer, api.ErrLobbyNotExistent.Error())
 		return

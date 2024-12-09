@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"path"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/scribble-rs/scribble.rs/internal/translations"
 )
 
@@ -49,12 +48,12 @@ type BasePageConfig struct {
 }
 
 // SetupRoutes registers the official webclient endpoints with the http package.
-func (handler *SSRHandler) SetupRoutes(router chi.Router) {
-	router.Get("/"+handler.cfg.RootPath, handler.homePageHandler)
+func (handler *SSRHandler) SetupRoutes(register func(string, string, http.HandlerFunc)) {
+	register("GET", handler.cfg.RootPath, handler.homePageHandler)
 
 	fileServer := http.FileServer(http.FS(frontendResourcesFS))
-	router.Get(
-		"/"+path.Join(handler.cfg.RootPath, "resources/*"),
+	register(
+		"GET", path.Join(handler.cfg.RootPath, "resources", "{file}"),
 		http.StripPrefix(
 			"/"+handler.cfg.RootPath,
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -65,8 +64,8 @@ func (handler *SSRHandler) SetupRoutes(router chi.Router) {
 			}),
 		).ServeHTTP,
 	)
-	router.Get("/"+path.Join(handler.cfg.RootPath, "ssrEnterLobby/{lobby_id}"), handler.ssrEnterLobby)
-	router.Post("/"+path.Join(handler.cfg.RootPath, "ssrCreateLobby"), handler.ssrCreateLobby)
+	register("GET", path.Join(handler.cfg.RootPath, "ssrEnterLobby", "{lobby_id}"), handler.ssrEnterLobby)
+	register("POST", path.Join(handler.cfg.RootPath, "ssrCreateLobby"), handler.ssrCreateLobby)
 }
 
 // errorPageData represents the data that error.html requires to be displayed.

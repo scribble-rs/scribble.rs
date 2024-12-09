@@ -6,7 +6,6 @@ require (
 	github.com/Bios-Marcel/discordemojimap/v2 v2.0.6
 	github.com/Bios-Marcel/go-petname v0.0.1
 	github.com/caarlos0/env/v10 v10.0.0
-	github.com/go-chi/chi/v5 v5.1.0
 	github.com/go-chi/cors v1.2.1
 	github.com/gofrs/uuid/v5 v5.3.0
 	github.com/lxzan/gws v1.8.8

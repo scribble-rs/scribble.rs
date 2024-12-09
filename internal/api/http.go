@@ -5,28 +5,27 @@ import (
 	"path"
 	"strings"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/scribble-rs/scribble.rs/internal/metrics"
 )
 
 // SetupRoutes registers the /v1/ endpoints with the http package.
-func (handler *V1Handler) SetupRoutes(rootPath string, router chi.Router) {
-	routePrefix := "/" + path.Join(rootPath, "v1")
+func (handler *V1Handler) SetupRoutes(rootPath string, register func(string, string, http.HandlerFunc)) {
+	v1 := path.Join(rootPath, "v1")
 
 	metrics.SetupRoute(func(metricsHandler http.HandlerFunc) {
-		router.Get(routePrefix+"/metrics", metricsHandler)
+		register("GET", path.Join(v1, "metrics"), metricsHandler)
 	})
-	router.Get(routePrefix+"/stats", handler.getStats)
+	register("GET", path.Join(v1, "stats"), handler.getStats)
 
 	// These exist only for the public API. We version them in order to ensure
 	// backwards compatibility as far as possible.
-	router.Get(routePrefix+"/lobby", handler.getLobbies)
-	router.Post(routePrefix+"/lobby", handler.postLobby)
+	register("GET", path.Join(v1, "lobby"), handler.getLobbies)
+	register("POST", path.Join(v1, "lobby"), handler.postLobby)
 
-	router.Patch(routePrefix+"/lobby/{lobby_id}", handler.patchLobby)
+	register("PATCH", path.Join(v1, "lobby", "{lobby_id}"), handler.patchLobby)
 	// The websocket is shared between the public API and the official client
-	router.Get(routePrefix+"/lobby/{lobby_id}/ws", handler.websocketUpgrade)
-	router.Post(routePrefix+"/lobby/{lobby_id}/player", handler.postPlayer)
+	register("GET", path.Join(v1, "lobby", "{lobby_id}", "ws"), handler.websocketUpgrade)
+	register("POST", path.Join(v1, "lobby", "{lobby_id}", "player"), handler.postPlayer)
 }
 
 // remoteAddressToSimpleIP removes unnecessary clutter from the input,

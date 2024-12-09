@@ -8,7 +8,6 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/gofrs/uuid/v5"
 	"github.com/lxzan/gws"
 	"github.com/mailru/easyjson"
@@ -44,7 +43,7 @@ func (handler *V1Handler) websocketUpgrade(writer http.ResponseWriter, request *
 		return
 	}
 
-	lobby := state.GetLobby(chi.URLParam(request, "lobby_id"))
+	lobby := state.GetLobby(request.PathValue("lobby_id"))
 	if lobby == nil {
 		http.Error(writer, ErrLobbyNotExistent.Error(), http.StatusNotFound)
 		return

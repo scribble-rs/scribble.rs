@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/gofrs/uuid/v5"
 	"github.com/mailru/easyjson"
 	"github.com/scribble-rs/scribble.rs/internal/config"
@@ -194,7 +193,7 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 }
 
 func (handler *V1Handler) postPlayer(writer http.ResponseWriter, request *http.Request) {
-	lobby := state.GetLobby(chi.URLParam(request, "lobby_id"))
+	lobby := state.GetLobby(request.PathValue("lobby_id"))
 	if lobby == nil {
 		http.Error(writer, ErrLobbyNotExistent.Error(), http.StatusNotFound)
 		return
@@ -264,7 +263,7 @@ func (handler *V1Handler) patchLobby(writer http.ResponseWriter, request *http.R
 		return
 	}
 
-	lobby := state.GetLobby(chi.URLParam(request, "lobby_id"))
+	lobby := state.GetLobby(request.PathValue("lobby_id"))
 	if lobby == nil {
 		http.Error(writer, ErrLobbyNotExistent.Error(), http.StatusNotFound)
 		return

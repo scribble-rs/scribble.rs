@@ -8,11 +8,10 @@ import (
 	"os/signal"
 	"path"
 	"runtime/pprof"
+	"strings"
 	"syscall"
 	"time"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/scribble-rs/scribble.rs/internal/api"
 	"github.com/scribble-rs/scribble.rs/internal/config"
@@ -40,28 +39,33 @@ func main() {
 		}
 	}
 
-	router := chi.NewMux()
-	router.Use(middleware.StripSlashes)
-	router.Use(middleware.Recoverer)
-	router.Use(cors.Handler(cors.Options{
+	router := http.NewServeMux()
+	corsWrapper := cors.Handler(cors.Options{
 		AllowedOrigins:   cfg.CORS.AllowedOrigins,
 		AllowCredentials: cfg.CORS.AllowCredentials,
-	}))
+	})
+	register := func(method, path string, handler http.HandlerFunc) {
+		// Each path needs to start with a slash anyway, so this is convenient.
+		if !strings.HasPrefix(path, "/") {
+			path = "/" + path
+		}
+
+		log.Printf("Registering route: %s %s\n", method, path)
+		router.HandleFunc(fmt.Sprintf("%s %s", method, path), corsWrapper(handler).ServeHTTP)
+	}
 
 	// Healthcheck for deployments with monitoring if required.
-	router.Get(
-		"/"+path.Join(cfg.RootPath, "health"),
-		func(writer http.ResponseWriter, _ *http.Request) {
-			writer.WriteHeader(http.StatusOK)
-		})
+	register("GET", path.Join(cfg.RootPath, "health"), func(writer http.ResponseWriter, _ *http.Request) {
+		writer.WriteHeader(http.StatusOK)
+	})
 
-	api.NewHandler(cfg).SetupRoutes(cfg.RootPath, router)
+	api.NewHandler(cfg).SetupRoutes(cfg.RootPath, register)
 
 	frontendHandler, err := frontend.NewHandler(cfg)
 	if err != nil {
 		log.Fatal("error setting up frontend:", err)
 	}
-	frontendHandler.SetupRoutes(router)
+	frontendHandler.SetupRoutes(register)
 
 	if cfg.LobbyCleanup.Interval > 0 {
 		state.LaunchCleanupRoutine(cfg.LobbyCleanup)
@@ -81,21 +85,18 @@ func main() {
 		}
 	}()
 
-	for _, route := range router.Routes() {
-		log.Printf("Registered route: %s\n", route.Pattern)
-		if route.SubRoutes != nil {
-			for _, subRoute := range route.SubRoutes.Routes() {
-				log.Printf("  Registered route: %s\n", subRoute.Pattern)
-			}
-		}
-	}
-
 	address := fmt.Sprintf("%s:%d", cfg.NetworkAddress, cfg.Port)
 	log.Println("Started, listening on: http://" + address)
 
 	httpServer := &http.Server{
-		Addr:              address,
-		Handler:           router,
+		Addr: address,
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path != "/" && r.URL.Path[len(r.URL.Path)-1] == '/' {
+				r.URL.Path = r.URL.Path[:len(r.URL.Path)-1]
+			}
+
+			router.ServeHTTP(w, r)
+		}),
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 	log.Fatalln(httpServer.ListenAndServe())
