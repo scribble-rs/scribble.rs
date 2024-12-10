@@ -1431,7 +1431,7 @@
                 let isSelfRankOne = false;
                 for (let i = 0; i < players.length; i++) {
                     const player = players[i];
-                    if (!player.connected) {
+                    if (!player.connected || player.state === "spectating") {
                         continue;
                     }
 
