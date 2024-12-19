@@ -62,7 +62,7 @@ func (handler *V1Handler) getLobbies(writer http.ResponseWriter, _ *http.Request
 		// important to get 100% consistent results here.
 		lobbyEntries = append(lobbyEntries, &LobbyEntry{
 			LobbyID:         lobby.LobbyID,
-			PlayerCount:     lobby.GetOccupiedPlayerSlots(),
+			PlayerCount:     lobby.GetConnectedPlayerCount(),
 			MaxPlayers:      lobby.MaxPlayers,
 			Round:           lobby.Round,
 			Rounds:          lobby.Rounds,

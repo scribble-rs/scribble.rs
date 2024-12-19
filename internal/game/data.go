@@ -12,7 +12,9 @@ import (
 	"golang.org/x/text/cases"
 )
 
-const slotReservationTime = time.Minute * 5
+// slotReservationTime should give a player enough time to restart their browser
+// without losing their slost.
+const slotReservationTime = time.Minute * 1
 
 // Lobby represents a game session. It must not be sent via the API, as it
 // exposes gameplay relevant information.
