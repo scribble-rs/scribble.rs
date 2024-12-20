@@ -29,6 +29,7 @@ type SSRHandler struct {
 func NewHandler(cfg *config.Config) (*SSRHandler, error) {
 	basePageConfig := &BasePageConfig{
 		Version: version.Version,
+		Commit:  version.Commit,
 		RootURL: cfg.RootURL,
 	}
 	if cfg.RootPath != "" {

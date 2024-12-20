@@ -1,6 +1,9 @@
 {{define "footer"}}
 {{if eq .Version "dev"}}
 <a class="footer-item" href="https://github.com/scribble-rs/scribble.rs" target="_blank">{{.Version}}</a>
+{{else if ne .Commit ""}}
+<a class="footer-item" href="https://github.com/scribble-rs/scribble.rs/commit/{{.Commit}}"
+    target="_blank">{{.Version}}</a>
 {{else}}
 <a class="footer-item" href="https://github.com/scribble-rs/scribble.rs/releases/tag/{{.Version}}"
     target="_blank">{{.Version}}</a>

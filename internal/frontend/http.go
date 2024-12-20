@@ -30,8 +30,11 @@ func init() {
 // BasePageConfig is data that all pages require to function correctly, no matter
 // whether error page or lobby page.
 type BasePageConfig struct {
-	// Version is the source code version of this build.
+	// Version is the tagged source code version of this build. Can be empty for dev
+	// builds. Untagged commits will be of format `tag-N-gSHA`.
 	Version string `json:"version"`
+	// Commit that was deployed, if we didn't deploy a concrete tag.
+	Commit string `json:"commit"`
 	// RootPath is the path directly after the domain and before the
 	// scribble.rs paths. For example if you host scribblers on painting.com
 	// but already host a different website, then your API paths might have to
