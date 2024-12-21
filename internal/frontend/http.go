@@ -52,7 +52,7 @@ type BasePageConfig struct {
 
 // SetupRoutes registers the official webclient endpoints with the http package.
 func (handler *SSRHandler) SetupRoutes(register func(string, string, http.HandlerFunc)) {
-	register("GET", handler.cfg.RootPath, handler.homePageHandler)
+	register("GET", handler.cfg.RootPath, handler.indexPageHandler)
 
 	fileServer := http.FileServer(http.FS(frontendResourcesFS))
 	register(

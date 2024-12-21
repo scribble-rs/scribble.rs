@@ -67,16 +67,16 @@ func Test_templateRobotPage(t *testing.T) {
 	}
 }
 
-func Test_templateLobbyCreatePage(t *testing.T) {
+func Test_templateIndexPage(t *testing.T) {
 	t.Parallel()
 
 	handler, err := NewHandler(&config.Config{})
 	require.NoError(t, err)
-	createPageData := handler.createDefaultLobbyCreatePageData()
+	createPageData := handler.createDefaultIndexPageData()
 	createPageData.Translation = translations.DefaultTranslation
 
 	var buffer bytes.Buffer
-	if err := pageTemplates.ExecuteTemplate(&buffer, "lobby-create-page", createPageData); err != nil {
+	if err := pageTemplates.ExecuteTemplate(&buffer, "index", createPageData); err != nil {
 		t.Errorf("Error templating: %s", err)
 	}
 }

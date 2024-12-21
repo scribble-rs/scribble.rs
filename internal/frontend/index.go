@@ -63,22 +63,22 @@ func NewHandler(cfg *config.Config) (*SSRHandler, error) {
 	return handler, nil
 }
 
-// homePage servers the default page for scribble.rs, which is the page to
-// create a new lobby.
-func (handler *SSRHandler) homePageHandler(writer http.ResponseWriter, request *http.Request) {
+// indexPageHandler servers the default page for scribble.rs, which is the
+// page to create or join a lobby.
+func (handler *SSRHandler) indexPageHandler(writer http.ResponseWriter, request *http.Request) {
 	translation, locale := determineTranslation(request)
-	createPageData := handler.createDefaultLobbyCreatePageData()
+	createPageData := handler.createDefaultIndexPageData()
 	createPageData.Translation = translation
 	createPageData.Locale = locale
 
-	err := pageTemplates.ExecuteTemplate(writer, "lobby-create-page", createPageData)
+	err := pageTemplates.ExecuteTemplate(writer, "index", createPageData)
 	if err != nil {
 		log.Printf("Error templating home page: %s\n", err)
 	}
 }
 
-func (handler *SSRHandler) createDefaultLobbyCreatePageData() *LobbyCreatePageData {
-	return &LobbyCreatePageData{
+func (handler *SSRHandler) createDefaultIndexPageData() *IndexPageData {
+	return &IndexPageData{
 		BasePageConfig:       handler.basePageConfig,
 		SettingBounds:        handler.cfg.LobbySettingBounds,
 		Languages:            game.SupportedLanguages,
@@ -87,8 +87,8 @@ func (handler *SSRHandler) createDefaultLobbyCreatePageData() *LobbyCreatePageDa
 	}
 }
 
-// LobbyCreatePageData defines all non-static data for the lobby create page.
-type LobbyCreatePageData struct {
+// IndexPageData defines all non-static data for the lobby create page.
+type IndexPageData struct {
 	*BasePageConfig
 	config.LobbySettingDefaults
 	game.SettingBounds
@@ -126,7 +126,7 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 	customWords, customWordsInvalid := api.ParseCustomWords(lowercaser, request.Form.Get("custom_words"))
 
 	// Prevent resetting the form, since that would be annoying as hell.
-	pageData := LobbyCreatePageData{
+	pageData := IndexPageData{
 		BasePageConfig: handler.basePageConfig,
 		SettingBounds:  handler.cfg.LobbySettingBounds,
 		LobbySettingDefaults: config.LobbySettingDefaults{
@@ -176,7 +176,7 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 	pageData.Locale = locale
 
 	if len(pageData.Errors) != 0 {
-		err := pageTemplates.ExecuteTemplate(writer, "lobby-create-page", pageData)
+		err := pageTemplates.ExecuteTemplate(writer, "index", pageData)
 		if err != nil {
 			http.Error(writer, err.Error(), http.StatusInternalServerError)
 		}
@@ -190,7 +190,7 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 		clientsPerIPLimit, customWords, scoreCalculation)
 	if err != nil {
 		pageData.Errors = append(pageData.Errors, err.Error())
-		if err := pageTemplates.ExecuteTemplate(writer, "lobby-create-page", pageData); err != nil {
+		if err := pageTemplates.ExecuteTemplate(writer, "index", pageData); err != nil {
 			handler.userFacingError(writer, err.Error())
 		}
 
