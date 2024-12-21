@@ -15,7 +15,7 @@ dockerfile = "linux.Dockerfile"
 strategy = "canary"
 
 [env]
-  ROOT_URL = "https://scribblers.fly.dev"
+  ROOT_URL = "https://scribblers.bios-marcel.link"
   LOBBY_SETTING_BOUNDS_MAX_MAX_PLAYERS = 100
 
 [http_service]

@@ -22,7 +22,7 @@ It is an alternative to the web-based drawing game skribbl.io.
 ## Play now
 
 There are some community hosted versions of the game (feel free to host your own instance and add it here!):
- - [scribblers.fly.dev](https://scribblers.fly.dev) (Official instance, Note
+ - [scribblers.bios-marcel.link](https://scribblers.bios-marcel.link) (Official instance, Note
 that the instance may not respond instantly, as it automatically shuts down
 if no traffic is received.)
  - [scribble.bixilon.de](https://scribble.bixilon.de) (community instance maintained by @Bixilon)
