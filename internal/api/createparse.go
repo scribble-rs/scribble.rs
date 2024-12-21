@@ -135,7 +135,7 @@ func parseIntValue(toParse string, lower, upper int, valueName string) (int, err
 // ParseBoolean checks whether the given value is either "true" or "false".
 // The checks are case-insensitive. If an empty string is supplied, false
 // is returned. All other invalid input will return an error.
-func ParseBoolean(valueName string, value string) (bool, error) {
+func ParseBoolean(valueName, value string) (bool, error) {
 	if value == "" {
 		return false, nil
 	}

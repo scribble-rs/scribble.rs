@@ -52,7 +52,7 @@ type Config struct {
 	RootPath string `env:"ROOT_PATH"`
 	// RootURL is similar to RootPath, but contains only the protocol and
 	// domain. So it could be https://painting.com. This is required for some
-	// non critical functionallity, such as metadata tags.
+	// non critical functionality, such as metadata tags.
 	RootURL        string `env:"ROOT_URL"`
 	CPUProfilePath string `env:"CPU_PROFILE_PATH"`
 	// LobbySettingDefaults is used for the server side rendering of the lobby

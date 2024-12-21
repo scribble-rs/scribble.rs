@@ -1146,11 +1146,11 @@ func (lobby *Lobby) Shutdown() {
 	lobby.Broadcast(&EventTypeOnly{Type: EventTypeShutdown})
 }
 
-// ScoreCalculation allows having different scoring systems for
+// ScoreCalculation allows having different scoring systems for a lobby.
 type ScoreCalculation interface {
 	Identifier() string
-	CalculateGuesserScore(*Lobby) int
-	CalculateDrawerScore(*Lobby) int
+	CalculateGuesserScore(lobby *Lobby) int
+	CalculateDrawerScore(lobby *Lobby) int
 }
 
 var ChillScoring = &adjustableScoringAlgorithm{

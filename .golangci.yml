@@ -2,9 +2,7 @@ linters:
   enable-all: true
   disable:
     ## These are deprecated
-    - execinquery
     - exportloopref
-    - gomnd
 
     ## These are too strict for our taste
     # Whitespace linter
@@ -23,7 +21,13 @@ linters:
     # I don't really care about cyclopmatic complexity
     - cyclop
     - gocognit
-      
+    # I don't see the harm in returning an interface
+    - ireturn
+    # Too many false positives, due to easyjson rn
+    - recvcheck
+    # While aligned tags look nice, i can't be arsed doing it manually.
+    - tagalign
+
     ## Useful, but we won't use it for now, maybe later
     # Allows us to define rules for dependencies
     - depguard
@@ -60,6 +64,12 @@ linters-settings:
     disabled-checks:
       # This has false positives and provides little value.
       - ifElseChain
+
+  gosec:
+    excludes:
+      # weak number generator stuff; mostly false positives, as we don't do
+      # security sensitive things anyway.
+      - G404
 
   revive:
     rules:

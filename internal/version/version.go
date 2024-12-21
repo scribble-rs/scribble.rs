@@ -3,7 +3,6 @@
 package version
 
 import (
-	"fmt"
 	"regexp"
 )
 
@@ -20,9 +19,8 @@ func init() {
 
 	if Version != "dev" {
 		// version-commit_count_after_version-hash
-		hashRegex := regexp.MustCompile("v.+?(?:-\\d+?-g(.+?)(?:$|-))")
+		hashRegex := regexp.MustCompile(`v.+?(?:-\d+?-g(.+?)(?:$|-))`)
 		match := hashRegex.FindStringSubmatch(Version)
-		fmt.Println(match, len(match))
 		if len(match) == 2 {
 			Commit = match[1]
 		}
