@@ -150,6 +150,15 @@ Other reverse proxies may require similar configuration. If you are using a
 well known reverse proxy, you are free to contribute a configuration to the
 wiki.
 
+## Server-Side Metrics
+
+While there's a Prometheus metrics endpoint at `/v1/metrics`, it currently
+doesn't expose a lot of information. If there are any requests for certain data,
+I'd be willing to extend it, as long as it doesn't expose any personal data.
+
+While I do have a dashboard for it, my hoster (fly.io) sadly doesn't support
+public dashboards right now, so the data will remain closed for now.
+
 ## Contributing
 
 There are many ways you can contribute:
