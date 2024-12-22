@@ -550,8 +550,6 @@ func handleNameChangeEvent(caller *Player, lobby *Lobby, name string) {
 	oldName := caller.Name
 	newName := SanitizeName(name)
 
-	log.Printf("%s is now %s\n", oldName, newName)
-
 	// We'll avoid sending the event in this case, as it's useless, but still log
 	// the event, as it might be useful to know that this happened.
 	if oldName != newName {
@@ -1065,7 +1063,6 @@ func (lobby *Lobby) OnPlayerDisconnect(player *Player) {
 	// It is important to properly disconnect the player before aqcuiring the mutex
 	// in order to avoid false assumptions about the players connection state
 	// and avoid attempting to send events.
-	log.Printf("Player %s(%s) disconnected.\n", player.Name, player.ID)
 	player.Connected = false
 	player.ws = nil
 

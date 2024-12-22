@@ -64,7 +64,6 @@ func (handler *V1Handler) websocketUpgrade(writer http.ResponseWriter, request *
 
 		metrics.TrackPlayerConnect()
 
-		log.Printf("%s(%s) has connected\n", player.Name, player.ID)
 		player.SetWebsocket(socket)
 		socket.Session().Store("player", player)
 		socket.Session().Store("lobby", lobby)
