@@ -441,13 +441,7 @@
 
             socketIsConnecting = true;
 
-            if (location.protocol === "https:") {
-                console.log("Attempting secure socket connection ...");
-                socket = new WebSocket("wss://" + location.hostname + ":" + location.port + "{{.RootPath}}/v1/lobby/{{.LobbyID}}/ws");
-            } else {
-                console.log("Attempting socket connection ...");
-                socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "{{.RootPath}}/v1/lobby/{{.LobbyID}}/ws");
-            }
+            socket = new WebSocket("{{.RootPath}}/v1/lobby/{{.LobbyID}}/ws");
 
             socket.onerror = error => {
                 //Is not connected and we haven't yet said that we are done trying to
