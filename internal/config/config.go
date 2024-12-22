@@ -53,8 +53,11 @@ type Config struct {
 	// RootURL is similar to RootPath, but contains only the protocol and
 	// domain. So it could be https://painting.com. This is required for some
 	// non critical functionality, such as metadata tags.
-	RootURL        string `env:"ROOT_URL"`
-	CPUProfilePath string `env:"CPU_PROFILE_PATH"`
+	RootURL string `env:"ROOT_URL"`
+	// ServeDirectories is a map of `path` to `directory`. All directories are
+	// served under the given path.
+	ServeDirectories map[string]string `env:"SERVE_DIRECTORIES"`
+	CPUProfilePath   string            `env:"CPU_PROFILE_PATH"`
 	// LobbySettingDefaults is used for the server side rendering of the lobby
 	// creation page. It doesn't affect the default values of lobbies created
 	// via the API.

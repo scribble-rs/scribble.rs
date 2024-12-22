@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/scribble-rs/scribble.rs/internal/translations"
 )
@@ -52,7 +54,37 @@ type BasePageConfig struct {
 
 // SetupRoutes registers the official webclient endpoints with the http package.
 func (handler *SSRHandler) SetupRoutes(register func(string, string, http.HandlerFunc)) {
-	register("GET", handler.cfg.RootPath, handler.indexPageHandler)
+	var genericFileHandler http.HandlerFunc
+	if dir := handler.cfg.ServeDirectories[""]; dir != "" {
+		delete(handler.cfg.ServeDirectories, "")
+		fileServer := http.FileServer(http.FS(os.DirFS(dir)))
+		genericFileHandler = fileServer.ServeHTTP
+	}
+
+	for route, dir := range handler.cfg.ServeDirectories {
+		fileServer := http.FileServer(http.FS(os.DirFS(dir)))
+		fmt.Println(filepath.Base(dir), fileServer)
+		fileHandler := http.StripPrefix(
+			"/"+path.Join(handler.cfg.RootPath, route)+"/",
+			http.HandlerFunc(fileServer.ServeHTTP),
+		).ServeHTTP
+		register(
+			// Trailing slash means wildcard.
+			"GET", path.Join(handler.cfg.RootPath, route)+"/",
+			fileHandler,
+		)
+	}
+
+	register("GET", handler.cfg.RootPath, func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "" || r.URL.Path == "/" {
+			handler.indexPageHandler(w, r)
+			return
+		}
+
+		if genericFileHandler != nil {
+			genericFileHandler.ServeHTTP(w, r)
+		}
+	})
 
 	fileServer := http.FileServer(http.FS(frontendResourcesFS))
 	register(
