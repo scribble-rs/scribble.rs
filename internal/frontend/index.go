@@ -9,7 +9,6 @@ import (
 	"net/http"
 	txtTemplate "text/template"
 
-	"github.com/gofrs/uuid/v5"
 	"github.com/scribble-rs/scribble.rs/internal/api"
 	"github.com/scribble-rs/scribble.rs/internal/config"
 	"github.com/scribble-rs/scribble.rs/internal/game"
@@ -123,6 +122,18 @@ func (handler *SSRHandler) indexPageHandler(writer http.ResponseWriter, request 
 	createPageData.Locale = locale
 
 	api.SetDiscordCookies(writer, request)
+	discordInstanceId := api.GetDiscordInstanceId(request)
+	if discordInstanceId != "" {
+		lobby := state.GetLobby(discordInstanceId)
+		if lobby != nil {
+			handler.ssrEnterLobbyNoChecks(lobby, writer, request,
+				func() *game.Player {
+					return api.GetPlayer(lobby, request)
+				})
+			return
+		}
+	}
+
 	err := pageTemplates.ExecuteTemplate(writer, "index", createPageData)
 	if err != nil {
 		log.Printf("Error templating home page: %s\n", err)
@@ -238,7 +249,16 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 
 	playerName := api.GetPlayername(request)
 
-	player, lobby, err := game.CreateLobby(uuid.Nil, playerName, languageKey,
+	var lobbyId string
+	discordInstanceId := api.GetDiscordInstanceId(request)
+	if discordInstanceId != "" {
+		lobbyId = discordInstanceId
+		// Workaround, since the discord proxy potentially always has the same
+		// IP address, preventing all players from connecting.
+		clientsPerIPLimit = maxPlayers
+	}
+
+	player, lobby, err := game.CreateLobby(lobbyId, playerName, languageKey,
 		publicLobby, drawingTime, rounds, maxPlayers, customWordsPerTurn,
 		clientsPerIPLimit, customWords, scoreCalculation)
 	if err != nil {
@@ -260,7 +280,7 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 
 	// Workaround for discord activity case not correctly being able to read
 	// user session, as the cookie isn't being passed.
-	if api.GetDiscordInstanceId(request) != "" {
+	if discordInstanceId != "" {
 		handler.ssrEnterLobbyNoChecks(lobby, writer, request,
 			func() *game.Player {
 				return player

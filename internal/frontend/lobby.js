@@ -655,33 +655,33 @@ function setSpectateMode(requestedValue, spectatingValue) {
 
     if (spectateRequested && !requestedValue && modeUnchanged) {
         showInfoDialog(
-            '{{.Translation.Get "spectation-request-cancelled-title"}}',
-            '{{.Translation.Get "spectation-request-cancelled-text"}}',
+            `{{.Translation.Get "spectation-request-cancelled-title"}}`,
+            `{{.Translation.Get "spectation-request-cancelled-text"}}`,
             "Okay");
     } else if (spectateRequested && !requestedValue && modeUnchanged) {
         showInfoDialog(
-            '{{.Translation.Get "participation-request-cancelled-title"}}',
-            '{{.Translation.Get "participation-request-cancelled-text"}}',
+            `{{.Translation.Get "participation-request-cancelled-title"}}`,
+            `{{.Translation.Get "participation-request-cancelled-text"}}`,
             "Okay");
     } else if (!spectateRequested && requestedValue && !spectatingValue) {
         showInfoDialog(
-            '{{.Translation.Get "spectation-requested-title"}}',
-            '{{.Translation.Get "spectation-requested-text"}}',
+            `{{.Translation.Get "spectation-requested-title"}}`,
+            `{{.Translation.Get "spectation-requested-text"}}`,
             "Okay");
     } else if (!spectateRequested && requestedValue && spectatingValue) {
         showInfoDialog(
-            '{{.Translation.Get "participation-requested-title"}}',
-            '{{.Translation.Get "participation-requested-text"}}',
+            `{{.Translation.Get "participation-requested-title"}}`,
+            `{{.Translation.Get "participation-requested-text"}}`,
             "Okay");
     } else if (spectatingValue && !spectating) {
         showInfoDialog(
-            '{{.Translation.Get "now-spectating-title"}}',
-            '{{.Translation.Get "now-spectating-text"}}',
+            `{{.Translation.Get "now-spectating-title"}}`,
+            `{{.Translation.Get "now-spectating-text"}}`,
             "Okay");
     } else if (!spectatingValue && spectating) {
         showInfoDialog(
-            '{{.Translation.Get "now-participating-title"}}',
-            '{{.Translation.Get "now-participating-text"}}',
+            `{{.Translation.Get "now-participating-title"}}`,
+            `{{.Translation.Get "now-participating-text"}}`,
             "Okay");
     }
 
@@ -1098,12 +1098,12 @@ function handleReadyEvent(ready) {
 
         if (isSelfRankOne) {
             if (countOfRankOnePlayers >= 2) {
-                gameOverDialogTitle.innerText = '{{.Translation.Get "game-over-tie"}}';
+                gameOverDialogTitle.innerText = `{{.Translation.Get "game-over-tie"}}`;
             } else {
-                gameOverDialogTitle.innerText = '{{.Translation.Get "game-over-win"}}';
+                gameOverDialogTitle.innerText = `{{.Translation.Get "game-over-win"}}`;
             }
         } else {
-            gameOverDialogTitle.innerText = '{{.Translation.Get "game-over"}}'.format(player.rank, player.score);
+            gameOverDialogTitle.innerText = `{{.Translation.Get "game-over"}}`.format(player.rank, player.score);
         }
     } else if (ready.gameState === "ongoing") {
         // Lack of wordHints implies that word has been chosen yet.

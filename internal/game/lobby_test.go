@@ -534,7 +534,7 @@ func Test_lobby_calculateDrawerScore(t *testing.T) {
 func Test_NoPrematureGameOver(t *testing.T) {
 	t.Parallel()
 
-	player, lobby, err := CreateLobby(uuid.Nil, "test", "english", false, 120, 4, 4, 3, 1, nil, ChillScoring)
+	player, lobby, err := CreateLobby("", "test", "english", false, 120, 4, 4, 3, 1, nil, ChillScoring)
 	require.NoError(t, err)
 
 	lobby.WriteObject = noOpWriteObject

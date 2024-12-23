@@ -1,5 +1,4 @@
 //go:generate easyjson -all ${GOFILE}
-
 package state
 
 import (

@@ -95,11 +95,10 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 	// yourself, but for certain integrations / automations this can be useful.
 	// However, to avoid any kind of abuse, this needs to be a valid UUID at
 	// least.
-	desiredLobbyId := uuid.Nil
 	lobbyId := request.Form.Get("lobby_id")
 	if lobbyId != "" {
 		var err error
-		desiredLobbyId, err = uuid.FromString(lobbyId)
+		_, err = uuid.FromString(lobbyId)
 		if err != nil {
 			requestErrors = append(requestErrors, err.Error())
 		}
@@ -156,7 +155,7 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 	}
 
 	playerName := GetPlayername(request)
-	player, lobby, err := game.CreateLobby(desiredLobbyId, playerName,
+	player, lobby, err := game.CreateLobby(lobbyId, playerName,
 		languageKey, publicLobby, drawingTime, rounds, maxPlayers,
 		customWordsPerTurn, clientsPerIPLimit, customWords, scoreCalculation)
 	if err != nil {
