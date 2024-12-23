@@ -22,6 +22,7 @@ func Test_templateLobbyPage(t *testing.T) {
 			},
 			LobbyData: &api.LobbyData{
 				SettingBounds: config.Default.LobbySettingBounds,
+				GameConstants: api.GameConstantsData,
 			},
 			Translation: translations.DefaultTranslation,
 		})

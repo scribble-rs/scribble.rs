@@ -177,7 +177,7 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 	lobby.WritePreparedMessage = WritePreparedMessage
 	player.SetLastKnownAddress(GetIPAddressFromRequest(request))
 
-	SetUsersessionCookie(writer, player)
+	SetGameplayCookies(writer, request, player, lobby)
 
 	lobbyData := CreateLobbyData(handler.cfg, lobby)
 
@@ -221,7 +221,7 @@ func (handler *V1Handler) postPlayer(writer http.ResponseWriter, request *http.R
 			newPlayer.SetLastKnownAddress(requestAddress)
 
 			// Use the players generated usersession and pass it as a cookie.
-			SetUsersessionCookie(writer, newPlayer)
+			SetGameplayCookies(writer, request, newPlayer, lobby)
 		} else {
 			player.SetLastKnownAddress(GetIPAddressFromRequest(request))
 		}
@@ -239,15 +239,78 @@ func (handler *V1Handler) postPlayer(writer http.ResponseWriter, request *http.R
 	}
 }
 
-// SetUsersessionCookie takes the players usersession and sets it as a cookie.
-func SetUsersessionCookie(w http.ResponseWriter, player *game.Player) {
-	session := player.GetUserSession().String()
-	http.SetCookie(w, &http.Cookie{
-		Name:     "usersession",
-		Value:    session,
-		Path:     "/",
-		SameSite: http.SameSiteStrictMode,
-	})
+func GetDiscordInstanceId(request *http.Request) string {
+	discordInstanceId := request.URL.Query().Get("instance_id")
+	if discordInstanceId == "" {
+		cookie, _ := request.Cookie("discord-instance-id")
+		if cookie != nil {
+			discordInstanceId = cookie.Value
+		}
+	}
+	return discordInstanceId
+}
+
+const discordDomain = "1320396325925163070.discordsays.com"
+
+func SetDiscordCookies(w http.ResponseWriter, request *http.Request) {
+	discordInstanceId := GetDiscordInstanceId(request)
+	if discordInstanceId != "" {
+		http.SetCookie(w, &http.Cookie{
+			Name:        "discord-instance-id",
+			Value:       discordInstanceId,
+			Domain:      discordDomain,
+			Path:        "/",
+			SameSite:    http.SameSiteNoneMode,
+			Partitioned: true,
+			Secure:      true,
+		})
+	}
+}
+
+// SetGameplayCookies takes the players usersession and lobby id
+// and sets them as a cookie.
+func SetGameplayCookies(
+	w http.ResponseWriter,
+	request *http.Request,
+	player *game.Player,
+	lobby *game.Lobby,
+) {
+	discordInstanceId := GetDiscordInstanceId(request)
+	if discordInstanceId != "" {
+		http.SetCookie(w, &http.Cookie{
+			Name:        "usersession",
+			Value:       player.GetUserSession().String(),
+			Domain:      discordDomain,
+			Path:        "/",
+			SameSite:    http.SameSiteNoneMode,
+			Partitioned: true,
+			Secure:      true,
+		})
+		http.SetCookie(w, &http.Cookie{
+			Name:        "lobby-id",
+			Value:       lobby.LobbyID,
+			Domain:      discordDomain,
+			Path:        "/",
+			SameSite:    http.SameSiteNoneMode,
+			Partitioned: true,
+			Secure:      true,
+		})
+	} else {
+		// For the discord case, we need both, as the discord specific cookies
+		// aren't available during the readirect from ssrCreate to ssrEnter.
+		http.SetCookie(w, &http.Cookie{
+			Name:     "usersession",
+			Value:    player.GetUserSession().String(),
+			Path:     "/",
+			SameSite: http.SameSiteStrictMode,
+		})
+		http.SetCookie(w, &http.Cookie{
+			Name:     "lobby-id",
+			Value:    lobby.LobbyID,
+			Path:     "/",
+			SameSite: http.SameSiteStrictMode,
+		})
+	}
 }
 
 func (handler *V1Handler) patchLobby(writer http.ResponseWriter, request *http.Request) {
@@ -263,7 +326,7 @@ func (handler *V1Handler) patchLobby(writer http.ResponseWriter, request *http.R
 		return
 	}
 
-	lobby := state.GetLobby(request.PathValue("lobby_id"))
+	lobby := state.GetLobby(GetLobbyId(request))
 	if lobby == nil {
 		http.Error(writer, ErrLobbyNotExistent.Error(), http.StatusNotFound)
 		return
@@ -366,24 +429,19 @@ func (handler *V1Handler) getStats(writer http.ResponseWriter, _ *http.Request) 
 // and within the specified bounds.
 var SuggestedBrushSizes = [4]uint8{8, 16, 24, 32}
 
-// LobbyData is the data necessary for correctly configuring a lobby.
-// While unofficial clients will probably need all of these values, the
-// official webclient doesn't use all of them as of now.
-type LobbyData struct {
-	game.SettingBounds
-	game.EditableLobbySettings
-
-	LobbyID string `json:"lobbyId"`
+// GameConstants are values that are lobby-independent and can't be changed via
+// settings, neither at compile time nor at startup time.
+type GameConstants struct {
 	// DrawingBoardBaseWidth is the internal canvas width and is needed for
 	// correctly up- / downscaling drawing instructions.
-	DrawingBoardBaseWidth int `json:"drawingBoardBaseWidth"`
+	DrawingBoardBaseWidth uint16 `json:"drawingBoardBaseWidth"`
 	// DrawingBoardBaseHeight is the internal canvas height and is needed for
 	// correctly up- / downscaling drawing instructions.
-	DrawingBoardBaseHeight int `json:"drawingBoardBaseHeight"`
+	DrawingBoardBaseHeight uint16 `json:"drawingBoardBaseHeight"`
 	// MinBrushSize is the minimum amount of pixels the brush can draw in.
-	MinBrushSize int `json:"minBrushSize"`
+	MinBrushSize uint8 `json:"minBrushSize"`
 	// MaxBrushSize is the maximum amount of pixels the brush can draw in.
-	MaxBrushSize int `json:"maxBrushSize"`
+	MaxBrushSize uint8 `json:"maxBrushSize"`
 	// CanvasColor is the initially (empty) color of the canvas.
 	CanvasColor uint8 `json:"canvasColor"`
 	// SuggestedBrushSizes are suggestions for the different brush sizes
@@ -392,19 +450,31 @@ type LobbyData struct {
 	SuggestedBrushSizes [4]uint8 `json:"suggestedBrushSizes"`
 }
 
+var GameConstantsData = &GameConstants{
+	DrawingBoardBaseWidth:  game.DrawingBoardBaseWidth,
+	DrawingBoardBaseHeight: game.DrawingBoardBaseHeight,
+	MinBrushSize:           game.MinBrushSize,
+	MaxBrushSize:           game.MaxBrushSize,
+	CanvasColor:            0, /* White */
+	SuggestedBrushSizes:    SuggestedBrushSizes,
+}
+
+// LobbyData is the data necessary for correctly configuring a lobby.
+// While unofficial clients will probably need all of these values, the
+// official webclient doesn't use all of them as of now.
+type LobbyData struct {
+	game.SettingBounds
+	game.EditableLobbySettings
+	*GameConstants
+}
+
 // CreateLobbyData creates a ready to use LobbyData object containing data
 // from the passed Lobby.
 func CreateLobbyData(cfg *config.Config, lobby *game.Lobby) *LobbyData {
 	return &LobbyData{
-		SettingBounds:          cfg.LobbySettingBounds,
-		EditableLobbySettings:  lobby.EditableLobbySettings,
-		LobbyID:                lobby.LobbyID,
-		DrawingBoardBaseWidth:  game.DrawingBoardBaseWidth,
-		DrawingBoardBaseHeight: game.DrawingBoardBaseHeight,
-		MinBrushSize:           game.MinBrushSize,
-		MaxBrushSize:           game.MaxBrushSize,
-		CanvasColor:            0, /* White */
-		SuggestedBrushSizes:    SuggestedBrushSizes,
+		SettingBounds:         cfg.LobbySettingBounds,
+		EditableLobbySettings: lobby.EditableLobbySettings,
+		GameConstants:         GameConstantsData,
 	}
 }
 
@@ -433,8 +503,8 @@ func GetUserSession(request *http.Request) (uuid.UUID, error) {
 
 // GetPlayer returns the player object that matches the usersession in the
 // supplied HTTP request and lobby. If no user session is set, we return nil.
-func GetPlayer(lobby *game.Lobby, r *http.Request) *game.Player {
-	userSession, err := GetUserSession(r)
+func GetPlayer(lobby *game.Lobby, request *http.Request) *game.Player {
+	userSession, err := GetUserSession(request)
 	if err != nil {
 		log.Printf("error getting user session: %v", err)
 		return nil
@@ -464,4 +534,14 @@ func GetPlayername(request *http.Request) string {
 	}
 
 	return ""
+}
+
+// GetLobbyId returns either the lobby id from the URL or from a cookie.
+func GetLobbyId(request *http.Request) string {
+	lobbyId := request.PathValue("lobby_id")
+	if lobbyId == "" {
+		cookie, _ := request.Cookie("lobby-id")
+		lobbyId = cookie.Value
+	}
+	return lobbyId
 }

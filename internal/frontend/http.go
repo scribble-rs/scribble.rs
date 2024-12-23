@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"path/filepath"
 
 	"github.com/scribble-rs/scribble.rs/internal/translations"
 )
@@ -52,8 +51,18 @@ type BasePageConfig struct {
 	CacheBust string `json:"cacheBust"`
 }
 
+func (handler *SSRHandler) cspMiddleware(handleFunc http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Security-Policy-Report-Only", "default-src 'self'; script-src 'self' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline' blob:; img-src 'self' data: blob:; media-src 'self' blob: data:")
+		handleFunc.ServeHTTP(w, r)
+	}
+}
+
 // SetupRoutes registers the official webclient endpoints with the http package.
 func (handler *SSRHandler) SetupRoutes(register func(string, string, http.HandlerFunc)) {
+	registerWithCsp := func(s1, s2 string, hf http.HandlerFunc) {
+		register(s1, s2, handler.cspMiddleware(hf))
+	}
 	var genericFileHandler http.HandlerFunc
 	if dir := handler.cfg.ServeDirectories[""]; dir != "" {
 		delete(handler.cfg.ServeDirectories, "")
@@ -63,7 +72,6 @@ func (handler *SSRHandler) SetupRoutes(register func(string, string, http.Handle
 
 	for route, dir := range handler.cfg.ServeDirectories {
 		fileServer := http.FileServer(http.FS(os.DirFS(dir)))
-		fmt.Println(filepath.Base(dir), fileServer)
 		fileHandler := http.StripPrefix(
 			"/"+path.Join(handler.cfg.RootPath, route)+"/",
 			http.HandlerFunc(fileServer.ServeHTTP),
@@ -75,9 +83,10 @@ func (handler *SSRHandler) SetupRoutes(register func(string, string, http.Handle
 		)
 	}
 
+	indexHandler := handler.cspMiddleware(handler.indexPageHandler)
 	register("GET", handler.cfg.RootPath, func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "" || r.URL.Path == "/" {
-			handler.indexPageHandler(w, r)
+			indexHandler(w, r)
 			return
 		}
 
@@ -99,8 +108,10 @@ func (handler *SSRHandler) SetupRoutes(register func(string, string, http.Handle
 			}),
 		).ServeHTTP,
 	)
-	register("GET", path.Join(handler.cfg.RootPath, "ssrEnterLobby", "{lobby_id}"), handler.ssrEnterLobby)
-	register("POST", path.Join(handler.cfg.RootPath, "ssrCreateLobby"), handler.ssrCreateLobby)
+	register("GET", path.Join(handler.cfg.RootPath, "lobbyJs"), handler.lobbyJs)
+	register("GET", path.Join(handler.cfg.RootPath, "indexJs"), handler.indexJs)
+	registerWithCsp("GET", path.Join(handler.cfg.RootPath, "ssrEnterLobby", "{lobby_id}"), handler.ssrEnterLobby)
+	registerWithCsp("POST", path.Join(handler.cfg.RootPath, "ssrCreateLobby"), handler.ssrCreateLobby)
 }
 
 // errorPageData represents the data that error.html requires to be displayed.

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/scribble-rs/scribble.rs/internal/api"
+	"github.com/scribble-rs/scribble.rs/internal/game"
 	"github.com/scribble-rs/scribble.rs/internal/state"
 	"github.com/scribble-rs/scribble.rs/internal/translations"
 	"golang.org/x/text/language"
@@ -19,9 +20,33 @@ type lobbyPageData struct {
 	Locale      string
 }
 
+type lobbyJsData struct {
+	*BasePageConfig
+	*api.GameConstants
+
+	Translation translations.Translation
+	Locale      string
+}
+
 type robotPageData struct {
 	*BasePageConfig
 	*api.LobbyData
+}
+
+func (handler *SSRHandler) lobbyJs(writer http.ResponseWriter, request *http.Request) {
+	translation, locale := determineTranslation(request)
+	pageData := &lobbyJsData{
+		BasePageConfig: handler.basePageConfig,
+		GameConstants:  api.GameConstantsData,
+		Translation:    translation,
+		Locale:         locale,
+	}
+
+	writer.Header().Add("Content-Type", "text/javascript")
+	writer.WriteHeader(http.StatusOK)
+	if err := handler.lobbyJsRawTemplate.ExecuteTemplate(writer, "lobby-js", pageData); err != nil {
+		log.Printf("error templating JS: %s\n", err)
+	}
 }
 
 // ssrEnterLobby opens a lobby, either opening it directly or asking for a lobby.
@@ -44,12 +69,25 @@ func (handler *SSRHandler) ssrEnterLobby(writer http.ResponseWriter, request *ht
 		return
 	}
 
+	handler.ssrEnterLobbyNoChecks(lobby, writer, request,
+		func() *game.Player {
+			return api.GetPlayer(lobby, request)
+		})
+}
+
+func (handler *SSRHandler) ssrEnterLobbyNoChecks(
+	lobby *game.Lobby,
+	writer http.ResponseWriter,
+	request *http.Request,
+	getPlayer func() *game.Player,
+) {
 	translation, locale := determineTranslation(request)
 	requestAddress := api.GetIPAddressFromRequest(request)
+	api.SetDiscordCookies(writer, request)
 
 	var pageData *lobbyPageData
 	lobby.Synchronized(func() {
-		player := api.GetPlayer(lobby, request)
+		player := getPlayer()
 
 		if player == nil {
 			if !lobby.HasFreePlayerSlot() {
@@ -64,13 +102,14 @@ func (handler *SSRHandler) ssrEnterLobby(writer http.ResponseWriter, request *ht
 
 			newPlayer := lobby.JoinPlayer(api.GetPlayername(request))
 
-			api.SetUsersessionCookie(writer, newPlayer)
+			api.SetGameplayCookies(writer, request, newPlayer, lobby)
 		} else {
 			if player.Connected && player.GetWebsocket() != nil {
 				handler.userFacingError(writer, "It appears you already have an open tab for this lobby.")
 				return
 			}
 			player.SetLastKnownAddress(requestAddress)
+			api.SetGameplayCookies(writer, request, player, lobby)
 		}
 
 		pageData = &lobbyPageData{

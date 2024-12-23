@@ -241,6 +241,7 @@ func easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalApi2(in *jlexer.
 		in.Skip()
 		return
 	}
+	out.GameConstants = new(GameConstants)
 	in.Delim('{')
 	for !in.IsDelim('}') {
 		key := in.UnsafeFieldName(false)
@@ -251,16 +252,14 @@ func easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalApi2(in *jlexer.
 			continue
 		}
 		switch key {
-		case "lobbyId":
-			out.LobbyID = string(in.String())
 		case "drawingBoardBaseWidth":
-			out.DrawingBoardBaseWidth = int(in.Int())
+			out.DrawingBoardBaseWidth = uint16(in.Uint16())
 		case "drawingBoardBaseHeight":
-			out.DrawingBoardBaseHeight = int(in.Int())
+			out.DrawingBoardBaseHeight = uint16(in.Uint16())
 		case "minBrushSize":
-			out.MinBrushSize = int(in.Int())
+			out.MinBrushSize = uint8(in.Uint8())
 		case "maxBrushSize":
-			out.MaxBrushSize = int(in.Int())
+			out.MaxBrushSize = uint8(in.Uint8())
 		case "canvasColor":
 			out.CanvasColor = uint8(in.Uint8())
 		case "suggestedBrushSizes":
@@ -316,29 +315,24 @@ func easyjson102f8a2fEncodeGithubComScribbleRsScribbleRsInternalApi2(out *jwrite
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"lobbyId\":"
-		out.RawString(prefix[1:])
-		out.String(string(in.LobbyID))
-	}
-	{
 		const prefix string = ",\"drawingBoardBaseWidth\":"
-		out.RawString(prefix)
-		out.Int(int(in.DrawingBoardBaseWidth))
+		out.RawString(prefix[1:])
+		out.Uint16(uint16(in.DrawingBoardBaseWidth))
 	}
 	{
 		const prefix string = ",\"drawingBoardBaseHeight\":"
 		out.RawString(prefix)
-		out.Int(int(in.DrawingBoardBaseHeight))
+		out.Uint16(uint16(in.DrawingBoardBaseHeight))
 	}
 	{
 		const prefix string = ",\"minBrushSize\":"
 		out.RawString(prefix)
-		out.Int(int(in.MinBrushSize))
+		out.Uint8(uint8(in.MinBrushSize))
 	}
 	{
 		const prefix string = ",\"maxBrushSize\":"
 		out.RawString(prefix)
-		out.Int(int(in.MaxBrushSize))
+		out.Uint8(uint8(in.MaxBrushSize))
 	}
 	{
 		const prefix string = ",\"canvasColor\":"
@@ -455,4 +449,109 @@ func (v *LobbyData) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *LobbyData) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalApi2(l, v)
+}
+func easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalApi3(in *jlexer.Lexer, out *GameConstants) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "drawingBoardBaseWidth":
+			out.DrawingBoardBaseWidth = uint16(in.Uint16())
+		case "drawingBoardBaseHeight":
+			out.DrawingBoardBaseHeight = uint16(in.Uint16())
+		case "minBrushSize":
+			out.MinBrushSize = uint8(in.Uint8())
+		case "maxBrushSize":
+			out.MaxBrushSize = uint8(in.Uint8())
+		case "canvasColor":
+			out.CanvasColor = uint8(in.Uint8())
+		case "suggestedBrushSizes":
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				copy(out.SuggestedBrushSizes[:], in.Bytes())
+			}
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson102f8a2fEncodeGithubComScribbleRsScribbleRsInternalApi3(out *jwriter.Writer, in GameConstants) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"drawingBoardBaseWidth\":"
+		out.RawString(prefix[1:])
+		out.Uint16(uint16(in.DrawingBoardBaseWidth))
+	}
+	{
+		const prefix string = ",\"drawingBoardBaseHeight\":"
+		out.RawString(prefix)
+		out.Uint16(uint16(in.DrawingBoardBaseHeight))
+	}
+	{
+		const prefix string = ",\"minBrushSize\":"
+		out.RawString(prefix)
+		out.Uint8(uint8(in.MinBrushSize))
+	}
+	{
+		const prefix string = ",\"maxBrushSize\":"
+		out.RawString(prefix)
+		out.Uint8(uint8(in.MaxBrushSize))
+	}
+	{
+		const prefix string = ",\"canvasColor\":"
+		out.RawString(prefix)
+		out.Uint8(uint8(in.CanvasColor))
+	}
+	{
+		const prefix string = ",\"suggestedBrushSizes\":"
+		out.RawString(prefix)
+		out.Base64Bytes(in.SuggestedBrushSizes[:])
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v GameConstants) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson102f8a2fEncodeGithubComScribbleRsScribbleRsInternalApi3(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v GameConstants) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson102f8a2fEncodeGithubComScribbleRsScribbleRsInternalApi3(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *GameConstants) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalApi3(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *GameConstants) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson102f8a2fDecodeGithubComScribbleRsScribbleRsInternalApi3(l, v)
 }

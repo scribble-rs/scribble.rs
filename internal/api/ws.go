@@ -43,7 +43,13 @@ func (handler *V1Handler) websocketUpgrade(writer http.ResponseWriter, request *
 		return
 	}
 
-	lobby := state.GetLobby(request.PathValue("lobby_id"))
+	lobbyId := GetLobbyId(request)
+	if lobbyId == "" {
+		http.Error(writer, "lobby id missing", http.StatusBadRequest)
+		return
+	}
+
+	lobby := state.GetLobby(lobbyId)
 	if lobby == nil {
 		http.Error(writer, ErrLobbyNotExistent.Error(), http.StatusNotFound)
 		return

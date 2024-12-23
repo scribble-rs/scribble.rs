@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	txtTemplate "text/template"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/scribble-rs/scribble.rs/internal/api"
@@ -17,13 +18,30 @@ import (
 	"github.com/scribble-rs/scribble.rs/internal/version"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
+
+	_ "embed"
 )
+
+//go:embed lobby.js
+var lobbyJsRaw string
+
+//go:embed index.js
+var indexJsRaw string
+
+type indexJsData struct {
+	*BasePageConfig
+
+	Translation translations.Translation
+	Locale      string
+}
 
 // This file contains the API for the official web client.
 
 type SSRHandler struct {
-	cfg            *config.Config
-	basePageConfig *BasePageConfig
+	cfg                *config.Config
+	basePageConfig     *BasePageConfig
+	lobbyJsRawTemplate *txtTemplate.Template
+	indexJsRawTemplate *txtTemplate.Template
 }
 
 func NewHandler(cfg *config.Config) (*SSRHandler, error) {
@@ -35,6 +53,22 @@ func NewHandler(cfg *config.Config) (*SSRHandler, error) {
 	if cfg.RootPath != "" {
 		basePageConfig.RootPath = "/" + cfg.RootPath
 	}
+
+	indexJsRawTemplate, err := txtTemplate.
+		New("index-js").
+		Parse(indexJsRaw)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing index js template: %w", err)
+	}
+
+	lobbyJsRawTemplate, err := txtTemplate.
+		New("lobby-js").
+		Parse(lobbyJsRaw)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing lobby js template: %w", err)
+	}
+
+	lobbyJsRawTemplate.AddParseTree("footer", pageTemplates.Tree)
 
 	entries, err := frontendResourcesFS.ReadDir("resources")
 	if err != nil {
@@ -57,10 +91,27 @@ func NewHandler(cfg *config.Config) (*SSRHandler, error) {
 	basePageConfig.CacheBust = hex.EncodeToString(hash.Sum(nil))
 
 	handler := &SSRHandler{
-		cfg:            cfg,
-		basePageConfig: basePageConfig,
+		cfg:                cfg,
+		basePageConfig:     basePageConfig,
+		lobbyJsRawTemplate: lobbyJsRawTemplate,
+		indexJsRawTemplate: indexJsRawTemplate,
 	}
 	return handler, nil
+}
+
+func (handler *SSRHandler) indexJs(writer http.ResponseWriter, request *http.Request) {
+	translation, locale := determineTranslation(request)
+	pageData := &indexJsData{
+		BasePageConfig: handler.basePageConfig,
+		Translation:    translation,
+		Locale:         locale,
+	}
+
+	writer.Header().Add("Content-Type", "text/javascript")
+	writer.WriteHeader(http.StatusOK)
+	if err := handler.indexJsRawTemplate.ExecuteTemplate(writer, "index-js", pageData); err != nil {
+		log.Printf("error templating JS: %s\n", err)
+	}
 }
 
 // indexPageHandler servers the default page for scribble.rs, which is the
@@ -71,6 +122,7 @@ func (handler *SSRHandler) indexPageHandler(writer http.ResponseWriter, request 
 	createPageData.Translation = translation
 	createPageData.Locale = locale
 
+	api.SetDiscordCookies(writer, request)
 	err := pageTemplates.ExecuteTemplate(writer, "index", createPageData)
 	if err != nil {
 		log.Printf("Error templating home page: %s\n", err)
@@ -125,6 +177,7 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 	}
 	customWords, customWordsInvalid := api.ParseCustomWords(lowercaser, request.Form.Get("custom_words"))
 
+	api.SetDiscordCookies(writer, request)
 	// Prevent resetting the form, since that would be annoying as hell.
 	pageData := IndexPageData{
 		BasePageConfig: handler.basePageConfig,
@@ -200,11 +253,20 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 	lobby.WriteObject = api.WriteObject
 	lobby.WritePreparedMessage = api.WritePreparedMessage
 	player.SetLastKnownAddress(api.GetIPAddressFromRequest(request))
-
-	api.SetUsersessionCookie(writer, player)
+	api.SetGameplayCookies(writer, request, player, lobby)
 
 	// We only add the lobby if we could do all necessary pre-steps successfully.
 	state.AddLobby(lobby)
+
+	// Workaround for discord activity case not correctly being able to read
+	// user session, as the cookie isn't being passed.
+	if api.GetDiscordInstanceId(request) != "" {
+		handler.ssrEnterLobbyNoChecks(lobby, writer, request,
+			func() *game.Player {
+				return player
+			})
+		return
+	}
 
 	http.Redirect(writer, request, handler.basePageConfig.RootPath+"/ssrEnterLobby/"+lobby.LobbyID, http.StatusFound)
 }
