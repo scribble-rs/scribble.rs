@@ -16,8 +16,9 @@ type lobbyPageData struct {
 	*BasePageConfig
 	*api.LobbyData
 
-	Translation translations.Translation
-	Locale      string
+	DiscordActivity bool
+	Translation     translations.Translation
+	Locale          string
 }
 
 type lobbyJsData struct {
@@ -113,10 +114,11 @@ func (handler *SSRHandler) ssrEnterLobbyNoChecks(
 		}
 
 		pageData = &lobbyPageData{
-			BasePageConfig: handler.basePageConfig,
-			LobbyData:      api.CreateLobbyData(handler.cfg, lobby),
-			Translation:    translation,
-			Locale:         locale,
+			BasePageConfig:  handler.basePageConfig,
+			LobbyData:       api.CreateLobbyData(handler.cfg, lobby),
+			Translation:     translation,
+			DiscordActivity: api.GetDiscordInstanceId(request) != "",
+			Locale:          locale,
 		}
 	})
 
