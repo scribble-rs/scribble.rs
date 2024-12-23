@@ -136,6 +136,7 @@ func (handler *SSRHandler) indexPageHandler(writer http.ResponseWriter, request 
 	api.SetDiscordCookies(writer, request)
 	discordInstanceId := api.GetDiscordInstanceId(request)
 	if discordInstanceId != "" {
+		createPageData.DiscordActivity = true
 		lobby := state.GetLobby(discordInstanceId)
 		if lobby != nil {
 			handler.ssrEnterLobbyNoChecks(lobby, writer, request,
@@ -168,6 +169,7 @@ type IndexPageData struct {
 	config.LobbySettingDefaults
 	game.SettingBounds
 
+	DiscordActivity   bool
 	Translation       translations.Translation
 	Locale            string
 	Errors            []string

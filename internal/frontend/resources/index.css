@@ -222,7 +222,11 @@
     overflow-y: auto;
     padding-right: 0.5rem;
     flex: 1;
-    grid-template-rows: max-content max-content max-content max-content max-content max-content max-content auto;
+    grid-template-rows: repeat(7, max-content) auto;
+}
+
+.discord-activity #lobby-create {
+    grid-template-rows: repeat(6, max-content) auto;
 }
 
 .lobby-create-label {
