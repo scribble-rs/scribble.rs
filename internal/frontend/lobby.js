@@ -122,6 +122,10 @@ const soundToggleLabel = document.getElementById("sound-toggle-label");
 let sound = localStorage.getItem("sound") !== "false";
 updateSoundIcon();
 
+const penToggleLabel = document.getElementById("pen-pressure-toggle-label");
+let penPressure = localStorage.getItem("penPressure") !== "false";
+updateTogglePenIcon();
+
 const set_dummy_word_hints = () => {
     // Dummy wordhint to prevent layout changes.
     applyWordHints([{
@@ -385,6 +389,21 @@ function updateSoundIcon() {
         soundToggleLabel.src = "{{.RootPath}}/resources/sound.svg?cache_bust={{.CacheBust}}";
     } else {
         soundToggleLabel.src = "{{.RootPath}}/resources/no-sound.svg?cache_bust={{.CacheBust}}";
+    }
+}
+
+function togglePenPressure() {
+    penPressure = !penPressure;
+    localStorage.setItem("penPressure", penPressure.toString());
+    updateTogglePenIcon();
+}
+document.getElementById("toggle-pen-pressure-button").addEventListener("click", togglePenPressure);
+
+function updateTogglePenIcon() {
+    if (penPressure) {
+        penToggleLabel.src = "{{.RootPath}}/resources/pen.svg?cache_bust={{.CacheBust}}";
+    } else {
+        penToggleLabel.src = "{{.RootPath}}/resources/no-pen.svg?cache_bust={{.CacheBust}}";
     }
 }
 
@@ -1452,7 +1471,7 @@ function pressureToLineWidth(event) {
     if (event.buttons !== 1 || event.pressure === 0 || event.pointerType === "touch") {
         return 0;
     }
-    if (event.pressure === 0.5 || !event.pressure) {
+    if (!penPressure || event.pressure === 0.5 || !event.pressure) {
         return localLineWidth;
     }
     return Math.ceil(event.pressure * 32);

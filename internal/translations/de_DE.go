@@ -30,6 +30,7 @@ func initGermanTranslation() {
 
 	translation.put("round", "Runde")
 	translation.put("toggle-soundeffects", "Sound ein- / ausschalten")
+	translation.put("toggle-pen-pressure", "Tablet-Stiftdruck ein- / ausschalten")
 	translation.put("change-your-name", "Anzeigename")
 	translation.put("randomize", "Zufälliger Name")
 	translation.put("apply", "Anwenden")
