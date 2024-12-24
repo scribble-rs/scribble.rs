@@ -192,6 +192,7 @@ original file.
 * [Help Icon](https://www.iconfinder.com/icons/211675/help_icon) - Made by Ionicons
 * [Fullscreen Icon](https://www.iconfinder.com/icons/298714/screen_full_icon) - Made by Github
 * [Pencil Icon](https://github.com/twitter/twemoji/blob/8e58ae4/svg/270f.svg)
+* [Drawing Tablet Pen Icon](https://www.iconfinder.com/icons/8665767/pen_icon)
 * [Checkmark Icon](https://commons.wikimedia.org/wiki/File:Green_check_icon_with_gradient.svg)
 * [Fill Icon](https://commons.wikimedia.org/wiki/File:Circle-icons-paintcan.svg)
 * [Trash Icon](https://www.iconfinder.com/icons/315225/trash_can_icon) - Made by [Yannick Lung](https://yannicklung.com)

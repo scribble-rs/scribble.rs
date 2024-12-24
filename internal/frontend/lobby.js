@@ -122,6 +122,10 @@ const soundToggleLabel = document.getElementById("sound-toggle-label");
 let sound = localStorage.getItem("sound") !== "false";
 updateSoundIcon();
 
+const penToggleLabel = document.getElementById("pen-pressure-toggle-label");
+let penPressure = localStorage.getItem("penPressure") !== "false";
+updateTogglePenIcon();
+
 const set_dummy_word_hints = () => {
     // Dummy wordhint to prevent layout changes.
     applyWordHints([{
@@ -385,6 +389,21 @@ function updateSoundIcon() {
         soundToggleLabel.src = "{{.RootPath}}/resources/sound.svg?cache_bust={{.CacheBust}}";
     } else {
         soundToggleLabel.src = "{{.RootPath}}/resources/no-sound.svg?cache_bust={{.CacheBust}}";
+    }
+}
+
+function togglePenPressure() {
+    penPressure = !penPressure;
+    localStorage.setItem("penPressure", penPressure.toString());
+    updateTogglePenIcon();
+}
+document.getElementById("toggle-pen-pressure-button").addEventListener("click", togglePenPressure);
+
+function updateTogglePenIcon() {
+    if (penPressure) {
+        penToggleLabel.src = "{{.RootPath}}/resources/pen.svg?cache_bust={{.CacheBust}}";
+    } else {
+        penToggleLabel.src = "{{.RootPath}}/resources/no-pen.svg?cache_bust={{.CacheBust}}";
     }
 }
 
@@ -1438,24 +1457,65 @@ drawingBoard.addEventListener('touchstart', onTouchStart);
 drawingBoard.addEventListener('touchmove', onTouchMove);
 
 function onMouseDown(event) {
-    if (allowDrawing && event.buttons === 1 && localTool !== fillBucket) {
+    if (allowDrawing
+        && event.pointerType !== "touch"
+        && event.buttons === 1
+        && localTool !== fillBucket) {
         const clientRect = drawingBoard.getBoundingClientRect();
         lastX = event.clientX - clientRect.left;
         lastY = event.clientY - clientRect.top;
     }
 }
 
-function onMouseMove(event) {
+function pressureToLineWidth(event) {
     //event.button === 0 could be wrong, as it can also be the uninitialized state.
     //Therefore we use event.buttons, which works differently.
-    if (allowDrawing && event.buttons === 1 && localTool !== fillBucket) {
+    if (event.buttons !== 1 || event.pressure === 0 || event.pointerType === "touch") {
+        return 0;
+    }
+    if (!penPressure || event.pressure === 0.5 || !event.pressure) {
+        return localLineWidth;
+    }
+    return Math.ceil(event.pressure * 32);
+}
+
+// Previously the onMouseMove handled leave, but we do this separately now for
+// proper pen support. Otherwise leave leads to a loss of the pen pressure, as
+// we are handling that with mouseleave instead of pointerleave. pointerlave
+// is not triggered until the pen is let go.
+function onMouseLeave(event) {
+    if (allowDrawing
+        && lastLineWidth
+        && localTool !== fillBucket) {
+
         // calculate the offset coordinates based on client mouse position and drawing board client origin
         const clientRect = drawingBoard.getBoundingClientRect();
         const offsetX = (event.clientX - clientRect.left);
         const offsetY = (event.clientY - clientRect.top);
 
         // drawing functions must check for context boundaries
-        drawLineAndSendEvent(context, lastX, lastY, offsetX, offsetY);
+        drawLineAndSendEvent(context, lastX, lastY, offsetX, offsetY, lastLineWidth);
+        lastX = offsetX;
+        lastY = offsetY;
+    }
+}
+
+let lastLineWidth;
+function onMouseMove(event) {
+    const pressureLineWidth = pressureToLineWidth(event);
+    lastLineWidth = pressureLineWidth;
+
+    if (allowDrawing
+        && pressureLineWidth
+        && localTool !== fillBucket) {
+
+        // calculate the offset coordinates based on client mouse position and drawing board client origin
+        const clientRect = drawingBoard.getBoundingClientRect();
+        const offsetX = (event.clientX - clientRect.left);
+        const offsetY = (event.clientY - clientRect.top);
+
+        // drawing functions must check for context boundaries
+        drawLineAndSendEvent(context, lastX, lastY, offsetX, offsetY, pressureLineWidth);
         lastX = offsetX;
         lastY = offsetY;
     }
@@ -1474,9 +1534,9 @@ function onMouseClick(event) {
     }
 }
 
-drawingBoard.addEventListener('mousedown', onMouseDown)
-drawingBoard.addEventListener('mousemove', onMouseMove);
-drawingBoard.addEventListener('mouseleave', onMouseMove);
+drawingBoard.addEventListener('pointerdown', onMouseDown)
+drawingBoard.addEventListener('pointermove', onMouseMove);
+drawingBoard.addEventListener('mouseleave', onMouseLeave);
 drawingBoard.addEventListener('click', onMouseClick);
 
 function onGlobalMouseMove(event) {
@@ -1584,7 +1644,7 @@ function fillAndSendEvent(context, x, y, colorIndex) {
     }
 }
 
-function drawLineAndSendEvent(context, x1, y1, x2, y2) {
+function drawLineAndSendEvent(context, x1, y1, x2, y2, lineWidth = localLineWidth) {
     const color = localTool === rubber ? rubberColor : localColor;
     const colorIndex = localTool === rubber ? 0 /* white */ : localColorIndex;
 
@@ -1593,7 +1653,7 @@ function drawLineAndSendEvent(context, x1, y1, x2, y2) {
     const x2Scaled = convertToServerCoordinate(x2);
     const y2Scaled = convertToServerCoordinate(y2);
     drawLine(context, imageData, x1Scaled, y1Scaled,
-        x2Scaled, y2Scaled, color, localLineWidth);
+        x2Scaled, y2Scaled, color, lineWidth);
 
     const drawInstruction = {
         type: "line",
@@ -1603,7 +1663,7 @@ function drawLineAndSendEvent(context, x1, y1, x2, y2) {
             x2: x2Scaled,
             y2: y2Scaled,
             color: colorIndex,
-            width: localLineWidth,
+            width: lineWidth,
         }
     };
     socket.send(JSON.stringify(drawInstruction));
