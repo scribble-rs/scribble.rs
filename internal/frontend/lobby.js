@@ -780,6 +780,14 @@ messageInput.addEventListener("keypress", sendMessage);
 messageInput.addEventListener("keydown", function(event) {
     if (event.code === 'ArrowUp' && messageInput.value.length === 0) {
         messageInput.value = lastMessage;
+        const length = lastMessage.length;
+        // Postpone selection change onto next event queue loop iteration, as
+        // nothing will happen otherwise.
+        setTimeout(() => {
+            // length+1 is necessary, as the selection wont change if start and
+            // end are the same,
+            messageInput.setSelectionRange(length + 1, length);
+        }, 0);
     }
 });
 
