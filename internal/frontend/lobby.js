@@ -999,7 +999,7 @@ function getCachedPlayer(playerID) {
     }
 
     for (let i = 0; i < cachedPlayers.length; i++) {
-        let player = cachedPlayers[i];
+        const player = cachedPlayers[i];
         if (player.id === playerID) {
             return player;
         }
@@ -1073,7 +1073,7 @@ function handleReadyEvent(ready) {
 
         //These two are required for displaying the "game over / win / tie" message.
         let countOfRankOnePlayers = 0;
-        let isSelfRankOne = false;
+        let selfPlayer;
         for (let i = 0; i < players.length; i++) {
             const player = players[i];
             if (!player.connected || player.state === "spectating") {
@@ -1082,13 +1082,12 @@ function handleReadyEvent(ready) {
 
             if (player.rank === 1) {
                 countOfRankOnePlayers++;
-                if (player.id === ownID) {
-                    isSelfRankOne = true;
-                }
+            }
+            if (player.id === ownID) {
+                selfPlayer = player;
             }
 
-            //Even if we don't want to show a player-entry, we still need to iterate
-            //over all players to handle the dialog titles.
+            // We only display the first 5 players on the scoreboard.
             if (player.rank <= 5) {
                 const newScoreboardEntry = document.createElement("div");
                 newScoreboardEntry.classList.add("gameover-scoreboard-entry");
@@ -1115,14 +1114,15 @@ function handleReadyEvent(ready) {
             }
         }
 
-        if (isSelfRankOne) {
+        if (selfPlayer.rank === 1) {
             if (countOfRankOnePlayers >= 2) {
                 gameOverDialogTitle.innerText = `{{.Translation.Get "game-over-tie"}}`;
             } else {
                 gameOverDialogTitle.innerText = `{{.Translation.Get "game-over-win"}}`;
             }
         } else {
-            gameOverDialogTitle.innerText = `{{.Translation.Get "game-over"}}`.format(player.rank, player.score);
+            gameOverDialogTitle.innerText = `{{.Translation.Get "game-over"}}`
+                .format(selfPlayer.rank, selfPlayer.score);
         }
     } else if (ready.gameState === "ongoing") {
         // Lack of wordHints implies that word has been chosen yet.
