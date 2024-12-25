@@ -749,7 +749,7 @@ let lastMessage = "";
 
 const encoder = new TextEncoder();
 function sendMessage(event) {
-    if (event.keyCode !== 13) {
+    if (event.code !== 'Enter') {
         return;
     }
     if (!messageInput.value) {
@@ -778,7 +778,7 @@ function sendMessage(event) {
 
 messageInput.addEventListener("keypress", sendMessage);
 messageInput.addEventListener("keydown", function(event) {
-    if (event.keyCode === 38 /* arrow up */ && messageInput.value.length === 0) {
+    if (event.code === 'ArrowUp' && messageInput.value.length === 0) {
         messageInput.value = lastMessage;
     }
 });
