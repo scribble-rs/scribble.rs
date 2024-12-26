@@ -3,7 +3,7 @@
 {{define "non-static-css-decl"}}
 <style>
     :root {
-        --scribble-background: url('{{.RootPath}}/resources/background.png?cache_bust={{.CacheBust}}');
+        --scribble-background: url('{{.RootPath}}/resources/{{.WithCacheBust "background.png"}}');
     }
 </style>
 {{end}}

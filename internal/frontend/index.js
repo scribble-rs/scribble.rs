@@ -165,13 +165,13 @@ const set_lobbies = (lobbies, visible) => {
             return element;
         };
         const user_pair = create_info_pair(
-            "{{.RootPath}}/resources/user.svg?cache_bust={{.CacheBust}}",
+            `{{.RootPath}}/resources/{{.WithCacheBust "user.svg"}}`,
             `${lobby.playerCount}/${lobby.maxPlayers}`);
         const round_pair = create_info_pair(
-            "{{.RootPath}}/resources/round.svg?cache_bust={{.CacheBust}}",
+            `{{.RootPath}}/resources/{{.WithCacheBust "round.svg"}}`,
             `${lobby.round}/${lobby.rounds}`);
         const time_pair = create_info_pair(
-            "{{.RootPath}}/resources/clock.svg?cache_bust={{.CacheBust}}",
+            `{{.RootPath}}/resources/{{.WithCacheBust "clock.svg"}}`,
             `${lobby.drawingTime}`);
 
         lobby_list_row_b.replaceChildren(user_pair, round_pair, time_pair);

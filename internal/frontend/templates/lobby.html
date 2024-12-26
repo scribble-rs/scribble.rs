@@ -7,16 +7,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1 maximum-scale=1, user-scalable=0">
     {{template "non-static-css-decl" .}}
-    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/root.css?cache_bust={{.CacheBust}}" />
-    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/lobby.css?cache_bust={{.CacheBust}}" />
+    <link rel="stylesheet" type="text/css" href='{{.RootPath}}/resources/{{.WithCacheBust "root.css"}}' />
+    <link rel="stylesheet" type="text/css" href='{{.RootPath}}/resources/{{.WithCacheBust "lobby.css"}}' />
     {{template "favicon-decl" .}}
-    <link rel="prefetch" href="{{.RootPath}}/resources/plop.wav?cache_bust={{.CacheBust}}" />
-    <link rel="prefetch" href="{{.RootPath}}/resources/end-turn.wav?cache_bust={{.CacheBust}}" />
-    <link rel="prefetch" href="{{.RootPath}}/resources/your-turn.wav?cache_bust={{.CacheBust}}" />
-    <link rel="prefetch" href="{{.RootPath}}/resources/pencil.wav?cache_bust={{.CacheBust}}" />
-    <link rel="prefetch" href="{{.RootPath}}/resources/checkmark.wav?cache_bust={{.CacheBust}}" />
-    <link rel="prefetch" href="{{.RootPath}}/resources/sound.svg?cache_bust={{.CacheBust}}" />
-    <link rel="prefetch" href="{{.RootPath}}/resources/no-sound.svg?cache_bust={{.CacheBust}}" />
+    <link rel="prefetch" href='{{.RootPath}}/resources/{{.WithCacheBust "plop.wav"}}' />
+    <link rel="prefetch" href='{{.RootPath}}/resources/{{.WithCacheBust "end-turn.wav"}}' />
+    <link rel="prefetch" href='{{.RootPath}}/resources/{{.WithCacheBust "your-turn.wav"}}' />
+    <link rel="prefetch" href='{{.RootPath}}/resources/{{.WithCacheBust "pencil.svg"}}' />
+    <link rel="prefetch" href='{{.RootPath}}/resources/{{.WithCacheBust "checkmark.svg"}}' />
+    <link rel="prefetch" href='{{.RootPath}}/resources/{{.WithCacheBust "sound.svg"}}' />
+    <link rel="prefetch" href='{{.RootPath}}/resources/{{.WithCacheBust "no-sound.svg"}}' />
 </head>
 
 <body>
@@ -26,7 +26,7 @@
         <div id="lobby">
             <div id="lobby-header">
                 <div id="round-container">
-                    <img src=" {{.RootPath}}/resources/round.svg?cache_bust={{.CacheBust}}" class="header-button-image"
+                    <img src='{{.RootPath}}/resources/{{.WithCacheBust "round.svg"}}' class="header-button-image"
                         alt="{{.Translation.Get "round"}}" title="{{.Translation.Get "round"}}" />
                     <span id="rounds"></span>
                     <span id="max-rounds"></span>
@@ -36,7 +36,7 @@
                     <div>
                         <div>
                             <button id="menu-button" popovertarget="menu" alt="Show menu" title="Show menu">
-                                <img src="{{.RootPath}}/resources/menu.svg?cache_bust={{.CacheBust}}"
+                                <img src='{{.RootPath}}/resources/{{.WithCacheBust "menu.svg"}}'
                                     class="header-button-image" />
                             </button>
                             <div id="menu" popover>
@@ -60,34 +60,34 @@
                                     <button id="name-change-button" class="dialog-button menu-item header-button"
                                         alt="{{.Translation.Get "change-your-name"}}"
                                         title="{{.Translation.Get "change-your-name"}}">
-                                        <img src="{{.RootPath}}/resources/user.svg?cache_bust={{.CacheBust}}"
+                                        <img src='{{.RootPath}}/resources/{{.WithCacheBust "user.svg"}}'
                                             class="header-button-image" />
                                         {{.Translation.Get "change-your-name"}}
                                     </button>
                                     <button id="toggle-fullscreen-button" class="dialog-button menu-item header-button"
                                         alt="{{.Translation.Get "toggle-fullscreen"}}"
                                         title="{{.Translation.Get "toggle-fullscreen"}}">
-                                        <img src="{{.RootPath}}/resources/fullscreen.svg?cache_bust={{.CacheBust}}"
+                                        <img src='{{.RootPath}}/resources/{{.WithCacheBust "fullscreen.svg"}}'
                                             class="header-button-image" />
                                         {{.Translation.Get "toggle-fullscreen"}}
                                     </button>
                                     <button id="toggle-spectate-button" class="dialog-button menu-item header-button"
                                         alt="{{.Translation.Get "toggle-spectate"}}"
                                         title="{{.Translation.Get "toggle-spectate"}}">
-                                        <img src="{{.RootPath}}/resources/spectate.svg?cache_bust={{.CacheBust}}"
+                                        <img src='{{.RootPath}}/resources/{{.WithCacheBust "spectate.svg"}}'
                                             class="header-button-image" />
                                         {{.Translation.Get "toggle-spectate"}}
                                     </button>
                                     <button id="help-button" class="dialog-button menu-item header-button"
                                         alt="{{.Translation.Get "show-help"}}" title="{{.Translation.Get "show-help"}}">
-                                        <img src="{{.RootPath}}/resources/help.svg?cache_bust={{.CacheBust}}"
+                                        <img src='{{.RootPath}}/resources/{{.WithCacheBust "help.svg"}}'
                                             class="header-button-image" />
                                         {{.Translation.Get "show-help"}}
                                     </button>
                                     <button id="kick-button" class="dialog-button menu-item header-button"
                                         alt="{{.Translation.Get "votekick-a-player"}}"
                                         title="{{.Translation.Get "votekick-a-player"}}">
-                                        <img src="{{.RootPath}}/resources/kick.png?cache_bust={{.CacheBust}}"
+                                        <img src='{{.RootPath}}/resources/{{.WithCacheBust "kick.png"}}'
                                             class="header-button-image" />
                                         {{.Translation.Get "votekick-a-player"}}
                                     </button>
@@ -95,7 +95,7 @@
                                         class="dialog-button menu-item header-button"
                                         alt="{{.Translation.Get "change-lobby-settings-tooltip"}}"
                                         title="{{.Translation.Get "change-lobby-settings-tooltip"}}">
-                                        <img src="{{.RootPath}}/resources/settings.svg?cache_bust={{.CacheBust}}"
+                                        <img src='{{.RootPath}}/resources/{{.WithCacheBust "settings.svg"}}'
                                             class="header-button-image" />
                                         {{.Translation.Get "change-lobby-settings-tooltip"}}
                                     </button>
@@ -107,8 +107,7 @@
                 </div>
 
                 <div id="time-left">
-                    <img src=" {{.RootPath}}/resources/clock.svg?cache_bust={{.CacheBust}}"
-                        class="header-button-image" />
+                    <img src='{{.RootPath}}/resources/{{.WithCacheBust "clock.svg"}}' class="header-button-image" />
                     <div id="time-left-value">∞</div>
                 </div>
             </div>
@@ -301,7 +300,7 @@
                             name="tool-type" checked>
                         <div id="tool-type-pencil-wrapper" class="line-width-button-content">
                             <img title="{{.Translation.Get "use-pencil"}}" alt="{{.Translation.Get "use-pencil"}}"
-                                src="{{.RootPath}}/resources/pencil.svg?cache_bust={{.CacheBust}}"
+                                src='{{.RootPath}}/resources/{{.WithCacheBust "pencil.svg"}}'
                                 style="transform: scaleX(-1)" />
                         </div>
                     </label>
@@ -311,7 +310,7 @@
                         <div id="tool-type-fill-wrapper" class="line-width-button-content">
                             <img alt="{{.Translation.Get "use-fill-bucket"}}"
                                 title="{{.Translation.Get "use-fill-bucket"}}"
-                                src="{{.RootPath}}/resources/fill.svg?cache_bust={{.CacheBust}}" />
+                                src='{{.RootPath}}/resources/{{.WithCacheBust "fill.svg"}}' />
                         </div>
                     </label>
                     <label for="tool-type-rubber">
@@ -319,7 +318,7 @@
                             name="tool-type">
                         <div id="tool-type-rubber-wrapper" class="line-width-button-content">
                             <img alt="{{.Translation.Get "use-eraser"}}" title="{{.Translation.Get "use-eraser"}}"
-                                src="{{.RootPath}}/resources/rubber.svg?cache_bust={{.CacheBust}}" />
+                                src='{{.RootPath}}/resources/{{.WithCacheBust "rubber.svg"}}' />
                         </div>
                     </label>
                 </div>
@@ -365,13 +364,13 @@
                 <button id="clear-canvas-button" class="canvas-button toolbox-group"
                     alt="{{.Translation.Get "clear-canvas"}}" title="{{.Translation.Get "clear-canvas"}}">
                     <img alt="{{.Translation.Get "clear-canvas"}}" title="{{.Translation.Get "clear-canvas"}}"
-                        src="{{.RootPath}}/resources/trash.svg?cache_bust={{.CacheBust}}" />
+                        src='{{.RootPath}}/resources/{{.WithCacheBust "trash.svg"}}' />
                 </button>
                 <!--We won't make this button easier to click, as there's no going back. -->
                 <button id="undo-button" class="canvas-button toolbox-group" alt="{{.Translation.Get "undo"}}"
                     title="{{.Translation.Get "undo"}}">
                     <img alt="{{.Translation.Get "undo"}}" title="{{.Translation.Get "undo"}}"
-                        src="{{.RootPath}}/resources/undo.svg?cache_bust={{.CacheBust}}" />
+                        src='{{.RootPath}}/resources/{{.WithCacheBust "undo.svg"}}' />
                 </button>
             </div>
 
@@ -383,8 +382,8 @@
         </div>
     </div>
 
-    <script type="text/javascript" src="{{.RootPath}}/resources/draw.js?cache_bust={{.CacheBust}}"></script>
-    <script type="text/javascript" src="{{.RootPath}}/lobbyJs?cache_bust={{.CacheBust}}"></script>
+    <script type="text/javascript" src='{{.RootPath}}/resources/{{.WithCacheBust "draw.js"}}'></script>
+    <script type="text/javascript" src='{{.RootPath}}/{{.WithCacheBust "lobby.js"}}'></script>
 </body>
 
 </html>

@@ -2,12 +2,15 @@ package frontend
 
 import (
 	"embed"
+	"encoding/hex"
 	"fmt"
+	"hash"
 	"html/template"
 	"net/http"
 	"os"
 	"path"
 
+	"github.com/gofrs/uuid/v5"
 	"github.com/scribble-rs/scribble.rs/internal/translations"
 )
 
@@ -31,6 +34,9 @@ func init() {
 // BasePageConfig is data that all pages require to function correctly, no matter
 // whether error page or lobby page.
 type BasePageConfig struct {
+	checksums map[string]string
+	hash      hash.Hash
+
 	// Version is the tagged source code version of this build. Can be empty for dev
 	// builds. Untagged commits will be of format `tag-N-gSHA`.
 	Version string `json:"version"`
@@ -45,10 +51,37 @@ type BasePageConfig struct {
 	// domain. So it could be https://painting.com. This is required for some
 	// non critical functionality, such as metadata tags.
 	RootURL string `json:"rootUrl"`
-	// CacheBust is a string that is appended to all resources to prevent
-	// browsers from using cached data of a previous version, but still have
-	// long lived max age values.
-	CacheBust string `json:"cacheBust"`
+}
+
+var fallbackChecksum = uuid.Must(uuid.NewV4()).String()
+
+func (baseConfig *BasePageConfig) Hash(key string, bytes []byte) error {
+	_, alreadyExists := baseConfig.checksums[key]
+	if alreadyExists {
+		return fmt.Errorf("duplicate hash key '%s'", key)
+	}
+	if _, err := baseConfig.hash.Write(bytes); err != nil {
+		return fmt.Errorf("error hashing '%s': %w", key, err)
+	}
+	baseConfig.checksums[key] = hex.EncodeToString(baseConfig.hash.Sum(nil))
+	baseConfig.hash.Reset()
+	return nil
+}
+
+// CacheBust is a string that is appended to all resources to prevent
+// browsers from using cached data of a previous version, but still have
+// long lived max age values.
+func (baseConfig *BasePageConfig) withCacheBust(file string) string {
+	checksum, found := baseConfig.checksums[file]
+	if !found {
+		// No need to crash over
+		return fmt.Sprintf("%s?cache_bust=%s", file, fallbackChecksum)
+	}
+	return fmt.Sprintf("%s?cache_bust=%s", file, checksum)
+}
+
+func (baseConfig *BasePageConfig) WithCacheBust(file string) template.HTMLAttr {
+	return template.HTMLAttr(baseConfig.withCacheBust(file))
 }
 
 func (handler *SSRHandler) cspMiddleware(handleFunc http.HandlerFunc) http.HandlerFunc {
@@ -108,8 +141,8 @@ func (handler *SSRHandler) SetupRoutes(register func(string, string, http.Handle
 			}),
 		).ServeHTTP,
 	)
-	register("GET", path.Join(handler.cfg.RootPath, "lobbyJs"), handler.lobbyJs)
-	register("GET", path.Join(handler.cfg.RootPath, "indexJs"), handler.indexJs)
+	register("GET", path.Join(handler.cfg.RootPath, "lobby.js"), handler.lobbyJs)
+	register("GET", path.Join(handler.cfg.RootPath, "index.js"), handler.indexJs)
 	registerWithCsp("GET", path.Join(handler.cfg.RootPath, "ssrEnterLobby", "{lobby_id}"), handler.ssrEnterLobby)
 	registerWithCsp("POST", path.Join(handler.cfg.RootPath, "ssrCreateLobby"), handler.ssrCreateLobby)
 }

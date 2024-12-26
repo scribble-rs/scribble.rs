@@ -2,8 +2,8 @@ package frontend
 
 import (
 	//nolint:gosec //We just use this for cache busting, so it's secure enough
+
 	"crypto/md5"
-	"encoding/hex"
 	"fmt"
 	"log"
 	"net/http"
@@ -45,9 +45,11 @@ type SSRHandler struct {
 
 func NewHandler(cfg *config.Config) (*SSRHandler, error) {
 	basePageConfig := &BasePageConfig{
-		Version: version.Version,
-		Commit:  version.Commit,
-		RootURL: cfg.RootURL,
+		checksums: make(map[string]string),
+		hash:      md5.New(),
+		Version:   version.Version,
+		Commit:    version.Commit,
+		RootURL:   cfg.RootURL,
 	}
 	if cfg.RootPath != "" {
 		basePageConfig.RootPath = "/" + cfg.RootPath
@@ -75,19 +77,22 @@ func NewHandler(cfg *config.Config) (*SSRHandler, error) {
 	}
 
 	//nolint:gosec //We just use this for cache busting, so it's secure enough
-	hash := md5.New()
 	for _, entry := range entries {
 		bytes, err := frontendResourcesFS.ReadFile("resources/" + entry.Name())
 		if err != nil {
 			return nil, fmt.Errorf("error reading resource %s: %w", entry.Name(), err)
 		}
 
-		if _, err := hash.Write(bytes); err != nil {
+		if err := basePageConfig.Hash(entry.Name(), bytes); err != nil {
 			return nil, fmt.Errorf("error hashing resource %s: %w", entry.Name(), err)
 		}
 	}
-
-	basePageConfig.CacheBust = hex.EncodeToString(hash.Sum(nil))
+	if err := basePageConfig.Hash("index.js", []byte(indexJsRaw)); err != nil {
+		return nil, fmt.Errorf("error hashing: %w", err)
+	}
+	if err := basePageConfig.Hash("lobby.js", []byte(lobbyJsRaw)); err != nil {
+		return nil, fmt.Errorf("error hashing: %w", err)
+	}
 
 	handler := &SSRHandler{
 		cfg:                cfg,
@@ -106,7 +111,9 @@ func (handler *SSRHandler) indexJs(writer http.ResponseWriter, request *http.Req
 		Locale:         locale,
 	}
 
-	writer.Header().Add("Content-Type", "text/javascript")
+	writer.Header().Set("Content-Type", "text/javascript")
+	// Duration of 1 year, since we use cachebusting anyway.
+	writer.Header().Set("Cache-Control", "public, max-age=31536000")
 	writer.WriteHeader(http.StatusOK)
 	if err := handler.indexJsRawTemplate.ExecuteTemplate(writer, "index-js", pageData); err != nil {
 		log.Printf("error templating JS: %s\n", err)

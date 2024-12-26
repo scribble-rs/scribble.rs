@@ -6,8 +6,8 @@
     <title>Scribble.rs - Error</title>
     <meta charset="UTF-8" />
     {{template "non-static-css-decl" .}}
-    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/root.css?cache_bust={{.CacheBust}}" />
-    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/error.css?cache_bust={{.CacheBust}}" />
+    <link rel="stylesheet" type="text/css" href='{{.RootPath}}/resources/{{.WithCacheBust "root.css"}}' />
+    <link rel="stylesheet" type="text/css" href='{{.RootPath}}/resources/{{.WithCacheBust "error.css"}}' />
     {{template "favicon-decl" .}}
 </head>
 

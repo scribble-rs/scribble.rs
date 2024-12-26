@@ -18,7 +18,7 @@ func Test_templateLobbyPage(t *testing.T) {
 	err := pageTemplates.ExecuteTemplate(&buffer,
 		"lobby-page", &lobbyPageData{
 			BasePageConfig: &BasePageConfig{
-				CacheBust: "lol",
+				checksums: make(map[string]string),
 			},
 			LobbyData: &api.LobbyData{
 				SettingBounds: config.Default.LobbySettingBounds,

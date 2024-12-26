@@ -386,9 +386,9 @@ document.getElementById("toggle-sound-button").addEventListener("click", toggleS
 
 function updateSoundIcon() {
     if (sound) {
-        soundToggleLabel.src = "{{.RootPath}}/resources/sound.svg?cache_bust={{.CacheBust}}";
+        soundToggleLabel.src = `{{.RootPath}}/resources/{{.WithCacheBust "sound.svg"}}`;
     } else {
-        soundToggleLabel.src = "{{.RootPath}}/resources/no-sound.svg?cache_bust={{.CacheBust}}";
+        soundToggleLabel.src = `{{.RootPath}}/resources/{{.WithCacheBust "no-sound.svg"}}`;
     }
 }
 
@@ -401,9 +401,9 @@ document.getElementById("toggle-pen-pressure-button").addEventListener("click", 
 
 function updateTogglePenIcon() {
     if (penPressure) {
-        penToggleLabel.src = "{{.RootPath}}/resources/pen.svg?cache_bust={{.CacheBust}}";
+        penToggleLabel.src = `{{.RootPath}}/resources/{{.WithCacheBust "pen.svg"}}`;
     } else {
-        penToggleLabel.src = "{{.RootPath}}/resources/no-pen.svg?cache_bust={{.CacheBust}}";
+        penToggleLabel.src = `{{.RootPath}}/resources/{{.WithCacheBust "no-pen.svg"}}`;
     }
 }
 
@@ -862,7 +862,7 @@ function registerMessageHandler(targetSocket) {
                 waitChooseDrawerSpan.innerText = parsed.data.playerName;
             }
         } else if (parsed.type === "correct-guess") {
-            playWav('{{.RootPath}}/resources/plop.wav?cache_bust={{.CacheBust}}');
+            playWav('{{.RootPath}}/resources/{{.WithCacheBust "plop.wav"}}');
 
             if (parsed.data === ownID) {
                 appendMessage("correct-guess-message", null, `{{.Translation.Get "correct-guess"}}`);
@@ -928,7 +928,7 @@ function registerMessageHandler(targetSocket) {
 
             //If a player doesn't choose, the dialog will still be up.
             wordDialog.style.visibility = "hidden";
-            playWav('{{.RootPath}}/resources/end-turn.wav?cache_bust={{.CacheBust}}');
+            playWav('{{.RootPath}}/resources/{{.WithCacheBust "end-turn.wav"}}');
 
             clear(context);
 
@@ -949,7 +949,7 @@ function registerMessageHandler(targetSocket) {
 
             setAllowDrawing(false);
         } else if (parsed.type === "your-turn") {
-            playWav('{{.RootPath}}/resources/your-turn.wav?cache_bust={{.CacheBust}}');
+            playWav('{{.RootPath}}/resources/{{.WithCacheBust "your-turn.wav"}}');
             //This dialog could potentially stay visible from last
             //turn, in case nobody has chosen a word.
             waitChooseDialog.style.visibility = "hidden";
@@ -1297,11 +1297,11 @@ function applyPlayers(players) {
             if (player.state === "standby") {
                 playerDiv.classList.add("player-done");
             } else if (player.state === "drawing") {
-                const playerStateImage = createPlayerStateImageNode("{{.RootPath}}/resources/pencil.svg?cache_bust={{.CacheBust}}");
+                const playerStateImage = createPlayerStateImageNode(`{{.RootPath}}/resources/{{.WithCacheBust "pencil.svg"}}`);
                 playerStateImage.style.transform = "scaleX(-1)";
                 scoreAndStatusDiv.appendChild(playerStateImage);
             } else if (player.state === "standby") {
-                const playerStateImage = createPlayerStateImageNode("{{.RootPath}}/resources/checkmark.svg?cache_bust={{.CacheBust}}");
+                const playerStateImage = createPlayerStateImageNode(`{{.RootPath}}/resources/{{.WithCacheBust "checkmark.svg"}}`);
                 scoreAndStatusDiv.appendChild(playerStateImage);
             }
         } else {

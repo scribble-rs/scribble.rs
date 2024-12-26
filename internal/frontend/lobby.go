@@ -42,7 +42,9 @@ func (handler *SSRHandler) lobbyJs(writer http.ResponseWriter, request *http.Req
 		Locale:         locale,
 	}
 
-	writer.Header().Add("Content-Type", "text/javascript")
+	writer.Header().Set("Content-Type", "text/javascript")
+	// Duration of 1 year, since we use cachebusting anyway.
+	writer.Header().Set("Cache-Control", "public, max-age=31536000")
 	writer.WriteHeader(http.StatusOK)
 	if err := handler.lobbyJsRawTemplate.ExecuteTemplate(writer, "lobby-js", pageData); err != nil {
 		log.Printf("error templating JS: %s\n", err)

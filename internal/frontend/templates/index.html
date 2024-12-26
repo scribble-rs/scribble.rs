@@ -22,18 +22,18 @@
     <meta name="twitter:card" content="summary_large_image">
     {{end}}
     {{template "non-static-css-decl" .}}
-    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/root.css?cache_bust={{.CacheBust}}" />
-    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/index.css?cache_bust={{.CacheBust}}" />
+    <link rel="stylesheet" type="text/css" href='{{.RootPath}}/resources/{{.WithCacheBust "root.css"}}' />
+    <link rel="stylesheet" type="text/css" href='{{.RootPath}}/resources/{{.WithCacheBust "index.css"}}' />
     {{template "favicon-decl" .}}
-    <link rel="prefetch" href="{{.RootPath}}/resources/user.svg?cache_bust={{.CacheBust}}" />
-    <link rel="prefetch" href="{{.RootPath}}/resources/round.svg?cache_bust={{.CacheBust}}" />
-    <link rel="prefetch" href="{{.RootPath}}/resources/clock.svg?cache_bust={{.CacheBust}}" />
+    <link rel="prefetch" href='{{.RootPath}}/resources/{{.WithCacheBust "user.svg"}}' />
+    <link rel="prefetch" href='{{.RootPath}}/resources/{{.WithCacheBust "round.svg"}}' />
+    <link rel="prefetch" href='{{.RootPath}}/resources/{{.WithCacheBust "clock.svg"}}' />
 </head>
 
 <body>
     <div id="app">
         <div class="home">
-            <img id="logo" src="{{.RootPath}}/resources/logo.svg?cache_bust={{.CacheBust}}" alt="Scribble.rs logo">
+            <img id="logo" src='{{.RootPath}}/resources/{{.WithCacheBust "logo.svg"}}' alt="Scribble.rs logo">
             <div id="home-choices">
                 <div class="home-choice">
                     <div class="home-choice-inner">
@@ -166,7 +166,7 @@
             {{template "footer" .}}
         </footer>
 
-        <script type="text/javascript" src="{{.RootPath}}/indexJs?cache_bust={{.CacheBust}}"></script>
+        <script type="text/javascript" src='{{.RootPath}}/{{.WithCacheBust "index.js"}}'></script>
 </body>
 
 </html>

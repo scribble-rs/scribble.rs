@@ -12,15 +12,15 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="Scribble.rs - Join Lobby">
     <meta property="og:description" content="{{$description}}">
-    <meta property="og:image" content="{{.RootPath}}/resources/favicon_96.png?cache_bust={{.CacheBust}}">
+    <meta property="og:image" content='{{.RootPath}}/resources/{{.WithCacheBust "favicon_96.png"}}'>
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:title" content="Scribble.rs - Join Lobby">
     <meta property="twitter:description" content="{{$description}}">
-    <meta property="twitter:image" content="{{.RootPath}}/resources/favicon_96.png?cache_bust={{.CacheBust}}">
+    <meta property="twitter:image" content='{{.RootPath}}/resources/{{.WithCacheBust "favicon_96.png"}}'>
     {{template "non-static-css-decl" .}}
-    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/root.css?cache_bust={{.CacheBust}}" />
-    <link rel="stylesheet" type="text/css" href="{{.RootPath}}/resources/error.css?cache_bust={{.CacheBust}}" />
-    <link rel="icon" type="image/png" href="{{.RootPath}}/resources/favicon_96.png?cache_bust={{.CacheBust}}" />
+    <link rel="stylesheet" type="text/css" href='{{.RootPath}}/resources/{{.WithCacheBust "root.css"}}' />
+    <link rel="stylesheet" type="text/css" href='{{.RootPath}}/resources/{{.WithCacheBust "error.css"}}' />
+    <link rel="icon" type="image/png" href='{{.RootPath}}/resources/{{.WithCacheBust "favicon_96.png"}}' />
 </head>
 
 <body>
