@@ -87,6 +87,7 @@ func (handler *SSRHandler) ssrEnterLobbyNoChecks(
 	translation, locale := determineTranslation(request)
 	requestAddress := api.GetIPAddressFromRequest(request)
 	api.SetDiscordCookies(writer, request)
+	writer.Header().Set("Cache-Control", "no-cache")
 
 	var pageData *lobbyPageData
 	lobby.Synchronized(func() {
