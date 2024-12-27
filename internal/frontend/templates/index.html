@@ -12,6 +12,8 @@
             skribbl.io, scribble, scribblers, scribble.rs, pictionary,
             montagsmaler, sketchful, draw and guess, drawmything, free, oss">
     <link rel="canonical" href="{{.CanonicalURL}}" />
+    {{if not .AllowIndexing}}
+    <meta name="robots" content="noindex, nofollow">{{end}}
     {{if ne "" .RootURL}}
     <meta property="og:image" content="{{.RootURL}}{{.RootPath}}/resources/logo.png">
     <meta property="og:image:type" content="image/png">

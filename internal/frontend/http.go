@@ -54,6 +54,9 @@ type BasePageConfig struct {
 	// CanonicalURL specifies the original domain, in case we are accessing the
 	// site via some other domain, such as scribblers.fly.dev
 	CanonicalURL string `json:"canonicalUrl"`
+	// AllowIndexing will control whether the noindex, nofollow meta tag is
+	// added to the home page.
+	AllowIndexing bool `env:"ALLOW_INDEXING"`
 }
 
 var fallbackChecksum = uuid.Must(uuid.NewV4()).String()

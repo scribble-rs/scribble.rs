@@ -45,12 +45,13 @@ type SSRHandler struct {
 
 func NewHandler(cfg *config.Config) (*SSRHandler, error) {
 	basePageConfig := &BasePageConfig{
-		checksums:    make(map[string]string),
-		hash:         md5.New(),
-		Version:      version.Version,
-		Commit:       version.Commit,
-		RootURL:      cfg.RootURL,
-		CanonicalURL: cfg.CanonicalURL,
+		checksums:     make(map[string]string),
+		hash:          md5.New(),
+		Version:       version.Version,
+		Commit:        version.Commit,
+		RootURL:       cfg.RootURL,
+		CanonicalURL:  cfg.CanonicalURL,
+		AllowIndexing: cfg.AllowIndexing,
 	}
 	if cfg.RootPath != "" {
 		basePageConfig.RootPath = "/" + cfg.RootPath

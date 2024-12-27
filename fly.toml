@@ -16,6 +16,7 @@ strategy = "immediate"
 
 [env]
 ROOT_URL = "https://scribblers.bios-marcel.link"
+ALLOW_INDEXING = true
 SERVE_DIRECTORIES = ":/public"
 LOBBY_SETTING_BOUNDS_MAX_MAX_PLAYERS = 100
 

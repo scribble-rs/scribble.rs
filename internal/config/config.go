@@ -57,6 +57,9 @@ type Config struct {
 	// CanonicalURL specifies the original domain, in case we are accessing the
 	// site via some other domain, such as scribblers.fly.dev
 	CanonicalURL string `env:"CANONICAL_URL"`
+	// AllowIndexing will control whether the noindex, nofollow meta tag is
+	// added to the home page.
+	AllowIndexing bool `env:"ALLOW_INDEXING"`
 	// ServeDirectories is a map of `path` to `directory`. All directories are
 	// served under the given path.
 	ServeDirectories map[string]string `env:"SERVE_DIRECTORIES"`
