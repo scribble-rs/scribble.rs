@@ -24,6 +24,7 @@ type lobbyPageData struct {
 type lobbyJsData struct {
 	*BasePageConfig
 	*api.GameConstants
+	DiscordActivity bool
 
 	Translation translations.Translation
 	Locale      string
@@ -35,18 +36,21 @@ type robotPageData struct {
 }
 
 func (handler *SSRHandler) lobbyJs(writer http.ResponseWriter, request *http.Request) {
+	discordInstanceId := api.GetDiscordInstanceId(request)
 	translation, locale := determineTranslation(request)
 	pageData := &lobbyJsData{
-		BasePageConfig: handler.basePageConfig,
-		GameConstants:  api.GameConstantsData,
-		Translation:    translation,
-		Locale:         locale,
+		BasePageConfig:  handler.basePageConfig,
+		GameConstants:   api.GameConstantsData,
+		Translation:     translation,
+		DiscordActivity: discordInstanceId != "",
+		Locale:          locale,
 	}
 
 	writer.Header().Set("Content-Type", "text/javascript")
 	// Duration of 1 year, since we use cachebusting anyway.
 	writer.Header().Set("Cache-Control", "public, max-age=31536000")
 	writer.WriteHeader(http.StatusOK)
+
 	if err := handler.lobbyJsRawTemplate.ExecuteTemplate(writer, "lobby-js", pageData); err != nil {
 		log.Printf("error templating JS: %s\n", err)
 	}
@@ -86,6 +90,7 @@ func (handler *SSRHandler) ssrEnterLobbyNoChecks(
 ) {
 	translation, locale := determineTranslation(request)
 	requestAddress := api.GetIPAddressFromRequest(request)
+	discordInstanceId := api.GetDiscordInstanceId(request)
 	api.SetDiscordCookies(writer, request)
 	writer.Header().Set("Cache-Control", "no-cache")
 
@@ -120,7 +125,7 @@ func (handler *SSRHandler) ssrEnterLobbyNoChecks(
 			BasePageConfig:  handler.basePageConfig,
 			LobbyData:       api.CreateLobbyData(handler.cfg, lobby),
 			Translation:     translation,
-			DiscordActivity: api.GetDiscordInstanceId(request) != "",
+			DiscordActivity: discordInstanceId != "",
 			Locale:          locale,
 		}
 	})
