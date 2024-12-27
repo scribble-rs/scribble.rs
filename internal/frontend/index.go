@@ -45,14 +45,18 @@ type SSRHandler struct {
 
 func NewHandler(cfg *config.Config) (*SSRHandler, error) {
 	basePageConfig := &BasePageConfig{
-		checksums: make(map[string]string),
-		hash:      md5.New(),
-		Version:   version.Version,
-		Commit:    version.Commit,
-		RootURL:   cfg.RootURL,
+		checksums:    make(map[string]string),
+		hash:         md5.New(),
+		Version:      version.Version,
+		Commit:       version.Commit,
+		RootURL:      cfg.RootURL,
+		CanonicalURL: cfg.CanonicalURL,
 	}
 	if cfg.RootPath != "" {
 		basePageConfig.RootPath = "/" + cfg.RootPath
+	}
+	if basePageConfig.CanonicalURL == "" {
+		basePageConfig.CanonicalURL = basePageConfig.RootURL
 	}
 
 	indexJsRawTemplate, err := txtTemplate.

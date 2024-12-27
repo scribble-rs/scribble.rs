@@ -51,6 +51,9 @@ type BasePageConfig struct {
 	// domain. So it could be https://painting.com. This is required for some
 	// non critical functionality, such as metadata tags.
 	RootURL string `json:"rootUrl"`
+	// CanonicalURL specifies the original domain, in case we are accessing the
+	// site via some other domain, such as scribblers.fly.dev
+	CanonicalURL string `json:"canonicalUrl"`
 }
 
 var fallbackChecksum = uuid.Must(uuid.NewV4()).String()

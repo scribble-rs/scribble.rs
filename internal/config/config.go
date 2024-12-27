@@ -54,6 +54,9 @@ type Config struct {
 	// domain. So it could be https://painting.com. This is required for some
 	// non critical functionality, such as metadata tags.
 	RootURL string `env:"ROOT_URL"`
+	// CanonicalURL specifies the original domain, in case we are accessing the
+	// site via some other domain, such as scribblers.fly.dev
+	CanonicalURL string `env:"CANONICAL_URL"`
 	// ServeDirectories is a map of `path` to `directory`. All directories are
 	// served under the given path.
 	ServeDirectories map[string]string `env:"SERVE_DIRECTORIES"`
@@ -148,6 +151,9 @@ func Load() (*Config, error) {
 
 	// Prevent user error and let the code decide when we need slashes.
 	config.RootURL = strings.TrimSuffix(config.RootURL, "/")
+	if config.CanonicalURL == "" {
+		config.CanonicalURL = config.RootURL
+	}
 	config.RootPath = strings.Trim(config.RootPath, "/")
 
 	return &config, nil
