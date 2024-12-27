@@ -749,7 +749,7 @@ let lastMessage = "";
 
 const encoder = new TextEncoder();
 function sendMessage(event) {
-    if (event.code !== 'Enter') {
+    if (event.key !== 'Enter') {
         return;
     }
     if (!messageInput.value) {
@@ -778,7 +778,7 @@ function sendMessage(event) {
 
 messageInput.addEventListener("keypress", sendMessage);
 messageInput.addEventListener("keydown", function(event) {
-    if (event.code === 'ArrowUp' && messageInput.value.length === 0) {
+    if (event.key === 'ArrowUp' && messageInput.value.length === 0) {
         messageInput.value = lastMessage;
         const length = lastMessage.length;
         // Postpone selection change onto next event queue loop iteration, as
