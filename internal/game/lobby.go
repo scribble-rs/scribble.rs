@@ -526,16 +526,6 @@ func calculateVotesNeededToKick(playerToKick *Player, lobby *Lobby) int {
 		return 2
 	}
 
-	if playerToKick == lobby.creator {
-		// We don't want to allow people to kick the creator, as this could
-		// potentially annoy certain creators. For example a streamer playing
-		// a game with viewers could get trolled this way. Just one
-		// hypothetical scenario, I am sure there are more ;)
-
-		// All players excluding the owner themselves.
-		return connectedPlayerCount - 1
-	}
-
 	// If the amount of players equals an even number, such as 6, we will always
 	// need half of that. If the amount is uneven, we'll get a floored result.
 	// therefore we always add one to the amount.
@@ -982,7 +972,6 @@ func CreateLobby(
 
 	player := lobby.JoinPlayer(playerName)
 	lobby.Owner = player
-	lobby.creator = player
 
 	return player, lobby, nil
 }

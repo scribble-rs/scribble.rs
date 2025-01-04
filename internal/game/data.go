@@ -40,10 +40,6 @@ type Lobby struct {
 	// Owner references the Player that currently owns the lobby.
 	// Meaning this player has rights to restart or change certain settings.
 	Owner *Player
-	// creator is the player that opened a lobby. Initially creator and owner
-	// are set to the same player. While the owner can change throughout the
-	// game, the creator can't.
-	creator *Player
 	// ScoreCalculation decides how scores for both guessers and drawers are
 	// determined.
 	ScoreCalculation ScoreCalculation
