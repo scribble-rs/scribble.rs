@@ -354,7 +354,7 @@ func (handler *V1Handler) patchLobby(writer http.ResponseWriter, request *http.R
 	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(handler.cfg, request.Form.Get("clients_per_ip_limit"))
 	publicLobby, publicLobbyInvalid := ParseBoolean("public", request.Form.Get("public"))
 
-	owner := lobby.Owner
+	owner := lobby.GetOwner()
 	if owner == nil || owner.GetUserSession() != userSession {
 		http.Error(writer, "only the lobby owner can edit the lobby", http.StatusForbidden)
 		return

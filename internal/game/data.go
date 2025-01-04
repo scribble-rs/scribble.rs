@@ -37,9 +37,9 @@ type Lobby struct {
 
 	// Whether the game has started, is ongoing or already over.
 	State State
-	// Owner references the Player that currently owns the lobby.
+	// OwnerID references the Player that currently owns the lobby.
 	// Meaning this player has rights to restart or change certain settings.
-	Owner *Player
+	OwnerID uuid.UUID
 	// ScoreCalculation decides how scores for both guessers and drawers are
 	// determined.
 	ScoreCalculation ScoreCalculation
@@ -147,6 +147,10 @@ func (lobby *Lobby) GetPlayer(userSession uuid.UUID) *Player {
 	}
 
 	return nil
+}
+
+func (lobby *Lobby) GetOwner() *Player {
+	return lobby.GetPlayer(lobby.OwnerID)
 }
 
 func (lobby *Lobby) ClearDrawing() {

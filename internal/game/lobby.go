@@ -178,7 +178,7 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 	} else if eventType == EventTypeToggleReadiness {
 		lobby.handleToggleReadinessEvent(player)
 	} else if eventType == EventTypeStart {
-		if lobby.State != Ongoing && player == lobby.Owner {
+		if lobby.State != Ongoing && player.ID == lobby.OwnerID {
 			lobby.startGame()
 		}
 	} else if eventType == EventTypeNameChange {
@@ -429,7 +429,7 @@ func handleKickVoteEvent(lobby *Lobby, player *Player, toKickID uuid.UUID) {
 		}
 	}
 
-	votesRequired := calculateVotesNeededToKick(playerToKick, lobby)
+	votesRequired := calculateVotesNeededToKick(lobby)
 
 	// We send the kick event to all players, since it was a valid vote.
 	lobby.Broadcast(&Event{
@@ -464,11 +464,11 @@ func kickPlayer(lobby *Lobby, playerToKick *Player, playerToKickIndex int) {
 	}
 
 	// If the owner is kicked, we choose the next best person as the owner.
-	if lobby.Owner == playerToKick {
+	if lobby.OwnerID == playerToKick.ID {
 		for _, otherPlayer := range lobby.players {
 			potentialOwner := otherPlayer
 			if potentialOwner.Connected {
-				lobby.Owner = potentialOwner
+				lobby.OwnerID = potentialOwner.ID
 				lobby.Broadcast(&Event{
 					Type: EventTypeOwnerChange,
 					Data: &OwnerChangeEvent{
@@ -517,7 +517,7 @@ func (lobby *Lobby) Drawer() *Player {
 	return nil
 }
 
-func calculateVotesNeededToKick(playerToKick *Player, lobby *Lobby) int {
+func calculateVotesNeededToKick(lobby *Lobby) int {
 	connectedPlayerCount := lobby.GetConnectedPlayerCount()
 
 	// If there are only two players, e.g. none of them should be able to
@@ -971,7 +971,7 @@ func CreateLobby(
 	}
 
 	player := lobby.JoinPlayer(playerName)
-	lobby.Owner = player
+	lobby.OwnerID = player.ID
 
 	return player, lobby, nil
 }
@@ -990,7 +990,7 @@ func generateReadyData(lobby *Lobby, player *Player) *ReadyEvent {
 		PlayerName:   player.Name,
 
 		GameState:          lobby.State,
-		OwnerID:            lobby.Owner.ID,
+		OwnerID:            lobby.OwnerID,
 		Round:              lobby.Round,
 		Rounds:             lobby.Rounds,
 		DrawingTimeSetting: lobby.DrawingTime,
