@@ -17,7 +17,7 @@ import (
 func createLobbyWithDemoPlayers(playercount int) *Lobby {
 	owner := &Player{}
 	lobby := &Lobby{
-		Owner: owner,
+		OwnerID: owner.ID,
 	}
 	for range playercount {
 		lobby.players = append(lobby.players, &Player{
@@ -65,7 +65,7 @@ func Test_CalculateVotesNeededToKick(t *testing.T) {
 
 	for playerCount, expctedRequiredVotes := range expectedResults {
 		lobby := createLobbyWithDemoPlayers(playerCount)
-		result := calculateVotesNeededToKick(nil, lobby)
+		result := calculateVotesNeededToKick(lobby)
 		if result != expctedRequiredVotes {
 			t.Errorf("Error. Necessary vote amount was %d, but should've been %d", result, expctedRequiredVotes)
 		}
@@ -277,7 +277,7 @@ func Test_wordSelectionEvent(t *testing.T) {
 
 	drawer := lobby.JoinPlayer("Drawer")
 	drawer.Connected = true
-	lobby.Owner = drawer
+	lobby.OwnerID = drawer.ID
 
 	if err := lobby.HandleEvent(EventTypeStart, nil, drawer); err != nil {
 		t.Errorf("Couldn't start lobby: %s", err)
@@ -343,7 +343,7 @@ func Test_kickDrawer(t *testing.T) {
 
 	marcel := lobby.JoinPlayer("marcel")
 	marcel.Connected = true
-	lobby.Owner = marcel
+	lobby.OwnerID = marcel.ID
 
 	kevin := lobby.JoinPlayer("kevin")
 	kevin.Connected = true
