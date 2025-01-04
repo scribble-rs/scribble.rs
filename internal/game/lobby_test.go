@@ -17,8 +17,7 @@ import (
 func createLobbyWithDemoPlayers(playercount int) *Lobby {
 	owner := &Player{}
 	lobby := &Lobby{
-		Owner:   owner,
-		creator: owner,
+		Owner: owner,
 	}
 	for range playercount {
 		lobby.players = append(lobby.players, &Player{
@@ -279,7 +278,6 @@ func Test_wordSelectionEvent(t *testing.T) {
 	drawer := lobby.JoinPlayer("Drawer")
 	drawer.Connected = true
 	lobby.Owner = drawer
-	lobby.creator = drawer
 
 	if err := lobby.HandleEvent(EventTypeStart, nil, drawer); err != nil {
 		t.Errorf("Couldn't start lobby: %s", err)
@@ -346,7 +344,6 @@ func Test_kickDrawer(t *testing.T) {
 	marcel := lobby.JoinPlayer("marcel")
 	marcel.Connected = true
 	lobby.Owner = marcel
-	lobby.creator = marcel
 
 	kevin := lobby.JoinPlayer("kevin")
 	kevin.Connected = true
