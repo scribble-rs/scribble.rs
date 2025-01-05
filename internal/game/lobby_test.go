@@ -20,7 +20,7 @@ func createLobbyWithDemoPlayers(playercount int) *Lobby {
 		OwnerID: owner.ID,
 	}
 	for range playercount {
-		lobby.players = append(lobby.players, &Player{
+		lobby.Players = append(lobby.Players, &Player{
 			Connected: true,
 		})
 	}
@@ -146,40 +146,40 @@ func Test_recalculateRanks(t *testing.T) {
 	t.Parallel()
 
 	lobby := &Lobby{}
-	lobby.players = append(lobby.players, &Player{
+	lobby.Players = append(lobby.Players, &Player{
 		ID:        uuid.Must(uuid.NewV4()),
 		Score:     1,
 		Connected: true,
 	})
-	lobby.players = append(lobby.players, &Player{
+	lobby.Players = append(lobby.Players, &Player{
 		ID:        uuid.Must(uuid.NewV4()),
 		Score:     1,
 		Connected: true,
 	})
 	recalculateRanks(lobby)
 
-	rankPlayerA := lobby.players[0].Rank
-	rankPlayerB := lobby.players[1].Rank
+	rankPlayerA := lobby.Players[0].Rank
+	rankPlayerB := lobby.Players[1].Rank
 	if rankPlayerA != 1 || rankPlayerB != 1 {
 		t.Errorf("With equal score, ranks should be equal. (A: %d; B: %d)",
 			rankPlayerA, rankPlayerB)
 	}
 
-	lobby.players = append(lobby.players, &Player{
+	lobby.Players = append(lobby.Players, &Player{
 		ID:        uuid.Must(uuid.NewV4()),
 		Score:     0,
 		Connected: true,
 	})
 	recalculateRanks(lobby)
 
-	rankPlayerA = lobby.players[0].Rank
-	rankPlayerB = lobby.players[1].Rank
+	rankPlayerA = lobby.Players[0].Rank
+	rankPlayerB = lobby.Players[1].Rank
 	if rankPlayerA != 1 || rankPlayerB != 1 {
 		t.Errorf("With equal score, ranks should be equal. (A: %d; B: %d)",
 			rankPlayerA, rankPlayerB)
 	}
 
-	rankPlayerC := lobby.players[2].Rank
+	rankPlayerC := lobby.Players[2].Rank
 	if rankPlayerC != 2 {
 		t.Errorf("new player should be rank 2, since the previous two players had the same rank. (C: %d)", rankPlayerC)
 	}
@@ -234,11 +234,13 @@ func Test_wordSelectionEvent(t *testing.T) {
 	t.Parallel()
 
 	lobby := &Lobby{
-		EditableLobbySettings: EditableLobbySettings{
-			DrawingTime: 10,
-			Rounds:      10,
+		LobbySettings: LobbySettings{
+			EditableLobbySettings: EditableLobbySettings{
+				DrawingTime: 10,
+				Rounds:      10,
+			},
 		},
-		words: []string{"abc", "def", "ghi"},
+		Words: []string{"abc", "def", "ghi"},
 	}
 	wordHintEvents := make(map[uuid.UUID][]*WordHint)
 	var wordChoice []string
@@ -331,12 +333,14 @@ func Test_kickDrawer(t *testing.T) {
 	t.Parallel()
 
 	lobby := &Lobby{
-		EditableLobbySettings: EditableLobbySettings{
-			DrawingTime: 10,
-			Rounds:      10,
+		LobbySettings: LobbySettings{
+			EditableLobbySettings: EditableLobbySettings{
+				DrawingTime: 10,
+				Rounds:      10,
+			},
 		},
 		ScoreCalculation: ChillScoring,
-		words:            []string{"a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a"},
+		Words:            []string{"a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a"},
 	}
 	lobby.WriteObject = noOpWriteObject
 	lobby.WritePreparedMessage = noOpWritePreparedMessage
@@ -394,7 +398,7 @@ func Test_lobby_calculateDrawerScore(t *testing.T) {
 		t.Parallel()
 		drawer := &Player{State: Drawing}
 		lobby := Lobby{
-			players: []*Player{
+			Players: []*Player{
 				drawer,
 				{
 					Connected: false,
@@ -414,7 +418,7 @@ func Test_lobby_calculateDrawerScore(t *testing.T) {
 		t.Parallel()
 		drawer := &Player{State: Drawing}
 		lobby := Lobby{
-			players: []*Player{
+			Players: []*Player{
 				drawer,
 				{
 					Connected: false,
@@ -434,7 +438,7 @@ func Test_lobby_calculateDrawerScore(t *testing.T) {
 		t.Parallel()
 		drawer := &Player{State: Drawing}
 		lobby := Lobby{
-			players: []*Player{
+			Players: []*Player{
 				drawer,
 				{
 					Connected: true,
@@ -454,7 +458,7 @@ func Test_lobby_calculateDrawerScore(t *testing.T) {
 		t.Parallel()
 		drawer := &Player{State: Drawing}
 		lobby := Lobby{
-			players: []*Player{
+			Players: []*Player{
 				drawer,
 				{
 					Connected: true,
@@ -474,7 +478,7 @@ func Test_lobby_calculateDrawerScore(t *testing.T) {
 		t.Parallel()
 		drawer := &Player{State: Drawing}
 		lobby := Lobby{
-			players: []*Player{
+			Players: []*Player{
 				drawer,
 				{
 					Connected: true,
@@ -502,7 +506,7 @@ func Test_lobby_calculateDrawerScore(t *testing.T) {
 		t.Parallel()
 		drawer := &Player{State: Drawing}
 		lobby := Lobby{
-			players: []*Player{
+			Players: []*Player{
 				drawer,
 				{
 					Connected: true,

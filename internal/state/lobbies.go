@@ -65,7 +65,24 @@ func AddLobby(lobby *game.Lobby) {
 	globalStateMutex.Lock()
 	defer globalStateMutex.Unlock()
 
+	addLobby(lobby)
+}
+
+func addLobby(lobby *game.Lobby) {
 	lobbies = append(lobbies, lobby)
+}
+
+func ResurrectLobby(lobby *game.Lobby) bool {
+	globalStateMutex.RLock()
+	defer globalStateMutex.RUnlock()
+
+	existingLobby := getLobby(lobby.LobbyID)
+	if existingLobby == nil {
+		addLobby(lobby)
+		return true
+	}
+
+	return false
 }
 
 // GetLobby returns a Lobby that has a matching ID or no Lobby if none could
@@ -74,6 +91,10 @@ func GetLobby(id string) *game.Lobby {
 	globalStateMutex.RLock()
 	defer globalStateMutex.RUnlock()
 
+	return getLobby(id)
+}
+
+func getLobby(id string) *game.Lobby {
 	for _, lobby := range lobbies {
 		if lobby.LobbyID == id {
 			return lobby

@@ -5,6 +5,7 @@
 package api
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"log"
@@ -71,7 +72,7 @@ func (handler *V1Handler) getLobbies(writer http.ResponseWriter, _ *http.Request
 			MaxClientsPerIP: lobby.ClientsPerIPLimit,
 			Wordpack:        lobby.Wordpack,
 			State:           lobby.State,
-			Scoring:         lobby.ScoreCalculation.Identifier(),
+			Scoring:         lobby.ScoreCalculationIdentifier,
 		})
 	}
 
@@ -81,6 +82,28 @@ func (handler *V1Handler) getLobbies(writer http.ResponseWriter, _ *http.Request
 		}
 		return
 	}
+}
+
+func (handler *V1Handler) resurrectLobby(writer http.ResponseWriter, request *http.Request) {
+	var data game.LobbyRestoreData
+	base64Decoder := base64.NewDecoder(base64.StdEncoding, request.Body)
+	if err := easyjson.UnmarshalFromReader(base64Decoder, &data); err != nil {
+		log.Println("Error unmarshalling lobby resurrection data:", err)
+		http.Error(writer, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	lobby := data.Lobby
+	// We add the lobby, while the lobby mutex is aqcuired. This prevents us
+	// from attempting to connect to the lobby, before the internal state has
+	// been restored correctly.
+	lobby.Synchronized(func() {
+		if state.ResurrectLobby(lobby) {
+			lobby.WriteObject = WriteObject
+			lobby.WritePreparedMessage = WritePreparedMessage
+			lobby.ResurrectUnsynchronized(&data)
+		}
+	})
 }
 
 func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Request) {

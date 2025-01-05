@@ -14,12 +14,12 @@ func TestOccupiedPlayerCount(t *testing.T) {
 	}
 
 	// While disconnect, there's no disconnect time, which we count as occupied.
-	lobby.players = append(lobby.players, &Player{})
+	lobby.Players = append(lobby.Players, &Player{})
 	if lobby.GetOccupiedPlayerSlots() != 1 {
 		t.Errorf("Occupied player count expected to be 1, but was %d", lobby.GetOccupiedPlayerSlots())
 	}
 
-	lobby.players = append(lobby.players, &Player{
+	lobby.Players = append(lobby.Players, &Player{
 		Connected: true,
 	})
 	if lobby.GetOccupiedPlayerSlots() != 2 {
@@ -29,7 +29,7 @@ func TestOccupiedPlayerCount(t *testing.T) {
 	disconnectedPlayer := &Player{
 		Connected: false,
 	}
-	lobby.players = append(lobby.players, disconnectedPlayer)
+	lobby.Players = append(lobby.Players, disconnectedPlayer)
 	if lobby.GetOccupiedPlayerSlots() != 3 {
 		t.Errorf("Occupied player count expected to be 3, but was %d", lobby.GetOccupiedPlayerSlots())
 	}
