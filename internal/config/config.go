@@ -72,6 +72,8 @@ type Config struct {
 	Port                 uint16               `env:"PORT"`
 	CORS                 CORS                 `envPrefix:"CORS_"`
 	LobbyCleanup         LobbyCleanup         `envPrefix:"LOBBY_CLEANUP_"`
+
+	DiscordApiKey string `env:"DISCORD_API_KEY"`
 }
 
 var Default = Config{
