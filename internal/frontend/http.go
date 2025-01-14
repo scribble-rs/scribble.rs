@@ -123,16 +123,20 @@ func (handler *SSRHandler) SetupRoutes(register func(string, string, http.Handle
 	}
 
 	indexHandler := handler.cspMiddleware(handler.indexPageHandler)
-	register("GET", handler.cfg.RootPath, func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "" || r.URL.Path == "/" {
-			indexHandler(w, r)
-			return
-		}
+	register("GET", handler.cfg.RootPath,
+		http.StripPrefix(
+			"/"+handler.cfg.RootPath,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				println(r.URL.Path)
+				if r.URL.Path == "" || r.URL.Path == "/" {
+					indexHandler(w, r)
+					return
+				}
 
-		if genericFileHandler != nil {
-			genericFileHandler.ServeHTTP(w, r)
-		}
-	})
+				if genericFileHandler != nil {
+					genericFileHandler.ServeHTTP(w, r)
+				}
+			})).ServeHTTP)
 
 	fileServer := http.FileServer(http.FS(frontendResourcesFS))
 	register(
