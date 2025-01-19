@@ -1,4 +1,3 @@
-//go:generate easyjson -all ${GOFILE}
 package game
 
 import (
@@ -10,10 +9,6 @@ import (
 
 //
 // This file contains all structs and constants that are shared with clients.
-// These files require special treatment, since we use easyjson for marshalling
-// and unmarshalling. If this file changes, run:
-//
-//  go generate ./...
 //
 
 // Eevnts that are just incomming from the client.
@@ -210,16 +205,6 @@ type ReadyEvent struct {
 
 // Player represents a participant in a Lobby.
 type Player struct {
-	// userSession uniquely identifies the player.
-	userSession uuid.UUID
-	ws          *gws.Conn
-	// disconnectTime is used to kick a player in case the lobby doesn't have
-	// space for new players. The player with the oldest disconnect.Time will
-	// get kicked.
-	disconnectTime   *time.Time
-	votedForKick     map[uuid.UUID]bool
-	lastKnownAddress string
-
 	// Name is the players displayed name
 	Name  string      `json:"name"`
 	State PlayerState `json:"state"`
@@ -241,6 +226,22 @@ type Player struct {
 	Connected bool `json:"connected"`
 	// ID uniquely identified the Player.
 	ID uuid.UUID `json:"id"`
+
+	// userSession uniquely identifies the player.
+	userSession uuid.UUID
+	ws          *gws.Conn
+	// disconnectTime is used to kick a player in case the lobby doesn't have
+	// space for new players. The player with the oldest disconnect.Time will
+	// get kicked.
+	disconnectTime   *time.Time
+	votedForKick     map[uuid.UUID]bool
+	lastKnownAddress string
+}
+
+type LobbySettings struct {
+	Wordpack                   string
+	ScoreCalculationIdentifier string `json:"scoreCalculationIdentifier"`
+	EditableLobbySettings
 }
 
 // EditableLobbySettings represents all lobby settings that are editable by

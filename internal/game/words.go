@@ -149,9 +149,9 @@ func popCustomWord(lobby *Lobby) string {
 // popCustomWords is, that the wordlist gets reset and reshuffeled once every
 // item has been popped.
 func popWordpackWord(lobby *Lobby, reloadWords func(lobby *Lobby) ([]string, error)) string {
-	if len(lobby.words) == 0 {
+	if len(lobby.Words) == 0 {
 		var err error
-		lobby.words, err = reloadWords(lobby)
+		lobby.Words, err = reloadWords(lobby)
 		if err != nil {
 			// Since this list should've been successfully read once before, we
 			// can "safely" panic if this happens, assuming that there's a
@@ -159,9 +159,9 @@ func popWordpackWord(lobby *Lobby, reloadWords func(lobby *Lobby) ([]string, err
 			panic(err)
 		}
 	}
-	lastIndex := len(lobby.words) - 1
-	lastWord := lobby.words[lastIndex]
-	lobby.words = lobby.words[:lastIndex]
+	lastIndex := len(lobby.Words) - 1
+	lastWord := lobby.Words[lastIndex]
+	lobby.Words = lobby.Words[:lastIndex]
 	return lastWord
 }
 

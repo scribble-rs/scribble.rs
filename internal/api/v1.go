@@ -1,18 +1,18 @@
-//go:generate easyjson -all ${GOFILE}
-
 // This file contains the API methods for the public API
 
 package api
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gofrs/uuid/v5"
-	"github.com/mailru/easyjson"
 	"github.com/scribble-rs/scribble.rs/internal/config"
 	"github.com/scribble-rs/scribble.rs/internal/game"
 	"github.com/scribble-rs/scribble.rs/internal/state"
@@ -22,7 +22,6 @@ import (
 
 var ErrLobbyNotExistent = errors.New("the requested lobby doesn't exist")
 
-//easyjson:skip
 type V1Handler struct {
 	cfg *config.Config
 }
@@ -33,7 +32,18 @@ func NewHandler(cfg *config.Config) *V1Handler {
 	}
 }
 
-//easyjson:json
+func marshalToHTTPWriter(data any, writer http.ResponseWriter) (bool, error) {
+	bytes, err := json.Marshal(data)
+	if err != nil {
+		return false, err
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	writer.Header().Set("Content-Length", strconv.Itoa(len(bytes)))
+	_, err = writer.Write(bytes)
+	return true, err
+}
+
 type LobbyEntries []*LobbyEntry
 
 // LobbyEntry is an API object for representing a join-able public lobby.
@@ -54,7 +64,6 @@ type LobbyEntry struct {
 func (handler *V1Handler) getLobbies(writer http.ResponseWriter, _ *http.Request) {
 	// REMARK: If paging is ever implemented, we might want to maintain order
 	// when deleting lobbies from state in the state package.
-
 	lobbies := state.GetPublicLobbies()
 	lobbyEntries := make(LobbyEntries, 0, len(lobbies))
 	for _, lobby := range lobbies {
@@ -71,16 +80,38 @@ func (handler *V1Handler) getLobbies(writer http.ResponseWriter, _ *http.Request
 			MaxClientsPerIP: lobby.ClientsPerIPLimit,
 			Wordpack:        lobby.Wordpack,
 			State:           lobby.State,
-			Scoring:         lobby.ScoreCalculation.Identifier(),
+			Scoring:         lobby.ScoreCalculationIdentifier,
 		})
 	}
 
-	if started, _, err := easyjson.MarshalToHTTPResponseWriter(lobbyEntries, writer); err != nil {
+	if started, err := marshalToHTTPWriter(lobbyEntries, writer); err != nil {
 		if !started {
 			http.Error(writer, err.Error(), http.StatusInternalServerError)
 		}
 		return
 	}
+}
+
+func (handler *V1Handler) resurrectLobby(writer http.ResponseWriter, request *http.Request) {
+	var data game.LobbyRestoreData
+	base64Decoder := base64.NewDecoder(base64.StdEncoding, request.Body)
+	if err := json.NewDecoder(base64Decoder).Decode(&data); err != nil {
+		log.Println("Error unmarshalling lobby resurrection data:", err)
+		http.Error(writer, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	lobby := data.Lobby
+	// We add the lobby, while the lobby mutex is aqcuired. This prevents us
+	// from attempting to connect to the lobby, before the internal state has
+	// been restored correctly.
+	lobby.Synchronized(func() {
+		if state.ResurrectLobby(lobby) {
+			lobby.WriteObject = WriteObject
+			lobby.WritePreparedMessage = WritePreparedMessage
+			lobby.ResurrectUnsynchronized(&data)
+		}
+	})
 }
 
 func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Request) {
@@ -180,7 +211,7 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 
 	lobbyData := CreateLobbyData(handler.cfg, lobby)
 
-	if started, _, err := easyjson.MarshalToHTTPResponseWriter(lobbyData, writer); err != nil {
+	if started, err := marshalToHTTPWriter(lobbyData, writer); err != nil {
 		if !started {
 			http.Error(writer, err.Error(), http.StatusInternalServerError)
 		}
@@ -229,7 +260,7 @@ func (handler *V1Handler) postPlayer(writer http.ResponseWriter, request *http.R
 	})
 
 	if lobbyData != nil {
-		if started, _, err := easyjson.MarshalToHTTPResponseWriter(lobbyData, writer); err != nil {
+		if started, err := marshalToHTTPWriter(lobbyData, writer); err != nil {
 			if !started {
 				http.Error(writer, err.Error(), http.StatusInternalServerError)
 			}
@@ -354,7 +385,7 @@ func (handler *V1Handler) patchLobby(writer http.ResponseWriter, request *http.R
 	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(handler.cfg, request.Form.Get("clients_per_ip_limit"))
 	publicLobby, publicLobbyInvalid := ParseBoolean("public", request.Form.Get("public"))
 
-	owner := lobby.Owner
+	owner := lobby.GetOwner()
 	if owner == nil || owner.GetUserSession() != userSession {
 		http.Error(writer, "only the lobby owner can edit the lobby", http.StatusForbidden)
 		return
@@ -415,7 +446,7 @@ func (handler *V1Handler) patchLobby(writer http.ResponseWriter, request *http.R
 }
 
 func (handler *V1Handler) getStats(writer http.ResponseWriter, _ *http.Request) {
-	if started, _, err := easyjson.MarshalToHTTPResponseWriter(state.Stats(), writer); err != nil {
+	if started, err := marshalToHTTPWriter(state.Stats(), writer); err != nil {
 		if !started {
 			http.Error(writer, err.Error(), http.StatusInternalServerError)
 		}

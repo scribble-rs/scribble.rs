@@ -9,7 +9,6 @@ import (
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/lxzan/gws"
-	easyjson "github.com/mailru/easyjson"
 	"github.com/scribble-rs/scribble.rs/internal/sanitize"
 	"github.com/stretchr/testify/require"
 )
@@ -17,11 +16,10 @@ import (
 func createLobbyWithDemoPlayers(playercount int) *Lobby {
 	owner := &Player{}
 	lobby := &Lobby{
-		Owner:   owner,
-		creator: owner,
+		OwnerID: owner.ID,
 	}
 	for range playercount {
-		lobby.players = append(lobby.players, &Player{
+		lobby.Players = append(lobby.Players, &Player{
 			Connected: true,
 		})
 	}
@@ -29,7 +27,7 @@ func createLobbyWithDemoPlayers(playercount int) *Lobby {
 	return lobby
 }
 
-func noOpWriteObject(_ *Player, _ easyjson.Marshaler) error {
+func noOpWriteObject(_ *Player, _ any) error {
 	return nil
 }
 
@@ -66,7 +64,7 @@ func Test_CalculateVotesNeededToKick(t *testing.T) {
 
 	for playerCount, expctedRequiredVotes := range expectedResults {
 		lobby := createLobbyWithDemoPlayers(playerCount)
-		result := calculateVotesNeededToKick(nil, lobby)
+		result := calculateVotesNeededToKick(lobby)
 		if result != expctedRequiredVotes {
 			t.Errorf("Error. Necessary vote amount was %d, but should've been %d", result, expctedRequiredVotes)
 		}
@@ -147,40 +145,40 @@ func Test_recalculateRanks(t *testing.T) {
 	t.Parallel()
 
 	lobby := &Lobby{}
-	lobby.players = append(lobby.players, &Player{
+	lobby.Players = append(lobby.Players, &Player{
 		ID:        uuid.Must(uuid.NewV4()),
 		Score:     1,
 		Connected: true,
 	})
-	lobby.players = append(lobby.players, &Player{
+	lobby.Players = append(lobby.Players, &Player{
 		ID:        uuid.Must(uuid.NewV4()),
 		Score:     1,
 		Connected: true,
 	})
 	recalculateRanks(lobby)
 
-	rankPlayerA := lobby.players[0].Rank
-	rankPlayerB := lobby.players[1].Rank
+	rankPlayerA := lobby.Players[0].Rank
+	rankPlayerB := lobby.Players[1].Rank
 	if rankPlayerA != 1 || rankPlayerB != 1 {
 		t.Errorf("With equal score, ranks should be equal. (A: %d; B: %d)",
 			rankPlayerA, rankPlayerB)
 	}
 
-	lobby.players = append(lobby.players, &Player{
+	lobby.Players = append(lobby.Players, &Player{
 		ID:        uuid.Must(uuid.NewV4()),
 		Score:     0,
 		Connected: true,
 	})
 	recalculateRanks(lobby)
 
-	rankPlayerA = lobby.players[0].Rank
-	rankPlayerB = lobby.players[1].Rank
+	rankPlayerA = lobby.Players[0].Rank
+	rankPlayerB = lobby.Players[1].Rank
 	if rankPlayerA != 1 || rankPlayerB != 1 {
 		t.Errorf("With equal score, ranks should be equal. (A: %d; B: %d)",
 			rankPlayerA, rankPlayerB)
 	}
 
-	rankPlayerC := lobby.players[2].Rank
+	rankPlayerC := lobby.Players[2].Rank
 	if rankPlayerC != 2 {
 		t.Errorf("new player should be rank 2, since the previous two players had the same rank. (C: %d)", rankPlayerC)
 	}
@@ -235,15 +233,17 @@ func Test_wordSelectionEvent(t *testing.T) {
 	t.Parallel()
 
 	lobby := &Lobby{
-		EditableLobbySettings: EditableLobbySettings{
-			DrawingTime: 10,
-			Rounds:      10,
+		LobbySettings: LobbySettings{
+			EditableLobbySettings: EditableLobbySettings{
+				DrawingTime: 10,
+				Rounds:      10,
+			},
 		},
-		words: []string{"abc", "def", "ghi"},
+		Words: []string{"abc", "def", "ghi"},
 	}
 	wordHintEvents := make(map[uuid.UUID][]*WordHint)
 	var wordChoice []string
-	lobby.WriteObject = func(_ *Player, message easyjson.Marshaler) error {
+	lobby.WriteObject = func(_ *Player, message any) error {
 		event, ok := message.(*Event)
 		if ok {
 			if event.Type == EventTypeYourTurn {
@@ -278,8 +278,7 @@ func Test_wordSelectionEvent(t *testing.T) {
 
 	drawer := lobby.JoinPlayer("Drawer")
 	drawer.Connected = true
-	lobby.Owner = drawer
-	lobby.creator = drawer
+	lobby.OwnerID = drawer.ID
 
 	if err := lobby.HandleEvent(EventTypeStart, nil, drawer); err != nil {
 		t.Errorf("Couldn't start lobby: %s", err)
@@ -333,20 +332,21 @@ func Test_kickDrawer(t *testing.T) {
 	t.Parallel()
 
 	lobby := &Lobby{
-		EditableLobbySettings: EditableLobbySettings{
-			DrawingTime: 10,
-			Rounds:      10,
+		LobbySettings: LobbySettings{
+			EditableLobbySettings: EditableLobbySettings{
+				DrawingTime: 10,
+				Rounds:      10,
+			},
 		},
 		ScoreCalculation: ChillScoring,
-		words:            []string{"a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a"},
+		Words:            []string{"a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a"},
 	}
 	lobby.WriteObject = noOpWriteObject
 	lobby.WritePreparedMessage = noOpWritePreparedMessage
 
 	marcel := lobby.JoinPlayer("marcel")
 	marcel.Connected = true
-	lobby.Owner = marcel
-	lobby.creator = marcel
+	lobby.OwnerID = marcel.ID
 
 	kevin := lobby.JoinPlayer("kevin")
 	kevin.Connected = true
@@ -397,7 +397,7 @@ func Test_lobby_calculateDrawerScore(t *testing.T) {
 		t.Parallel()
 		drawer := &Player{State: Drawing}
 		lobby := Lobby{
-			players: []*Player{
+			Players: []*Player{
 				drawer,
 				{
 					Connected: false,
@@ -417,7 +417,7 @@ func Test_lobby_calculateDrawerScore(t *testing.T) {
 		t.Parallel()
 		drawer := &Player{State: Drawing}
 		lobby := Lobby{
-			players: []*Player{
+			Players: []*Player{
 				drawer,
 				{
 					Connected: false,
@@ -437,7 +437,7 @@ func Test_lobby_calculateDrawerScore(t *testing.T) {
 		t.Parallel()
 		drawer := &Player{State: Drawing}
 		lobby := Lobby{
-			players: []*Player{
+			Players: []*Player{
 				drawer,
 				{
 					Connected: true,
@@ -457,7 +457,7 @@ func Test_lobby_calculateDrawerScore(t *testing.T) {
 		t.Parallel()
 		drawer := &Player{State: Drawing}
 		lobby := Lobby{
-			players: []*Player{
+			Players: []*Player{
 				drawer,
 				{
 					Connected: true,
@@ -477,7 +477,7 @@ func Test_lobby_calculateDrawerScore(t *testing.T) {
 		t.Parallel()
 		drawer := &Player{State: Drawing}
 		lobby := Lobby{
-			players: []*Player{
+			Players: []*Player{
 				drawer,
 				{
 					Connected: true,
@@ -505,7 +505,7 @@ func Test_lobby_calculateDrawerScore(t *testing.T) {
 		t.Parallel()
 		drawer := &Player{State: Drawing}
 		lobby := Lobby{
-			players: []*Player{
+			Players: []*Player{
 				drawer,
 				{
 					Connected: true,
