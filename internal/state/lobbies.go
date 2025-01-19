@@ -121,6 +121,9 @@ func ShutdownLobbiesGracefully() {
 
 	// Instead of removing one by one, we nil the array, since that's faster.
 	lobbies = nil
+
+	// Graceperiod to make sure sockets can flush everything.
+	time.Sleep(500 * time.Millisecond)
 }
 
 // GetActiveLobbyCount indicates how many activate lobby there are. This includes

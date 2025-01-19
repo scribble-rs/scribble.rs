@@ -1150,8 +1150,8 @@ func (lobby *Lobby) Shutdown() {
 		lobby.Broadcast(&Event{Type: EventTypeShutdown, Data: state})
 	}
 
-	// We gotta make sure we wait for all sockets to be shut down correctly.
-	// Otherwise the palyers receive the close before the message.
+	// Since broadcast is synchronous, we gotta use the asynchronous queue, to
+	// make sure the message is received before closing.
 	var waitGroup sync.WaitGroup
 	waitGroup.Add(len(lobby.Players))
 	for _, player := range lobby.Players {

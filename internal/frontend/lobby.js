@@ -44,6 +44,7 @@ function connectToWebsocket() {
     };
 
     socket.onopen = () => {
+        closeDialog(shutdownDialogId);
         closeDialog(reconnectDialogId);
 
         hasSocketEverConnected = true;
@@ -84,6 +85,7 @@ function connectToWebsocket() {
     };
 }
 
+const shutdownDialogId = "shutdown-dialog";
 const reconnectDialogId = "reconnect-dialog";
 function showReconnectDialogIfNotShown() {
     const previousReconnectDialog = document.getElementById(reconnectDialogId);
@@ -1017,13 +1019,14 @@ function registerMessageHandler(targetSocket) {
                 + '{{.Translation.Get "custom-words-per-turn-setting"}}: ' + parsed.data.customWordsPerTurn + "%\n"
                 + '{{.Translation.Get "players-per-ip-limit-setting"}}: ' + parsed.data.clientsPerIpLimit);
         } else if (parsed.type === "shutdown") {
+            console.log("Shutdown event received");
             if (parsed.data) {
                 restoreData = parsed.data;
                 // FIXMe Text anpassen!
-                showDialog("shutdown-info", "Server shutting down",
-                    document.createTextNode("Sorry, but the server is about to shut down. Please come back at a later time."));
+                showDialog("shutdown-dialog", "Server shutting down",
+                    document.createTextNode("Sorry, but the server is about to shut down. Attempting to restore lobby on restart ..."));
             } else {
-                showDialog("shutdown-info", "Server shutting down",
+                showDialog("shutdown-dialog", "Server shutting down",
                     document.createTextNode("Sorry, but the server is about to shut down. Please come back at a later time."));
             }
         }
