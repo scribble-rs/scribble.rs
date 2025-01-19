@@ -1,5 +1,3 @@
-//go:generate easyjson ${GOFILE}
-
 package game
 
 import (
@@ -10,7 +8,6 @@ import (
 	discordemojimap "github.com/Bios-Marcel/discordemojimap/v2"
 	"github.com/gofrs/uuid/v5"
 	"github.com/lxzan/gws"
-	easyjson "github.com/mailru/easyjson"
 	"golang.org/x/text/cases"
 )
 
@@ -20,8 +17,6 @@ const slotReservationTime = time.Minute * 1
 
 // Lobby represents a game session. It must not be sent via the API, as it
 // exposes gameplay relevant information.
-//
-//easyjson:json
 type Lobby struct {
 	// ID uniquely identified the Lobby.
 	LobbyID string
@@ -36,8 +31,11 @@ type Lobby struct {
 	CustomWords []string
 	Words       []string
 
-	// Players references all participants of the Lobby.
+	// Players references all participants of the Lobby. Indices are synced
+	// with [Lobby.UserSessions].
 	Players []*Player
+	// Holds all UserSessions. Indices are synced with [Lobby.Players].
+	UserSessions []uuid.UUID
 
 	// Whether the game has started, is ongoing or already over.
 	State State
@@ -96,11 +94,10 @@ type Lobby struct {
 
 	mutex sync.Mutex
 
-	WriteObject          func(*Player, easyjson.Marshaler) error `json:"-"`
-	WritePreparedMessage func(*Player, *gws.Broadcaster) error   `json:"-"`
+	WriteObject          func(*Player, any) error              `json:"-"`
+	WritePreparedMessage func(*Player, *gws.Broadcaster) error `json:"-"`
 }
 
-//easyjson:json
 type LobbyRestoreData struct {
 	ShutdownTime time.Time
 	Lobby        *Lobby
@@ -154,7 +151,7 @@ func (player *Player) SetWebsocket(socket *gws.Conn) {
 
 // GetUserSession returns the players current user session.
 func (player *Player) GetUserSession() uuid.UUID {
-	return player.UserSession
+	return player.userSession
 }
 
 type PlayerState string
@@ -169,12 +166,11 @@ const (
 
 // GetPlayer searches for a player, identifying them by usersession.
 func (lobby *Lobby) GetPlayer(userSession uuid.UUID) *Player {
-	for _, player := range lobby.Players {
-		if player.UserSession == userSession {
-			return player
+	for index, uuid := range lobby.UserSessions {
+		if uuid == userSession {
+			return lobby.Players[index]
 		}
 	}
-
 	return nil
 }
 

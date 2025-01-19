@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/lxzan/gws"
-	"github.com/mailru/easyjson"
 
 	"github.com/scribble-rs/scribble.rs/internal/game"
 	"github.com/scribble-rs/scribble.rs/internal/metrics"
@@ -63,7 +63,6 @@ func (handler *V1Handler) websocketUpgrade(writer http.ResponseWriter, request *
 	lobby.Synchronized(func() {
 		player := lobby.GetPlayer(userSession)
 		if player == nil {
-			log.Println("no sesss")
 			http.Error(writer, "you don't have access to this lobby;usersession unknown", http.StatusUnauthorized)
 			return
 		}
@@ -159,7 +158,7 @@ func handleIncommingEvent(lobby *game.Lobby, player *game.Player, data []byte) {
 	}()
 
 	var event game.EventTypeOnly
-	if err := easyjson.Unmarshal(data, &event); err != nil {
+	if err := json.Unmarshal(data, &event); err != nil {
 		log.Printf("Error unmarshalling message: %s\n", err)
 		err := WriteObject(player, game.Event{
 			Type: game.EventTypeSystemMessage,
@@ -176,13 +175,13 @@ func handleIncommingEvent(lobby *game.Lobby, player *game.Player, data []byte) {
 	}
 }
 
-func WriteObject(player *game.Player, object easyjson.Marshaler) error {
+func WriteObject(player *game.Player, object any) error {
 	socket := player.GetWebsocket()
 	if socket == nil || !player.Connected {
 		return ErrPlayerNotConnected
 	}
 
-	bytes, err := easyjson.Marshal(object)
+	bytes, err := json.Marshal(object)
 	if err != nil {
 		return fmt.Errorf("error marshalling payload: %w", err)
 	}

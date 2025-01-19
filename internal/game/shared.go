@@ -1,4 +1,3 @@
-//go:generate easyjson -all ${GOFILE}
 package game
 
 import (
@@ -10,10 +9,6 @@ import (
 
 //
 // This file contains all structs and constants that are shared with clients.
-// These files require special treatment, since we use easyjson for marshalling
-// and unmarshalling. If this file changes, run:
-//
-//  go generate ./...
 //
 
 // Eevnts that are just incomming from the client.
@@ -208,7 +203,8 @@ type ReadyEvent struct {
 	AllowDrawing       bool        `json:"allowDrawing"`
 }
 
-type PlayerPublic struct {
+// Player represents a participant in a Lobby.
+type Player struct {
 	// Name is the players displayed name
 	Name  string      `json:"name"`
 	State PlayerState `json:"state"`
@@ -230,14 +226,9 @@ type PlayerPublic struct {
 	Connected bool `json:"connected"`
 	// ID uniquely identified the Player.
 	ID uuid.UUID `json:"id"`
-}
 
-// Player represents a participant in a Lobby.
-type Player struct {
-	*PlayerPublic
-
-	// UserSession uniquely identifies the player.
-	UserSession uuid.UUID
+	// userSession uniquely identifies the player.
+	userSession uuid.UUID
 	ws          *gws.Conn
 	// disconnectTime is used to kick a player in case the lobby doesn't have
 	// space for new players. The player with the oldest disconnect.Time will

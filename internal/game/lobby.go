@@ -1,6 +1,7 @@
 package game
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -13,7 +14,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/lxzan/gws"
-	"github.com/mailru/easyjson"
 	"github.com/scribble-rs/scribble.rs/internal/sanitize"
 
 	discordemojimap "github.com/Bios-Marcel/discordemojimap/v2"
@@ -93,7 +93,7 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 		lobby.Broadcast(&Event{Type: EventTypeUpdatePlayers, Data: lobby.Players})
 	} else if eventType == EventTypeMessage {
 		var message StringDataEvent
-		if err := easyjson.Unmarshal(payload, &message); err != nil {
+		if err := json.Unmarshal(payload, &message); err != nil {
 			return fmt.Errorf("invalid data received: '%s'", string(payload))
 		}
 
@@ -101,7 +101,7 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 	} else if eventType == EventTypeLine {
 		if lobby.canDraw(player) {
 			var line LineEvent
-			if err := easyjson.Unmarshal(payload, &line); err != nil {
+			if err := json.Unmarshal(payload, &line); err != nil {
 				return fmt.Errorf("error decoding data: %w", err)
 			}
 
@@ -127,7 +127,7 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 	} else if eventType == EventTypeFill {
 		if lobby.canDraw(player) {
 			var fill FillEvent
-			if err := easyjson.Unmarshal(payload, &fill); err != nil {
+			if err := json.Unmarshal(payload, &fill); err != nil {
 				return fmt.Errorf("error decoding data: %w", err)
 			}
 
@@ -157,7 +157,7 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 		}
 	} else if eventType == EventTypeChooseWord {
 		var wordChoice IntDataEvent
-		if err := easyjson.Unmarshal(payload, &wordChoice); err != nil {
+		if err := json.Unmarshal(payload, &wordChoice); err != nil {
 			return fmt.Errorf("error decoding data: %w", err)
 		}
 		if player.State == Drawing {
@@ -167,7 +167,7 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 		}
 	} else if eventType == EventTypeKickVote {
 		var kickEvent StringDataEvent
-		if err := easyjson.Unmarshal(payload, &kickEvent); err != nil {
+		if err := json.Unmarshal(payload, &kickEvent); err != nil {
 			return fmt.Errorf("invalid data received: '%s'", string(payload))
 		}
 
@@ -185,7 +185,7 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 		}
 	} else if eventType == EventTypeNameChange {
 		var message StringDataEvent
-		if err := easyjson.Unmarshal(payload, &message); err != nil {
+		if err := json.Unmarshal(payload, &message); err != nil {
 			return fmt.Errorf("invalid data received: '%s'", string(payload))
 		}
 
@@ -346,8 +346,8 @@ func (lobby *Lobby) broadcastMessage(message string, sender *Player) {
 	lobby.Broadcast(newMessageEvent(EventTypeMessage, message, sender))
 }
 
-func (lobby *Lobby) Broadcast(data easyjson.Marshaler) {
-	bytes, err := easyjson.Marshal(data)
+func (lobby *Lobby) Broadcast(data any) {
+	bytes, err := json.Marshal(data)
 	if err != nil {
 		log.Println("error marshalling Broadcast message", err)
 		return
@@ -359,12 +359,12 @@ func (lobby *Lobby) Broadcast(data easyjson.Marshaler) {
 	}
 }
 
-func (lobby *Lobby) broadcastConditional(data easyjson.Marshaler, condition func(*Player) bool) {
+func (lobby *Lobby) broadcastConditional(data any, condition func(*Player) bool) {
 	var message *gws.Broadcaster
 	for _, player := range lobby.Players {
 		if condition(player) {
 			if message == nil {
-				bytes, err := easyjson.Marshal(data)
+				bytes, err := json.Marshal(data)
 				if err != nil {
 					log.Println("error marshalling broadcastConditional message", err)
 					return
@@ -452,6 +452,11 @@ func handleKickVoteEvent(lobby *Lobby, player *Player, toKickID uuid.UUID) {
 	}
 }
 
+func (lobby *Lobby) removePlayerByIndex(index int) {
+	lobby.UserSessions = append(lobby.UserSessions[:index], lobby.UserSessions[index+1:]...)
+	lobby.Players = append(lobby.Players[:index], lobby.Players[index+1:]...)
+}
+
 // kickPlayer kicks the given player from the lobby, updating the lobby
 // state and sending all necessary events.
 func kickPlayer(lobby *Lobby, playerToKick *Player, playerToKickIndex int) {
@@ -485,7 +490,7 @@ func kickPlayer(lobby *Lobby, playerToKick *Player, playerToKickIndex int) {
 
 	if playerToKick.State == Drawing {
 		newDrawer, roundOver := determineNextDrawer(lobby)
-		lobby.Players = append(lobby.Players[:playerToKickIndex], lobby.Players[playerToKickIndex+1:]...)
+		lobby.removePlayerByIndex(playerToKickIndex)
 		lobby.Broadcast(&EventTypeOnly{Type: EventTypeDrawerKicked})
 
 		// Since the drawer has been kicked, that probably means that they were
@@ -497,7 +502,7 @@ func kickPlayer(lobby *Lobby, playerToKick *Player, playerToKickIndex int) {
 
 		advanceLobbyPredefineDrawer(lobby, roundOver, newDrawer)
 	} else {
-		lobby.Players = append(lobby.Players[:playerToKickIndex], lobby.Players[playerToKickIndex+1:]...)
+		lobby.removePlayerByIndex(playerToKickIndex)
 
 		if lobby.isAnyoneStillGuessing() {
 			// This isn't necessary in case we need to advanced the lobby, as it has
@@ -673,7 +678,7 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 }
 
 func (lobby *Lobby) startWordChoiceTimer(durationMs int64) {
-	timer := time.NewTimer(time.Duration(wordChoiceDurationMs) * time.Second)
+	timer := time.NewTimer(time.Duration(durationMs) * time.Millisecond)
 	<-timer.C
 
 	lobby.mutex.Lock()
@@ -1107,11 +1112,9 @@ func (lobby *Lobby) GetAvailableWordHints(player *Player) []*WordHint {
 // to the lobbies playerlist. The new players is returned.
 func (lobby *Lobby) JoinPlayer(name string) *Player {
 	player := &Player{
-		PlayerPublic: &PlayerPublic{
-			Name: SanitizeName(name),
-			ID:   uuid.Must(uuid.NewV4()),
-		},
-		UserSession:  uuid.Must(uuid.NewV4()),
+		Name:         SanitizeName(name),
+		ID:           uuid.Must(uuid.NewV4()),
+		userSession:  uuid.Must(uuid.NewV4()),
 		votedForKick: make(map[uuid.UUID]bool),
 	}
 
@@ -1123,6 +1126,7 @@ func (lobby *Lobby) JoinPlayer(name string) *Player {
 		player.State = Standby
 	}
 	lobby.Players = append(lobby.Players, player)
+	lobby.UserSessions = append(lobby.UserSessions, player.userSession)
 
 	return player
 }
@@ -1139,7 +1143,7 @@ func (lobby *Lobby) Shutdown() {
 	defer lobby.mutex.Unlock()
 	log.Println("Lobby Shutdown: Mutex acquired")
 
-	state, err := easyjson.Marshal(LobbyRestoreData{
+	state, err := json.Marshal(LobbyRestoreData{
 		ShutdownTime: time.Now(),
 		Lobby:        lobby,
 	})
