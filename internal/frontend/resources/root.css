@@ -136,10 +136,11 @@ textarea {
     resize: none;
 }
 
-.content-wrapper {
+#app {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    min-height: 100vh;
+    max-height: 100vh;
 }
 
 .noscript {
