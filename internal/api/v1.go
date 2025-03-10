@@ -5,6 +5,8 @@
 package api
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -191,6 +193,57 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 	state.AddLobby(lobby)
 }
 
+type discordAuthenticatePayload struct {
+	Code string `json:"code"`
+}
+
+type discordTokenRequest struct {
+	ClientId     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
+	GrantType    string `json:"grant_type"`
+	Code         string `json:"code"`
+}
+type discordTokenResponse struct {
+	AccessCode string `json:"access_code"`
+}
+
+func (handler *V1Handler) discordAuthenticate(writer http.ResponseWriter, request *http.Request) {
+	decoder := json.NewDecoder(request.Body)
+	var payload discordAuthenticatePayload
+	if err := decoder.Decode(&payload); err != nil {
+		http.Error(writer, "error decoding payload", http.StatusBadRequest)
+		return
+	}
+
+	discordPayload := bytes.NewBuffer(nil)
+	if err := json.NewEncoder(discordPayload).Encode(discordTokenRequest{
+		ClientId:     "1320396325925163070",
+		ClientSecret: handler.cfg.DiscordApiKey,
+		GrantType:    "authorization_code",
+		Code:         payload.Code,
+	}); err != nil {
+		http.Error(writer, "error retrieving token from discord", http.StatusInternalServerError)
+		return
+	}
+	discordRequest, err := http.NewRequest(http.MethodPost, "https://discord.com/api/oauth2/token", discordPayload)
+	if err != nil {
+		http.Error(writer, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	response, err := http.DefaultClient.Do(discordRequest)
+	if err != nil {
+		http.Error(writer, "error retrieving token from discord", http.StatusInternalServerError)
+		return
+	}
+
+	var discordTokenResponse discordTokenResponse
+	if err := json.NewDecoder(response.Body).Decode(&discordTokenResponse); err != nil {
+		http.Error(writer, "error retrieving token from discord", http.StatusInternalServerError)
+		return
+	}
+}
+
 func (handler *V1Handler) postPlayer(writer http.ResponseWriter, request *http.Request) {
 	lobby := state.GetLobby(request.PathValue("lobby_id"))
 	if lobby == nil {
@@ -249,20 +302,57 @@ func GetDiscordInstanceId(request *http.Request) string {
 	return discordInstanceId
 }
 
+func GetDiscordFrameId(request *http.Request) string {
+	value := request.URL.Query().Get("frame_id")
+	if value == "" {
+		cookie, _ := request.Cookie("discord-frame-id")
+		if cookie != nil {
+			value = cookie.Value
+		}
+	}
+	return value
+}
+
+func GetDiscordPlatform(request *http.Request) string {
+	value := request.URL.Query().Get("platform")
+	if value == "" {
+		cookie, _ := request.Cookie("discord-platform")
+		if cookie != nil {
+			value = cookie.Value
+		}
+	}
+	return value
+}
+
 const discordDomain = "1320396325925163070.discordsays.com"
 
+func createDiscordCookie(name, value string) *http.Cookie {
+	return &http.Cookie{
+		Name:        name,
+		Value:       value,
+		Domain:      discordDomain,
+		Path:        "/",
+		SameSite:    http.SameSiteNoneMode,
+		Partitioned: true,
+		Secure:      true,
+	}
+}
+
 func SetDiscordCookies(w http.ResponseWriter, request *http.Request) {
-	discordInstanceId := GetDiscordInstanceId(request)
+	discordInstanceId := request.URL.Query().Get("instance_id")
 	if discordInstanceId != "" {
-		http.SetCookie(w, &http.Cookie{
-			Name:        "discord-instance-id",
-			Value:       discordInstanceId,
-			Domain:      discordDomain,
-			Path:        "/",
-			SameSite:    http.SameSiteNoneMode,
-			Partitioned: true,
-			Secure:      true,
-		})
+		http.SetCookie(w, createDiscordCookie(
+			"discord-instance-id",
+			discordInstanceId,
+		))
+		http.SetCookie(w, createDiscordCookie(
+			"discord-platform",
+			GetDiscordPlatform(request),
+		))
+		http.SetCookie(w, createDiscordCookie(
+			"discord-frame-id",
+			GetDiscordFrameId(request),
+		))
 	}
 }
 
@@ -276,24 +366,14 @@ func SetGameplayCookies(
 ) {
 	discordInstanceId := GetDiscordInstanceId(request)
 	if discordInstanceId != "" {
-		http.SetCookie(w, &http.Cookie{
-			Name:        "usersession",
-			Value:       player.GetUserSession().String(),
-			Domain:      discordDomain,
-			Path:        "/",
-			SameSite:    http.SameSiteNoneMode,
-			Partitioned: true,
-			Secure:      true,
-		})
-		http.SetCookie(w, &http.Cookie{
-			Name:        "lobby-id",
-			Value:       lobby.LobbyID,
-			Domain:      discordDomain,
-			Path:        "/",
-			SameSite:    http.SameSiteNoneMode,
-			Partitioned: true,
-			Secure:      true,
-		})
+		http.SetCookie(w, createDiscordCookie(
+			"usersession",
+			player.GetUserSession().String(),
+		))
+		http.SetCookie(w, createDiscordCookie(
+			"lobby-id",
+			lobby.LobbyID,
+		))
 	} else {
 		// For the discord case, we need both, as the discord specific cookies
 		// aren't available during the readirect from ssrCreate to ssrEnter.

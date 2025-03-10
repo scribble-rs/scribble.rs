@@ -32,6 +32,7 @@ func (handler *V1Handler) SetupRoutes(rootPath string, register func(string, str
 	register("GET", path.Join(v1, "lobby", "ws"), handler.websocketUpgrade)
 
 	register("POST", path.Join(v1, "lobby", "{lobby_id}", "player"), handler.postPlayer)
+	register("POST", path.Join(v1, "discord_authenticate"), handler.discordAuthenticate)
 }
 
 // remoteAddressToSimpleIP removes unnecessary clutter from the input,

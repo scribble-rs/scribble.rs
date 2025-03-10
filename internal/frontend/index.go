@@ -24,6 +24,18 @@ import (
 //go:embed lobby.js
 var lobbyJsRaw string
 
+//go:embed lobby-discord.js
+var lobbyDiscordJsRaw string
+
+func init() {
+	lobbyJsRaw = `
+{{if .DiscordActivity}}
+` + lobbyDiscordJsRaw + `
+{{end}}
+` + lobbyJsRaw
+	lobbyDiscordJsRaw = ""
+}
+
 //go:embed index.js
 var indexJsRaw string
 
@@ -95,7 +107,7 @@ func NewHandler(cfg *config.Config) (*SSRHandler, error) {
 	if err := basePageConfig.Hash("index.js", []byte(indexJsRaw)); err != nil {
 		return nil, fmt.Errorf("error hashing: %w", err)
 	}
-	if err := basePageConfig.Hash("lobby.js", []byte(lobbyJsRaw)); err != nil {
+	if err := basePageConfig.Hash("lobby.js", []byte(lobbyJsRaw), []byte(lobbyDiscordJsRaw)); err != nil {
 		return nil, fmt.Errorf("error hashing: %w", err)
 	}
 
@@ -144,6 +156,8 @@ func (handler *SSRHandler) indexPageHandler(writer http.ResponseWriter, request 
 				})
 			return
 		}
+
+		createPageData.DiscordActivity = true
 	}
 
 	err := pageTemplates.ExecuteTemplate(writer, "index", createPageData)
@@ -168,6 +182,7 @@ type IndexPageData struct {
 	config.LobbySettingDefaults
 	game.SettingBounds
 
+	DiscordActivity   bool
 	Translation       translations.Translation
 	Locale            string
 	Errors            []string

@@ -61,13 +61,15 @@ type BasePageConfig struct {
 
 var fallbackChecksum = uuid.Must(uuid.NewV4()).String()
 
-func (baseConfig *BasePageConfig) Hash(key string, bytes []byte) error {
+func (baseConfig *BasePageConfig) Hash(key string, bytes ...[]byte) error {
 	_, alreadyExists := baseConfig.checksums[key]
 	if alreadyExists {
 		return fmt.Errorf("duplicate hash key '%s'", key)
 	}
-	if _, err := baseConfig.hash.Write(bytes); err != nil {
-		return fmt.Errorf("error hashing '%s': %w", key, err)
+	for _, arr := range bytes {
+		if _, err := baseConfig.hash.Write(arr); err != nil {
+			return fmt.Errorf("error hashing '%s': %w", key, err)
+		}
 	}
 	baseConfig.checksums[key] = hex.EncodeToString(baseConfig.hash.Sum(nil))
 	baseConfig.hash.Reset()
