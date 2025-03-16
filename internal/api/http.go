@@ -31,6 +31,7 @@ func (handler *V1Handler) SetupRoutes(rootPath string, register func(string, str
 	// We support both path parameter and cookie.
 	register("GET", path.Join(v1, "lobby", "ws"), handler.websocketUpgrade)
 
+	register("POST", path.Join(v1, "lobby", "resurrect"), handler.resurrectLobby)
 	register("POST", path.Join(v1, "lobby", "{lobby_id}", "player"), handler.postPlayer)
 }
 

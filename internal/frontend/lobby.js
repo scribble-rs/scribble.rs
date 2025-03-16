@@ -10,41 +10,73 @@ let hasSocketEverConnected = false;
 let socket;
 function connectToWebsocket() {
     if (socketIsConnecting === true) {
+        console.log("aborting connection attempt.");
         return;
     }
 
     socketIsConnecting = true;
 
-    socket = new WebSocket(`${rootPath}/v1/lobby/ws`);
+    try {
+        socket = new WebSocket(`${rootPath}/v1/lobby/ws`);
+    } catch (exception) {
+        console.log("Connection error:" + exception)
+        socketIsConnecting = false;
+        connectToWebsocket();
+        return;
+    }
 
     socket.onerror = error => {
         //Is not connected and we haven't yet said that we are done trying to
         //connect, this means that we could never even establish a connection.
-        if (socket.readyState != 1 && !hasSocketEverConnected) {
+        if (socket.readyState != 1) {
             socketIsConnecting = false;
-            showTextDialog("connection-error-dialog",
-                '{{.Translation.Get "error-connecting"}}',
-                `{{.Translation.Get "error-connecting-text"}}`);
-            console.log("Error establishing connection: ", error);
+            if (!hasSocketEverConnected) {
+                showTextDialog("connection-error-dialog",
+                    '{{.Translation.Get "error-connecting"}}',
+                    `{{.Translation.Get "error-connecting-text"}}`);
+                console.log("Error establishing connection: ", error);
+            } else {
+                connectToWebsocket();
+            }
         } else {
             console.log("Socket error: ", error)
         }
     };
 
     socket.onopen = () => {
+        closeDialog(shutdownDialogId);
         closeDialog(reconnectDialogId);
 
         hasSocketEverConnected = true;
         socketIsConnecting = false;
 
         socket.onclose = event => {
-            //We want to avoid handling the error multiple times and showing the incorrect dialogs.
+            //We w to avoid handling the error multiple times and showing the incorrect dialogs.
             socket.onerror = null;
 
             console.log("Socket Closed Connection: ", event);
-            console.log("Attempting to reestablish socket connection.");
-            showReconnectDialogIfNotShown();
-            connectToWebsocket();
+
+            if (restoreData && event.reason === "lobby_gone") {
+                console.log("Resurrecting lobby ...",);
+                fetch('/v1/lobby/resurrect', {
+                    method: 'POST',
+                    body: restoreData,
+                }).then(() => {
+                    console.log("Attempting to reestablish socket connection after resurrection ...");
+                    socketIsConnecting = false;
+                    connectToWebsocket();
+                });
+
+                return
+            }
+
+            if (event.reason !== "lobby_gone" && event.reason !== "server_restart") {
+                console.log("Attempting to reestablish socket connection.");
+                showReconnectDialogIfNotShown();
+            }
+            if (event.reason === "server_restart") {
+                connectToWebsocket();
+            }
         };
 
         registerMessageHandler(socket);
@@ -53,6 +85,7 @@ function connectToWebsocket() {
     };
 }
 
+const shutdownDialogId = "shutdown-dialog";
 const reconnectDialogId = "reconnect-dialog";
 function showReconnectDialogIfNotShown() {
     const previousReconnectDialog = document.getElementById(reconnectDialogId);
@@ -833,6 +866,7 @@ let rounds = 0;
 let roundEndTime = 0;
 let gameState = "unstarted";
 let drawingTimeSetting = "∞";
+let restoreData;
 
 function registerMessageHandler(targetSocket) {
     targetSocket.onmessage = event => {
@@ -985,10 +1019,16 @@ function registerMessageHandler(targetSocket) {
                 + '{{.Translation.Get "custom-words-per-turn-setting"}}: ' + parsed.data.customWordsPerTurn + "%\n"
                 + '{{.Translation.Get "players-per-ip-limit-setting"}}: ' + parsed.data.clientsPerIpLimit);
         } else if (parsed.type === "shutdown") {
-            socket.onclose = null;
-            socket.close();
-            showDialog("shutdown-info", "Server shutting down",
-                document.createTextNode("Sorry, but the server is about to shut down. Please come back at a later time."));
+            console.log("Shutdown event received");
+            if (parsed.data) {
+                restoreData = parsed.data;
+                // FIXMe Text anpassen!
+                showDialog("shutdown-dialog", "Server shutting down",
+                    document.createTextNode("Sorry, but the server is about to shut down. Attempting to restore lobby on restart ..."));
+            } else {
+                showDialog("shutdown-dialog", "Server shutting down",
+                    document.createTextNode("Sorry, but the server is about to shut down. Please come back at a later time."));
+            }
         }
     }
 };
@@ -1033,6 +1073,7 @@ function setRoundTimeLeft(timeLeftMs) {
 }
 
 function handleReadyEvent(ready) {
+    restoreData = null;
     ownerID = ready.ownerId;
     ownID = ready.playerId;
 

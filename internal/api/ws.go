@@ -51,7 +51,12 @@ func (handler *V1Handler) websocketUpgrade(writer http.ResponseWriter, request *
 
 	lobby := state.GetLobby(lobbyId)
 	if lobby == nil {
-		http.Error(writer, ErrLobbyNotExistent.Error(), http.StatusNotFound)
+		socket, err := upgrader.Upgrade(writer, request)
+		if err != nil {
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		socket.WriteClose(1000, []byte("lobby_gone"))
 		return
 	}
 
