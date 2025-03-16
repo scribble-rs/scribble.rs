@@ -84,14 +84,16 @@ func Test_getRandomWords(t *testing.T) {
 
 		lobby := &Lobby{
 			CurrentWord: "",
-			EditableLobbySettings: EditableLobbySettings{
-				CustomWordsPerTurn: 0,
+			LobbySettings: LobbySettings{
+				EditableLobbySettings: EditableLobbySettings{
+					CustomWordsPerTurn: 0,
+				},
 			},
-			words: []string{"a", "b", "c"},
+			Words: []string{"a", "b", "c"},
 		}
 
 		randomWords := GetRandomWords(3, lobby)
-		for _, lobbyWord := range lobby.words {
+		for _, lobbyWord := range lobby.Words {
 			if !arrayContains(randomWords, lobbyWord) {
 				t.Errorf("Random words %s, didn't contain lobbyWord %s", randomWords, lobbyWord)
 			}
@@ -103,16 +105,17 @@ func Test_getRandomWords(t *testing.T) {
 
 		lobby := &Lobby{
 			CurrentWord: "",
-			words:       []string{"a", "b", "c"},
-			EditableLobbySettings: EditableLobbySettings{
-				CustomWordsPerTurn: 0,
+			Words:       []string{"a", "b", "c"},
+			LobbySettings: LobbySettings{
+				EditableLobbySettings: EditableLobbySettings{
+					CustomWordsPerTurn: 0,
+				},
 			},
-
 			CustomWords: []string{"d", "e", "f"},
 		}
 
 		randomWords := GetRandomWords(3, lobby)
-		for _, lobbyWord := range lobby.words {
+		for _, lobbyWord := range lobby.Words {
 			if !arrayContains(randomWords, lobbyWord) {
 				t.Errorf("Random words %s, didn't contain lobbyWord %s", randomWords, lobbyWord)
 			}
@@ -124,15 +127,17 @@ func Test_getRandomWords(t *testing.T) {
 
 		lobby := &Lobby{
 			CurrentWord: "",
-			words:       []string{"a", "b", "c"},
-			EditableLobbySettings: EditableLobbySettings{
-				CustomWordsPerTurn: 3,
+			Words:       []string{"a", "b", "c"},
+			LobbySettings: LobbySettings{
+				EditableLobbySettings: EditableLobbySettings{
+					CustomWordsPerTurn: 3,
+				},
 			},
 			CustomWords: nil,
 		}
 
 		randomWords := GetRandomWords(3, lobby)
-		for _, lobbyWord := range lobby.words {
+		for _, lobbyWord := range lobby.Words {
 			if !arrayContains(randomWords, lobbyWord) {
 				t.Errorf("Random words %s, didn't contain lobbyWord %s", randomWords, lobbyWord)
 			}
@@ -144,9 +149,11 @@ func Test_getRandomWords(t *testing.T) {
 
 		lobby := &Lobby{
 			CurrentWord: "",
-			words:       []string{"a", "b", "c"},
-			EditableLobbySettings: EditableLobbySettings{
-				CustomWordsPerTurn: 3,
+			Words:       []string{"a", "b", "c"},
+			LobbySettings: LobbySettings{
+				EditableLobbySettings: EditableLobbySettings{
+					CustomWordsPerTurn: 3,
+				},
 			},
 			CustomWords: []string{"d", "e", "f"},
 		}
@@ -171,9 +178,11 @@ func Test_getRandomWordsReloading(t *testing.T) {
 		t.Parallel()
 
 		lobby := &Lobby{
-			words: wordList,
-			EditableLobbySettings: EditableLobbySettings{
-				CustomWordsPerTurn: 0,
+			Words: wordList,
+			LobbySettings: LobbySettings{
+				EditableLobbySettings: EditableLobbySettings{
+					CustomWordsPerTurn: 0,
+				},
 			},
 			CustomWords: nil,
 		}
@@ -192,9 +201,11 @@ func Test_getRandomWordsReloading(t *testing.T) {
 		t.Parallel()
 
 		lobby := &Lobby{
-			words: wordList,
-			EditableLobbySettings: EditableLobbySettings{
-				CustomWordsPerTurn: 3,
+			Words: wordList,
+			LobbySettings: LobbySettings{
+				EditableLobbySettings: EditableLobbySettings{
+					CustomWordsPerTurn: 3,
+				},
 			},
 			CustomWords: nil,
 		}
@@ -213,9 +224,11 @@ func Test_getRandomWordsReloading(t *testing.T) {
 		t.Parallel()
 
 		lobby := &Lobby{
-			words: wordList,
-			EditableLobbySettings: EditableLobbySettings{
-				CustomWordsPerTurn: 3,
+			Words: wordList,
+			LobbySettings: LobbySettings{
+				EditableLobbySettings: EditableLobbySettings{
+					CustomWordsPerTurn: 3,
+				},
 			},
 			CustomWords: []string{"a"},
 		}

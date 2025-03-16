@@ -21,7 +21,7 @@ type Lobby struct {
 	// ID uniquely identified the Lobby.
 	LobbyID string
 
-	EditableLobbySettings
+	LobbySettings
 
 	// DrawingTimeNew is the new value of the drawing time. If a round is
 	// already ongoing, we can't simply change the drawing time, as it would
@@ -29,10 +29,13 @@ type Lobby struct {
 	DrawingTimeNew int
 
 	CustomWords []string
-	words       []string
+	Words       []string
 
-	// players references all participants of the Lobby.
-	players []*Player
+	// Players references all participants of the Lobby. Indices are synced
+	// with [Lobby.UserSessions].
+	Players []*Player
+	// Holds all UserSessions. Indices are synced with [Lobby.Players].
+	UserSessions []uuid.UUID
 
 	// Whether the game has started, is ongoing or already over.
 	State State
@@ -41,19 +44,19 @@ type Lobby struct {
 	OwnerID uuid.UUID
 	// ScoreCalculation decides how scores for both guessers and drawers are
 	// determined.
-	ScoreCalculation ScoreCalculation
+	ScoreCalculation ScoreCalculation `json:"-"`
 	// CurrentWord represents the word that was last selected. If no word has
 	// been selected yet or the round is already over, this should be empty.
 	CurrentWord string
-	// wordHints for the current word.
-	wordHints []*WordHint
-	// wordHintsShown are the same as wordHints with characters visible.
-	wordHintsShown []*WordHint
-	// hintsLeft is the amount of hints still available for revelation.
-	hintsLeft int
-	// hintCount is the amount of hints that were initially available
+	// WordHints for the current word.
+	WordHints []*WordHint
+	// WordHintsShown are the same as wordHints with characters visible.
+	WordHintsShown []*WordHint
+	// HintsLeft is the amount of hints still available for revelation.
+	HintsLeft int
+	// HintCount is the amount of hints that were initially available
 	// for revelation.
-	hintCount int
+	HintCount int
 	// Round is the round that the Lobby is currently in. This is a number
 	// between 0 and Rounds. 0 indicates that it hasn't started yet.
 	Round             int
@@ -61,17 +64,16 @@ type Lobby struct {
 	preSelectedWord   int
 	// wordChoice represents the current choice of words present to the drawer.
 	wordChoice []string
-	Wordpack   string
-	// roundEndTime represents the time at which the current round will end.
+	// RoundEndTime represents the time at which the current round will end.
 	// This is a UTC unix-timestamp in milliseconds.
-	roundEndTime int64
+	RoundEndTime int64
 
 	timeLeftTicker *time.Ticker
-	// currentDrawing represents the state of the current canvas. The elements
+	// CurrentDrawing represents the state of the current canvas. The elements
 	// consist of LineEvent and FillEvent. Please do not modify the contents
 	// of this array an only move AppendLine and AppendFill on the respective
 	// lobby object.
-	currentDrawing []any
+	CurrentDrawing []any
 
 	// These variables are used to define the ranges of connected drawing events.
 	// For example a line that has been drawn or a fill that has been executed.
@@ -81,18 +83,43 @@ type Lobby struct {
 	// connected, but that could technically undo a whole drawing.
 
 	lastDrawEvent                 time.Time
-	connectedDrawEventsIndexStack []int
+	ConnectedDrawEventsIndexStack []int
 
 	lowercaser cases.Caser
 
 	// LastPlayerDisconnectTime is used to know since when a lobby is empty, in case
-	// it is empty.
+	// it is empty. If the time is nil, it's treated the same as when the
+	// timelimit has been reached.
 	LastPlayerDisconnectTime *time.Time
 
 	mutex sync.Mutex
 
-	WriteObject          func(*Player, any) error
-	WritePreparedMessage func(*Player, *gws.Broadcaster) error
+	WriteObject          func(*Player, any) error              `json:"-"`
+	WritePreparedMessage func(*Player, *gws.Broadcaster) error `json:"-"`
+}
+
+type LobbyRestoreData struct {
+	ShutdownTime time.Time
+	Lobby        *Lobby
+}
+
+func (lobby *Lobby) ResurrectUnsynchronized(restoreData *LobbyRestoreData) {
+	lobby.lowercaser = WordlistData[lobby.Wordpack].Lowercaser()
+
+	// Since we don't know how long the restart took, we extend all timers.\
+	// We add an additional second for good measure.
+	now := time.Now()
+	timeDiff := now.Sub(restoreData.ShutdownTime).Milliseconds() + 1000
+
+	lobby.RoundEndTime = lobby.RoundEndTime + int64(timeDiff)
+
+	if lobby.CurrentWord != "" {
+		lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
+		go startTurnTimeTicker(lobby, lobby.timeLeftTicker)
+	} else if len(lobby.wordChoice) > 0 {
+		lobby.wordChoiceEndTime = lobby.wordChoiceEndTime + int64(timeDiff)
+		go lobby.startWordChoiceTimer(lobby.wordChoiceEndTime - now.UTC().UnixMilli())
+	}
 }
 
 // MaxPlayerNameLength defines how long a string can be at max when used
@@ -138,7 +165,7 @@ const (
 )
 
 func (lobby *Lobby) GetPlayerByID(id uuid.UUID) *Player {
-	for _, player := range lobby.players {
+	for _, player := range lobby.Players {
 		if player.ID == player.ID {
 			return player
 		}
@@ -148,12 +175,11 @@ func (lobby *Lobby) GetPlayerByID(id uuid.UUID) *Player {
 }
 
 func (lobby *Lobby) GetPlayerBySession(userSession uuid.UUID) *Player {
-	for _, player := range lobby.players {
-		if player.userSession == userSession {
-			return player
+	for index, uuid := range lobby.UserSessions {
+		if uuid == userSession {
+			return lobby.Players[index]
 		}
 	}
-
 	return nil
 }
 
@@ -162,22 +188,22 @@ func (lobby *Lobby) GetOwner() *Player {
 }
 
 func (lobby *Lobby) ClearDrawing() {
-	lobby.currentDrawing = make([]any, 0)
-	lobby.connectedDrawEventsIndexStack = nil
+	lobby.CurrentDrawing = make([]any, 0)
+	lobby.ConnectedDrawEventsIndexStack = nil
 }
 
 // AppendLine adds a line direction to the current drawing. This exists in order
 // to prevent adding arbitrary elements to the drawing, as the backing array is
 // an empty interface type.
 func (lobby *Lobby) AppendLine(line *LineEvent) {
-	lobby.currentDrawing = append(lobby.currentDrawing, line)
+	lobby.CurrentDrawing = append(lobby.CurrentDrawing, line)
 }
 
 // AppendFill adds a fill direction to the current drawing. This exists in order
 // to prevent adding arbitrary elements to the drawing, as the backing array is
 // an empty interface type.
 func (lobby *Lobby) AppendFill(fill *FillEvent) {
-	lobby.currentDrawing = append(lobby.currentDrawing, fill)
+	lobby.CurrentDrawing = append(lobby.CurrentDrawing, fill)
 }
 
 // SanitizeName removes invalid characters from the players name, resolves
@@ -203,7 +229,7 @@ func SanitizeName(name string) string {
 // established a socket connection.
 func (lobby *Lobby) GetConnectedPlayerCount() int {
 	var count int
-	for _, player := range lobby.players {
+	for _, player := range lobby.Players {
 		if player.Connected {
 			count++
 		}
@@ -216,7 +242,7 @@ func (lobby *Lobby) HasConnectedPlayers() bool {
 	lobby.mutex.Lock()
 	defer lobby.mutex.Unlock()
 
-	for _, otherPlayer := range lobby.players {
+	for _, otherPlayer := range lobby.Players {
 		if otherPlayer.Connected {
 			return true
 		}
@@ -247,7 +273,7 @@ func (lobby *Lobby) IsPublic() bool {
 }
 
 func (lobby *Lobby) GetPlayers() []*Player {
-	return lobby.players
+	return lobby.Players
 }
 
 // GetOccupiedPlayerSlots counts the available slots which can be taken by new
@@ -258,7 +284,7 @@ func (lobby *Lobby) GetPlayers() []*Player {
 func (lobby *Lobby) GetOccupiedPlayerSlots() int {
 	var occupiedPlayerSlots int
 	now := time.Now()
-	for _, player := range lobby.players {
+	for _, player := range lobby.Players {
 		if player.Connected {
 			occupiedPlayerSlots++
 		} else {
@@ -281,7 +307,7 @@ func (lobby *Lobby) GetOccupiedPlayerSlots() int {
 // will be preserved for 5 minutes. This function should be used over
 // Lobby.GetOccupiedPlayerSlots, as it is potentially faster.
 func (lobby *Lobby) HasFreePlayerSlot() bool {
-	if len(lobby.players) < lobby.MaxPlayers {
+	if len(lobby.Players) < lobby.MaxPlayers {
 		return true
 	}
 
