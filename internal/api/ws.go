@@ -56,7 +56,7 @@ func (handler *V1Handler) websocketUpgrade(writer http.ResponseWriter, request *
 	}
 
 	lobby.Synchronized(func() {
-		player := lobby.GetPlayer(userSession)
+		player := lobby.GetPlayerBySession(userSession)
 		if player == nil {
 			http.Error(writer, "you don't have access to this lobby;usersession unknown", http.StatusUnauthorized)
 			return

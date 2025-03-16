@@ -513,7 +513,7 @@ func GetPlayer(lobby *game.Lobby, request *http.Request) *game.Player {
 		return nil
 	}
 
-	return lobby.GetPlayer(userSession)
+	return lobby.GetPlayerBySession(userSession)
 }
 
 // GetPlayername either retrieves the playername from a cookie, the URL form.

@@ -138,8 +138,17 @@ const (
 	Spectating PlayerState = "spectating"
 )
 
-// GetPlayer searches for a player, identifying them by usersession.
-func (lobby *Lobby) GetPlayer(userSession uuid.UUID) *Player {
+func (lobby *Lobby) GetPlayerByID(id uuid.UUID) *Player {
+	for _, player := range lobby.players {
+		if player.ID == player.ID {
+			return player
+		}
+	}
+
+	return nil
+}
+
+func (lobby *Lobby) GetPlayerBySession(userSession uuid.UUID) *Player {
 	for _, player := range lobby.players {
 		if player.userSession == userSession {
 			return player
@@ -150,7 +159,7 @@ func (lobby *Lobby) GetPlayer(userSession uuid.UUID) *Player {
 }
 
 func (lobby *Lobby) GetOwner() *Player {
-	return lobby.GetPlayer(lobby.OwnerID)
+	return lobby.GetPlayerByID(lobby.OwnerID)
 }
 
 func (lobby *Lobby) ClearDrawing() {
