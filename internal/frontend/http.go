@@ -127,7 +127,6 @@ func (handler *SSRHandler) SetupRoutes(register func(string, string, http.Handle
 		http.StripPrefix(
 			"/"+handler.cfg.RootPath,
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				println(r.URL.Path)
 				if r.URL.Path == "" || r.URL.Path == "/" {
 					indexHandler(w, r)
 					return
