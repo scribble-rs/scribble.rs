@@ -1,4 +1,3 @@
-//go:generate easyjson -all ${GOFILE}
 package game
 
 import (
@@ -10,10 +9,6 @@ import (
 
 //
 // This file contains all structs and constants that are shared with clients.
-// These files require special treatment, since we use easyjson for marshalling
-// and unmarshalling. If this file changes, run:
-//
-//  go generate ./...
 //
 
 // Eevnts that are just incomming from the client.

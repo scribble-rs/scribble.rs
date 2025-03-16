@@ -9,7 +9,6 @@ import (
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/lxzan/gws"
-	easyjson "github.com/mailru/easyjson"
 	"github.com/scribble-rs/scribble.rs/internal/sanitize"
 	"github.com/stretchr/testify/require"
 )
@@ -28,7 +27,7 @@ func createLobbyWithDemoPlayers(playercount int) *Lobby {
 	return lobby
 }
 
-func noOpWriteObject(_ *Player, _ easyjson.Marshaler) error {
+func noOpWriteObject(_ *Player, _ any) error {
 	return nil
 }
 
@@ -242,7 +241,7 @@ func Test_wordSelectionEvent(t *testing.T) {
 	}
 	wordHintEvents := make(map[uuid.UUID][]*WordHint)
 	var wordChoice []string
-	lobby.WriteObject = func(_ *Player, message easyjson.Marshaler) error {
+	lobby.WriteObject = func(_ *Player, message any) error {
 		event, ok := message.(*Event)
 		if ok {
 			if event.Type == EventTypeYourTurn {

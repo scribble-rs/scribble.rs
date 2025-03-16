@@ -1,6 +1,7 @@
 package game
 
 import (
+	json "encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -12,7 +13,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/lxzan/gws"
-	"github.com/mailru/easyjson"
 	"github.com/scribble-rs/scribble.rs/internal/sanitize"
 
 	discordemojimap "github.com/Bios-Marcel/discordemojimap/v2"
@@ -91,7 +91,7 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 		lobby.Broadcast(&Event{Type: EventTypeUpdatePlayers, Data: lobby.players})
 	} else if eventType == EventTypeMessage {
 		var message StringDataEvent
-		if err := easyjson.Unmarshal(payload, &message); err != nil {
+		if err := json.Unmarshal(payload, &message); err != nil {
 			return fmt.Errorf("invalid data received: '%s'", string(payload))
 		}
 
@@ -99,7 +99,7 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 	} else if eventType == EventTypeLine {
 		if lobby.canDraw(player) {
 			var line LineEvent
-			if err := easyjson.Unmarshal(payload, &line); err != nil {
+			if err := json.Unmarshal(payload, &line); err != nil {
 				return fmt.Errorf("error decoding data: %w", err)
 			}
 
@@ -125,7 +125,7 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 	} else if eventType == EventTypeFill {
 		if lobby.canDraw(player) {
 			var fill FillEvent
-			if err := easyjson.Unmarshal(payload, &fill); err != nil {
+			if err := json.Unmarshal(payload, &fill); err != nil {
 				return fmt.Errorf("error decoding data: %w", err)
 			}
 
@@ -155,7 +155,7 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 		}
 	} else if eventType == EventTypeChooseWord {
 		var wordChoice IntDataEvent
-		if err := easyjson.Unmarshal(payload, &wordChoice); err != nil {
+		if err := json.Unmarshal(payload, &wordChoice); err != nil {
 			return fmt.Errorf("error decoding data: %w", err)
 		}
 		if player.State == Drawing {
@@ -165,7 +165,7 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 		}
 	} else if eventType == EventTypeKickVote {
 		var kickEvent StringDataEvent
-		if err := easyjson.Unmarshal(payload, &kickEvent); err != nil {
+		if err := json.Unmarshal(payload, &kickEvent); err != nil {
 			return fmt.Errorf("invalid data received: '%s'", string(payload))
 		}
 
@@ -183,7 +183,7 @@ func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player
 		}
 	} else if eventType == EventTypeNameChange {
 		var message StringDataEvent
-		if err := easyjson.Unmarshal(payload, &message); err != nil {
+		if err := json.Unmarshal(payload, &message); err != nil {
 			return fmt.Errorf("invalid data received: '%s'", string(payload))
 		}
 
@@ -344,8 +344,8 @@ func (lobby *Lobby) broadcastMessage(message string, sender *Player) {
 	lobby.Broadcast(newMessageEvent(EventTypeMessage, message, sender))
 }
 
-func (lobby *Lobby) Broadcast(data easyjson.Marshaler) {
-	bytes, err := easyjson.Marshal(data)
+func (lobby *Lobby) Broadcast(data any) {
+	bytes, err := json.Marshal(data)
 	if err != nil {
 		log.Println("error marshalling Broadcast message", err)
 		return
@@ -357,12 +357,12 @@ func (lobby *Lobby) Broadcast(data easyjson.Marshaler) {
 	}
 }
 
-func (lobby *Lobby) broadcastConditional(data easyjson.Marshaler, condition func(*Player) bool) {
+func (lobby *Lobby) broadcastConditional(data any, condition func(*Player) bool) {
 	var message *gws.Broadcaster
 	for _, player := range lobby.players {
 		if condition(player) {
 			if message == nil {
-				bytes, err := easyjson.Marshal(data)
+				bytes, err := json.Marshal(data)
 				if err != nil {
 					log.Println("error marshalling broadcastConditional message", err)
 					return

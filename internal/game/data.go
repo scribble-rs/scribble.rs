@@ -8,7 +8,6 @@ import (
 	discordemojimap "github.com/Bios-Marcel/discordemojimap/v2"
 	"github.com/gofrs/uuid/v5"
 	"github.com/lxzan/gws"
-	easyjson "github.com/mailru/easyjson"
 	"golang.org/x/text/cases"
 )
 
@@ -92,7 +91,7 @@ type Lobby struct {
 
 	mutex sync.Mutex
 
-	WriteObject          func(*Player, easyjson.Marshaler) error
+	WriteObject          func(*Player, any) error
 	WritePreparedMessage func(*Player, *gws.Broadcaster) error
 }
 

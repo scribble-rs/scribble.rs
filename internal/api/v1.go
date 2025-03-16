@@ -1,18 +1,17 @@
-//go:generate easyjson -all ${GOFILE}
-
 // This file contains the API methods for the public API
 
 package api
 
 import (
+	json "encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gofrs/uuid/v5"
-	"github.com/mailru/easyjson"
 	"github.com/scribble-rs/scribble.rs/internal/config"
 	"github.com/scribble-rs/scribble.rs/internal/game"
 	"github.com/scribble-rs/scribble.rs/internal/state"
@@ -22,7 +21,6 @@ import (
 
 var ErrLobbyNotExistent = errors.New("the requested lobby doesn't exist")
 
-//easyjson:skip
 type V1Handler struct {
 	cfg *config.Config
 }
@@ -33,7 +31,18 @@ func NewHandler(cfg *config.Config) *V1Handler {
 	}
 }
 
-//easyjson:json
+func marshalToHTTPWriter(data any, writer http.ResponseWriter) (bool, error) {
+	bytes, err := json.Marshal(data)
+	if err != nil {
+		return false, err
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	writer.Header().Set("Content-Length", strconv.Itoa(len(bytes)))
+	_, err = writer.Write(bytes)
+	return true, err
+}
+
 type LobbyEntries []*LobbyEntry
 
 // LobbyEntry is an API object for representing a join-able public lobby.
@@ -75,7 +84,7 @@ func (handler *V1Handler) getLobbies(writer http.ResponseWriter, _ *http.Request
 		})
 	}
 
-	if started, _, err := easyjson.MarshalToHTTPResponseWriter(lobbyEntries, writer); err != nil {
+	if started, err := marshalToHTTPWriter(lobbyEntries, writer); err != nil {
 		if !started {
 			http.Error(writer, err.Error(), http.StatusInternalServerError)
 		}
@@ -180,7 +189,7 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 
 	lobbyData := CreateLobbyData(handler.cfg, lobby)
 
-	if started, _, err := easyjson.MarshalToHTTPResponseWriter(lobbyData, writer); err != nil {
+	if started, err := marshalToHTTPWriter(lobbyData, writer); err != nil {
 		if !started {
 			http.Error(writer, err.Error(), http.StatusInternalServerError)
 		}
@@ -229,7 +238,7 @@ func (handler *V1Handler) postPlayer(writer http.ResponseWriter, request *http.R
 	})
 
 	if lobbyData != nil {
-		if started, _, err := easyjson.MarshalToHTTPResponseWriter(lobbyData, writer); err != nil {
+		if started, err := marshalToHTTPWriter(lobbyData, writer); err != nil {
 			if !started {
 				http.Error(writer, err.Error(), http.StatusInternalServerError)
 			}
@@ -415,7 +424,7 @@ func (handler *V1Handler) patchLobby(writer http.ResponseWriter, request *http.R
 }
 
 func (handler *V1Handler) getStats(writer http.ResponseWriter, _ *http.Request) {
-	if started, _, err := easyjson.MarshalToHTTPResponseWriter(state.Stats(), writer); err != nil {
+	if started, err := marshalToHTTPWriter(state.Stats(), writer); err != nil {
 		if !started {
 			http.Error(writer, err.Error(), http.StatusInternalServerError)
 		}
