@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/caarlos0/env/v10"
+	"github.com/caarlos0/env/v11"
 	"github.com/scribble-rs/scribble.rs/internal/game"
 	"github.com/subosito/gotenv"
 )

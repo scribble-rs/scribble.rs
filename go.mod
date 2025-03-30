@@ -5,9 +5,9 @@ go 1.23.3
 require (
 	github.com/Bios-Marcel/discordemojimap/v2 v2.0.6
 	github.com/Bios-Marcel/go-petname v0.0.1
-	github.com/caarlos0/env/v10 v10.0.0
+	github.com/caarlos0/env/v11 v11.3.1
 	github.com/go-chi/cors v1.2.1
-	github.com/gofrs/uuid/v5 v5.3.1
+	github.com/gofrs/uuid/v5 v5.3.2
 	github.com/lxzan/gws v1.8.8
 	github.com/prometheus/client_golang v1.21.1
 	github.com/stretchr/testify v1.10.0
