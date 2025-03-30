@@ -178,7 +178,17 @@ function drawBresenhamLine(imageData, x1, y1, x2, y2, color) {
     }
 }
 
+// We cache them, as we need quite a lot of them, but the pencil size usually
+// doesn't change that often. There's also not many sizes, so we don't need to
+// worry about invalidating anything.
+let cachedCircleMaps = {};
+
 function generateCircleMap(radius) {
+    const cached = cachedCircleMaps[radius];
+    if (cached) {
+        return cached;
+    }
+
     const diameter = 2 * radius;
     const circleData = new Array(diameter);
 
@@ -196,6 +206,7 @@ function generateCircleMap(radius) {
         }
     }
 
+    cachedCircleMaps[radius] = circleData;
     return circleData;
 }
 
