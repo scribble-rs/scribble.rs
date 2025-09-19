@@ -36,5 +36,5 @@ COPY --from=builder /app/scribblers /scribblers
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 ENTRYPOINT ["/scribblers"]
-
+# Random uid to avoid having root privileges. Linux doesn't care that there's no user for it.
 USER 248:248
