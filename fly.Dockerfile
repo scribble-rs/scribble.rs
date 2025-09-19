@@ -36,3 +36,5 @@ COPY --from=builder /app/scribblers /scribblers
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 ENTRYPOINT ["/scribblers"]
+
+USER 248:248
