@@ -1,6 +1,46 @@
 const discordInstanceId = getCookie("discord-instance-id")
 const rootPath = `${discordInstanceId ? ".proxy/" : ""}{{.RootPath}}`
 
+function createLabel(cssClass, forElement, text) {
+    const label = document.createElement("label");
+    label.setAttribute("for", forElement);
+    label.classList.add(cssClass);
+    label.innerText = text;
+    return label;
+}
+
+function createNumberInput(id, min, max, value) {
+    const input = document.createElement("input");
+    input.setAttribute("type", "number");
+    // Figure out why I did this exactly.
+    input.setAttribute("size", "4");
+    input.setAttribute("id", id);
+    input.setAttribute("name", id);
+    input.setAttribute("value", Number.toString(value));
+    input.setAttribute("min", Number.toString(min));
+    input.setAttribute("max", Number.toString(max));
+
+    const decButton = document.createElement("button");
+    decButton.setAttribute("type", "button");
+    decButton.classList.add("number-decrement");
+    decButton.addEventListener("click", function() {
+        input.stepDown();
+    })
+    decButton.innerText = "-";
+
+    const incButton = document.createElement("button");
+    incButton.setAttribute("type", "button");
+    incButton.classList.add("number-increment");
+    incButton.addEventListener("click", function() {
+        input.stepUp();
+    })
+    incButton.innerText = "+";
+
+    const div = document.createElement("div")
+    div.append(decButton, input, incButton);
+    return div;
+}
+
 Array
     .from(document.getElementsByClassName("number-input"))
     .forEach(number_input => {
