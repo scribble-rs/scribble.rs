@@ -14,6 +14,7 @@ func init() {
 	DefaultTranslation = initEnglishTranslation()
 	initGermanTranslation()
 	initPolishTranslation()
+	initSpainTranslation()
 }
 
 var translationRegistry = make(map[string]Translation)
