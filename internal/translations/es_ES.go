@@ -71,7 +71,6 @@ func initSpainTranslation() Translation {
 	translation.put("create-public-lobby", "Crear un lobby público")
 	translation.put("create-private-lobby", "Crear un lobby privado")
 
-	translation.put("players", "Jugadores")
 	translation.put("refresh", "Refrescar")
 	translation.put("join-lobby", "Únase al lobby")
 
@@ -133,7 +132,6 @@ func initSpainTranslation() Translation {
 	translation.put("stats", "Estado")
 
 	RegisterTranslation("es", translation)
-	RegisterTranslation("es-es", translation)
 
 	return translation
 }
