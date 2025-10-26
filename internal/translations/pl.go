@@ -125,7 +125,6 @@ func initPolishTranslation() Translation {
 	translation.put("stats", "Stan")
 
 	RegisterTranslation("pl", translation)
-	RegisterTranslation("pl-pl", translation)
 
 	return translation
 }

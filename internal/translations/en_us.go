@@ -132,7 +132,6 @@ func initEnglishTranslation() Translation {
 	translation.put("stats", "Status")
 
 	RegisterTranslation("en", translation)
-	RegisterTranslation("en-de", translation)
 
 	return translation
 }

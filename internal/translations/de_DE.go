@@ -127,5 +127,4 @@ func initGermanTranslation() {
 	translation.put("stats", "Status")
 
 	RegisterTranslation("de", translation)
-	RegisterTranslation("de-de", translation)
 }
