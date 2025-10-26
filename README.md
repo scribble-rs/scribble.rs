@@ -169,6 +169,12 @@ There are many ways you can contribute:
 * Solve issues by creating Pull Requests
 * Tell your friends about the project
 
+### Translations
+
+For translations, please always use the `en_us.go` as your base. Other
+translations might not be up-to-date. This will cause you to have missing keys
+or translate obsolete keys.
+
 ## Credits
 
 These resources are by people unrelated to the project, whilst not every of
