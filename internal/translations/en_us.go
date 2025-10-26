@@ -71,7 +71,6 @@ func initEnglishTranslation() Translation {
 	translation.put("create-public-lobby", "Create Public Lobby")
 	translation.put("create-private-lobby", "Create Private Lobby")
 
-	translation.put("players", "Players")
 	translation.put("refresh", "Refresh")
 	translation.put("join-lobby", "Join Lobby")
 
