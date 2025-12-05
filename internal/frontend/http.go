@@ -92,7 +92,7 @@ func (baseConfig *BasePageConfig) WithCacheBust(file string) template.HTMLAttr {
 
 func (handler *SSRHandler) cspMiddleware(handleFunc http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Content-Security-Policy-Report-Only", "default-src 'self'; script-src 'self' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline' blob:; img-src 'self' data: blob:; media-src 'self' blob: data:")
+		w.Header().Add("Content-Security-Policy", "base-uri 'self'; default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:")
 		handleFunc.ServeHTTP(w, r)
 	}
 }
@@ -115,7 +115,7 @@ func (handler *SSRHandler) SetupRoutes(register func(string, string, http.Handle
 			"/"+path.Join(handler.cfg.RootPath, route)+"/",
 			http.HandlerFunc(fileServer.ServeHTTP),
 		).ServeHTTP
-		register(
+		registerWithCsp(
 			// Trailing slash means wildcard.
 			"GET", path.Join(handler.cfg.RootPath, route)+"/",
 			fileHandler,
@@ -138,7 +138,7 @@ func (handler *SSRHandler) SetupRoutes(register func(string, string, http.Handle
 			})).ServeHTTP)
 
 	fileServer := http.FileServer(http.FS(frontendResourcesFS))
-	register(
+	registerWithCsp(
 		"GET", path.Join(handler.cfg.RootPath, "resources", "{file}"),
 		http.StripPrefix(
 			"/"+handler.cfg.RootPath,
@@ -150,8 +150,8 @@ func (handler *SSRHandler) SetupRoutes(register func(string, string, http.Handle
 			}),
 		).ServeHTTP,
 	)
-	register("GET", path.Join(handler.cfg.RootPath, "lobby.js"), handler.lobbyJs)
-	register("GET", path.Join(handler.cfg.RootPath, "index.js"), handler.indexJs)
+	registerWithCsp("GET", path.Join(handler.cfg.RootPath, "lobby.js"), handler.lobbyJs)
+	registerWithCsp("GET", path.Join(handler.cfg.RootPath, "index.js"), handler.indexJs)
 	registerWithCsp("GET", path.Join(handler.cfg.RootPath, "ssrEnterLobby", "{lobby_id}"), handler.ssrEnterLobby)
 	registerWithCsp("POST", path.Join(handler.cfg.RootPath, "ssrCreateLobby"), handler.ssrCreateLobby)
 }
