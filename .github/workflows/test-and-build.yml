@@ -30,7 +30,7 @@ jobs:
       - name: Run tests
         shell: bash
         run: |
-          go test -v -race -covermode=atomic ./...
+          go test -v -race ./...
 
       - name: Build artifact
         shell: bash
