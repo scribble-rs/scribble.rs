@@ -248,15 +248,18 @@ const (
 func isRateLimited(player *Player) bool {
 	now := time.Now()
 
-	// Clean up old timestamps (older than 20 seconds)
+	// Clean up old timestamps (older than 20 seconds) in-place
 	cutoff := now.Add(-rateLimitWindowSeconds * time.Second)
-	validTimestamps := make([]time.Time, 0, len(player.messageTimestamps))
-	for _, ts := range player.messageTimestamps {
+	validCount := 0
+	for i, ts := range player.messageTimestamps {
 		if ts.After(cutoff) {
-			validTimestamps = append(validTimestamps, ts)
+			// Move valid timestamp to the front of the slice
+			player.messageTimestamps[validCount] = player.messageTimestamps[i]
+			validCount++
 		}
 	}
-	player.messageTimestamps = validTimestamps
+	// Trim slice to keep only valid timestamps
+	player.messageTimestamps = player.messageTimestamps[:validCount]
 
 	// Check if exceeded 30 messages in 20 seconds window
 	if len(player.messageTimestamps) >= maxMessagesInWindow {
@@ -264,11 +267,16 @@ func isRateLimited(player *Player) bool {
 	}
 
 	// Check if exceeded 5 messages in the last second
+	// Since timestamps are chronologically ordered (newest last),
+	// we iterate backwards and break early when we find an old timestamp
 	oneSecondAgo := now.Add(-1 * time.Second)
 	messagesInLastSecond := 0
-	for _, ts := range player.messageTimestamps {
-		if ts.After(oneSecondAgo) {
+	for i := len(player.messageTimestamps) - 1; i >= 0; i-- {
+		if player.messageTimestamps[i].After(oneSecondAgo) {
 			messagesInLastSecond++
+		} else {
+			// Timestamps are chronologically ordered, so we can break early
+			break
 		}
 	}
 
