@@ -665,6 +665,7 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 		},
 	})
 
+	preSelectedWord := lobby.wordChoice[lobby.preSelectedWord]
 	lobby.wordChoiceEndTime = getTimeAsMillis() + int64(wordChoiceDuration)*1000
 	go func() {
 		timer := time.NewTimer(time.Duration(wordChoiceDuration) * time.Second)
@@ -673,9 +674,15 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 		lobby.mutex.Lock()
 		defer lobby.mutex.Unlock()
 
+		// Timer is still from last round. Unlikely to happen, but there
+		// was a bug report.
+		if lobby.wordChoice[lobby.preSelectedWord] != preSelectedWord {
+			return
+		}
+
 		// We let the timer run out as long as it doesn't seem to cause any
 		// issues and make sure it doesn't fire when it would break stuff.
-		lobby.selectWord(int(lobby.preSelectedWord))
+		lobby.selectWord(lobby.preSelectedWord)
 	}()
 
 	lobby.SendYourTurnEvent(newDrawer)
