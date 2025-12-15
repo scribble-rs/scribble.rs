@@ -239,7 +239,7 @@ const (
 	// Allow up to 5 messages per second
 	maxMessagesPerSecond = 5
 	// Allow up to 30 messages in 20 seconds
-	maxMessagesInWindow = 30
+	maxMessagesInWindow    = 30
 	rateLimitWindowSeconds = 20
 )
 
@@ -247,7 +247,7 @@ const (
 // Rate limits: 5 messages/second and 30 messages in 20 seconds.
 func isRateLimited(player *Player) bool {
 	now := time.Now()
-	
+
 	// Clean up old timestamps (older than 20 seconds)
 	cutoff := now.Add(-rateLimitWindowSeconds * time.Second)
 	validTimestamps := make([]time.Time, 0, len(player.messageTimestamps))
@@ -257,12 +257,12 @@ func isRateLimited(player *Player) bool {
 		}
 	}
 	player.messageTimestamps = validTimestamps
-	
+
 	// Check if exceeded 30 messages in 20 seconds window
 	if len(player.messageTimestamps) >= maxMessagesInWindow {
 		return true
 	}
-	
+
 	// Check if exceeded 5 messages in the last second
 	oneSecondAgo := now.Add(-1 * time.Second)
 	messagesInLastSecond := 0
@@ -271,11 +271,11 @@ func isRateLimited(player *Player) bool {
 			messagesInLastSecond++
 		}
 	}
-	
+
 	if messagesInLastSecond >= maxMessagesPerSecond {
 		return true
 	}
-	
+
 	return false
 }
 

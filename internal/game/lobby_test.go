@@ -573,7 +573,7 @@ func Test_RateLimiting_UnderLimit(t *testing.T) {
 	}
 
 	now := time.Now()
-	
+
 	// Add 4 messages in the last second (under the 5/second limit)
 	for i := 0; i < 4; i++ {
 		player.messageTimestamps = append(player.messageTimestamps, now.Add(-time.Duration(i*100)*time.Millisecond))
@@ -590,7 +590,7 @@ func Test_RateLimiting_ExceedPerSecondLimit(t *testing.T) {
 	}
 
 	now := time.Now()
-	
+
 	// Add 5 messages in the last second (at the 5/second limit)
 	for i := 0; i < 5; i++ {
 		player.messageTimestamps = append(player.messageTimestamps, now.Add(-time.Duration(i*100)*time.Millisecond))
@@ -608,7 +608,7 @@ func Test_RateLimiting_ExceedWindowLimit(t *testing.T) {
 	}
 
 	now := time.Now()
-	
+
 	// Add 30 messages spread over 19 seconds (at the 30/20s limit)
 	for i := 0; i < 30; i++ {
 		// Spread messages across 19 seconds, not exceeding 5/second
@@ -627,7 +627,7 @@ func Test_RateLimiting_OldTimestampsCleanup(t *testing.T) {
 	}
 
 	now := time.Now()
-	
+
 	// Add 30 messages older than 20 seconds
 	for i := 0; i < 30; i++ {
 		player.messageTimestamps = append(player.messageTimestamps, now.Add(-21*time.Second))
@@ -635,7 +635,7 @@ func Test_RateLimiting_OldTimestampsCleanup(t *testing.T) {
 
 	// Should not be rate limited (all timestamps are old and should be cleaned up)
 	require.False(t, isRateLimited(player))
-	
+
 	// Verify old timestamps were cleaned up
 	require.Equal(t, 0, len(player.messageTimestamps))
 }
@@ -664,12 +664,12 @@ func Test_RateLimiting_MixedOldAndNewMessages(t *testing.T) {
 	}
 
 	now := time.Now()
-	
+
 	// Add 15 old messages (older than 20 seconds)
 	for i := 0; i < 15; i++ {
 		player.messageTimestamps = append(player.messageTimestamps, now.Add(-21*time.Second))
 	}
-	
+
 	// Add 4 recent messages (under the 5/second limit)
 	for i := 0; i < 4; i++ {
 		player.messageTimestamps = append(player.messageTimestamps, now.Add(-time.Duration(i*200)*time.Millisecond))
@@ -677,7 +677,7 @@ func Test_RateLimiting_MixedOldAndNewMessages(t *testing.T) {
 
 	// Should not be rate limited (old messages cleaned up, only 4 recent)
 	require.False(t, isRateLimited(player))
-	
+
 	// Verify cleanup happened
 	require.Equal(t, 4, len(player.messageTimestamps))
 }
