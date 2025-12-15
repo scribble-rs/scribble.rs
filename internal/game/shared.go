@@ -214,6 +214,9 @@ type Player struct {
 	disconnectTime   *time.Time
 	votedForKick     map[uuid.UUID]bool
 	lastKnownAddress string
+	// messageTimestamps tracks the timestamps of recent messages for rate limiting.
+	// Stores up to 30 timestamps (max messages in 20 seconds).
+	messageTimestamps []time.Time
 
 	// Name is the players displayed name
 	Name  string      `json:"name"`

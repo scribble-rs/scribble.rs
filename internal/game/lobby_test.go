@@ -553,3 +553,131 @@ func Test_NoPrematureGameOver(t *testing.T) {
 	require.Equal(t, Standby, player.State)
 	require.Equal(t, Unstarted, lobby.State)
 }
+
+func Test_RateLimiting_NoLimit(t *testing.T) {
+	t.Parallel()
+
+	player := &Player{
+		messageTimestamps: []time.Time{},
+	}
+
+	// No messages yet, should not be rate limited
+	require.False(t, isRateLimited(player))
+}
+
+func Test_RateLimiting_UnderLimit(t *testing.T) {
+	t.Parallel()
+
+	player := &Player{
+		messageTimestamps: []time.Time{},
+	}
+
+	now := time.Now()
+	
+	// Add 4 messages in the last second (under the 5/second limit)
+	for i := 0; i < 4; i++ {
+		player.messageTimestamps = append(player.messageTimestamps, now.Add(-time.Duration(i*100)*time.Millisecond))
+	}
+
+	require.False(t, isRateLimited(player))
+}
+
+func Test_RateLimiting_ExceedPerSecondLimit(t *testing.T) {
+	t.Parallel()
+
+	player := &Player{
+		messageTimestamps: []time.Time{},
+	}
+
+	now := time.Now()
+	
+	// Add 5 messages in the last second (at the 5/second limit)
+	for i := 0; i < 5; i++ {
+		player.messageTimestamps = append(player.messageTimestamps, now.Add(-time.Duration(i*100)*time.Millisecond))
+	}
+
+	// Should be rate limited (5 messages already, trying to send 6th)
+	require.True(t, isRateLimited(player))
+}
+
+func Test_RateLimiting_ExceedWindowLimit(t *testing.T) {
+	t.Parallel()
+
+	player := &Player{
+		messageTimestamps: []time.Time{},
+	}
+
+	now := time.Now()
+	
+	// Add 30 messages spread over 19 seconds (at the 30/20s limit)
+	for i := 0; i < 30; i++ {
+		// Spread messages across 19 seconds, not exceeding 5/second
+		player.messageTimestamps = append(player.messageTimestamps, now.Add(-time.Duration(i*600)*time.Millisecond))
+	}
+
+	// Should be rate limited (30 messages already in window)
+	require.True(t, isRateLimited(player))
+}
+
+func Test_RateLimiting_OldTimestampsCleanup(t *testing.T) {
+	t.Parallel()
+
+	player := &Player{
+		messageTimestamps: []time.Time{},
+	}
+
+	now := time.Now()
+	
+	// Add 30 messages older than 20 seconds
+	for i := 0; i < 30; i++ {
+		player.messageTimestamps = append(player.messageTimestamps, now.Add(-21*time.Second))
+	}
+
+	// Should not be rate limited (all timestamps are old and should be cleaned up)
+	require.False(t, isRateLimited(player))
+	
+	// Verify old timestamps were cleaned up
+	require.Equal(t, 0, len(player.messageTimestamps))
+}
+
+func Test_RateLimiting_RecordMessage(t *testing.T) {
+	t.Parallel()
+
+	player := &Player{
+		messageTimestamps: []time.Time{},
+	}
+
+	require.Equal(t, 0, len(player.messageTimestamps))
+
+	recordMessage(player)
+	require.Equal(t, 1, len(player.messageTimestamps))
+
+	recordMessage(player)
+	require.Equal(t, 2, len(player.messageTimestamps))
+}
+
+func Test_RateLimiting_MixedOldAndNewMessages(t *testing.T) {
+	t.Parallel()
+
+	player := &Player{
+		messageTimestamps: []time.Time{},
+	}
+
+	now := time.Now()
+	
+	// Add 15 old messages (older than 20 seconds)
+	for i := 0; i < 15; i++ {
+		player.messageTimestamps = append(player.messageTimestamps, now.Add(-21*time.Second))
+	}
+	
+	// Add 4 recent messages (under the 5/second limit)
+	for i := 0; i < 4; i++ {
+		player.messageTimestamps = append(player.messageTimestamps, now.Add(-time.Duration(i*200)*time.Millisecond))
+	}
+
+	// Should not be rate limited (old messages cleaned up, only 4 recent)
+	require.False(t, isRateLimited(player))
+	
+	// Verify cleanup happened
+	require.Equal(t, 4, len(player.messageTimestamps))
+}

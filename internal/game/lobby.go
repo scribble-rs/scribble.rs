@@ -234,6 +234,56 @@ func (lobby *Lobby) readyToStart() bool {
 	return hasConnectedPlayers
 }
 
+const (
+	// Rate limiting constants
+	// Allow up to 5 messages per second
+	maxMessagesPerSecond = 5
+	// Allow up to 30 messages in 20 seconds
+	maxMessagesInWindow = 30
+	rateLimitWindowSeconds = 20
+)
+
+// isRateLimited checks if a player has exceeded rate limits.
+// Rate limits: 5 messages/second and 30 messages in 20 seconds.
+func isRateLimited(player *Player) bool {
+	now := time.Now()
+	
+	// Clean up old timestamps (older than 20 seconds)
+	cutoff := now.Add(-rateLimitWindowSeconds * time.Second)
+	validTimestamps := make([]time.Time, 0, len(player.messageTimestamps))
+	for _, ts := range player.messageTimestamps {
+		if ts.After(cutoff) {
+			validTimestamps = append(validTimestamps, ts)
+		}
+	}
+	player.messageTimestamps = validTimestamps
+	
+	// Check if exceeded 30 messages in 20 seconds window
+	if len(player.messageTimestamps) >= maxMessagesInWindow {
+		return true
+	}
+	
+	// Check if exceeded 5 messages in the last second
+	oneSecondAgo := now.Add(-1 * time.Second)
+	messagesInLastSecond := 0
+	for _, ts := range player.messageTimestamps {
+		if ts.After(oneSecondAgo) {
+			messagesInLastSecond++
+		}
+	}
+	
+	if messagesInLastSecond >= maxMessagesPerSecond {
+		return true
+	}
+	
+	return false
+}
+
+// recordMessage adds the current timestamp to the player's message history.
+func recordMessage(player *Player) {
+	player.messageTimestamps = append(player.messageTimestamps, time.Now())
+}
+
 func handleMessage(message string, sender *Player, lobby *Lobby) {
 	// Very long message can cause lags and can therefore be easily abused.
 	// While it is debatable whether a 10000 byte (not character) long
@@ -250,18 +300,33 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 		return
 	}
 
+	// Check if player is rate limited
+	rateLimited := isRateLimited(sender)
+	// Record message timestamp for rate limiting (even if rate limited)
+	recordMessage(sender)
+
 	// If no word is currently selected, all players can talk to each other
 	// and we don't have to check for corrected guesses.
 	if lobby.CurrentWord == "" {
-		lobby.broadcastMessage(trimmedMessage, sender)
+		if rateLimited {
+			// Silent rate limiting: send message only to sender
+			_ = lobby.WriteObject(sender, newMessageEvent(EventTypeMessage, trimmedMessage, sender))
+		} else {
+			lobby.broadcastMessage(trimmedMessage, sender)
+		}
 		return
 	}
 
 	if sender.State != Guessing {
-		lobby.broadcastConditional(
-			newMessageEvent(EventTypeNonGuessingPlayerMessage, trimmedMessage, sender),
-			IsAllowedToSeeRevealedHints,
-		)
+		if rateLimited {
+			// Silent rate limiting: send message only to sender
+			_ = lobby.WriteObject(sender, newMessageEvent(EventTypeNonGuessingPlayerMessage, trimmedMessage, sender))
+		} else {
+			lobby.broadcastConditional(
+				newMessageEvent(EventTypeNonGuessingPlayerMessage, trimmedMessage, sender),
+				IsAllowedToSeeRevealedHints,
+			)
+		}
 		return
 	}
 
@@ -271,6 +336,12 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 	switch CheckGuess(normInput, normSearched) {
 	case EqualGuess:
 		{
+			// Don't process correct guesses if rate limited (prevents guess botting)
+			if rateLimited {
+				_ = lobby.WriteObject(sender, newMessageEvent(EventTypeMessage, trimmedMessage, sender))
+				return
+			}
+
 			sender.LastScore = lobby.calculateGuesserScore()
 			sender.Score += sender.LastScore
 
@@ -289,14 +360,25 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 		}
 	case CloseGuess:
 		{
-			// In cases of a close guess, we still send the message to everyone.
-			// This allows other players to guess the word by watching what the
-			// other players are misstyping.
-			lobby.broadcastMessage(trimmedMessage, sender)
-			_ = lobby.WriteObject(sender, Event{Type: EventTypeCloseGuess, Data: trimmedMessage})
+			if rateLimited {
+				// Silent rate limiting: send only to sender
+				_ = lobby.WriteObject(sender, newMessageEvent(EventTypeMessage, trimmedMessage, sender))
+				_ = lobby.WriteObject(sender, Event{Type: EventTypeCloseGuess, Data: trimmedMessage})
+			} else {
+				// In cases of a close guess, we still send the message to everyone.
+				// This allows other players to guess the word by watching what the
+				// other players are misstyping.
+				lobby.broadcastMessage(trimmedMessage, sender)
+				_ = lobby.WriteObject(sender, Event{Type: EventTypeCloseGuess, Data: trimmedMessage})
+			}
 		}
 	default:
-		lobby.broadcastMessage(trimmedMessage, sender)
+		if rateLimited {
+			// Silent rate limiting: send message only to sender
+			_ = lobby.WriteObject(sender, newMessageEvent(EventTypeMessage, trimmedMessage, sender))
+		} else {
+			lobby.broadcastMessage(trimmedMessage, sender)
+		}
 	}
 }
 
