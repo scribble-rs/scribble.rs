@@ -676,7 +676,9 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 
 		// Timer is still from last round. Unlikely to happen, but there
 		// was a bug report.
-		if lobby.wordChoice[lobby.preSelectedWord] != preSelectedWord {
+		if len(lobby.wordChoice)-1 >= lobby.preSelectedWord &&
+			lobby.preSelectedWord >= 0 &&
+			lobby.wordChoice[lobby.preSelectedWord] != preSelectedWord {
 			return
 		}
 
