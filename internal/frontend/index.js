@@ -92,10 +92,6 @@ const language_to_flag = (language) => {
     }
 };
 
-const remove_icon_loading_class = (img) => {
-    img.classList.remove("lobby-list-icon-loading");
-};
-
 const set_lobbies = (lobbies, visible) => {
     const new_lobby_nodes = lobbies.map((lobby) => {
         const lobby_list_item = document.createElement("div");
@@ -154,8 +150,9 @@ const set_lobbies = (lobbies, visible) => {
             const image = document.createElement("img");
             image.className = "lobby-list-item-icon lobby-list-icon-loading";
             image.setAttribute("loading", "lazy");
-            image.setAttribute("onLoad",
-                "remove_icon_loading_class(this)");
+            image.addEventListener("load", function() {
+                image.classList.remove("lobby-list-icon-loading");
+            });
             image.setAttribute("src", icon);
 
             const span = document.createElement("span");
