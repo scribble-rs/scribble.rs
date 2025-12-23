@@ -57,6 +57,10 @@ var (
 			LanguageCode: "pl",
 			Lowercaser:   func() cases.Caser { return cases.Lower(language.Polish) },
 		},
+		"arabic": {
+			LanguageCode: "ar",
+			Lowercaser:   func() cases.Caser { return cases.Lower(language.Arabic) },
+		},
 	}
 
 	//go:embed words/*
