@@ -17,26 +17,29 @@ func init() {
 	initSpainTranslation()
 }
 
-var translationRegistry = make(map[string]Translation)
+var translationRegistry = make(map[string]*Translation)
 
 // DefaultTranslation is the fallback translation for cases where the users
 // preferred language can't be found. This value is never returned by Get, but
 // has to be retrieved manually if desired. Currently, this is en-US.
-var DefaultTranslation Translation
+var DefaultTranslation *Translation
 
 // Translation represents key - value pairs of translated user interface
 // strings.
-type Translation map[string]string
+type Translation struct {
+	Dictionary map[string]string
+	IsRtl      bool
+}
 
 // Get retrieves a translated string or the default string if none could
 // be found.
 func (translation Translation) Get(key string) string {
-	value, avail := translation[key]
+	value, avail := translation.Dictionary[key]
 	if avail {
 		return value
 	}
 
-	fallbackValue, fallbackAvail := DefaultTranslation[key]
+	fallbackValue, fallbackAvail := DefaultTranslation.Dictionary[key]
 	if fallbackAvail {
 		return fallbackValue
 	}
@@ -47,7 +50,7 @@ func (translation Translation) Get(key string) string {
 // put adds a new key to the translation. If the key already exists, the
 // server panics. This happens on startup, therefore it's safe.
 func (translation Translation) put(key, value string) {
-	_, avail := translation[key]
+	_, avail := translation.Dictionary[key]
 	if avail {
 		panic(fmt.Sprintf("Duplicate key '%s'", key))
 	}
@@ -60,19 +63,19 @@ func (translation Translation) put(key, value string) {
 		panic(fmt.Sprintf("Language key '%s' value contains leading or trailing whitespace", value))
 	}
 
-	translation[key] = value
+	translation.Dictionary[key] = value
 }
 
 // GetLanguage retrieves a translation pack or nil if the desired package
 // couldn't be found.
-func GetLanguage(locale string) Translation {
+func GetLanguage(locale string) *Translation {
 	return translationRegistry[locale]
 }
 
 // RegisterTranslation makes adds a language to the registry and makes
 // it available via Get. If the language is already registered, the server
 // panics. This happens on startup, therefore it's safe.
-func RegisterTranslation(locale string, translation Translation) {
+func RegisterTranslation(locale string, translation *Translation) {
 	// Make sure the locale is valid.
 	language.MustParse(locale)
 
@@ -84,8 +87,8 @@ func RegisterTranslation(locale string, translation Translation) {
 	}
 
 	if DefaultTranslation != nil {
-		for key := range translation {
-			_, fallbackValueAvail := DefaultTranslation[key]
+		for key := range translation.Dictionary {
+			_, fallbackValueAvail := DefaultTranslation.Dictionary[key]
 			if !fallbackValueAvail {
 				panic(fmt.Sprintf("Language key '%s' in language '%s' has no default translation value in 'en_US'", key, locale))
 			}
@@ -95,6 +98,8 @@ func RegisterTranslation(locale string, translation Translation) {
 	translationRegistry[localeLowercased] = translation
 }
 
-func createTranslation() Translation {
-	return make(map[string]string)
+func createTranslation() *Translation {
+	return &Translation{
+		Dictionary: make(map[string]string),
+	}
 }

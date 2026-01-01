@@ -11,7 +11,7 @@
     {{template "favicon-decl" .}}
 </head>
 
-<body>
+<body {{if eq .Translation.IsRtl true}} dir="rtl" {{end}}>
     <div id="app">
         <div class="error-pane-wrapper">
             <div class="error-pane">

@@ -91,6 +91,8 @@ type Lobby struct {
 
 	mutex sync.Mutex
 
+	IsWordpackRtl bool
+
 	WriteObject          func(*Player, any) error
 	WritePreparedMessage func(*Player, *gws.Broadcaster) error
 }

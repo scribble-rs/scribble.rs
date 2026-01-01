@@ -19,7 +19,7 @@
     <link rel="prefetch" href='{{.RootPath}}/resources/{{.WithCacheBust "no-sound.svg"}}' />
 </head>
 
-<body>
+<body {{if eq .Translation.IsRtl true}} dir="rtl" {{end}}>
     <div id="app">
         <noscript><span class="noscript">{{.Translation.Get "requires-js"}}</span></noscript>
 
@@ -103,9 +103,8 @@
                             </div>
                         </div>
                     </div>
-                    <div id="word-container"></div>
+            <div id="word-container" {{if eq .IsWordpackRtl true}} dir="rtl" {{else}} dir="ltr" {{end}}></div>
                 </div>
-
                 <div id="time-left">
                     <img src='{{.RootPath}}/resources/{{.WithCacheBust "clock.svg"}}' class="header-button-image" />
                     <div id="time-left-value">∞</div>

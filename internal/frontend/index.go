@@ -30,7 +30,7 @@ var indexJsRaw string
 type indexJsData struct {
 	*BasePageConfig
 
-	Translation translations.Translation
+	Translation *translations.Translation
 	Locale      string
 }
 
@@ -168,7 +168,7 @@ type IndexPageData struct {
 	config.LobbySettingDefaults
 	game.SettingBounds
 
-	Translation       translations.Translation
+	Translation       *translations.Translation
 	Locale            string
 	Errors            []string
 	Languages         map[string]string
