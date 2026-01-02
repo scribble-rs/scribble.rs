@@ -8,6 +8,7 @@
 <a class="footer-item" href="https://github.com/scribble-rs/scribble.rs/releases/tag/{{.Version}}"
     target="_blank">{{.Version}}</a>
 {{end}}
+{{if ne .Translation nil}}
 <a class="footer-item" href="https://github.com/scribble-rs/scribble.rs"
     target="_blank">{{.Translation.Get "source-code"}}</a>
 <a class="footer-item" href="https://github.com/scribble-rs/scribble.rs/wiki"
@@ -15,4 +16,5 @@
 <a class="footer-item" href="https://github.com/scribble-rs/scribble.rs/issues/new"
     target="_blank">{{.Translation.Get "submit-feedback"}}</a>
 <a class="footer-item" href="{{.RootPath}}/v1/stats" target="_blank">{{.Translation.Get "stats"}}</a>
+{{end}}
 {{end}}
