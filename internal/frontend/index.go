@@ -276,7 +276,7 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 	if err != nil {
 		pageData.Errors = append(pageData.Errors, err.Error())
 		if err := pageTemplates.ExecuteTemplate(writer, "index", pageData); err != nil {
-			handler.userFacingError(writer, err.Error())
+			handler.userFacingError(writer, err.Error(), translation)
 		}
 
 		return
