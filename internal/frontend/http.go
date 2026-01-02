@@ -162,7 +162,7 @@ type errorPageData struct {
 	// ErrorMessage displayed on the page.
 	ErrorMessage string
 
-	Translation translations.Translation
+	Translation *translations.Translation
 	Locale      string
 }
 

@@ -16,7 +16,7 @@ type lobbyPageData struct {
 	*BasePageConfig
 	*api.LobbyData
 
-	Translation translations.Translation
+	Translation *translations.Translation
 	Locale      string
 }
 
@@ -24,7 +24,7 @@ type lobbyJsData struct {
 	*BasePageConfig
 	*api.GameConstants
 
-	Translation translations.Translation
+	Translation *translations.Translation
 	Locale      string
 }
 
@@ -132,7 +132,7 @@ func (handler *SSRHandler) ssrEnterLobbyNoChecks(
 	}
 }
 
-func determineTranslation(r *http.Request) (translations.Translation, string) {
+func determineTranslation(r *http.Request) (*translations.Translation, string) {
 	languageTags, _, err := language.ParseAcceptLanguage(r.Header.Get("Accept-Language"))
 	if err == nil {
 		for _, languageTag := range languageTags {

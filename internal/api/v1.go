@@ -474,6 +474,7 @@ type LobbyData struct {
 	game.SettingBounds
 	game.EditableLobbySettings
 	*GameConstants
+	IsWordpackRtl bool
 }
 
 // CreateLobbyData creates a ready to use LobbyData object containing data
@@ -483,6 +484,7 @@ func CreateLobbyData(cfg *config.Config, lobby *game.Lobby) *LobbyData {
 		SettingBounds:         cfg.LobbySettingBounds,
 		EditableLobbySettings: lobby.EditableLobbySettings,
 		GameConstants:         GameConstantsData,
+		IsWordpackRtl:         lobby.IsWordpackRtl,
 	}
 }
 

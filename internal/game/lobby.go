@@ -972,6 +972,8 @@ func CreateLobby(
 	// will most likely be faulty.
 	lobby.lowercaser = WordlistData[chosenLanguage].Lowercaser()
 
+	lobby.IsWordpackRtl = WordlistData[chosenLanguage].IsRtl
+
 	// customWords are lowercased afterwards, as they are direct user input.
 	if len(customWords) > 0 {
 		for customWordIndex, customWord := range customWords {
