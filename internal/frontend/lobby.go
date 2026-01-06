@@ -53,9 +53,10 @@ func (handler *SSRHandler) lobbyJs(writer http.ResponseWriter, request *http.Req
 
 // ssrEnterLobby opens a lobby, either opening it directly or asking for a lobby.
 func (handler *SSRHandler) ssrEnterLobby(writer http.ResponseWriter, request *http.Request) {
+	translation, _ := determineTranslation(request)
 	lobby := state.GetLobby(request.PathValue("lobby_id"))
 	if lobby == nil {
-		handler.userFacingError(writer, api.ErrLobbyNotExistent.Error(), nil)
+		handler.userFacingError(writer, translation.Get("lobby-doesnt-exist"), translation)
 		return
 	}
 
@@ -93,12 +94,12 @@ func (handler *SSRHandler) ssrEnterLobbyNoChecks(
 
 		if player == nil {
 			if !lobby.HasFreePlayerSlot() {
-				handler.userFacingError(writer, "Sorry, but the lobby is full.", translation)
+				handler.userFacingError(writer, translation.Get("lobby-full"), translation)
 				return
 			}
 
 			if !lobby.CanIPConnect(requestAddress) {
-				handler.userFacingError(writer, "Sorry, but you have exceeded the maximum number of clients per IP.", translation)
+				handler.userFacingError(writer, translation.Get("lobby-ip-limit-excceeded"), translation)
 				return
 			}
 
@@ -107,7 +108,7 @@ func (handler *SSRHandler) ssrEnterLobbyNoChecks(
 			api.SetGameplayCookies(writer, request, newPlayer, lobby)
 		} else {
 			if player.Connected && player.GetWebsocket() != nil {
-				handler.userFacingError(writer, "It appears you already have an open tab for this lobby.", translation)
+				handler.userFacingError(writer, translation.Get("lobby-open-tab-exists"), translation)
 				return
 			}
 			player.SetLastKnownAddress(requestAddress)

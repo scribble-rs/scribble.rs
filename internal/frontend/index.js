@@ -39,7 +39,7 @@ const lobby_list_loading_placeholder =
     document.getElementById("lobby-list-placeholder-loading");
 const lobby_list = document.getElementById("lobby-list");
 
-lobby_list_placeholder.innerHTML = "<b>There are no lobbies yet.</b>";
+lobby_list_placeholder.innerHTML = '<b>{{.Translation.Get "no-lobbies-yet"}}</b>';
 
 const getLobbies = () => {
     return new Promise((resolve, reject) => {
@@ -89,6 +89,8 @@ const language_to_flag = (language) => {
             return "\u{1f1f3}\u{1f1f1}";
         case "polish":
             return "\u{1f1f5}\u{1f1f1}";
+        case "hebrew":
+            return "\u{1f1ee}\u{1f1f1}"
     }
 };
 
@@ -121,12 +123,12 @@ const set_lobbies = (lobbies, visible) => {
         }
         if (lobby.state === "ongoing") {
             lobby_list_row_a.appendChild(new_custom_tag(
-                'Ongoing'
+                '{{.Translation.Get "ongoing"}}'
             ));
         }
         if (lobby.state === "gameover") {
             lobby_list_row_a.appendChild(new_custom_tag(
-                'Game Over'
+                '{{.Translation.Get "game-over-lobby"}}'
             ));
         }
 
@@ -177,7 +179,7 @@ const set_lobbies = (lobbies, visible) => {
 
         const join_button = document.createElement("button");
         join_button.className = "join-button";
-        join_button.innerText = "Join";
+        join_button.innerText = '{{.Translation.Get "join"}}';
         join_button.addEventListener("click", (event) => {
             window.location.href =
                 `{{.RootPath}}/ssrEnterLobby/${lobby.lobbyId}`;
@@ -194,7 +196,7 @@ const set_lobbies = (lobbies, visible) => {
         set_lobby_list_placeholder("", false);
     } else {
         lobby_list.style.display = "none";
-        set_lobby_list_placeholder("There are no lobbies.", true);
+        set_lobby_list_placeholder('{{.Translation.Get "no-lobbies-yet"}}', true);
     }
 };
 

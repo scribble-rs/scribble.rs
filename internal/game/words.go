@@ -59,9 +59,14 @@ var (
 			Lowercaser:   func() cases.Caser { return cases.Lower(language.Polish) },
 		},
 		"arabic": {
-			IsRtl: true,
+			IsRtl:        true,
 			LanguageCode: "ar",
 			Lowercaser:   func() cases.Caser { return cases.Lower(language.Arabic) },
+		},
+		"hebrew": {
+			IsRtl:        true,
+			LanguageCode: "he",
+			Lowercaser:   func() cases.Caser { return cases.Lower(language.Hebrew) },
 		},
 	}
 
@@ -111,7 +116,7 @@ func readDefaultWordList(lowercaser cases.Caser, chosenLanguage string) ([]strin
 			return "", fmt.Errorf("error reading wordfile: %w", err)
 		}
 
-		return string(wordBytes), nil
+		return strings.ReplaceAll(string(wordBytes), "\r", ""), nil
 	})
 }
 

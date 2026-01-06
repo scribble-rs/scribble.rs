@@ -681,32 +681,32 @@ function setSpectateMode(requestedValue, spectatingValue) {
         showInfoDialog(
             `{{.Translation.Get "spectation-request-cancelled-title"}}`,
             `{{.Translation.Get "spectation-request-cancelled-text"}}`,
-            "Okay");
+            `{{.Translation.Get "confirm"}}`);
     } else if (spectateRequested && !requestedValue && modeUnchanged) {
         showInfoDialog(
             `{{.Translation.Get "participation-request-cancelled-title"}}`,
             `{{.Translation.Get "participation-request-cancelled-text"}}`,
-            "Okay");
+            `{{.Translation.Get "confirm"}}`);
     } else if (!spectateRequested && requestedValue && !spectatingValue) {
         showInfoDialog(
             `{{.Translation.Get "spectation-requested-title"}}`,
             `{{.Translation.Get "spectation-requested-text"}}`,
-            "Okay");
+            `{{.Translation.Get "confirm"}}`);
     } else if (!spectateRequested && requestedValue && spectatingValue) {
         showInfoDialog(
             `{{.Translation.Get "participation-requested-title"}}`,
             `{{.Translation.Get "participation-requested-text"}}`,
-            "Okay");
+            `{{.Translation.Get "confirm"}}`);
     } else if (spectatingValue && !spectating) {
         showInfoDialog(
             `{{.Translation.Get "now-spectating-title"}}`,
             `{{.Translation.Get "now-spectating-text"}}`,
-            "Okay");
+            `{{.Translation.Get "confirm"}}`);
     } else if (!spectatingValue && spectating) {
         showInfoDialog(
             `{{.Translation.Get "now-participating-title"}}`,
             `{{.Translation.Get "now-participating-text"}}`,
-            "Okay");
+            `{{.Translation.Get "confirm"}}`);
     }
 
     spectateRequested = requestedValue;
@@ -1003,8 +1003,8 @@ function registerMessageHandler(targetSocket) {
         } else if (parsed.type === "shutdown") {
             socket.onclose = null;
             socket.close();
-            showDialog("shutdown-info", "Server shutting down",
-                document.createTextNode("Sorry, but the server is about to shut down. Please come back at a later time."));
+            showDialog("shutdown-info", '{{.Translation.Get "server-shutting-down-title"}}',
+                document.createTextNode('{{.Translation.Get "server-shutting-down-text"}}'));
         }
     }
 };
