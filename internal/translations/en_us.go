@@ -10,6 +10,7 @@ func initEnglishTranslation() *Translation {
 	translation.put("force-restart", "Force Restart")
 	translation.put("game-not-started-title", "Game hasn't started")
 	translation.put("waiting-for-host-to-start", "Please wait for your lobby host to start the game.")
+	translation.put("click-to-homepage", "Click here to get back to the Homepage")
 
 	translation.put("now-spectating-title", "You are now spectating")
 	translation.put("now-spectating-text", "You can leave the spectator mode by pressing the eye button at the top.")
@@ -62,6 +63,7 @@ func initEnglishTranslation() *Translation {
 	translation.put("public-lobby-setting", "Public Lobby")
 	translation.put("custom-words", "Custom Words")
 	translation.put("custom-words-info", "Enter your additional words, separating them by commas")
+	translation.put("custom-words-placeholder", "Comma, separated, word, list, here")
 	translation.put("custom-words-per-turn-setting", "Custom Words Per Turn")
 	translation.put("players-per-ip-limit-setting", "Players per IP Limit")
 	translation.put("save-settings", "Save settings")
@@ -70,6 +72,11 @@ func initEnglishTranslation() *Translation {
 	translation.put("create-lobby", "Create Lobby")
 	translation.put("create-public-lobby", "Create Public Lobby")
 	translation.put("create-private-lobby", "Create Private Lobby")
+	translation.put("no-lobbies-yet", "There are no lobbies yet.")
+	translation.put("lobby-full", "Sorry, but the lobby is full.")
+	translation.put("lobby-ip-limit-excceeded", "Sorry, but you have exceeded the maximum number of clients per IP.")
+	translation.put("lobby-open-tab-exists", "It appears you already have an open tab for this lobby.")
+	translation.put("lobby-doesnt-exist", "The requested lobby doesn't exist")
 
 	translation.put("refresh", "Refresh")
 	translation.put("join-lobby", "Join Lobby")
@@ -110,8 +117,9 @@ func initEnglishTranslation() *Translation {
 		"Scribble.rs couldn't establish a socket connection.\n\nWhile your internet "+
 			"connection seems to be working, either the\nserver or your firewall hasn't "+
 			"been configured correctly.\n\nTo retry, reload the page.")
-
 	translation.put("message-too-long", "Your message is too long.")
+	translation.put("server-shutting-down-title", "Server shutting down")
+	translation.put("server-shutting-down-text", "Sorry, but the server is about to shut down. Please come back at a later time.")
 
 	// Help dialog
 	translation.put("controls", "Controls")
@@ -127,6 +135,11 @@ func initEnglishTranslation() *Translation {
 	translation.put("no", "No")
 	translation.put("yes", "Yes")
 	translation.put("system", "System")
+	translation.put("confirm", "Okay")
+	translation.put("ready", "Ready")
+	translation.put("join", "Join")
+	translation.put("ongoing", "Ongoing")
+	translation.put("game-over-lobby", "Game Over")
 
 	translation.put("source-code", "Source Code")
 	translation.put("help", "Help")

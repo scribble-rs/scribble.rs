@@ -36,6 +36,7 @@ var SupportedLanguages = map[string]string{
 	"russian":    "Russian",
 	"polish":     "Polish",
 	"arabic":     "Arabic",
+	"hebrew":     "Hebrew",
 }
 
 const (
