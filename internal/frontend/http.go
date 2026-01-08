@@ -162,15 +162,16 @@ type errorPageData struct {
 	// ErrorMessage displayed on the page.
 	ErrorMessage string
 
-	Translation translations.Translation
+	Translation *translations.Translation
 	Locale      string
 }
 
 // userFacingError will return the occurred error as a custom html page to the caller.
-func (handler *SSRHandler) userFacingError(w http.ResponseWriter, errorMessage string) {
+func (handler *SSRHandler) userFacingError(w http.ResponseWriter, errorMessage string, translation *translations.Translation) {
 	err := pageTemplates.ExecuteTemplate(w, "error-page", &errorPageData{
 		BasePageConfig: handler.basePageConfig,
 		ErrorMessage:   errorMessage,
+		Translation:    translation,
 	})
 	// This should never happen, but if it does, something is very wrong.
 	if err != nil {

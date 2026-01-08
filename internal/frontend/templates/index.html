@@ -31,7 +31,7 @@
     <link rel="prefetch" href='{{.RootPath}}/resources/{{.WithCacheBust "clock.svg"}}' />
 </head>
 
-<body>
+  <body {{if eq .Translation.IsRtl true}} dir="rtl" {{end}}>
     <div id="app">
         <div class="home">
             <img id="logo" src='{{.RootPath}}/resources/{{.WithCacheBust "logo.svg"}}' alt="Scribble.rs logo">

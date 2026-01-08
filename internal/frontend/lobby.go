@@ -16,7 +16,7 @@ type lobbyPageData struct {
 	*BasePageConfig
 	*api.LobbyData
 
-	Translation translations.Translation
+	Translation *translations.Translation
 	Locale      string
 }
 
@@ -24,7 +24,7 @@ type lobbyJsData struct {
 	*BasePageConfig
 	*api.GameConstants
 
-	Translation translations.Translation
+	Translation *translations.Translation
 	Locale      string
 }
 
@@ -55,7 +55,7 @@ func (handler *SSRHandler) lobbyJs(writer http.ResponseWriter, request *http.Req
 func (handler *SSRHandler) ssrEnterLobby(writer http.ResponseWriter, request *http.Request) {
 	lobby := state.GetLobby(request.PathValue("lobby_id"))
 	if lobby == nil {
-		handler.userFacingError(writer, api.ErrLobbyNotExistent.Error())
+		handler.userFacingError(writer, api.ErrLobbyNotExistent.Error(), nil)
 		return
 	}
 
@@ -93,12 +93,12 @@ func (handler *SSRHandler) ssrEnterLobbyNoChecks(
 
 		if player == nil {
 			if !lobby.HasFreePlayerSlot() {
-				handler.userFacingError(writer, "Sorry, but the lobby is full.")
+				handler.userFacingError(writer, "Sorry, but the lobby is full.", translation)
 				return
 			}
 
 			if !lobby.CanIPConnect(requestAddress) {
-				handler.userFacingError(writer, "Sorry, but you have exceeded the maximum number of clients per IP.")
+				handler.userFacingError(writer, "Sorry, but you have exceeded the maximum number of clients per IP.", translation)
 				return
 			}
 
@@ -107,7 +107,7 @@ func (handler *SSRHandler) ssrEnterLobbyNoChecks(
 			api.SetGameplayCookies(writer, request, newPlayer, lobby)
 		} else {
 			if player.Connected && player.GetWebsocket() != nil {
-				handler.userFacingError(writer, "It appears you already have an open tab for this lobby.")
+				handler.userFacingError(writer, "It appears you already have an open tab for this lobby.", translation)
 				return
 			}
 			player.SetLastKnownAddress(requestAddress)
@@ -132,7 +132,7 @@ func (handler *SSRHandler) ssrEnterLobbyNoChecks(
 	}
 }
 
-func determineTranslation(r *http.Request) (translations.Translation, string) {
+func determineTranslation(r *http.Request) (*translations.Translation, string) {
 	languageTags, _, err := language.ParseAcceptLanguage(r.Header.Get("Accept-Language"))
 	if err == nil {
 		for _, languageTag := range languageTags {

@@ -23,7 +23,7 @@
     <link rel="icon" type="image/png" href='{{.RootPath}}/resources/{{.WithCacheBust "favicon_96.png"}}' />
 </head>
 
-<body>
+<body {{if eq .Translation.IsRtl true}} dir="rtl" {{end}}>
     <div id="app">
         <h1 class="error-title">(◕︿◕✿)</h1>
         <h2 class="error-message">You can NOT join the lobby with this browser.</h2>

@@ -16,6 +16,7 @@ import (
 type LanguageData struct {
 	Lowercaser   func() cases.Caser
 	LanguageCode string
+	IsRtl        bool
 }
 
 var (

@@ -30,7 +30,7 @@ var indexJsRaw string
 type indexJsData struct {
 	*BasePageConfig
 
-	Translation translations.Translation
+	Translation *translations.Translation
 	Locale      string
 }
 
@@ -168,7 +168,7 @@ type IndexPageData struct {
 	config.LobbySettingDefaults
 	game.SettingBounds
 
-	Translation       translations.Translation
+	Translation       *translations.Translation
 	Locale            string
 	Errors            []string
 	Languages         map[string]string
@@ -276,7 +276,7 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 	if err != nil {
 		pageData.Errors = append(pageData.Errors, err.Error())
 		if err := pageTemplates.ExecuteTemplate(writer, "index", pageData); err != nil {
-			handler.userFacingError(writer, err.Error())
+			handler.userFacingError(writer, err.Error(), translation)
 		}
 
 		return
