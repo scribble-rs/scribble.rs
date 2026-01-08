@@ -2,6 +2,7 @@ package translations
 
 func initArabicTranslation() Translation {
 	translation := createTranslation()
+	translation.IsRtl = true
 
 	translation.put("requires-js", "يحتاج هذا الموقع لصلاحيات جافاسكريبت ليعمل.")
 
