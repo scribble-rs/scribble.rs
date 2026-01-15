@@ -1,6 +1,6 @@
 package translations
 
-func initArabicTranslation() Translation {
+func initArabicTranslation() *Translation {
 	translation := createTranslation()
 	translation.IsRtl = true
 
