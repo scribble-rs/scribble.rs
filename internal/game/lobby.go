@@ -758,6 +758,50 @@ func startTurnTimeTicker(lobby *Lobby, ticker *time.Ticker) {
 func (lobby *Lobby) tickLogic(expectedTicker *time.Ticker) bool {
 	lobby.mutex.Lock()
 	defer lobby.mutex.Unlock()
+	// EARLY ROUND END LOGIC (disconnect handling)
+const disconnectGrace = 8 * time.Second
+
+// Case 1: drawer disconnected before choosing word
+if lobby.CurrentWord == "" {
+    drawer := lobby.Drawer()
+    if drawer != nil &&
+        drawer.disconnectTime != nil &&
+        time.Since(*drawer.disconnectTime) > disconnectGrace {
+
+        lobby.endRoundEarly("drawer_left_before_word")
+        expectedTicker.Stop()
+        return false
+    }
+}
+
+// Case 2: last guesser disconnected
+if lobby.CurrentWord != "" {
+    hasGuessers := false
+    for _, p := range lobby.players {
+        if p.State == Guessing && p.Connected {
+            hasGuessers = true
+            break
+        }
+    }
+
+    if !hasGuessers {
+        allGoneLongEnough := true
+        for _, p := range lobby.players {
+            if p.State == Guessing && p.disconnectTime != nil {
+                if time.Since(*p.disconnectTime) < disconnectGrace {
+                    allGoneLongEnough = false
+                    break
+                }
+            }
+        }
+
+        if allGoneLongEnough {
+            lobby.endRoundEarly("no_guessers_left")
+            expectedTicker.Stop()
+            return false
+        }
+    }
+}
 
 	// Since we have a lock on the lobby, we can find out if the ticker we are
 	// listening to is still valid. If not, we want to kill the outer routine.
@@ -806,6 +850,12 @@ func (lobby *Lobby) tickLogic(expectedTicker *time.Ticker) bool {
 
 	return true
 }
+func (lobby *Lobby) endRoundEarly(reason string) {
+    lobby.CurrentWord = ""
+    lobby.wordHints = nil
+    advanceLobby(lobby)
+}
+
 
 func getTimeAsMillis() int64 {
 	return time.Now().UTC().UnixMilli()
