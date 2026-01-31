@@ -205,6 +205,41 @@ type ReadyEvent struct {
 	AllowDrawing       bool        `json:"allowDrawing"`
 }
 
+type Ring[T any] struct {
+	buf  []T
+	head int
+	size int
+}
+
+func NewRing[T any](cap int) *Ring[T] {
+	return &Ring[T]{buf: make([]T, cap /* slice len, not cap */)}
+}
+
+func (r *Ring[T]) Push(v T) {
+	r.buf[r.head] = v
+	r.head = (r.head + 1) % len(r.buf)
+	if r.size < len(r.buf) {
+		r.size++
+	}
+}
+
+func (r *Ring[T]) Oldest() T {
+	if r.size == 0 {
+		var zero T
+		return zero
+	}
+	return r.buf[(r.head-r.size+len(r.buf))%len(r.buf)]
+}
+
+func (r *Ring[T]) Latest() T {
+	if r.size == 0 {
+		var zero T
+		return zero
+	}
+
+	return r.buf[(r.head-1+len(r.buf))%len(r.buf)]
+}
+
 // Player represents a participant in a Lobby.
 type Player struct {
 	// userSession uniquely identifies the player.
@@ -216,6 +251,8 @@ type Player struct {
 	disconnectTime   *time.Time
 	votedForKick     map[uuid.UUID]bool
 	lastKnownAddress string
+	// messageTimestamps are stored for ratelimiting reasons. See handleMessage.
+	messageTimestamps *Ring[time.Time]
 
 	// Name is the players displayed name
 	Name  string      `json:"name"`

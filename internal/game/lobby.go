@@ -235,7 +235,25 @@ func (lobby *Lobby) readyToStart() bool {
 	return hasConnectedPlayers
 }
 
+func isRatelimited(sender *Player) bool {
+	if sender.messageTimestamps.size < 3 {
+		return false
+	}
+
+	oldest := sender.messageTimestamps.Oldest()
+	latest := sender.messageTimestamps.Latest()
+
+	if latest.Sub(oldest) >= time.Second*3 {
+		return false
+	}
+
+	return true
+}
+
 func handleMessage(message string, sender *Player, lobby *Lobby) {
+	// No matter whether the message is send, we'll make ratelimitting take place.
+	sender.messageTimestamps.Push(time.Now())
+
 	// Very long message can cause lags and can therefore be easily abused.
 	// While it is debatable whether a 10000 byte (not character) long
 	// message makes sense, this is technically easy to manage and therefore
@@ -248,6 +266,17 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 	// Empty message can neither be a correct guess nor are useful for
 	// other players in the chat.
 	if trimmedMessage == "" {
+		return
+	}
+
+	// Rate limitting is silent, we will pretend the message was sent, but not show any other players.
+	// Additionally, both close and correct guesses will be ignored.
+	if isRatelimited(sender) {
+		if sender.State != Guessing && lobby.CurrentWord != "" {
+			_ = lobby.WriteObject(sender, newMessageEvent(EventTypeNonGuessingPlayerMessage, trimmedMessage, sender))
+		} else {
+			_ = lobby.WriteObject(sender, newMessageEvent(EventTypeMessage, trimmedMessage, sender))
+		}
 		return
 	}
 
@@ -1162,10 +1191,11 @@ func (lobby *Lobby) GetAvailableWordHints(player *Player) []*WordHint {
 // to the lobbies playerlist. The new players is returned.
 func (lobby *Lobby) JoinPlayer(name string) *Player {
 	player := &Player{
-		Name:         SanitizeName(name),
-		ID:           uuid.Must(uuid.NewV4()),
-		userSession:  uuid.Must(uuid.NewV4()),
-		votedForKick: make(map[uuid.UUID]bool),
+		Name:              SanitizeName(name),
+		ID:                uuid.Must(uuid.NewV4()),
+		userSession:       uuid.Must(uuid.NewV4()),
+		votedForKick:      make(map[uuid.UUID]bool),
+		messageTimestamps: NewRing[time.Time](5),
 	}
 
 	if lobby.State == Ongoing {
