@@ -236,15 +236,15 @@ func (lobby *Lobby) readyToStart() bool {
 
 const (
 	// Rate limiting constants
-	// Allow up to 5 messages per second
-	maxMessagesPerSecond = 5
+	// Allow up to 3 messages per second (roughly 150 WPM)
+	maxMessagesPerSecond = 3
 	// Allow up to 30 messages in 20 seconds
 	maxMessagesInWindow    = 30
 	rateLimitWindowSeconds = 20
 )
 
 // isRateLimited checks if a player has exceeded rate limits.
-// Rate limits: 5 messages/second and 30 messages in 20 seconds.
+// Rate limits: 3 messages/second and 30 messages in 20 seconds.
 func isRateLimited(player *Player) bool {
 	now := time.Now()
 

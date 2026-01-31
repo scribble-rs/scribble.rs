@@ -574,8 +574,8 @@ func Test_RateLimiting_UnderLimit(t *testing.T) {
 
 	now := time.Now()
 
-	// Add 4 messages in the last second (under the 5/second limit)
-	for i := 0; i < 4; i++ {
+	// Add 2 messages in the last second (under the 3/second limit)
+	for i := 0; i < 2; i++ {
 		player.messageTimestamps = append(player.messageTimestamps, now.Add(-time.Duration(i*100)*time.Millisecond))
 	}
 
@@ -591,12 +591,12 @@ func Test_RateLimiting_ExceedPerSecondLimit(t *testing.T) {
 
 	now := time.Now()
 
-	// Add 5 messages in the last second (at the 5/second limit)
-	for i := 0; i < 5; i++ {
+	// Add 3 messages in the last second (at the 3/second limit)
+	for i := 0; i < 3; i++ {
 		player.messageTimestamps = append(player.messageTimestamps, now.Add(-time.Duration(i*100)*time.Millisecond))
 	}
 
-	// Should be rate limited (5 messages already, trying to send 6th)
+	// Should be rate limited (3 messages already, trying to send 4th)
 	require.True(t, isRateLimited(player))
 }
 
@@ -611,7 +611,7 @@ func Test_RateLimiting_ExceedWindowLimit(t *testing.T) {
 
 	// Add 30 messages spread over 19 seconds (at the 30/20s limit)
 	for i := 0; i < 30; i++ {
-		// Spread messages across 19 seconds, not exceeding 5/second
+		// Spread messages across 19 seconds, not exceeding 3/second
 		player.messageTimestamps = append(player.messageTimestamps, now.Add(-time.Duration(i*600)*time.Millisecond))
 	}
 
@@ -670,14 +670,14 @@ func Test_RateLimiting_MixedOldAndNewMessages(t *testing.T) {
 		player.messageTimestamps = append(player.messageTimestamps, now.Add(-21*time.Second))
 	}
 
-	// Add 4 recent messages (under the 5/second limit)
-	for i := 0; i < 4; i++ {
+	// Add 2 recent messages (under the 3/second limit)
+	for i := 0; i < 2; i++ {
 		player.messageTimestamps = append(player.messageTimestamps, now.Add(-time.Duration(i*200)*time.Millisecond))
 	}
 
-	// Should not be rate limited (old messages cleaned up, only 4 recent)
+	// Should not be rate limited (old messages cleaned up, only 2 recent)
 	require.False(t, isRateLimited(player))
 
 	// Verify cleanup happened
-	require.Equal(t, 4, len(player.messageTimestamps))
+	require.Equal(t, 2, len(player.messageTimestamps))
 }
