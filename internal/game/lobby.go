@@ -619,6 +619,9 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 
 	recalculateRanks(lobby)
 
+	currentRoundEndReason := lobby.roundEndReason
+	lobby.roundEndReason = ""
+
 	if roundOver {
 		// Game over, meaning all rounds have been played out. Alternatively
 		// We can reach this state if all players are spectating and or are not
@@ -635,8 +638,9 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 				lobby.WriteObject(player, Event{
 					Type: EventTypeGameOver,
 					Data: &GameOverEvent{
-						PreviousWord: previousWord,
-						ReadyEvent:   readyData,
+						PreviousWord:   previousWord,
+						ReadyEvent:     readyData,
+						RoundEndReason: currentRoundEndReason,
 					},
 				})
 			}
@@ -662,30 +666,13 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 			Players:        lobby.players,
 			ChoiceTimeLeft: wordChoiceDuration * 1000,
 			PreviousWord:   previousWord,
+			RoundEndReason: currentRoundEndReason,
 		},
 	})
 
-	preSelectedWord := lobby.wordChoice[lobby.preSelectedWord]
-	lobby.wordChoiceEndTime = getTimeAsMillis() + int64(wordChoiceDuration)*1000
-	go func() {
-		timer := time.NewTimer(time.Duration(wordChoiceDuration) * time.Second)
-		<-timer.C
-
-		lobby.mutex.Lock()
-		defer lobby.mutex.Unlock()
-
-		// Timer is still from last round. Unlikely to happen, but there
-		// was a bug report.
-		if len(lobby.wordChoice)-1 >= lobby.preSelectedWord &&
-			lobby.preSelectedWord >= 0 &&
-			lobby.wordChoice[lobby.preSelectedWord] != preSelectedWord {
-			return
-		}
-
-		// We let the timer run out as long as it doesn't seem to cause any
-		// issues and make sure it doesn't fire when it would break stuff.
-		lobby.selectWord(lobby.preSelectedWord)
-	}()
+	lobby.wordChoiceEndTime = time.Now().Add(time.Duration(wordChoiceDuration) * time.Second)
+	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
+	go startTurnTimeTicker(lobby, lobby.timeLeftTicker)
 
 	lobby.SendYourTurnEvent(newDrawer)
 }
@@ -746,10 +733,13 @@ func startTurnTimeTicker(lobby *Lobby, ticker *time.Ticker) {
 	for {
 		<-ticker.C
 		if !lobby.tickLogic(ticker) {
+			ticker.Stop()
 			break
 		}
 	}
 }
+
+const disconnectGrace = 8 * time.Second
 
 // tickLogic checks whether the lobby needs to proceed to the next round and
 // updates the available word hints if required. The return value indicates
@@ -762,15 +752,33 @@ func (lobby *Lobby) tickLogic(expectedTicker *time.Ticker) bool {
 	// Since we have a lock on the lobby, we can find out if the ticker we are
 	// listening to is still valid. If not, we want to kill the outer routine.
 	if lobby.timeLeftTicker != expectedTicker {
-		expectedTicker.Stop()
 		return false
+	}
+
+	if lobby.shouldEndEarlyDueToDisconnectedDrawer() {
+		lobby.roundEndReason = drawerDisconnected
+		advanceLobby(lobby)
+		return false
+	}
+
+	if lobby.shouldEndEarlyDueToDisconnectedGuessers() {
+		lobby.roundEndReason = guessersDisconnected
+		advanceLobby(lobby)
+		return false
+	}
+
+	if lobby.CurrentWord == "" {
+		if lobby.wordChoiceEndTime.Before(time.Now()) {
+			lobby.selectWord(lobby.preSelectedWord)
+		}
+
+		// This timer previously was only started AFTER a word was chosen, so we'll early exit here.
+		return true
 	}
 
 	currentTime := getTimeAsMillis()
 	if currentTime >= lobby.roundEndTime {
-		expectedTicker.Stop()
 		advanceLobby(lobby)
-		// Kill outer goroutine and therefore avoid executing hint logic.
 		return false
 	}
 
@@ -801,6 +809,52 @@ func (lobby *Lobby) tickLogic(expectedTicker *time.Ticker) bool {
 					break
 				}
 			}
+		}
+	}
+
+	return true
+}
+
+func (lobby *Lobby) shouldEndEarlyDueToDisconnectedDrawer() bool {
+	// If a word was already chosen, there might already be a drawing. So we only end
+	// early if the drawing isn't empty.
+	if lobby.CurrentWord != "" && len(lobby.currentDrawing) != 0 {
+		return false
+	}
+
+	drawer := lobby.Drawer()
+	if drawer != nil && !drawer.Connected && drawer.disconnectTime != nil &&
+		time.Since(*drawer.disconnectTime) >= disconnectGrace {
+		return true
+	}
+
+	return false
+}
+
+func (lobby *Lobby) shouldEndEarlyDueToDisconnectedGuessers() bool {
+	if lobby.CurrentWord == "" {
+		return false
+	}
+
+	for _, p := range lobby.players {
+		if p.State == Guessing {
+			goto HAS_GUESSERS
+		}
+	}
+	// No guessers anyway.
+	return false
+
+HAS_GUESSERS:
+	for _, p := range lobby.players {
+		if p.State == Guessing && p.Connected {
+			return false
+		}
+	}
+
+	for _, p := range lobby.players {
+		if p.State == Guessing && !p.Connected && p.disconnectTime != nil &&
+			time.Since(*p.disconnectTime) <= disconnectGrace {
+			return false
 		}
 	}
 
@@ -855,6 +909,7 @@ func (lobby *Lobby) selectWord(index int) error {
 			index, len(lobby.wordChoice))
 	}
 
+	lobby.roundEndTime = getTimeAsMillis() + int64(lobby.DrawingTime)*1000
 	lobby.CurrentWord = lobby.wordChoice[index]
 	lobby.wordChoice = nil
 
@@ -903,10 +958,6 @@ func (lobby *Lobby) selectWord(index int) error {
 			})
 		}
 	}
-	// We use milliseconds for higher accuracy
-	lobby.roundEndTime = getTimeAsMillis() + int64(lobby.DrawingTime)*1000
-	lobby.timeLeftTicker = time.NewTicker(1 * time.Second)
-	go startTurnTimeTicker(lobby, lobby.timeLeftTicker)
 
 	wordHintData := &Event{
 		Type: EventTypeWordChosen,
@@ -1024,7 +1075,7 @@ func (lobby *Lobby) SendYourTurnEvent(player *Player) {
 	lobby.WriteObject(player, &Event{
 		Type: EventTypeYourTurn,
 		Data: &YourTurn{
-			TimeLeft:        int(lobby.wordChoiceEndTime - getTimeAsMillis()),
+			TimeLeft:        int(lobby.wordChoiceEndTime.UnixMilli() - getTimeAsMillis()),
 			PreSelectedWord: lobby.preSelectedWord,
 			Words:           lobby.wordChoice,
 		},

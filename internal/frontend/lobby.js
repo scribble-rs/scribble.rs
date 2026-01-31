@@ -841,7 +841,13 @@ function registerMessageHandler(targetSocket) {
             handleReadyEvent(parsed.data);
         } else if (parsed.type === "game-over") {
             let ready = parsed.data;
-            showRoundEndMessage(ready.previousWord);
+            if (parsed.data.roundEndReason === "drawer_disconnected") {
+              appendMessage("system-message", null, `{{.Translation.Get "drawer-disconnected"}}`);
+            } else if (parsed.data.roundEndReason === "guessers_disconnected") {
+              appendMessage("system-message", null, `{{.Translation.Get "guessers-disconnected"}}`);
+            } else {
+              showRoundEndMessage(ready.previousWord);
+            }
             handleReadyEvent(ready);
         } else if (parsed.type === "update-players") {
             applyPlayers(parsed.data);
@@ -912,8 +918,13 @@ function registerMessageHandler(targetSocket) {
             setAllowDrawing(drawerID === ownID);
         } else if (parsed.type === "next-turn") {
             if (gameState === "ongoing") {
-                //The previous turn has ended.
+              if (parsed.data.roundEndReason === "drawer_disconnected") {
+                appendMessage("system-message", null, `{{.Translation.Get "drawer-disconnected"}}`);
+              } else if (parsed.data.roundEndReason === "guessers_disconnected") {
+                appendMessage("system-message", null, `{{.Translation.Get "guessers-disconnected"}}`);
+              } else {
                 showRoundEndMessage(parsed.data.previousWord);
+              }
             } else {
                 //First turn, the game starts
                 gameState = "ongoing";
@@ -1685,4 +1696,3 @@ function getCookie(name) {
     })
     return cookie[name];
 }
-

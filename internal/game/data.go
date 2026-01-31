@@ -15,6 +15,13 @@ import (
 // without losing their slost.
 const slotReservationTime = time.Minute * 1
 
+type roundEndReason string
+
+const (
+	drawerDisconnected   roundEndReason = "drawer_disconnected"
+	guessersDisconnected roundEndReason = "guessers_disconnected"
+)
+
 // Lobby represents a game session. It must not be sent via the API, as it
 // exposes gameplay relevant information.
 type Lobby struct {
@@ -57,14 +64,15 @@ type Lobby struct {
 	// Round is the round that the Lobby is currently in. This is a number
 	// between 0 and Rounds. 0 indicates that it hasn't started yet.
 	Round             int
-	wordChoiceEndTime int64
+	wordChoiceEndTime time.Time
 	preSelectedWord   int
 	// wordChoice represents the current choice of words present to the drawer.
 	wordChoice []string
 	Wordpack   string
 	// roundEndTime represents the time at which the current round will end.
 	// This is a UTC unix-timestamp in milliseconds.
-	roundEndTime int64
+	roundEndTime   int64
+	roundEndReason roundEndReason
 
 	timeLeftTicker *time.Ticker
 	// currentDrawing represents the state of the current canvas. The elements
@@ -141,7 +149,7 @@ const (
 
 func (lobby *Lobby) GetPlayerByID(id uuid.UUID) *Player {
 	for _, player := range lobby.players {
-		if player.ID == player.ID {
+		if player.ID == id {
 			return player
 		}
 	}

@@ -90,6 +90,8 @@ func initEnglishTranslation() *Translation {
 	translation.put("game-over-win", "Congratulations, you've won!")
 	translation.put("game-over-tie", "It's a tie!")
 	translation.put("game-over", "You placed %s. with %s points")
+	translation.put("drawer-disconnected", "Turn ended early, drawer disconnected.")
+	translation.put("guessers-disconnected", "Turn ended early, guessers disconnected.")
 
 	translation.put("change-active-color", "Change your active color")
 	translation.put("use-pencil", "Use pencil")

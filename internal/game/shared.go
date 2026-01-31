@@ -148,7 +148,8 @@ type NameChangeEvent struct {
 // game is over already.
 type GameOverEvent struct {
 	*ReadyEvent
-	PreviousWord string `json:"previousWord"`
+	PreviousWord   string         `json:"previousWord"`
+	RoundEndReason roundEndReason `json:"roundEndReason"`
 }
 
 type WordChosen struct {
@@ -169,10 +170,11 @@ type NextTurn struct {
 	// PreviousWord signals the last chosen word. If empty, no word has been
 	// chosen. The client can now themselves whether there has been a previous
 	// turn, by looking at the current gamestate.
-	PreviousWord   string    `json:"previousWord"`
-	Players        []*Player `json:"players"`
-	ChoiceTimeLeft int       `json:"choiceTimeLeft"`
-	Round          int       `json:"round"`
+	PreviousWord   string         `json:"previousWord"`
+	Players        []*Player      `json:"players"`
+	ChoiceTimeLeft int            `json:"choiceTimeLeft"`
+	Round          int            `json:"round"`
+	RoundEndReason roundEndReason `json:"roundEndReason"`
 }
 
 // OutgoingMessage represents a message in the chatroom.
