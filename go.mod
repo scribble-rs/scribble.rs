@@ -12,7 +12,7 @@ require (
 	github.com/prometheus/client_golang v1.23.2
 	github.com/stretchr/testify v1.11.1
 	github.com/subosito/gotenv v1.6.0
-	golang.org/x/text v0.32.0
+	golang.org/x/text v0.33.0
 )
 
 require (
