@@ -485,7 +485,8 @@ func handleKickVoteEvent(lobby *Lobby, player *Player, toKickID uuid.UUID) {
 func kickPlayer(lobby *Lobby, playerToKick *Player, playerToKickIndex int) {
 	// Avoiding nilpointer in case playerToKick disconnects during this event unluckily.
 	if playerToKickSocket := playerToKick.ws; playerToKickSocket != nil {
-		playerToKickSocket.WriteClose(1000, nil)
+		// 4k-5k is codes not in the spec, they are free to use.
+		playerToKickSocket.WriteClose(4000, nil)
 	}
 
 	// Since the player is already kicked, we first clean up the kicking information related to that player

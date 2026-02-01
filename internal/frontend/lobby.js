@@ -42,9 +42,14 @@ function connectToWebsocket() {
             socket.onerror = null;
 
             console.log("Socket Closed Connection: ", event);
-            console.log("Attempting to reestablish socket connection.");
-            showReconnectDialogIfNotShown();
-            connectToWebsocket();
+
+            if (event.code === 4000) {
+              showTextDialog(reconnectDialogId, 'Kicked', `You have been kicked from the lobby.`);
+            } else {
+              console.log("Attempting to reestablish socket connection.");
+              showReconnectDialogIfNotShown();
+              connectToWebsocket();
+            }
         };
 
         registerMessageHandler(socket);
