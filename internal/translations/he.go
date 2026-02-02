@@ -145,5 +145,7 @@ func initHebrewTranslation() {
 	translation.put("submit-feedback", "משוב")
 	translation.put("stats", "סטטוס")
 
+	translation.put("forbidden", "לא ניתן להציג דף זה")
+
 	RegisterTranslation("he", translation)
 }

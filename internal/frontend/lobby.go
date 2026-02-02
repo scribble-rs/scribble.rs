@@ -28,11 +28,6 @@ type lobbyJsData struct {
 	Locale      string
 }
 
-type robotPageData struct {
-	*BasePageConfig
-	*api.LobbyData
-}
-
 func (handler *SSRHandler) lobbyJs(writer http.ResponseWriter, request *http.Request) {
 	translation, locale := determineTranslation(request)
 	pageData := &lobbyJsData{
@@ -62,13 +57,8 @@ func (handler *SSRHandler) ssrEnterLobby(writer http.ResponseWriter, request *ht
 
 	userAgent := strings.ToLower(request.UserAgent())
 	if !(strings.Contains(userAgent, "gecko") || strings.Contains(userAgent, "chrome") || strings.Contains(userAgent, "opera") || strings.Contains(userAgent, "safari")) {
-		err := pageTemplates.ExecuteTemplate(writer, "robot-page", &robotPageData{
-			BasePageConfig: handler.basePageConfig,
-			LobbyData:      api.CreateLobbyData(handler.cfg, lobby),
-		})
-		if err != nil {
-			log.Printf("error templating robot page: %d\n", err)
-		}
+		writer.WriteHeader(http.StatusForbidden)
+		handler.userFacingError(writer, translation.Get("forbidden"), translation)
 		return
 	}
 
