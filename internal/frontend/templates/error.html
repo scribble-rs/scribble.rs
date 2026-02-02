@@ -11,18 +11,14 @@
     {{template "favicon-decl" .}}
 </head>
 
-<body {{if and (ne .Translation nil) (eq .Translation.IsRtl true)}} dir="rtl" {{end}}>
+<body {{if eq .Translation.IsRtl true}} dir="rtl" {{end}}>
     <div id="app">
         <div class="error-pane-wrapper">
             <div class="error-pane">
                 <h1 class="error-title">(◕︿◕✿)</h1>
                 <h2 class="error-message">{{.ErrorMessage}}</h2>
                 <a class="go-back" href="{{.RootPath}}/">
-                  {{if eq .Translation nil}}
-                    Click here to get back to the Homepage
-                  {{else}}
-                    {{.Translation.Get "click-to-homepage"}}
-                  {{end}}
+                  {{.Translation.Get "click-to-homepage"}}
                 </a>
             </div>
         </div>
