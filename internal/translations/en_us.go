@@ -146,6 +146,8 @@ func initEnglishTranslation() *Translation {
 	translation.put("submit-feedback", "Feedback")
 	translation.put("stats", "Status")
 
+	translation.put("forbidden", "Forbidden")
+
 	RegisterTranslation("en", translation)
 
 	return translation
