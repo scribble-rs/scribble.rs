@@ -1,54 +1,55 @@
-const discordInstanceId = getCookie("discord-instance-id")
-const rootPath = `${discordInstanceId ? ".proxy/" : ""}{{.RootPath}}`
+const discordInstanceId = getCookie("discord-instance-id");
+const rootPath = `${discordInstanceId ? ".proxy/" : ""}{{.RootPath}}`;
 
-Array
-    .from(document.getElementsByClassName("number-input"))
-    .forEach(number_input => {
+Array.from(document.getElementsByClassName("number-input")).forEach(
+    (number_input) => {
         const input = number_input.children.item(1);
         const decrement_button = number_input.children.item(0);
-        decrement_button.addEventListener("click", function() {
+        decrement_button.addEventListener("click", function () {
             input.stepDown();
-        })
+        });
         const increment_button = number_input.children.item(2);
-        increment_button.addEventListener("click", function() {
+        increment_button.addEventListener("click", function () {
             input.stepUp();
-        })
-    })
+        });
+    },
+);
 
 // We'll keep using the ssr endpoint for now. With this listener, we
 // can fake in the form data for "public" depending on which button
 // we submitted via. This is a dirty hack, but works for now.
-document
-    .getElementById("lobby-create")
-    .addEventListener("submit", (event) => {
-        const check_box = document.getElementById("public-check-box");
-        if (event.submitter.id === "create-public") {
-            check_box.value = "true";
-            check_box.setAttribute("checked", "");
-        } else {
-            check_box.value = "false";
-            check_box.removeAttribute("checked");
-        }
+document.getElementById("lobby-create").addEventListener("submit", (event) => {
+    const check_box = document.getElementById("public-check-box");
+    if (event.submitter.id === "create-public") {
+        check_box.value = "true";
+        check_box.setAttribute("checked", "");
+    } else {
+        check_box.value = "false";
+        check_box.removeAttribute("checked");
+    }
 
-        return true;
-    });
+    return true;
+});
 
-const lobby_list_placeholder =
-    document.getElementById("lobby-list-placeholder-text");
-const lobby_list_loading_placeholder =
-    document.getElementById("lobby-list-placeholder-loading");
+const lobby_list_placeholder = document.getElementById(
+    "lobby-list-placeholder-text",
+);
+const lobby_list_loading_placeholder = document.getElementById(
+    "lobby-list-placeholder-loading",
+);
 const lobby_list = document.getElementById("lobby-list");
 
-lobby_list_placeholder.innerHTML = '<b>{{.Translation.Get "no-lobbies-yet"}}</b>';
+lobby_list_placeholder.innerHTML =
+    '<b>{{.Translation.Get "no-lobbies-yet"}}</b>';
 
 const getLobbies = () => {
     return new Promise((resolve, reject) => {
-        fetch(`${rootPath}/v1/lobby`).
-            then((response) => {
+        fetch(`${rootPath}/v1/lobby`)
+            .then((response) => {
                 response.json().then(resolve);
-            }).
-            catch(reject);
-    })
+            })
+            .catch(reject);
+    });
 };
 
 const set_lobby_list_placeholder = (text, visible) => {
@@ -90,7 +91,7 @@ const language_to_flag = (language) => {
         case "polish":
             return "\u{1f1f5}\u{1f1f1}";
         case "hebrew":
-            return "\u{1f1ee}\u{1f1f1}"
+            return "\u{1f1ee}\u{1f1f1}";
     }
 };
 
@@ -117,29 +118,29 @@ const set_lobbies = (lobbies, visible) => {
             return tag;
         };
         if (lobby.customWords) {
-            lobby_list_row_a.appendChild(new_custom_tag(
-                '{{.Translation.Get "custom-words"}}'
-            ));
+            lobby_list_row_a.appendChild(
+                new_custom_tag('{{.Translation.Get "custom-words"}}'),
+            );
         }
         if (lobby.state === "ongoing") {
-            lobby_list_row_a.appendChild(new_custom_tag(
-                '{{.Translation.Get "ongoing"}}'
-            ));
+            lobby_list_row_a.appendChild(
+                new_custom_tag('{{.Translation.Get "ongoing"}}'),
+            );
         }
         if (lobby.state === "gameover") {
-            lobby_list_row_a.appendChild(new_custom_tag(
-                '{{.Translation.Get "game-over-lobby"}}'
-            ));
+            lobby_list_row_a.appendChild(
+                new_custom_tag('{{.Translation.Get "game-over-lobby"}}'),
+            );
         }
 
         if (lobby.scoring === "chill") {
-            lobby_list_row_a.appendChild(new_custom_tag(
-                '{{.Translation.Get "chill"}}'
-            ));
+            lobby_list_row_a.appendChild(
+                new_custom_tag('{{.Translation.Get "chill"}}'),
+            );
         } else if (lobby.scoring === "competitive") {
-            lobby_list_row_a.appendChild(new_custom_tag(
-                '{{.Translation.Get "competitive"}}'
-            ));
+            lobby_list_row_a.appendChild(
+                new_custom_tag('{{.Translation.Get "competitive"}}'),
+            );
         }
 
         const lobby_list_row_b = document.createElement("div");
@@ -152,7 +153,7 @@ const set_lobbies = (lobbies, visible) => {
             const image = document.createElement("img");
             image.className = "lobby-list-item-icon lobby-list-icon-loading";
             image.setAttribute("loading", "lazy");
-            image.addEventListener("load", function() {
+            image.addEventListener("load", function () {
                 image.classList.remove("lobby-list-icon-loading");
             });
             image.setAttribute("src", icon);
@@ -165,13 +166,16 @@ const set_lobbies = (lobbies, visible) => {
         };
         const user_pair = create_info_pair(
             `{{.RootPath}}/resources/{{.WithCacheBust "user.svg"}}`,
-            `${lobby.playerCount}/${lobby.maxPlayers}`);
+            `${lobby.playerCount}/${lobby.maxPlayers}`,
+        );
         const round_pair = create_info_pair(
             `{{.RootPath}}/resources/{{.WithCacheBust "round.svg"}}`,
-            `${lobby.round}/${lobby.rounds}`);
+            `${lobby.round}/${lobby.rounds}`,
+        );
         const time_pair = create_info_pair(
             `{{.RootPath}}/resources/{{.WithCacheBust "clock.svg"}}`,
-            `${lobby.drawingTime}`);
+            `${lobby.drawingTime}`,
+        );
 
         lobby_list_row_b.replaceChildren(user_pair, round_pair, time_pair);
 
@@ -181,8 +185,7 @@ const set_lobbies = (lobbies, visible) => {
         join_button.className = "join-button";
         join_button.innerText = '{{.Translation.Get "join"}}';
         join_button.addEventListener("click", (event) => {
-            window.location.href =
-                `{{.RootPath}}/ssrEnterLobby/${lobby.lobbyId}`;
+            window.location.href = `{{.RootPath}}/ssrEnterLobby/${lobby.lobbyId}`;
         });
 
         lobby_list_item.replaceChildren(lobby_list_rows, join_button);
@@ -196,7 +199,10 @@ const set_lobbies = (lobbies, visible) => {
         set_lobby_list_placeholder("", false);
     } else {
         lobby_list.style.display = "none";
-        set_lobby_list_placeholder('{{.Translation.Get "no-lobbies-yet"}}', true);
+        set_lobby_list_placeholder(
+            '{{.Translation.Get "no-lobbies-yet"}}',
+            true,
+        );
     }
 };
 
@@ -204,24 +210,35 @@ const refresh_lobby_list = () => {
     set_lobbies([], false);
     set_lobby_list_loading(true);
 
-    getLobbies().then((data) => {
-        set_lobbies(data, true);
-    }).catch((err) => {
-        set_lobby_list_placeholder(err, true);
-    }).finally(() => {
-        set_lobby_list_loading(false);
-    });
+    getLobbies()
+        .then((data) => {
+            set_lobbies(data, true);
+        })
+        .catch((err) => {
+            set_lobby_list_placeholder(err, true);
+        })
+        .finally(() => {
+            set_lobby_list_loading(false);
+        });
 };
 
 refresh_lobby_list();
-document.getElementById("refresh-lobby-list-button").addEventListener("click", refresh_lobby_list);
+document
+    .getElementById("refresh-lobby-list-button")
+    .addEventListener("click", refresh_lobby_list);
 
 function getCookie(name) {
     let cookie = {};
-    document.cookie.split(';').forEach(function(el) {
-        let split = el.split('=');
+    document.cookie.split(";").forEach(function (el) {
+        let split = el.split("=");
         cookie[split[0].trim()] = split.slice(1).join("=");
-    })
+    });
     return cookie[name];
 }
 
+// Makes sure, that navigating back after creating a lobby also shows it in the list.
+window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+        refresh_lobby_list();
+    }
+});
