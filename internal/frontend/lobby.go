@@ -95,6 +95,7 @@ func (handler *SSRHandler) ssrEnterLobbyNoChecks(
 
 			newPlayer := lobby.JoinPlayer(api.GetPlayername(request))
 
+			newPlayer.SetLastKnownAddress(requestAddress)
 			api.SetGameplayCookies(writer, request, newPlayer, lobby)
 		} else {
 			if player.Connected && player.GetWebsocket() != nil {
