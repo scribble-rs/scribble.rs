@@ -203,9 +203,6 @@ func CheckGuess(a, b string) int {
 	//   * 1 character is wrong (abc ~ adc)
 	//   * 2 characters are swapped (abc ~ acb)
 
-	if len(a)-len(b) > CloseGuess {
-		return DistantGuess
-	}
 	if a == b {
 		return EqualGuess
 	}
@@ -216,6 +213,13 @@ func CheckGuess(a, b string) int {
 		a, b = b, a
 	}
 
+	// A maximum of 4 bytes is used for one unicode code point. So if there is a definitive character
+	// count difference of 2 or more characters, we can clearly indicate a distant guess.\
+	// This prevents having to count all runes in b.
+	if len(a)-len(b) >= 8 {
+		return DistantGuess
+	}
+
 	var distance int
 	aBytes := []byte(a)
 	bBytes := []byte(b)
@@ -224,6 +228,11 @@ func CheckGuess(a, b string) int {
 		// If a eaches the end, then so does b, as we make sure a is longer at
 		// the top, therefore we can be sure no additional conflict diff occurs.
 		if aRune == utf8.RuneError {
+			// If a is longer in terms of bytes, but contains for example an emoji that takes up 4 bytes, this CAN happen.
+			distance += utf8.RuneCount(bBytes)
+			if distance >= 2 {
+				return DistantGuess
+			}
 			return distance
 		}
 		bRune, bSize := utf8.DecodeRune(bBytes)

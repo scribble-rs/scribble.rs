@@ -283,6 +283,7 @@ func Test_CheckGuess_Negative(t *testing.T) {
 	t.Parallel()
 
 	type testCase struct {
+		name string
 		a, b string
 	}
 
@@ -300,8 +301,8 @@ func Test_CheckGuess_Negative(t *testing.T) {
 			b: "a",
 		},
 		{
-			a: "abc",
-			b: "c",
+			a: "c",
+			b: "abc",
 		},
 		{
 			a: "abc",
@@ -315,10 +316,42 @@ func Test_CheckGuess_Negative(t *testing.T) {
 			a: "abcd",
 			b: "badc",
 		},
+		{
+			name: "emoji_a",
+			a:    "😲",
+			b:    "abc",
+		},
+		{
+			name: "emoji_a_same_byte_count",
+			a:    "abcda",
+			b:    "😲",
+		},
+		{
+			name: "emoji_a_higher_byte_count",
+			a:    "abcda",
+			b:    "😲",
+		},
+		{
+			name: "emoji_b",
+			a:    "abc",
+			b:    "😲",
+		},
+		{
+			a: "cheese",
+			b: "wheel",
+		},
+		{
+			a: "a",
+			b: "bcdefg",
+		},
 	}
 
 	for _, c := range cases {
-		t.Run(fmt.Sprintf("%s ~ %s", c.a, c.b), func(t *testing.T) {
+		name := fmt.Sprintf("%s ~ %s", c.a, c.b)
+		if c.name != "" {
+			name = c.name
+		}
+		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
 			assert.Equal(t, 2, CheckGuess(c.a, c.b))
@@ -376,19 +409,14 @@ func Test_CheckGuess_Positive(t *testing.T) {
 			dist: CloseGuess,
 		},
 		{
-			a:    "abcd",
-			b:    "bacd",
+			a:    "äbcd",
+			b:    "abcd",
 			dist: CloseGuess,
 		},
 		{
-			a:    "cheese",
-			b:    "wheel",
-			dist: DistantGuess,
-		},
-		{
-			a:    "a",
-			b:    "bcdefg",
-			dist: DistantGuess,
+			a:    "abcd",
+			b:    "bacd",
+			dist: CloseGuess,
 		},
 	}
 
