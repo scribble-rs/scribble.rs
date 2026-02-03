@@ -203,10 +203,6 @@ func CheckGuess(a, b string) int {
 	//   * 1 character is wrong (abc ~ adc)
 	//   * 2 characters are swapped (abc ~ acb)
 
-	if a == b {
-		return EqualGuess
-	}
-
 	// If the longer string can't be on both sides, the follow-up logic can
 	// be simpler, so we switch them here.
 	if len(a) < len(b) {
@@ -218,6 +214,10 @@ func CheckGuess(a, b string) int {
 	// This prevents having to count all runes in b.
 	if len(a)-len(b) >= 8 {
 		return DistantGuess
+	}
+
+	if a == b {
+		return EqualGuess
 	}
 
 	var distance int
