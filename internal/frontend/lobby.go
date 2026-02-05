@@ -44,6 +44,33 @@ func (handler *SSRHandler) lobbyJs(writer http.ResponseWriter, request *http.Req
 	if err := handler.lobbyJsRawTemplate.ExecuteTemplate(writer, "lobby-js", pageData); err != nil {
 		log.Printf("error templating JS: %s\n", err)
 	}
+
+}
+
+type galleryJsData struct {
+	*BasePageConfig
+
+	LobbyID     string
+	Translation *translations.Translation
+	Locale      string
+}
+
+func (handler *SSRHandler) galleryJs(writer http.ResponseWriter, request *http.Request) {
+	translation, locale := determineTranslation(request)
+	pageData := &galleryJsData{
+		LobbyID:        api.GetLobbyId(request),
+		BasePageConfig: handler.basePageConfig,
+		Translation:    translation,
+		Locale:         locale,
+	}
+
+	writer.Header().Set("Content-Type", "text/javascript")
+	// Duration of 1 year, since we use cachebusting anyway.
+	writer.Header().Set("Cache-Control", "public, max-age=31536000")
+	writer.WriteHeader(http.StatusOK)
+	if err := handler.galleryJsRawTemplate.ExecuteTemplate(writer, "gallery-js", pageData); err != nil {
+		log.Printf("error templating JS: %s\n", err)
+	}
 }
 
 // ssrEnterLobby opens a lobby, either opening it directly or asking for a lobby.

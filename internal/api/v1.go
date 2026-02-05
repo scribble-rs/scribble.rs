@@ -200,6 +200,26 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 	state.AddLobby(lobby)
 }
 
+type Gallery []game.GalleryDrawing
+
+func (handler *V1Handler) getGallery(writer http.ResponseWriter, request *http.Request) {
+	lobby := state.GetLobby(GetLobbyId(request))
+	if lobby == nil {
+		http.Error(writer, ErrLobbyNotExistent.Error(), http.StatusNotFound)
+		return
+	}
+
+	// FIXME Synchronise access to lobby.Drawings.
+	// The drawings should also be available in an unstarted game.
+
+	if started, err := marshalToHTTPWriter(Gallery(lobby.Drawings), writer); err != nil {
+		if !started {
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+}
+
 func (handler *V1Handler) postPlayer(writer http.ResponseWriter, request *http.Request) {
 	lobby := state.GetLobby(request.PathValue("lobby_id"))
 	if lobby == nil {

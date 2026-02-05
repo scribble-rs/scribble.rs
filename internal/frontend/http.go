@@ -152,8 +152,10 @@ func (handler *SSRHandler) SetupRoutes(register func(string, string, http.Handle
 		).ServeHTTP,
 	)
 	registerWithCsp("GET", path.Join(handler.cfg.RootPath, "lobby.js"), handler.lobbyJs)
+	registerWithCsp("GET", path.Join(handler.cfg.RootPath, "gallery.js"), handler.galleryJs)
 	registerWithCsp("GET", path.Join(handler.cfg.RootPath, "index.js"), handler.indexJs)
 	registerWithCsp("GET", path.Join(handler.cfg.RootPath, "lobby", "{lobby_id}"), handler.ssrEnterLobby)
+	registerWithCsp("GET", path.Join(handler.cfg.RootPath, "lobby", "{lobby_id}", "gallery"), handler.ssrGallery)
 	registerWithCsp("POST", path.Join(handler.cfg.RootPath, "lobby"), handler.ssrCreateLobby)
 }
 
