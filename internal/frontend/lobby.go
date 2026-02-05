@@ -56,7 +56,7 @@ func (handler *SSRHandler) ssrEnterLobby(writer http.ResponseWriter, request *ht
 	}
 
 	userAgent := strings.ToLower(request.UserAgent())
-	if !(strings.Contains(userAgent, "gecko") || strings.Contains(userAgent, "chrome") || strings.Contains(userAgent, "opera") || strings.Contains(userAgent, "safari")) {
+	if !isHumanAgent(userAgent) {
 		writer.WriteHeader(http.StatusForbidden)
 		handler.userFacingError(writer, translation.Get("forbidden"), translation)
 		return

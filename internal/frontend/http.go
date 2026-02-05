@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/scribble-rs/scribble.rs/internal/translations"
@@ -177,4 +178,11 @@ func (handler *SSRHandler) userFacingError(w http.ResponseWriter, errorMessage s
 	if err != nil {
 		panic(err)
 	}
+}
+
+func isHumanAgent(userAgent string) bool {
+	return strings.Contains(userAgent, "gecko") ||
+		strings.Contains(userAgent, "chrome") ||
+		strings.Contains(userAgent, "opera") ||
+		strings.Contains(userAgent, "safari")
 }
