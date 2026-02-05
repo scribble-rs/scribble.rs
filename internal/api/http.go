@@ -22,6 +22,7 @@ func (handler *V1Handler) SetupRoutes(rootPath string, register func(string, str
 	register("GET", path.Join(v1, "lobby"), handler.getLobbies)
 	register("POST", path.Join(v1, "lobby"), handler.postLobby)
 
+	register("GET", path.Join(v1, "lobby", "{lobby_id}", "gallery"), handler.getGallery)
 	register("PATCH", path.Join(v1, "lobby", "{lobby_id}"), handler.patchLobby)
 	// We support both path parameter and cookie.
 	register("PATCH", path.Join(v1, "lobby"), handler.patchLobby)
