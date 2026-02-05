@@ -185,7 +185,7 @@ const set_lobbies = (lobbies, visible) => {
         join_button.className = "join-button";
         join_button.innerText = '{{.Translation.Get "join"}}';
         join_button.addEventListener("click", (event) => {
-            window.location.href = `{{.RootPath}}/ssrEnterLobby/${lobby.lobbyId}`;
+            window.location.href = `{{.RootPath}}/lobby/${lobby.lobbyId}`;
         });
 
         lobby_list_item.replaceChildren(lobby_list_rows, join_button);

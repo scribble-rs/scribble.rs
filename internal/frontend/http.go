@@ -153,8 +153,8 @@ func (handler *SSRHandler) SetupRoutes(register func(string, string, http.Handle
 	)
 	registerWithCsp("GET", path.Join(handler.cfg.RootPath, "lobby.js"), handler.lobbyJs)
 	registerWithCsp("GET", path.Join(handler.cfg.RootPath, "index.js"), handler.indexJs)
-	registerWithCsp("GET", path.Join(handler.cfg.RootPath, "ssrEnterLobby", "{lobby_id}"), handler.ssrEnterLobby)
-	registerWithCsp("POST", path.Join(handler.cfg.RootPath, "ssrCreateLobby"), handler.ssrCreateLobby)
+	registerWithCsp("GET", path.Join(handler.cfg.RootPath, "lobby", "{lobby_id}"), handler.ssrEnterLobby)
+	registerWithCsp("POST", path.Join(handler.cfg.RootPath, "lobby"), handler.ssrCreateLobby)
 }
 
 // errorPageData represents the data that error.html requires to be displayed.

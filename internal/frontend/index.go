@@ -300,5 +300,5 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 		return
 	}
 
-	http.Redirect(writer, request, handler.basePageConfig.RootPath+"/ssrEnterLobby/"+lobby.LobbyID, http.StatusFound)
+	http.Redirect(writer, request, handler.basePageConfig.RootPath+"/lobby/"+lobby.LobbyID, http.StatusFound)
 }
