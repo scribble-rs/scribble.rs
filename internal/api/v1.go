@@ -93,6 +93,9 @@ func (handler *V1Handler) getLobbies(writer http.ResponseWriter, _ *http.Request
 }
 
 func (handler *V1Handler) resurrectLobby(writer http.ResponseWriter, request *http.Request) {
+	// Limit request body size to 10MB to prevent memory exhaustion
+	request.Body = http.MaxBytesReader(writer, request.Body, 10*1024*1024)
+
 	var data game.LobbyRestoreData
 	base64Decoder := base64.NewDecoder(base64.StdEncoding, request.Body)
 	if err := json.NewDecoder(base64Decoder).Decode(&data); err != nil {
@@ -104,6 +107,12 @@ func (handler *V1Handler) resurrectLobby(writer http.ResponseWriter, request *ht
 	lobby := data.Lobby
 	if lobby == nil {
 		http.Error(writer, "invalid lobby data", http.StatusBadRequest)
+		return
+	}
+
+	// Basic validation of lobby data
+	if lobby.LobbyID == "" {
+		http.Error(writer, "invalid lobby ID", http.StatusBadRequest)
 		return
 	}
 

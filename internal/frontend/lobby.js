@@ -60,6 +60,9 @@ function connectToWebsocket() {
                 console.log("Resurrecting lobby ...");
                 fetch(`${rootPath}/v1/lobby/resurrect`, {
                     method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain',
+                    },
                     body: restoreData,
                 }).then(response => {
                     if (response.ok) {
