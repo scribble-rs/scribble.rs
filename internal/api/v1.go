@@ -130,7 +130,7 @@ func (handler *V1Handler) resurrectLobby(writer http.ResponseWriter, request *ht
 	})
 
 	if resurrected {
-		writer.WriteHeader(http.StatusOK)
+		writer.WriteHeader(http.StatusNoContent)
 	} else {
 		http.Error(writer, "lobby already exists", http.StatusConflict)
 	}
