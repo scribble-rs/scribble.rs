@@ -72,8 +72,8 @@ func addLobby(lobby *game.Lobby) {
 }
 
 func ResurrectLobby(lobby *game.Lobby) bool {
-	globalStateMutex.RLock()
-	defer globalStateMutex.RUnlock()
+	globalStateMutex.Lock()
+	defer globalStateMutex.Unlock()
 
 	existingLobby := getLobby(lobby.LobbyID)
 	if existingLobby == nil {

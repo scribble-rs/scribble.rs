@@ -93,6 +93,9 @@ func (handler *V1Handler) getLobbies(writer http.ResponseWriter, _ *http.Request
 }
 
 func (handler *V1Handler) resurrectLobby(writer http.ResponseWriter, request *http.Request) {
+	// Limit request body size to 10MB to prevent memory exhaustion
+	request.Body = http.MaxBytesReader(writer, request.Body, 10*1024*1024)
+
 	var data game.LobbyRestoreData
 	base64Decoder := base64.NewDecoder(base64.StdEncoding, request.Body)
 	if err := json.NewDecoder(base64Decoder).Decode(&data); err != nil {
@@ -102,16 +105,35 @@ func (handler *V1Handler) resurrectLobby(writer http.ResponseWriter, request *ht
 	}
 
 	lobby := data.Lobby
-	// We add the lobby, while the lobby mutex is aqcuired. This prevents us
+	if lobby == nil {
+		http.Error(writer, "invalid lobby data", http.StatusBadRequest)
+		return
+	}
+
+	// Basic validation of lobby data
+	if lobby.LobbyID == "" {
+		http.Error(writer, "invalid lobby ID", http.StatusBadRequest)
+		return
+	}
+
+	// We add the lobby, while the lobby mutex is acquired. This prevents us
 	// from attempting to connect to the lobby, before the internal state has
 	// been restored correctly.
+	var resurrected bool
 	lobby.Synchronized(func() {
-		if state.ResurrectLobby(lobby) {
+		resurrected = state.ResurrectLobby(lobby)
+		if resurrected {
 			lobby.WriteObject = WriteObject
 			lobby.WritePreparedMessage = WritePreparedMessage
 			lobby.ResurrectUnsynchronized(&data)
 		}
 	})
+
+	if resurrected {
+		writer.WriteHeader(http.StatusNoContent)
+	} else {
+		http.Error(writer, "lobby already exists", http.StatusConflict)
+	}
 }
 
 func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Request) {
