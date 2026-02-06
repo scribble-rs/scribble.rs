@@ -1157,12 +1157,15 @@ func (lobby *Lobby) Shutdown() {
 	// Since broadcast is synchronous, we gotta use the asynchronous queue, to
 	// make sure the message is received before closing.
 	var waitGroup sync.WaitGroup
-	waitGroup.Add(len(lobby.Players))
 	for _, player := range lobby.Players {
-		player.ws.Async(func() {
-			defer waitGroup.Done()
-			player.ws.WriteClose(1012, []byte("server_restart"))
-		})
+		if player.ws != nil {
+			waitGroup.Add(1)
+			ws := player.ws
+			ws.Async(func() {
+				defer waitGroup.Done()
+				ws.WriteClose(1012, []byte("server_restart"))
+			})
+		}
 	}
 	waitGroup.Wait()
 }

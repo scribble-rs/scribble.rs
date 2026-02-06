@@ -102,16 +102,29 @@ func (handler *V1Handler) resurrectLobby(writer http.ResponseWriter, request *ht
 	}
 
 	lobby := data.Lobby
-	// We add the lobby, while the lobby mutex is aqcuired. This prevents us
+	if lobby == nil {
+		http.Error(writer, "invalid lobby data", http.StatusBadRequest)
+		return
+	}
+
+	// We add the lobby, while the lobby mutex is acquired. This prevents us
 	// from attempting to connect to the lobby, before the internal state has
 	// been restored correctly.
+	var resurrected bool
 	lobby.Synchronized(func() {
-		if state.ResurrectLobby(lobby) {
+		resurrected = state.ResurrectLobby(lobby)
+		if resurrected {
 			lobby.WriteObject = WriteObject
 			lobby.WritePreparedMessage = WritePreparedMessage
 			lobby.ResurrectUnsynchronized(&data)
 		}
 	})
+
+	if resurrected {
+		writer.WriteHeader(http.StatusOK)
+	} else {
+		http.Error(writer, "lobby already exists", http.StatusConflict)
+	}
 }
 
 func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Request) {

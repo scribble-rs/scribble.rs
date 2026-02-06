@@ -57,14 +57,26 @@ function connectToWebsocket() {
             console.log("Socket Closed Connection: ", event);
 
             if (restoreData && event.reason === "lobby_gone") {
-                console.log("Resurrecting lobby ...",);
-                fetch('/v1/lobby/resurrect', {
+                console.log("Resurrecting lobby ...");
+                fetch(`${rootPath}/v1/lobby/resurrect`, {
                     method: 'POST',
                     body: restoreData,
-                }).then(() => {
-                    console.log("Attempting to reestablish socket connection after resurrection ...");
-                    socketIsConnecting = false;
-                    connectToWebsocket();
+                }).then(response => {
+                    if (response.ok) {
+                        console.log("Attempting to reestablish socket connection after resurrection ...");
+                        socketIsConnecting = false;
+                        connectToWebsocket();
+                    } else {
+                        console.error("Failed to resurrect lobby:", response.statusText);
+                        showTextDialog("connection-error-dialog",
+                            '{{.Translation.Get "error-connecting"}}',
+                            'Failed to restore lobby. Please try again later.');
+                    }
+                }).catch(error => {
+                    console.error("Error resurrecting lobby:", error);
+                    showTextDialog("connection-error-dialog",
+                        '{{.Translation.Get "error-connecting"}}',
+                        'Failed to restore lobby. Please try again later.');
                 });
 
                 return
@@ -1022,7 +1034,6 @@ function registerMessageHandler(targetSocket) {
             console.log("Shutdown event received");
             if (parsed.data) {
                 restoreData = parsed.data;
-                // FIXMe Text anpassen!
                 showDialog("shutdown-dialog", "Server shutting down",
                     document.createTextNode("Sorry, but the server is about to shut down. Attempting to restore lobby on restart ..."));
             } else {

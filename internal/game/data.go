@@ -106,7 +106,7 @@ type LobbyRestoreData struct {
 func (lobby *Lobby) ResurrectUnsynchronized(restoreData *LobbyRestoreData) {
 	lobby.lowercaser = WordlistData[lobby.Wordpack].Lowercaser()
 
-	// Since we don't know how long the restart took, we extend all timers.\
+	// Since we don't know how long the restart took, we extend all timers.
 	// We add an additional second for good measure.
 	now := time.Now()
 	timeDiff := now.Sub(restoreData.ShutdownTime).Milliseconds() + 1000
@@ -166,7 +166,7 @@ const (
 
 func (lobby *Lobby) GetPlayerByID(id uuid.UUID) *Player {
 	for _, player := range lobby.Players {
-		if player.ID == player.ID {
+		if player.ID == id {
 			return player
 		}
 	}
