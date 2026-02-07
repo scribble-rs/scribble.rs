@@ -24,6 +24,9 @@ import (
 //go:embed lobby.js
 var lobbyJsRaw string
 
+//go:embed gallery.js
+var galleryJsRaw string
+
 //go:embed index.js
 var indexJsRaw string
 
@@ -37,10 +40,11 @@ type indexJsData struct {
 // This file contains the API for the official web client.
 
 type SSRHandler struct {
-	cfg                *config.Config
-	basePageConfig     *BasePageConfig
-	lobbyJsRawTemplate *txtTemplate.Template
-	indexJsRawTemplate *txtTemplate.Template
+	cfg                  *config.Config
+	basePageConfig       *BasePageConfig
+	lobbyJsRawTemplate   *txtTemplate.Template
+	galleryJsRawTemplate *txtTemplate.Template
+	indexJsRawTemplate   *txtTemplate.Template
 }
 
 func NewHandler(cfg *config.Config) (*SSRHandler, error) {
@@ -74,7 +78,15 @@ func NewHandler(cfg *config.Config) (*SSRHandler, error) {
 		return nil, fmt.Errorf("error parsing lobby js template: %w", err)
 	}
 
+	galleryJsRawTemplate, err := txtTemplate.
+		New("gallery-js").
+		Parse(galleryJsRaw)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing gallery js template: %w", err)
+	}
+
 	lobbyJsRawTemplate.AddParseTree("footer", pageTemplates.Tree)
+	galleryJsRawTemplate.AddParseTree("footer", pageTemplates.Tree)
 
 	entries, err := frontendResourcesFS.ReadDir("resources")
 	if err != nil {
@@ -95,15 +107,19 @@ func NewHandler(cfg *config.Config) (*SSRHandler, error) {
 	if err := basePageConfig.Hash("index.js", []byte(indexJsRaw)); err != nil {
 		return nil, fmt.Errorf("error hashing: %w", err)
 	}
+	if err := basePageConfig.Hash("gallery.js", []byte(galleryJsRaw)); err != nil {
+		return nil, fmt.Errorf("error hashing: %w", err)
+	}
 	if err := basePageConfig.Hash("lobby.js", []byte(lobbyJsRaw)); err != nil {
 		return nil, fmt.Errorf("error hashing: %w", err)
 	}
 
 	handler := &SSRHandler{
-		cfg:                cfg,
-		basePageConfig:     basePageConfig,
-		lobbyJsRawTemplate: lobbyJsRawTemplate,
-		indexJsRawTemplate: indexJsRawTemplate,
+		cfg:                  cfg,
+		basePageConfig:       basePageConfig,
+		lobbyJsRawTemplate:   lobbyJsRawTemplate,
+		galleryJsRawTemplate: galleryJsRawTemplate,
+		indexJsRawTemplate:   indexJsRawTemplate,
 	}
 	return handler, nil
 }

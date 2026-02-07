@@ -612,6 +612,16 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 		drawer.Score += newDrawerScore
 	}
 
+	// Prevents that the initial advance, used to start the game, applies
+	// an empty drawing.
+	if lobby.State == Ongoing && len(lobby.currentDrawing) > 0 && lobby.CurrentWord != "" {
+		// Append drawing to history. Since we reallocate on clear, this will be safe.
+		lobby.Drawings = append(lobby.Drawings, GalleryDrawing{
+			Word:   lobby.CurrentWord,
+			Events: lobby.currentDrawing,
+		})
+	}
+
 	// We need this for the next-turn / game-over event, in order to allow the
 	// client to know which word was previously supposed to be guessed.
 	previousWord := lobby.CurrentWord
