@@ -19,7 +19,9 @@ type galleryPageData struct {
 func (handler *SSRHandler) ssrGallery(writer http.ResponseWriter, request *http.Request) {
 	userAgent := strings.ToLower(request.UserAgent())
 	if !isHumanAgent(userAgent) {
-		// FIXME Handle robots
+		translation, _ := determineTranslation(request)
+		writer.WriteHeader(http.StatusForbidden)
+		handler.userFacingError(writer, translation.Get("forbidden"), translation)
 		return
 	}
 

@@ -31,16 +31,20 @@ func NewHandler(cfg *config.Config) *V1Handler {
 	}
 }
 
+func writeJson(writer http.ResponseWriter, bytes []byte) error {
+	writer.Header().Set("Content-Type", "application/json")
+	writer.Header().Set("Content-Length", strconv.Itoa(len(bytes)))
+	_, err := writer.Write(bytes)
+	return err
+}
+
 func marshalToHTTPWriter(data any, writer http.ResponseWriter) (bool, error) {
 	bytes, err := json.Marshal(data)
 	if err != nil {
 		return false, err
 	}
 
-	writer.Header().Set("Content-Type", "application/json")
-	writer.Header().Set("Content-Length", strconv.Itoa(len(bytes)))
-	_, err = writer.Write(bytes)
-	return true, err
+	return true, writeJson(writer, bytes)
 }
 
 type LobbyEntries []*LobbyEntry
@@ -209,13 +213,19 @@ func (handler *V1Handler) getGallery(writer http.ResponseWriter, request *http.R
 		return
 	}
 
-	// FIXME Synchronise access to lobby.Drawings.
-	// The drawings should also be available in an unstarted game.
+	var encodedJson []byte
+	var err error
+	lobby.Synchronized(func() {
+		encodedJson, err = json.Marshal(Gallery(lobby.Drawings))
+	})
 
-	if started, err := marshalToHTTPWriter(Gallery(lobby.Drawings), writer); err != nil {
-		if !started {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
-		}
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := writeJson(writer, encodedJson); err != nil {
+		log.Println("Error responding to gallery request:", err)
 		return
 	}
 }
