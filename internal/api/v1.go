@@ -19,7 +19,10 @@ import (
 	"golang.org/x/text/language"
 )
 
-var ErrLobbyNotExistent = errors.New("the requested lobby doesn't exist")
+var (
+	ErrLobbyNotExistent   = errors.New("the requested lobby doesn't exist")
+	ErrSessionNotMatching = errors.New("session doesn't match any player")
+)
 
 type V1Handler struct {
 	cfg *config.Config
@@ -207,27 +210,68 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 type Gallery []game.GalleryDrawing
 
 func (handler *V1Handler) getGallery(writer http.ResponseWriter, request *http.Request) {
+	// Cached lobbies should simply run into an error if they try to update.
+	userSession, err := GetUserSession(request)
+	if err != nil {
+		log.Printf("error getting user session: %v", err)
+		http.Error(writer, "no valid usersession supplied", http.StatusBadRequest)
+		return
+	}
+
+	if userSession == uuid.Nil {
+		http.Error(writer, "no usersession supplied", http.StatusBadRequest)
+		return
+	}
+
+	if err := request.ParseForm(); err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	rawLocalCacheCount := request.FormValue("local_cache_count")
+	localCacheCount, err := strconv.Atoi(rawLocalCacheCount)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	lobby := state.GetLobby(GetLobbyId(request))
 	if lobby == nil {
 		http.Error(writer, ErrLobbyNotExistent.Error(), http.StatusNotFound)
 		return
 	}
 
-	var encodedJson []byte
-	var err error
+	var after func()
 	lobby.Synchronized(func() {
-		encodedJson, err = json.Marshal(Gallery(lobby.Drawings))
+		// FIXME Improve these.
+		if localCacheCount == len(lobby.Drawings) {
+			after = func() {
+				http.Error(writer, "drawings unchanged", http.StatusNoContent)
+			}
+			return
+		}
+
+		if lobby.GetPlayerBySession(userSession) == nil {
+			after = func() {
+				http.Error(writer, ErrSessionNotMatching.Error(), http.StatusForbidden)
+			}
+			return
+		}
+
+		encodedJson, err := json.Marshal(Gallery(lobby.Drawings))
+		after = func() {
+			if err != nil {
+				http.Error(writer, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			if err := writeJson(writer, encodedJson); err != nil {
+				log.Println("Error responding to gallery request:", err)
+				return
+			}
+		}
 	})
-
-	if err != nil {
-		http.Error(writer, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if err := writeJson(writer, encodedJson); err != nil {
-		log.Println("Error responding to gallery request:", err)
-		return
-	}
+	after()
 }
 
 func (handler *V1Handler) postPlayer(writer http.ResponseWriter, request *http.Request) {
