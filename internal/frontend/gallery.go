@@ -26,6 +26,9 @@ func (handler *SSRHandler) ssrGallery(writer http.ResponseWriter, request *http.
 	}
 
 	lobbyId := request.PathValue("lobby_id")
+	// Note that this lobby doesn't have to exist necessarily, as the user can still have
+	// the data cached locally.
+
 	translation, locale := determineTranslation(request)
 	pageData := &galleryPageData{
 		BasePageConfig: handler.basePageConfig,

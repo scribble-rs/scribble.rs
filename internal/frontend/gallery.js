@@ -6,28 +6,96 @@ document.getElementById("next").addEventListener("click", () => {
     nextDrawing();
 });
 
-const getGallery = () => {
-    return new Promise((resolve, reject) => {
-        const cachedGallery = sessionStorage.getItem("cached_gallery");
-        if (cachedGallery) {
-            resolve(JSON.parse(cachedGallery));
-            return;
-        }
+/**
+ * @returns {Promise<IDBDatabase>}
+ */
+const openDB = () => {
+    const db = indexedDB.open("scribblers", 1);
 
-        fetch("{{.RootPath}}/v1/lobby/{{.LobbyID}}/gallery")
+    db.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        const objectStore = db.createObjectStore("gallery", { keyPath: "id" });
+        // No index, as we store an array.
+    };
+
+    return new Promise((resolve, reject) => {
+        db.onsuccess = () => {
+            resolve(db.result);
+        };
+        db.onerror = () => {
+            reject(db.error);
+        };
+    });
+};
+
+const dbPromise = openDB();
+
+const getGalleryEntry = async (store, id) => {
+    return new Promise((resolve, reject) => {
+        const gallery = store.get(id);
+        gallery.onsuccess = (event) => {
+            const galleryData = event.target.result;
+            resolve(galleryData);
+        };
+        gallery.onerror = () => {
+            reject(gallery.error);
+        };
+    });
+};
+
+const getGallery = () => {
+    return new Promise(async (resolve, reject) => {
+        const db = await dbPromise;
+        const store = db.transaction("gallery").objectStore("gallery");
+        const cachedGallery = await getGalleryEntry(store, "{{.LobbyID}}");
+
+        fetch(
+            "{{.RootPath}}/v1/lobby/{{.LobbyID}}/gallery?" +
+                new URLSearchParams({
+                    local_cache_count: cachedGallery
+                        ? cachedGallery.data.length
+                        : 0,
+                }).toString(),
+        )
             .then((response) => {
-                response
-                    .json()
-                    .then((json) => {
-                        sessionStorage.setItem(
-                            "cached_gallery",
-                            JSON.stringify(json),
-                        );
-                        return json;
-                    })
-                    .then(resolve);
+                if (response.status === 204) {
+                    console.log(
+                        "No new gallery data for lobby {{.LobbyID}} available.",
+                    );
+                    resolve(cachedGallery ? cachedGallery.data : []);
+                    return;
+                }
+
+                if (response.status === 200) {
+                    response
+                        .json()
+                        .then((json) => {
+                            const store = db
+                                .transaction("gallery", "readwrite")
+                                .objectStore("gallery");
+                            store.put({
+                                id: "{{.LobbyID}}",
+                                data: json,
+                            });
+                            console.log(
+                                "Latest gallery for lobby {{.LobbyID}} stored.",
+                            );
+                            return json;
+                        })
+                        .then(resolve);
+                    return;
+                }
+
+                console.log("Unknown error, falling back to cached value");
+                resolve(cachedGallery.data);
             })
-            .catch(reject);
+            .catch((err) => {
+                if (cachedGallery && cachedGallery.data.length > 0) {
+                    resolve(cachedGallery.data);
+                } else {
+                    reject(err);
+                }
+            });
     });
 };
 
@@ -89,7 +157,9 @@ let currentIndex = 0;
 let galleryData;
 
 getGallery().then((data) => {
-    setDrawing(data[0]);
+    if (data.length > 0) {
+        setDrawing(data[0]);
+    }
     galleryData = data;
 });
 
@@ -118,3 +188,16 @@ function nextDrawing() {
     currentIndex = currentIndex + 1;
     setDrawing(galleryData[currentIndex]);
 }
+
+dbPromise.then((db) => {
+    const galleryStore = db.transaction("gallery").objectStore("gallery");
+    const galleryCursor = galleryStore.openCursor();
+    galleryCursor.onsuccess = async (event) => {
+        const cursor = event.target.result;
+        if (cursor) {
+            const entry = await cursor.value;
+            console.log(entry.id);
+            cursor.continue();
+        }
+    };
+});
