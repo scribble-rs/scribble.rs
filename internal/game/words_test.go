@@ -93,7 +93,7 @@ func Test_getRandomWords(t *testing.T) {
 
 		randomWords := GetRandomWords(3, lobby)
 		for _, lobbyWord := range lobby.words {
-			if !arrayContains(randomWords, lobbyWord) {
+			if !slices.Contains(randomWords, lobbyWord) {
 				t.Errorf("Random words %s, didn't contain lobbyWord %s", randomWords, lobbyWord)
 			}
 		}
@@ -114,7 +114,7 @@ func Test_getRandomWords(t *testing.T) {
 
 		randomWords := GetRandomWords(3, lobby)
 		for _, lobbyWord := range lobby.words {
-			if !arrayContains(randomWords, lobbyWord) {
+			if !slices.Contains(randomWords, lobbyWord) {
 				t.Errorf("Random words %s, didn't contain lobbyWord %s", randomWords, lobbyWord)
 			}
 		}
@@ -134,7 +134,7 @@ func Test_getRandomWords(t *testing.T) {
 
 		randomWords := GetRandomWords(3, lobby)
 		for _, lobbyWord := range lobby.words {
-			if !arrayContains(randomWords, lobbyWord) {
+			if !slices.Contains(randomWords, lobbyWord) {
 				t.Errorf("Random words %s, didn't contain lobbyWord %s", randomWords, lobbyWord)
 			}
 		}
@@ -154,7 +154,7 @@ func Test_getRandomWords(t *testing.T) {
 
 		randomWords := GetRandomWords(3, lobby)
 		for _, customWord := range lobby.CustomWords {
-			if !arrayContains(randomWords, customWord) {
+			if !slices.Contains(randomWords, customWord) {
 				t.Errorf("Random words %s, didn't contain customWord %s", randomWords, customWord)
 			}
 		}
@@ -230,10 +230,6 @@ func Test_getRandomWordsReloading(t *testing.T) {
 			}
 		}
 	})
-}
-
-func arrayContains(array []string, item string) bool {
-	return slices.Contains(array, item)
 }
 
 var poximityBenchCases = [][]string{
