@@ -3,6 +3,7 @@ package game
 import (
 	"bytes"
 	"fmt"
+	"slices"
 	"strings"
 	"testing"
 
@@ -232,13 +233,7 @@ func Test_getRandomWordsReloading(t *testing.T) {
 }
 
 func arrayContains(array []string, item string) bool {
-	for _, arrayItem := range array {
-		if arrayItem == item {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(array, item)
 }
 
 var poximityBenchCases = [][]string{

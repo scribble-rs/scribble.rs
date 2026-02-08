@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"log"
+	"maps"
 	"os"
 	"reflect"
 	"strings"
@@ -124,9 +125,7 @@ func Load() (*Config, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error reading .env file: %w", err)
 		}
-		for key, value := range envFileContent {
-			envVars[key] = value
-		}
+		maps.Copy(envVars, envFileContent)
 	}
 
 	// Add local environment variables to EnvVars map

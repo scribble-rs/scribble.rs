@@ -70,11 +70,11 @@ func GetIPAddressFromRequest(request *http.Request) string {
 	if standardForwardedHeader != "" {
 		targetPrefix := "for="
 		// Since forwarded can contain more than one field, we search for one specific field.
-		for _, part := range strings.Split(standardForwardedHeader, ";") {
+		for part := range strings.SplitSeq(standardForwardedHeader, ";") {
 			trimmed := strings.TrimSpace(part)
-			if strings.HasPrefix(trimmed, targetPrefix) {
+			if after, ok := strings.CutPrefix(trimmed, targetPrefix); ok {
 				// FIXME Maybe checking for a valid IP-Address would make sense here, not sure tho.
-				address := remoteAddressToSimpleIP(strings.TrimPrefix(trimmed, targetPrefix))
+				address := remoteAddressToSimpleIP(after)
 				// Since the documentation doesn't mention which quotes are used, I just remove all ;)
 				return strings.NewReplacer("`", "", "'", "", "\"", "", "[", "", "]", "").Replace(address)
 			}
