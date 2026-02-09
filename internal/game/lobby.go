@@ -237,7 +237,7 @@ func (lobby *Lobby) readyToStart() bool {
 }
 
 func isRatelimited(sender *Player) bool {
-	if sender.messageTimestamps.size < 3 {
+	if sender.messageTimestamps.size < 5 {
 		return false
 	}
 
