@@ -337,15 +337,7 @@ const discordDomain = "1320396325925163070.discordsays.com"
 func SetDiscordCookies(w http.ResponseWriter, request *http.Request) {
 	discordInstanceId := GetDiscordInstanceId(request)
 	if discordInstanceId != "" {
-		http.SetCookie(w, &http.Cookie{
-			Name:        "discord-instance-id",
-			Value:       discordInstanceId,
-			Domain:      discordDomain,
-			Path:        "/",
-			SameSite:    http.SameSiteNoneMode,
-			Partitioned: true,
-			Secure:      true,
-		})
+		SetDiscordCookie(w, "discord-instance-id", discordInstanceId)
 	}
 }
 
@@ -359,39 +351,14 @@ func SetGameplayCookies(
 ) {
 	discordInstanceId := GetDiscordInstanceId(request)
 	if discordInstanceId != "" {
-		http.SetCookie(w, &http.Cookie{
-			Name:        "usersession",
-			Value:       player.GetUserSession().String(),
-			Domain:      discordDomain,
-			Path:        "/",
-			SameSite:    http.SameSiteNoneMode,
-			Partitioned: true,
-			Secure:      true,
-		})
-		http.SetCookie(w, &http.Cookie{
-			Name:        "lobby-id",
-			Value:       lobby.LobbyID,
-			Domain:      discordDomain,
-			Path:        "/",
-			SameSite:    http.SameSiteNoneMode,
-			Partitioned: true,
-			Secure:      true,
-		})
+		SetDiscordCookie(w, "usersession", player.GetUserSession().String())
+		SetDiscordCookie(w, "lobby-id", lobby.LobbyID)
 	} else {
+		// FIXME This comment seems nonsensical, am i not getting something?
 		// For the discord case, we need both, as the discord specific cookies
 		// aren't available during the readirect from ssrCreate to ssrEnter.
-		http.SetCookie(w, &http.Cookie{
-			Name:     "usersession",
-			Value:    player.GetUserSession().String(),
-			Path:     "/",
-			SameSite: http.SameSiteStrictMode,
-		})
-		http.SetCookie(w, &http.Cookie{
-			Name:     "lobby-id",
-			Value:    lobby.LobbyID,
-			Path:     "/",
-			SameSite: http.SameSiteStrictMode,
-		})
+		SetNormalCookie(w, "usersession", player.GetUserSession().String())
+		SetNormalCookie(w, "lobby-id", lobby.LobbyID)
 	}
 }
 

@@ -84,3 +84,29 @@ func GetIPAddressFromRequest(request *http.Request) string {
 
 	return remoteAddressToSimpleIP(request.RemoteAddr)
 }
+
+func SetDiscordCookie(
+	w http.ResponseWriter,
+	key, value string,
+) {
+	http.SetCookie(w, &http.Cookie{
+		Name:        key,
+		Value:       value,
+		Domain:      discordDomain,
+		Path:        "/",
+		SameSite:    http.SameSiteNoneMode,
+		Partitioned: true,
+		Secure:      true,
+	})
+}
+func SetNormalCookie(
+	w http.ResponseWriter,
+	key, value string,
+) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     key,
+		Value:    value,
+		Path:     "/",
+		SameSite: http.SameSiteStrictMode,
+	})
+}

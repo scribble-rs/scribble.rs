@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/scribble-rs/scribble.rs/internal/api"
 	"github.com/scribble-rs/scribble.rs/internal/translations"
 )
 
@@ -26,6 +27,11 @@ func (handler *SSRHandler) ssrGallery(writer http.ResponseWriter, request *http.
 	}
 
 	lobbyId := request.PathValue("lobby_id")
+
+	// FIXME Do we care about discord anymore?
+	api.SetNormalCookie(writer, "lobby-id", lobbyId)
+	api.SetNormalCookie(writer, "root-path", handler.basePageConfig.RootPath)
+
 	// Note that this lobby doesn't have to exist necessarily, as the user can still have
 	// the data cached locally.
 
