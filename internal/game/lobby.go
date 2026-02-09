@@ -884,7 +884,12 @@ HAS_GUESSERS:
 	}
 
 	for _, p := range lobby.players {
-		if p.State == Guessing && !p.Connected && p.disconnectTime != nil &&
+		if p.State == Guessing &&
+			// Relevant, as we can otherwise early exit when someone joins in a bit
+			// too late and there's a ticket between page load and socket connect.
+			// Probably not a big issue in reality, but annoying when testing.
+			p.hasConnectedOnce &&
+			!p.Connected && p.disconnectTime != nil &&
 			time.Since(*p.disconnectTime) <= disconnectGrace {
 			return false
 		}
@@ -1116,6 +1121,7 @@ func (lobby *Lobby) SendYourTurnEvent(player *Player) {
 
 func (lobby *Lobby) OnPlayerConnectUnsynchronized(player *Player) {
 	player.Connected = true
+	player.hasConnectedOnce = true
 	recalculateRanks(lobby)
 	lobby.WriteObject(player, Event{Type: EventTypeReady, Data: generateReadyData(lobby, player)})
 

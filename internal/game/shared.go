@@ -273,6 +273,9 @@ type Player struct {
 	// While checking the websocket against nil would be enough, we still need
 	// this field for sending it via the APIs.
 	Connected bool `json:"connected"`
+	// hasConnectedOnce indicates whether a player has ever connected to the websocket.
+	// This can be false between loading the HTML and connecting to the websocket.
+	hasConnectedOnce bool
 	// ID uniquely identified the Player.
 	ID uuid.UUID `json:"id"`
 }
