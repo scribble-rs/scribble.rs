@@ -186,7 +186,7 @@ func main() {
 	}
 
 	start := time.Now()
-	for i := 0; i < 1_000_000; i++ {
+	for range 1_000_000 {
 		player.SendRandomStroke()
 		player.SendRandomMessage()
 	}
