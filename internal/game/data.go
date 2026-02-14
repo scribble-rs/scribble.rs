@@ -113,6 +113,9 @@ type Lobby struct {
 type GalleryDrawing struct {
 	// Word is the word that was drawn.
 	Word string `json:"word"`
+	// Drawer is the name of the player that has drawn this piece of art.
+	// This is the name at the time of drawing, name changes won't be reflected here.
+	Drawer string `json:"drawer"`
 	// Events are the events required for recreation of the drawing.
 	Events []any `json:"events"`
 }

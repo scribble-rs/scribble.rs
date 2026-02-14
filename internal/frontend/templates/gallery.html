@@ -6,7 +6,7 @@
         <meta charset="UTF-8" />
         <meta
             name="viewport"
-            content="width=device-width, initial-scale=1 maximum-scale=1, user-scalable=0"
+            content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"
         />
         {{template "non-static-css-decl" .}}
         <link
@@ -30,11 +30,13 @@
                 ></noscript
             >
             <div class="top-bar">
-                <button id="prev" class="prev">Prev</button>
-                <span id="word"></span>
-                <button id="next" class="next">Next</button>
+                <button id="prev" class="prev">&lt;</button>
+                <div>
+                    <span id="word"></span>
+                    <span id="drawer"></span>
+                </div>
+                <button id="next" class="next">&gt;</button>
             </div>
-            <!-- FIXME Get from server.-->
             <canvas id="drawing-board" width="1600" height="900"></canvas>
         </div>
 

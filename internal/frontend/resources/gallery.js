@@ -106,6 +106,7 @@ const getGallery = () => {
 };
 
 const word = document.getElementById("word");
+const drawer = document.getElementById("drawer");
 
 const drawingBoard = document.getElementById("drawing-board");
 const context = drawingBoard.getContext("2d", { alpha: false });
@@ -128,6 +129,11 @@ function setDrawing(drawing) {
   clear(context);
 
   word.innerText = drawing.word;
+  if (drawing.drawer) {
+    drawer.innerText = `by ${drawing.drawer}`;
+  } else {
+    drawer.innerText = "";
+  }
 
   drawing.events.forEach((drawElement) => {
     const drawData = drawElement.data;

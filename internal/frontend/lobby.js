@@ -3,6 +3,7 @@ String.prototype.format = function() {
 };
 
 const discordInstanceId = getCookie("discord-instance-id")
+const lobbyId = getCookie("lobby-id");
 const rootPath = `${discordInstanceId ? ".proxy/" : ""}{{.RootPath}}`
 
 let socketIsConnecting = false;
@@ -345,6 +346,12 @@ function toggleFullscreen() {
     }
 }
 document.getElementById("toggle-fullscreen-button").addEventListener("click", toggleFullscreen);
+
+function showGallery() {
+  window.open(`${rootPath}/lobby/${lobbyId}/gallery`,"_blank" );
+}
+
+document.getElementById("show-gallery-button").addEventListener("click", showGallery);
 
 function showLobbySettingsDialog() {
     hideMenu();

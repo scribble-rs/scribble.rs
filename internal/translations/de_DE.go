@@ -36,6 +36,7 @@ func initGermanTranslation() {
 	translation.put("apply", "Anwenden")
 	translation.put("save", "Speichern")
 	translation.put("toggle-fullscreen", "Vollbild aktivieren / deaktivieren")
+	translation.put("show-gallery", "Gallerie anzezigen")
 	translation.put("toggle-spectate", "Zuschauermodus aktivieren / deaktivieren")
 	translation.put("show-help", "Hilfe anzeigen")
 	translation.put("votekick-a-player", "Stimme dafür ab, einen Spieler rauszuwerfen")
