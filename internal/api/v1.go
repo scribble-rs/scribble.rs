@@ -19,7 +19,10 @@ import (
 	"golang.org/x/text/language"
 )
 
-var ErrLobbyNotExistent = errors.New("the requested lobby doesn't exist")
+var (
+	ErrLobbyNotExistent   = errors.New("the requested lobby doesn't exist")
+	ErrSessionNotMatching = errors.New("session doesn't match any player")
+)
 
 type V1Handler struct {
 	cfg *config.Config
@@ -31,16 +34,20 @@ func NewHandler(cfg *config.Config) *V1Handler {
 	}
 }
 
+func writeJson(writer http.ResponseWriter, bytes []byte) error {
+	writer.Header().Set("Content-Type", "application/json")
+	writer.Header().Set("Content-Length", strconv.Itoa(len(bytes)))
+	_, err := writer.Write(bytes)
+	return err
+}
+
 func marshalToHTTPWriter(data any, writer http.ResponseWriter) (bool, error) {
 	bytes, err := json.Marshal(data)
 	if err != nil {
 		return false, err
 	}
 
-	writer.Header().Set("Content-Type", "application/json")
-	writer.Header().Set("Content-Length", strconv.Itoa(len(bytes)))
-	_, err = writer.Write(bytes)
-	return true, err
+	return true, writeJson(writer, bytes)
 }
 
 type LobbyEntries []*LobbyEntry
@@ -200,6 +207,73 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 	state.AddLobby(lobby)
 }
 
+type Gallery []game.GalleryDrawing
+
+func (handler *V1Handler) getGallery(writer http.ResponseWriter, request *http.Request) {
+	// Cached lobbies should simply run into an error if they try to update.
+	userSession, err := GetUserSession(request)
+	if err != nil {
+		log.Printf("error getting user session: %v", err)
+		http.Error(writer, "no valid usersession supplied", http.StatusBadRequest)
+		return
+	}
+
+	if userSession == uuid.Nil {
+		http.Error(writer, "no usersession supplied", http.StatusBadRequest)
+		return
+	}
+
+	if err := request.ParseForm(); err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	rawLocalCacheCount := request.FormValue("local_cache_count")
+	localCacheCount, err := strconv.Atoi(rawLocalCacheCount)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	lobby := state.GetLobby(GetLobbyId(request))
+	if lobby == nil {
+		http.Error(writer, ErrLobbyNotExistent.Error(), http.StatusNotFound)
+		return
+	}
+
+	var after func()
+	lobby.Synchronized(func() {
+		// FIXME Improve these.
+		if localCacheCount == len(lobby.Drawings) {
+			after = func() {
+				http.Error(writer, "drawings unchanged", http.StatusNoContent)
+			}
+			return
+		}
+
+		if lobby.GetPlayerBySession(userSession) == nil {
+			after = func() {
+				http.Error(writer, ErrSessionNotMatching.Error(), http.StatusForbidden)
+			}
+			return
+		}
+
+		encodedJson, err := json.Marshal(Gallery(lobby.Drawings))
+		after = func() {
+			if err != nil {
+				http.Error(writer, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			if err := writeJson(writer, encodedJson); err != nil {
+				log.Println("Error responding to gallery request:", err)
+				return
+			}
+		}
+	})
+	after()
+}
+
 func (handler *V1Handler) postPlayer(writer http.ResponseWriter, request *http.Request) {
 	lobby := state.GetLobby(request.PathValue("lobby_id"))
 	if lobby == nil {
@@ -263,15 +337,7 @@ const discordDomain = "1320396325925163070.discordsays.com"
 func SetDiscordCookies(w http.ResponseWriter, request *http.Request) {
 	discordInstanceId := GetDiscordInstanceId(request)
 	if discordInstanceId != "" {
-		http.SetCookie(w, &http.Cookie{
-			Name:        "discord-instance-id",
-			Value:       discordInstanceId,
-			Domain:      discordDomain,
-			Path:        "/",
-			SameSite:    http.SameSiteNoneMode,
-			Partitioned: true,
-			Secure:      true,
-		})
+		SetDiscordCookie(w, "discord-instance-id", discordInstanceId)
 	}
 }
 
@@ -285,39 +351,14 @@ func SetGameplayCookies(
 ) {
 	discordInstanceId := GetDiscordInstanceId(request)
 	if discordInstanceId != "" {
-		http.SetCookie(w, &http.Cookie{
-			Name:        "usersession",
-			Value:       player.GetUserSession().String(),
-			Domain:      discordDomain,
-			Path:        "/",
-			SameSite:    http.SameSiteNoneMode,
-			Partitioned: true,
-			Secure:      true,
-		})
-		http.SetCookie(w, &http.Cookie{
-			Name:        "lobby-id",
-			Value:       lobby.LobbyID,
-			Domain:      discordDomain,
-			Path:        "/",
-			SameSite:    http.SameSiteNoneMode,
-			Partitioned: true,
-			Secure:      true,
-		})
+		SetDiscordCookie(w, "usersession", player.GetUserSession().String())
+		SetDiscordCookie(w, "lobby-id", lobby.LobbyID)
 	} else {
+		// FIXME This comment seems nonsensical, am i not getting something?
 		// For the discord case, we need both, as the discord specific cookies
 		// aren't available during the readirect from ssrCreate to ssrEnter.
-		http.SetCookie(w, &http.Cookie{
-			Name:     "usersession",
-			Value:    player.GetUserSession().String(),
-			Path:     "/",
-			SameSite: http.SameSiteStrictMode,
-		})
-		http.SetCookie(w, &http.Cookie{
-			Name:     "lobby-id",
-			Value:    lobby.LobbyID,
-			Path:     "/",
-			SameSite: http.SameSiteStrictMode,
-		})
+		SetNormalCookie(w, "usersession", player.GetUserSession().String())
+		SetNormalCookie(w, "lobby-id", lobby.LobbyID)
 	}
 }
 

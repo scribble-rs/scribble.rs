@@ -71,6 +71,13 @@
                                             class="header-button-image" />
                                         {{.Translation.Get "toggle-fullscreen"}}
                                     </button>
+                                    <button id="show-gallery-button" class="dialog-button menu-item header-button"
+                                        alt="{{.Translation.Get "show-gallery"}}"
+                                        title="{{.Translation.Get "show-gallery"}}">
+                                        <img src='{{.RootPath}}/resources/{{.WithCacheBust "gallery.svg"}}'
+                                            class="header-button-image" />
+                                        {{.Translation.Get "show-gallery"}}
+                                    </button>
                                     <button id="toggle-spectate-button" class="dialog-button menu-item header-button"
                                         alt="{{.Translation.Get "toggle-spectate"}}"
                                         title="{{.Translation.Get "toggle-spectate"}}">

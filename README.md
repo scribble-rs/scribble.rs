@@ -187,6 +187,8 @@ Some of these were slightly altered if the license allowed it.
 Treat each of the files in this repository with the same license terms as the
 original file.
 
+**It seems iconfinder was renamed and all the URLs aren't correct anymore. If you are the author of any of the icons and want me to attribute you differently, create an issue please.**
+
 * Logo - All rights reserved, excluded from BSD-3 licensing
 * Background - All rights reserved, excluded from BSD-3 licensing
 * Favicon - All rights reserved, excluded from BSD-3 licensing
@@ -204,4 +206,5 @@ original file.
 * [Trash Icon](https://www.iconfinder.com/icons/315225/trash_can_icon) - Made by [Yannick Lung](https://yannicklung.com)
 * [Undo Icon](https://www.iconfinder.com/icons/308948/arrow_undo_icon) - Made by [Ivan Boyko](https://www.iconfinder.com/visualpharm)
 * [Alarmclock Icon](https://www.iconfinder.com/icons/4280508/alarm_outlined_alert_clock_icon) - Made by [Kit of Parts](https://www.iconfinder.com/kitofparts)
-* https://www.iconfinder.com/icons/808399/load_turn_turnaround_icon TODO
+* https://www.iconfinder.com/icons/808399/load_turn_turnaround_icon - Made by Pixel Bazaar
+*[Gallery Icon](https://www.svgrepo.com/svg/528992/gallery-wide) - Made by [Solar Icons](https://www.svgrepo.com/author/Solar%20Icons/)
