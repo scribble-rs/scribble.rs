@@ -1,15 +1,8 @@
 <h1 align="center">Scribble.rs</h1>
 
 <p align="center">
-  <a href="https://github.com/scribble-rs/scribble.rs/actions/workflows/test-and-build.yml">
-    <img src="https://github.com/scribble-rs/scribble.rs/workflows/Build/badge.svg">
-  </a>
-  <a href="https://discord.gg/cE5BKP2UnE">
-    <img src="https://dcbadge.limes.pink/api/server/https://discord.gg/cE5BKP2UnE">
-  </a>
-  <a href="https://ko-fi.com/N4N07DNY">
-    <img src="https://ko-fi.com/img/githubbutton_sm.svg">
-  </a>
+  <a href="https://discord.gg/cE5BKP2UnE"><img src="https://dcbadge.limes.pink/api/server/https://discord.gg/cE5BKP2UnE"></a>
+  <a href="https://ko-fi.com/N4N07DNY"><img src="https://ko-fi.com/img/githubbutton_sm.svg"></a>
 </p>
 
 ![demo](.github/demo.png)
@@ -33,7 +26,9 @@ if no traffic is received.)
 Feel free to join the community Discord server to find people to play, talk, get
 help or whatever else: https://discord.gg/cE5BKP2UnE
 
-## Donation
+Note, the server is NOT very active.
+
+## Donations
 
 I haven't really accepted donations for a long time. But I think the project is
 polished enough now to dare taking some money. Right now the hosting is very
@@ -115,7 +110,7 @@ container and you shouldn't have to change it under normal circumstances.
 ## Building / Running
 
 Dependencies:
-  * [go](https://go.dev/doc/install) version 1.23.3 or later
+  * [go](https://go.dev/doc/install) version 1.25.0 or later
   * [git](https://git-scm.com/) (You can also download a .zip from Github)
 
 In order to download and build, open a terminal and execute:
@@ -164,10 +159,12 @@ public dashboards right now, so the data will remain closed for now.
 There are many ways you can contribute:
 
 * Update / Add documentation in the wiki of the GitHub repository
-* Extend this README
 * Create feature requests and bug reports
 * Solve issues by creating Pull Requests
+  * If  you are changing / adding behaviour, make an issue beforehand
 * Tell your friends about the project
+
+For contributions guidelines, see: https://github.com/scribble-rs/scribble.rs/wiki/Contributing
 
 ### Translations
 
