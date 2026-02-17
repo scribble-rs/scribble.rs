@@ -44,6 +44,7 @@ func (handler *SSRHandler) lobbyJs(writer http.ResponseWriter, request *http.Req
 	if err := handler.lobbyJsRawTemplate.ExecuteTemplate(writer, "lobby-js", pageData); err != nil {
 		log.Printf("error templating JS: %s\n", err)
 	}
+
 }
 
 // ssrEnterLobby opens a lobby, either opening it directly or asking for a lobby.

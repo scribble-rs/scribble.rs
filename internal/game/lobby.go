@@ -607,10 +607,25 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 	}
 
 	// The drawer can potentially be null if kicked or the game just started.
-	if drawer := lobby.Drawer(); drawer != nil {
+	drawer := lobby.Drawer()
+	if drawer != nil {
 		newDrawerScore := lobby.calculateDrawerScore()
 		drawer.LastScore = newDrawerScore
 		drawer.Score += newDrawerScore
+	}
+
+	// Prevents that the initial advance, used to start the game, applies
+	// an empty drawing.
+	if lobby.State == Ongoing && len(lobby.currentDrawing) > 0 && lobby.CurrentWord != "" {
+		// Append drawing to history. Since we reallocate on clear, this will be safe.
+		drawing := GalleryDrawing{
+			Word:   lobby.CurrentWord,
+			Events: lobby.currentDrawing,
+		}
+		if drawer != nil {
+			drawing.Drawer = drawer.Name
+		}
+		lobby.Drawings = append(lobby.Drawings, drawing)
 	}
 
 	// We need this for the next-turn / game-over event, in order to allow the

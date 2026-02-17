@@ -73,7 +73,6 @@ func NewHandler(cfg *config.Config) (*SSRHandler, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error parsing lobby js template: %w", err)
 	}
-
 	lobbyJsRawTemplate.AddParseTree("footer", pageTemplates.Tree)
 
 	entries, err := frontendResourcesFS.ReadDir("resources")

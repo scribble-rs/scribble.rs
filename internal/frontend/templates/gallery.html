@@ -1,0 +1,53 @@
+{{define "gallery-page"}}
+<!doctype html>
+<html lang="{{.Locale}}">
+    <head>
+        <title>Scribble.rs - Gallery</title>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"
+        />
+        {{template "non-static-css-decl" .}}
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href='{{.RootPath}}/resources/{{.WithCacheBust "gallery.css"}}'
+        />
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href='{{.RootPath}}/resources/{{.WithCacheBust "root.css"}}'
+        />
+        {{template "favicon-decl" .}}
+    </head>
+
+    <body>
+        <div class="app">
+            <noscript
+                ><span class="noscript"
+                    >{{.Translation.Get "requires-js"}}</span
+                ></noscript
+            >
+            <div class="top-bar">
+                <button id="prev" class="prev">&lt;</button>
+                <div>
+                    <span id="word"></span>
+                    <span id="drawer"></span>
+                </div>
+                <button id="next" class="next">&gt;</button>
+            </div>
+            <canvas id="drawing-board" width="1600" height="900"></canvas>
+        </div>
+
+        <script
+            type="text/javascript"
+            src='{{.RootPath}}/resources/{{.WithCacheBust "draw.js"}}'
+        ></script>
+        <script
+            type="text/javascript"
+            src='{{.RootPath}}/resources/{{.WithCacheBust "gallery.js"}}'
+        ></script>
+    </body>
+</html>
+{{end}}
