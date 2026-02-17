@@ -68,6 +68,11 @@ var (
 			LanguageCode: "he",
 			Lowercaser:   func() cases.Caser { return cases.Lower(language.Hebrew) },
 		},
+		"persian": {
+			IsRtl:        true,
+			LanguageCode: "fa",
+			Lowercaser:   func() cases.Caser { return cases.Lower(language.Persian) },
+		},
 	}
 
 	//go:embed words/*
