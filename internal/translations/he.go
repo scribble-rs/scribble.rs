@@ -67,6 +67,7 @@ func initHebrewTranslation() {
 	translation.put("custom-words-placeholder", "מילים, מופרדות, בפסיק, כאן")
 	translation.put("custom-words-per-turn-setting", "מילים נוספות בכל תור")
 	translation.put("players-per-ip-limit-setting", "הגבלת שחקנים לכתובת IP")
+	translation.put("words-per-turn-setting", "מילים בכל תור")
 	translation.put("save-settings", "שמור הגדרות")
 	translation.put("input-contains-invalid-data", "הזנת תוכן לא חוקי")
 	translation.put("please-fix-invalid-input", "תקן את התוכן ונסה שנית")

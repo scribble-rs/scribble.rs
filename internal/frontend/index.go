@@ -191,6 +191,7 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 	customWordsPerTurn, customWordsPerTurnInvalid := api.ParseCustomWordsPerTurn(request.Form.Get("custom_words_per_turn"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := api.ParseClientsPerIPLimit(handler.cfg, request.Form.Get("clients_per_ip_limit"))
 	publicLobby, publicLobbyInvalid := api.ParseBoolean("public", request.Form.Get("public"))
+	wordsPerTurn, wordsPerTurnInvalid := api.ParseWordsPerTurn(request.Form.Get("words_per_turn"))
 
 	var lowercaser cases.Caser
 	if languageInvalid != nil {
@@ -215,6 +216,7 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 			ClientsPerIPLimit:  request.Form.Get("clients_per_ip_limit"),
 			Language:           request.Form.Get("language"),
 			ScoreCalculation:   request.Form.Get("score_calculation"),
+			WordsPerTurn:       request.Form.Get("words_per_turn"),
 		},
 		Languages: game.SupportedLanguages,
 	}
@@ -246,6 +248,9 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 	if publicLobbyInvalid != nil {
 		pageData.Errors = append(pageData.Errors, publicLobbyInvalid.Error())
 	}
+	if wordsPerTurnInvalid != nil {
+		pageData.Errors = append(pageData.Errors, wordsPerTurnInvalid.Error())
+	}
 
 	translation, locale := determineTranslation(request)
 	pageData.Translation = translation
@@ -272,7 +277,7 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 
 	player, lobby, err := game.CreateLobby(lobbyId, playerName, languageKey,
 		publicLobby, drawingTime, rounds, maxPlayers, customWordsPerTurn,
-		clientsPerIPLimit, customWords, scoreCalculation)
+		clientsPerIPLimit, customWords, scoreCalculation, wordsPerTurn)
 	if err != nil {
 		pageData.Errors = append(pageData.Errors, err.Error())
 		if err := pageTemplates.ExecuteTemplate(writer, "index", pageData); err != nil {

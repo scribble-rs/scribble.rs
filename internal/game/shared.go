@@ -304,4 +304,6 @@ type EditableLobbySettings struct {
 	// DrawingTime is the amount of seconds that each player has available to
 	// finish their drawing.
 	DrawingTime int `json:"drawingTime"`
+	// WordsPerTurn defines how many words the drawer is able to choose from
+	WordsPerTurn int `json:"wordsPerTurn"`
 }

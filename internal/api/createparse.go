@@ -113,8 +113,15 @@ func ParseCustomWordsPerTurn(value string) (int, error) {
 	return parseIntValue(value, 1, 3, "custom words per turn")
 }
 
+func ParseWordsPerTurn(value string) (int, error) {
+	return parseIntValue(value, 1, -1, "words per turn")
+}
+
 func newIntOutOfBounds(value, valueName string, lower, upper int) error {
-	return fmt.Errorf("the value '%s' must be an integer between %d and %d, but was: '%s'", valueName, lower, upper, value)
+	if upper != -1 {
+		return fmt.Errorf("the value '%s' must be an integer between %d and %d, but was: '%s'", valueName, lower, upper, value)
+	}
+	return fmt.Errorf("the value '%s' must be an integer larger than %d, but was: '%s'", valueName, lower, value)
 }
 
 func parseIntValue(toParse string, lower, upper int, valueName string) (int, error) {
@@ -125,7 +132,7 @@ func parseIntValue(toParse string, lower, upper int, valueName string) (int, err
 		value = int(parsed)
 	}
 
-	if value < lower || value > upper {
+	if value < lower || (upper > -1 && value > upper) {
 		return 0, newIntOutOfBounds(toParse, valueName, lower, upper)
 	}
 

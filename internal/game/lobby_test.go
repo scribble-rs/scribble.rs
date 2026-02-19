@@ -234,8 +234,9 @@ func Test_wordSelectionEvent(t *testing.T) {
 
 	lobby := &Lobby{
 		EditableLobbySettings: EditableLobbySettings{
-			DrawingTime: 10,
-			Rounds:      10,
+			DrawingTime:  10,
+			Rounds:       10,
+			WordsPerTurn: 3,
 		},
 		words: []string{"abc", "def", "ghi"},
 	}
@@ -331,8 +332,9 @@ func Test_kickDrawer(t *testing.T) {
 
 	lobby := &Lobby{
 		EditableLobbySettings: EditableLobbySettings{
-			DrawingTime: 10,
-			Rounds:      10,
+			DrawingTime:  10,
+			Rounds:       10,
+			WordsPerTurn: 3,
 		},
 		ScoreCalculation: ChillScoring,
 		words:            []string{"a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a"},
@@ -530,7 +532,7 @@ func Test_lobby_calculateDrawerScore(t *testing.T) {
 func Test_NoPrematureGameOver(t *testing.T) {
 	t.Parallel()
 
-	player, lobby, err := CreateLobby("", "test", "english", false, 120, 4, 4, 3, 1, nil, ChillScoring)
+	player, lobby, err := CreateLobby("", "test", "english", false, 120, 4, 4, 3, 1, nil, ChillScoring, 3)
 	require.NoError(t, err)
 
 	lobby.WriteObject = noOpWriteObject
