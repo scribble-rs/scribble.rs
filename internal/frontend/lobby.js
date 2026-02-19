@@ -350,6 +350,9 @@ function saveLobbySettings() {
                 custom_words_per_turn: document.getElementById(
                     "lobby-settings-custom-words-per-turn",
                 ).value,
+                words_per_turn: document.getElementById(
+                  "lobby-settings-words-per-turn"
+                ).value,
             }),
         {
             method: "PATCH",
@@ -1180,7 +1183,10 @@ const handleEvent = (parsed) => {
                 parsed.data.customWordsPerTurn +
                 "%\n" +
                 '{{.Translation.Get "players-per-ip-limit-setting"}}: ' +
-                parsed.data.clientsPerIpLimit,
+                parsed.data.clientsPerIpLimit +
+                "\n" +
+                '{{.Translation.Get "words-per-turn-setting"}}: ' +
+                parsed.data.wordsPerTurn,
         );
     } else if (parsed.type === "shutdown") {
         socket.onclose = null;

@@ -322,11 +322,18 @@ kbd {
 }
 
 #word-button-container {
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     margin-left: 20px;
     margin-right: 20px;
-    gap: 0.25rem;
+    gap: 0.5rem;
+    align-self: stretch;
+}
+
+@media only screen and (max-width: 600px) {
+    #word-button-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 .dialog-button {
@@ -373,16 +380,13 @@ kbd {
     display: flex;
     align-items: center;
     justify-content: center;
+    background-color: var(--component-base-color);
 }
 
 .line-width-button-content > *,
 .canvas-button > * {
     width: 40px;
     height: 40px;
-}
-
-.line-width-button-content {
-    background-color: var(--component-base-color);
 }
 
 .line-width-button:checked + .line-width-button-content {

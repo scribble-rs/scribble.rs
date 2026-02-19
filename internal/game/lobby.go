@@ -60,6 +60,7 @@ type SettingBounds struct {
 	MaxClientsPerIPLimit  int `json:"maxClientsPerIpLimit" env:"MAX_CLIENTS_PER_IP_LIMIT"`
 	MinCustomWordsPerTurn int `json:"minCustomWordsPerTurn" env:"MIN_CUSTOM_WORDS_PER_TURN"`
 	MaxCustomWordsPerTurn int `json:"maxCustomWordsPerTurn" env:"MAX_CUSTOM_WORDS_PER_TURN"`
+	MinWordsPerTurn       int `json:"minWordsPerTurn" env:"MIN_WORDS_PER_TURN"`
 }
 
 func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player) error {
@@ -688,10 +689,11 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 	lobby.ClearDrawing()
 	newDrawer.State = Drawing
 	lobby.State = Ongoing
-	lobby.wordChoice = GetRandomWords(3, lobby)
+	lobby.wordChoice = GetRandomWords(lobby.WordsPerTurn, lobby)
 	lobby.preSelectedWord = rand.IntN(len(lobby.wordChoice))
 
 	wordChoiceDuration := 30
+
 	lobby.Broadcast(&Event{
 		Type: EventTypeNextTurn,
 		Data: &NextTurn{
@@ -1034,6 +1036,7 @@ func CreateLobby(
 	drawingTime, rounds, maxPlayers, customWordsPerTurn, clientsPerIPLimit int,
 	customWords []string,
 	scoringCalculation ScoreCalculation,
+	wordsPerTurn int,
 ) (*Player, *Lobby, error) {
 	if desiredLobbyId == "" {
 		desiredLobbyId = uuid.Must(uuid.NewV4()).String()
@@ -1047,6 +1050,7 @@ func CreateLobby(
 			CustomWordsPerTurn: customWordsPerTurn,
 			ClientsPerIPLimit:  clientsPerIPLimit,
 			Public:             publicLobby,
+			WordsPerTurn:       wordsPerTurn,
 		},
 		CustomWords:      customWords,
 		currentDrawing:   make([]any, 0),

@@ -24,6 +24,7 @@ type LobbySettingDefaults struct {
 	ClientsPerIPLimit  string `env:"CLIENTS_PER_IP_LIMIT"`
 	Language           string `env:"LANGUAGE"`
 	ScoreCalculation   string `env:"SCORE_CALCULATION"`
+	WordsPerTurn       string `env:"WORDS_PER_TURN"`
 }
 
 type CORS struct {
@@ -86,6 +87,7 @@ var Default = Config{
 		ClientsPerIPLimit:  "2",
 		Language:           "english",
 		ScoreCalculation:   "chill",
+		WordsPerTurn:       "3",
 	},
 	LobbySettingBounds: game.SettingBounds{
 		MinDrawingTime:        60,
@@ -98,6 +100,7 @@ var Default = Config{
 		MaxClientsPerIPLimit:  24,
 		MinCustomWordsPerTurn: 1,
 		MaxCustomWordsPerTurn: 3,
+		MinWordsPerTurn:       1,
 	},
 	CORS: CORS{
 		AllowedOrigins:   []string{"*"},
