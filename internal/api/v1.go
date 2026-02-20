@@ -441,10 +441,10 @@ var SuggestedBrushSizes = [4]uint8{8, 16, 24, 32}
 // settings, neither at compile time nor at startup time.
 type GameConstants struct {
 	// DrawingBoardBaseWidth is the internal canvas width and is needed for
-	// correctly up- / downscaling drawing instructions.
+	// correctly up- / downscaling drawing instructions. Deprecated, but kept for compat.
 	DrawingBoardBaseWidth uint16 `json:"drawingBoardBaseWidth"`
 	// DrawingBoardBaseHeight is the internal canvas height and is needed for
-	// correctly up- / downscaling drawing instructions.
+	// correctly up- / downscaling drawing instructions. Deprecated, but kept for compat.
 	DrawingBoardBaseHeight uint16 `json:"drawingBoardBaseHeight"`
 	// MinBrushSize is the minimum amount of pixels the brush can draw in.
 	MinBrushSize uint8 `json:"minBrushSize"`

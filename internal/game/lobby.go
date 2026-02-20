@@ -834,11 +834,19 @@ func (lobby *Lobby) tickLogic(expectedTicker *time.Ticker) bool {
 				randomIndex := rand.Int() % len(lobby.wordHints)
 				if lobby.wordHints[randomIndex].Character == 0 {
 					lobby.wordHints[randomIndex].Character = []rune(lobby.CurrentWord)[randomIndex]
+					lobby.wordHints[randomIndex].Revealed = true
+					lobby.wordHintsShown[randomIndex].Revealed = true
 					wordHintData := &Event{
 						Type: EventTypeUpdateWordHint,
 						Data: lobby.wordHints,
 					}
 					lobby.broadcastConditional(wordHintData, IsAllowedToSeeHints)
+
+					wordHintsShownData := &Event{
+						Type: EventTypeUpdateWordHint,
+						Data: lobby.wordHintsShown,
+					}
+					lobby.broadcastConditional(wordHintsShownData, IsAllowedToSeeRevealedHints)
 					break
 				}
 			}

@@ -86,8 +86,12 @@ type IntDataEvent struct {
 // the character should be shown and whether it should be underlined on the
 // UI.
 type WordHint struct {
+	// The actual word character or 0 if not revealed. Note, that for shown hints, these are always set, even if not revealed.
 	Character rune `json:"character"`
-	Underline bool `json:"underline"`
+	// Underline is used to distinguish characters like spaces or dashes from guessable characters.
+	Underline bool `json:"underline,omitempty"`
+	// Revealed is used for non-guessing players to indicate that other players can see a character.
+	Revealed bool `json:"revealed,omitempty"`
 }
 
 type LineEvent struct {

@@ -1,84 +1,30 @@
-String.prototype.format = function() {
+String.prototype.format = function () {
     return [...arguments].reduce((p, c) => p.replace(/%s/, c), this);
 };
 
-const discordInstanceId = getCookie("discord-instance-id")
-const rootPath = `${discordInstanceId ? ".proxy/" : ""}{{.RootPath}}`
+const discordInstanceId = getCookie("discord-instance-id");
+const rootPath = `${discordInstanceId ? ".proxy/" : ""}{{.RootPath}}`;
 
 let socketIsConnecting = false;
 let hasSocketEverConnected = false;
 let socket;
-function connectToWebsocket() {
-    if (socketIsConnecting === true) {
-        return;
-    }
-
-    socketIsConnecting = true;
-
-    socket = new WebSocket(`${rootPath}/v1/lobby/ws`);
-
-    socket.onerror = error => {
-        //Is not connected and we haven't yet said that we are done trying to
-        //connect, this means that we could never even establish a connection.
-        if (socket.readyState != 1 && !hasSocketEverConnected) {
-            socketIsConnecting = false;
-            showTextDialog("connection-error-dialog",
-                '{{.Translation.Get "error-connecting"}}',
-                `{{.Translation.Get "error-connecting-text"}}`);
-            console.log("Error establishing connection: ", error);
-        } else {
-            console.log("Socket error: ", error)
-        }
-    };
-
-    socket.onopen = () => {
-        closeDialog(reconnectDialogId);
-
-        hasSocketEverConnected = true;
-        socketIsConnecting = false;
-
-        socket.onclose = event => {
-            //We want to avoid handling the error multiple times and showing the incorrect dialogs.
-            socket.onerror = null;
-
-            console.log("Socket Closed Connection: ", event);
-
-            if (event.code === 4000) {
-              showTextDialog(reconnectDialogId, 'Kicked', `You have been kicked from the lobby.`);
-            } else {
-              console.log("Attempting to reestablish socket connection.");
-              showReconnectDialogIfNotShown();
-              connectToWebsocket();
-            }
-        };
-
-        registerMessageHandler(socket);
-
-        console.log("Successfully Connected");
-    };
-}
 
 const reconnectDialogId = "reconnect-dialog";
 function showReconnectDialogIfNotShown() {
     const previousReconnectDialog = document.getElementById(reconnectDialogId);
 
     //Since the content is constant, there's no need to ever show two.
-    if (previousReconnectDialog === undefined || previousReconnectDialog === null) {
-        showTextDialog(reconnectDialogId, '{{.Translation.Get "connection-lost"}}',
-            `{{.Translation.Get "connection-lost-text"}}`);
+    if (
+        previousReconnectDialog === undefined ||
+        previousReconnectDialog === null
+    ) {
+        showTextDialog(
+            reconnectDialogId,
+            '{{.Translation.Get "connection-lost"}}',
+            `{{.Translation.Get "connection-lost-text"}}`,
+        );
     }
 }
-
-connectToWebsocket();
-
-//In order to avoid automatically canceling the socket connection, we keep
-//sending dummy events every 5 seconds. This was a problem on Heroku. If
-//a player took a very long time to choose a word, the connection of all
-//players could be killed and even cause the lobby being closed. Since
-//that's very frustrating, we want to avoid that.
-window.setInterval(() => {
-    socket.send(JSON.stringify({ type: "keep-alive" }));
-}, 5000);
 
 //Makes sure that the server notices that the player disconnects.
 //Otherwise a refresh (on chromium based browsers) can lead to the server
@@ -86,7 +32,9 @@ window.setInterval(() => {
 window.onbeforeunload = () => {
     //Avoid unintentionally reestablishing connection.
     socket.onclose = null;
-    socket.close();
+    if (socket) {
+        socket.close();
+    }
 };
 
 const messageInput = document.getElementById("message-input");
@@ -104,7 +52,9 @@ const centerDialogs = document.getElementById("center-dialogs");
 const waitChooseDialog = document.getElementById("waitchoose-dialog");
 const waitChooseDrawerSpan = document.getElementById("waitchoose-drawer");
 const namechangeDialog = document.getElementById("namechange-dialog");
-const namechangeFieldStartDialog = document.getElementById("namechange-field-start-dialog");
+const namechangeFieldStartDialog = document.getElementById(
+    "namechange-field-start-dialog",
+);
 const namechangeField = document.getElementById("namechange-field");
 
 const lobbySettingsButton = document.getElementById("lobby-settings-button");
@@ -117,7 +67,7 @@ const gameOverDialogTitle = document.getElementById("game-over-dialog-title");
 const gameOverScoreboard = document.getElementById("game-over-scoreboard");
 const forceRestartButton = document.getElementById("force-restart-button");
 const wordDialog = document.getElementById("word-dialog");
-const wordPreSelected = document.getElementById("word-preselected")
+const wordPreSelected = document.getElementById("word-preselected");
 const wordButtonContainer = document.getElementById("word-button-container");
 
 const kickDialog = document.getElementById("kick-dialog");
@@ -130,15 +80,6 @@ updateSoundIcon();
 const penToggleLabel = document.getElementById("pen-pressure-toggle-label");
 let penPressure = localStorage.getItem("penPressure") !== "false";
 updateTogglePenIcon();
-
-const set_dummy_word_hints = () => {
-    // Dummy wordhint to prevent layout changes.
-    applyWordHints([{
-        character: 'D',
-        underline: true,
-    }], true);
-};
-set_dummy_word_hints();
 
 function showTextDialog(id, title, message) {
     const messageNode = document.createElement("span");
@@ -153,15 +94,15 @@ function hideMenu() {
 
 // Since chromes implementation of the popup is dumb, we can't position
 // it correctly without javascript.
-if (!navigator.userAgent.toLowerCase().includes('firefox')) {
+if (!navigator.userAgent.toLowerCase().includes("firefox")) {
     const menu_button = document.getElementById("menu-button");
     menu.addEventListener("toggle", (event) => {
         if (event.newState === "open") {
             const bounds = menu_button.getBoundingClientRect();
             // Technically this won't correctly handle the scrolling
             // position, but we'll cope for now.
-            menu.style.top = bounds.bottom + "px"
-            menu.style.left = bounds.left + "px"
+            menu.style.top = bounds.bottom + "px";
+            menu.style.left = bounds.left + "px";
         }
     });
 }
@@ -201,13 +142,18 @@ function showInfoDialog(title, message, buttonText) {
 
     const closeButton = createDialogButton(buttonText);
     closeButton.addEventListener("click", () => {
-        closeDialog(dialogId)
-    })
+        closeDialog(dialogId);
+    });
 
     const messageNode = document.createElement("span");
     messageNode.innerText = message;
 
-    showDialog(dialogId, title, messageNode, createDialogButtonBar(closeButton));
+    showDialog(
+        dialogId,
+        title,
+        messageNode,
+        createDialogButtonBar(closeButton),
+    );
 }
 
 function createDialogButton(text) {
@@ -220,7 +166,7 @@ function createDialogButton(text) {
 function createDialogButtonBar(...buttons) {
     const buttonBar = document.createElement("div");
     buttonBar.classList.add("button-bar");
-    buttons.forEach(button => buttonBar.appendChild(button));
+    buttons.forEach(buttonBar.appendChild);
     return buttonBar;
 }
 
@@ -244,17 +190,19 @@ function showHelpDialog() {
     controlsTextOne.innerText = '{{.Translation.Get "switch-tools-intro"}}:';
 
     const controlsTextTwo = document.createElement("p");
-    controlsTextTwo.innerHTML = '{{.Translation.Get "pencil"}}: <kbd>Q</kbd><br/>' +
+    controlsTextTwo.innerHTML =
+        '{{.Translation.Get "pencil"}}: <kbd>Q</kbd><br/>' +
         '{{.Translation.Get "fill-bucket"}}: <kbd>W</kbd><br/>' +
         '{{.Translation.Get "eraser"}}: <kbd>E</kbd><br/>';
 
     const controlsTextThree = document.createElement("p");
-    controlsTextThree.innerHTML = '{{printf (.Translation.Get "switch-pencil-sizes") "<kbd>1</kbd>" "<kbd>4</kbd>"}}';
+    controlsTextThree.innerHTML =
+        '{{printf (.Translation.Get "switch-pencil-sizes") "<kbd>1</kbd>" "<kbd>4</kbd>"}}';
 
     const closeButton = createDialogButton('{{.Translation.Get "close"}}');
     closeButton.addEventListener("click", () => {
-        closeDialog(helpDialogId)
-    })
+        closeDialog(helpDialogId);
+    });
 
     const footer = document.createElement("div");
     footer.className = "help-footer";
@@ -263,15 +211,22 @@ function showHelpDialog() {
     const buttonBar = createDialogButtonBar(closeButton);
 
     const dialogContent = document.createElement("div");
-    dialogContent.appendChild(controlsLabel)
+    dialogContent.appendChild(controlsLabel);
     dialogContent.appendChild(controlsTextOne);
     dialogContent.appendChild(controlsTextTwo);
     dialogContent.appendChild(controlsTextThree);
     dialogContent.appendChild(footer);
 
-    showDialog(helpDialogId, '{{.Translation.Get "help"}}', dialogContent, buttonBar);
+    showDialog(
+        helpDialogId,
+        '{{.Translation.Get "help"}}',
+        dialogContent,
+        buttonBar,
+    );
 }
-document.getElementById("help-button").addEventListener("click", showHelpDialog);
+document
+    .getElementById("help-button")
+    .addEventListener("click", showHelpDialog);
 
 function showKickDialog() {
     hideMenu();
@@ -279,7 +234,7 @@ function showKickDialog() {
     if (cachedPlayers && cachedPlayers) {
         kickDialogPlayers.innerHTML = "";
 
-        cachedPlayers.forEach(player => {
+        cachedPlayers.forEach((player) => {
             //Don't wanna allow kicking ourselves.
             if (player.id !== ownID && player.connected) {
                 const playerKickEntry = document.createElement("button");
@@ -294,12 +249,16 @@ function showKickDialog() {
         kickDialog.style.visibility = "visible";
     }
 }
-document.getElementById("kick-button").addEventListener("click", showKickDialog);
+document
+    .getElementById("kick-button")
+    .addEventListener("click", showKickDialog);
 
 function hideKickDialog() {
     kickDialog.style.visibility = "hidden";
 }
-document.getElementById("kick-close-button").addEventListener("click", hideKickDialog);
+document
+    .getElementById("kick-close-button")
+    .addEventListener("click", hideKickDialog);
 
 function showNameChangeDialog() {
     hideMenu();
@@ -307,27 +266,37 @@ function showNameChangeDialog() {
     namechangeDialog.style.visibility = "visible";
     namechangeField.focus();
 }
-document.getElementById("name-change-button").addEventListener("click", showNameChangeDialog);
+document
+    .getElementById("name-change-button")
+    .addEventListener("click", showNameChangeDialog);
 
 function hideNameChangeDialog() {
     namechangeDialog.style.visibility = "hidden";
 }
-document.getElementById("namechange-close-button").addEventListener("click", hideNameChangeDialog);
+document
+    .getElementById("namechange-close-button")
+    .addEventListener("click", hideNameChangeDialog);
 
 function changeName(name) {
     //Avoid unnecessary traffic.
     if (name !== ownName) {
-        socket.send(JSON.stringify({
-            type: "name-change",
-            data: name,
-        }));
+        socket.send(
+            JSON.stringify({
+                type: "name-change",
+                data: name,
+            }),
+        );
     }
 }
-document.getElementById("namechange-button-start-dialog").addEventListener("click", () => {
-    changeName(document.getElementById('namechange-field-start-dialog').value);
-});
+document
+    .getElementById("namechange-button-start-dialog")
+    .addEventListener("click", () => {
+        changeName(
+            document.getElementById("namechange-field-start-dialog").value,
+        );
+    });
 document.getElementById("namechange-button").addEventListener("click", () => {
-    changeName(document.getElementById('namechange-field').value);
+    changeName(document.getElementById("namechange-field").value);
     hideNameChangeDialog();
 });
 
@@ -344,7 +313,9 @@ function toggleFullscreen() {
         document.body.requestFullscreen();
     }
 }
-document.getElementById("toggle-fullscreen-button").addEventListener("click", toggleFullscreen);
+document
+    .getElementById("toggle-fullscreen-button")
+    .addEventListener("click", toggleFullscreen);
 
 function showLobbySettingsDialog() {
     hideMenu();
@@ -355,39 +326,59 @@ lobbySettingsButton.addEventListener("click", showLobbySettingsDialog);
 function hideLobbySettingsDialog() {
     lobbySettingsDialog.style.visibility = "hidden";
 }
-document.getElementById("lobby-settings-close-button").addEventListener("click", hideLobbySettingsDialog);
+document
+    .getElementById("lobby-settings-close-button")
+    .addEventListener("click", hideLobbySettingsDialog);
 
 function saveLobbySettings() {
-    fetch(`${rootPath}/v1/lobby?` + new URLSearchParams({
-        drawing_time: document.getElementById("lobby-settings-drawing-time").value,
-        rounds: document.getElementById("lobby-settings-max-rounds").value,
-        public: document.getElementById("lobby-settings-public").checked,
-        max_players: document.getElementById("lobby-settings-max-players").value,
-        clients_per_ip_limit: document.getElementById("lobby-settings-clients-per-ip-limit").value,
-        custom_words_per_turn: document.getElementById("lobby-settings-custom-words-per-turn").value,
-    }), {
-        method: 'PATCH',
-    })
-        .then(result => {
-            if (result.status === 200) {
-                hideLobbySettingsDialog();
-            } else {
-                result
-                    .text()
-                    .then(bodyText => {
-                        alert("Error saving lobby settings: \n\n - " + bodyText.replace(";", "\n - "));
-                    });
-            }
-        });
+    fetch(
+        `${rootPath}/v1/lobby?` +
+            new URLSearchParams({
+                drawing_time: document.getElementById(
+                    "lobby-settings-drawing-time",
+                ).value,
+                rounds: document.getElementById("lobby-settings-max-rounds")
+                    .value,
+                public: document.getElementById("lobby-settings-public")
+                    .checked,
+                max_players: document.getElementById(
+                    "lobby-settings-max-players",
+                ).value,
+                clients_per_ip_limit: document.getElementById(
+                    "lobby-settings-clients-per-ip-limit",
+                ).value,
+                custom_words_per_turn: document.getElementById(
+                    "lobby-settings-custom-words-per-turn",
+                ).value,
+            }),
+        {
+            method: "PATCH",
+        },
+    ).then((result) => {
+        if (result.status === 200) {
+            hideLobbySettingsDialog();
+        } else {
+            result.text().then((bodyText) => {
+                alert(
+                    "Error saving lobby settings: \n\n - " +
+                        bodyText.replace(";", "\n - "),
+                );
+            });
+        }
+    });
 }
-document.getElementById("lobby-settings-save-button").addEventListener("click", saveLobbySettings);
+document
+    .getElementById("lobby-settings-save-button")
+    .addEventListener("click", saveLobbySettings);
 
 function toggleSound() {
     sound = !sound;
     localStorage.setItem("sound", sound.toString());
     updateSoundIcon();
 }
-document.getElementById("toggle-sound-button").addEventListener("click", toggleSound);
+document
+    .getElementById("toggle-sound-button")
+    .addEventListener("click", toggleSound);
 
 function updateSoundIcon() {
     if (sound) {
@@ -402,7 +393,9 @@ function togglePenPressure() {
     localStorage.setItem("penPressure", penPressure.toString());
     updateTogglePenIcon();
 }
-document.getElementById("toggle-pen-pressure-button").addEventListener("click", togglePenPressure);
+document
+    .getElementById("toggle-pen-pressure-button")
+    .addEventListener("click", togglePenPressure);
 
 function updateTogglePenIcon() {
     if (penPressure) {
@@ -415,8 +408,8 @@ function updateTogglePenIcon() {
 //The drawing board has a base size. This base size results in a certain ratio
 //that the actual canvas has to be resized accordingly too. This is needed
 //since not every client has the same screensize.
-const baseWidth = {{.DrawingBoardBaseWidth }};
-const baseHeight = {{.DrawingBoardBaseHeight }};
+const baseWidth = 1600;
+const baseHeight = 900;
 const boardRatio = baseWidth / baseHeight;
 
 // Moving this here to extract the context after resizing
@@ -526,7 +519,9 @@ function setColorNoUpdate(index) {
     sessionStorage.setItem("local_color", JSON.stringify(index));
 }
 
-setColorNoUpdate(JSON.parse(sessionStorage.getItem("local_color")) ?? 13 /* black*/);
+setColorNoUpdate(
+    JSON.parse(sessionStorage.getItem("local_color")) ?? 13 /* black*/,
+);
 updateDrawingStateUI();
 
 function setLineWidth(value) {
@@ -534,17 +529,33 @@ function setLineWidth(value) {
     updateDrawingStateUI();
 }
 sizeButton8.addEventListener("change", () => setLineWidth(8));
-document.getElementById("size-8-button-wrapper").addEventListener("mouseup", sizeButton8.click);
-document.getElementById("size-8-button-wrapper").addEventListener("mousedown", sizeButton8.click);
+document
+    .getElementById("size-8-button-wrapper")
+    .addEventListener("mouseup", sizeButton8.click);
+document
+    .getElementById("size-8-button-wrapper")
+    .addEventListener("mousedown", sizeButton8.click);
 sizeButton16.addEventListener("change", () => setLineWidth(16));
-document.getElementById("size-16-button-wrapper").addEventListener("mouseup", sizeButton16.click);
-document.getElementById("size-16-button-wrapper").addEventListener("mousedown", sizeButton16.click);
+document
+    .getElementById("size-16-button-wrapper")
+    .addEventListener("mouseup", sizeButton16.click);
+document
+    .getElementById("size-16-button-wrapper")
+    .addEventListener("mousedown", sizeButton16.click);
 sizeButton24.addEventListener("change", () => setLineWidth(24));
-document.getElementById("size-24-button-wrapper").addEventListener("mouseup", sizeButton24.click);
-document.getElementById("size-24-button-wrapper").addEventListener("mousedown", sizeButton24.click);
+document
+    .getElementById("size-24-button-wrapper")
+    .addEventListener("mouseup", sizeButton24.click);
+document
+    .getElementById("size-24-button-wrapper")
+    .addEventListener("mousedown", sizeButton24.click);
 sizeButton32.addEventListener("change", () => setLineWidth(32));
-document.getElementById("size-32-button-wrapper").addEventListener("mouseup", sizeButton32.click);
-document.getElementById("size-32-button-wrapper").addEventListener("mousedown", sizeButton32.click);
+document
+    .getElementById("size-32-button-wrapper")
+    .addEventListener("mouseup", sizeButton32.click);
+document
+    .getElementById("size-32-button-wrapper")
+    .addEventListener("mousedown", sizeButton32.click);
 
 function setLineWidthNoUpdate(value) {
     localLineWidth = value;
@@ -557,12 +568,24 @@ function chooseTool(value) {
 toolButtonFill.addEventListener("change", () => chooseTool(fillBucket));
 toolButtonPen.addEventListener("change", () => chooseTool(pen));
 toolButtonRubber.addEventListener("change", () => chooseTool(rubber));
-document.getElementById("tool-type-fill-wrapper").addEventListener("mouseup", toolButtonFill.click);
-document.getElementById("tool-type-pencil-wrapper").addEventListener("mouseup", toolButtonPen.click);
-document.getElementById("tool-type-rubber-wrapper").addEventListener("mouseup", toolButtonRubber.click);
-document.getElementById("tool-type-fill-wrapper").addEventListener("mousedown", toolButtonFill.click);
-document.getElementById("tool-type-pencil-wrapper").addEventListener("mousedown", toolButtonPen.click);
-document.getElementById("tool-type-rubber-wrapper").addEventListener("mousedown", toolButtonRubber.click);
+document
+    .getElementById("tool-type-fill-wrapper")
+    .addEventListener("mouseup", toolButtonFill.click);
+document
+    .getElementById("tool-type-pencil-wrapper")
+    .addEventListener("mouseup", toolButtonPen.click);
+document
+    .getElementById("tool-type-rubber-wrapper")
+    .addEventListener("mouseup", toolButtonRubber.click);
+document
+    .getElementById("tool-type-fill-wrapper")
+    .addEventListener("mousedown", toolButtonFill.click);
+document
+    .getElementById("tool-type-pencil-wrapper")
+    .addEventListener("mousedown", toolButtonPen.click);
+document
+    .getElementById("tool-type-rubber-wrapper")
+    .addEventListener("mousedown", toolButtonRubber.click);
 
 function chooseToolNoUpdate(value) {
     if (value === pen || value === rubber || value === fillBucket) {
@@ -574,10 +597,12 @@ function chooseToolNoUpdate(value) {
 }
 
 function rgbColorObjectToHexString(color) {
-    return "#"
-        + numberTo16BitHexadecimal(color.r)
-        + numberTo16BitHexadecimal(color.g)
-        + numberTo16BitHexadecimal(color.b);
+    return (
+        "#" +
+        numberTo16BitHexadecimal(color.r) +
+        numberTo16BitHexadecimal(color.g) +
+        numberTo16BitHexadecimal(color.b)
+    );
 }
 
 function numberTo16BitHexadecimal(number) {
@@ -589,7 +614,10 @@ const rubberColor = { r: 255, g: 255, b: 255 };
 function updateDrawingStateUI() {
     // Color all buttons, so the player always has a hint as to what the
     // active color is, since the cursor might not always be visible.
-    sizeButtons.style.setProperty("--dot-color", rgbColorObjectToHexString(localColor));
+    sizeButtons.style.setProperty(
+        "--dot-color",
+        rgbColorObjectToHexString(localColor),
+    );
 
     updateCursor();
 }
@@ -600,12 +628,13 @@ function updateCursor() {
             setCircleCursor(rubberColor, localLineWidth);
         } else if (localTool === fillBucket) {
             const outerColor = getComplementaryCursorColor(localColor);
-            drawingBoard.style.cursor = `url('data:image/svg+xml;utf8,`
-                + encodeURIComponent(
-                    `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="32" width="32">`
-                    + generateSVGCircle(8, localColor, outerColor)
-                    //This has been taken from fill.svg
-                    + `
+            drawingBoard.style.cursor =
+                `url('data:image/svg+xml;utf8,` +
+                encodeURIComponent(
+                    `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="32" width="32">` +
+                        generateSVGCircle(8, localColor, outerColor) +
+                        //This has been taken from fill.svg
+                        `
                                 <svg viewBox="0 0 64 64" x="8" y="8" height="24" width="24">
                                     <path
                                         d="m 59.575359,58.158246 c 0,1.701889 -1.542545,3.094345 -3.427877,3.094345 H 8.1572059 c -1.8853322,0 -3.4278772,-1.392456 -3.4278772,-3.094345 V 5.5543863 c 0,-1.7018892 1.542545,-3.0943445 3.4278772,-3.0943445 H 56.147482 c 1.885332,0 3.427877,1.3924553 3.427877,3.0943445 z"
@@ -620,22 +649,22 @@ function updateCursor() {
                                         id="path18"
                                         style="fill:none;stroke:#4F5D73;stroke-width:2;stroke-linecap:round;stroke-miterlimit:10" />
                                 </svg>
-                            </svg>`
-                )
-                + `') 4 4, auto`;
+                            </svg>`,
+                ) +
+                `') 4 4, auto`;
         } else {
             setCircleCursor(localColor, localLineWidth);
         }
     } else {
-        drawingBoard.style.cursor = 'not-allowed';
+        drawingBoard.style.cursor = "not-allowed";
     }
 }
 
 function getComplementaryCursorColor(innerColor) {
     const hsp = Math.sqrt(
         0.299 * (innerColor.r * innerColor.r) +
-        0.587 * (innerColor.g * innerColor.g) +
-        0.114 * (innerColor.b * innerColor.b)
+            0.587 * (innerColor.g * innerColor.g) +
+            0.114 * (innerColor.b * innerColor.b),
     );
 
     if (hsp > 127.5) {
@@ -648,27 +677,51 @@ function getComplementaryCursorColor(innerColor) {
 function setCircleCursor(innerColor, size) {
     const outerColor = getComplementaryCursorColor(innerColor);
     const circleSize = size;
-    drawingBoard.style.cursor = `url('data:image/svg+xml;utf8,`
-        + encodeURIComponent(
-            `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="32" height="32">`
-            + generateSVGCircle(circleSize, innerColor, outerColor) + `</svg>')`
-        )
-        + ` ` + (circleSize / 2) + ` ` + (circleSize / 2) + `, auto`;
+    drawingBoard.style.cursor =
+        `url('data:image/svg+xml;utf8,` +
+        encodeURIComponent(
+            `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="32" height="32">` +
+                generateSVGCircle(circleSize, innerColor, outerColor) +
+                `</svg>')`,
+        ) +
+        ` ` +
+        circleSize / 2 +
+        ` ` +
+        circleSize / 2 +
+        `, auto`;
 }
 
 function generateSVGCircle(circleSize, innerColor, outerColor) {
-    const circleRadius = (circleSize / 2);
-    const innerColorCSS = "rgb(" + innerColor.r + "," + innerColor.g + "," + innerColor.b + ")";
-    const outerColorCSS = "rgb(" + outerColor.r + "," + outerColor.g + "," + outerColor.b + ")";
-    return `<circle cx="` + circleRadius + `" cy="` + circleRadius + `" r="` + circleRadius + `" style="fill: ` + innerColorCSS + `; stroke: ` + outerColorCSS + `;"/>`;
+    const circleRadius = circleSize / 2;
+    const innerColorCSS =
+        "rgb(" + innerColor.r + "," + innerColor.g + "," + innerColor.b + ")";
+    const outerColorCSS =
+        "rgb(" + outerColor.r + "," + outerColor.g + "," + outerColor.b + ")";
+    return (
+        `<circle cx="` +
+        circleRadius +
+        `" cy="` +
+        circleRadius +
+        `" r="` +
+        circleRadius +
+        `" style="fill: ` +
+        innerColorCSS +
+        `; stroke: ` +
+        outerColorCSS +
+        `;"/>`
+    );
 }
 
 function toggleSpectate() {
-    socket.send(JSON.stringify({
-        type: "toggle-spectate",
-    }));
+    socket.send(
+        JSON.stringify({
+            type: "toggle-spectate",
+        }),
+    );
 }
-document.getElementById("toggle-spectate-button").addEventListener("click", toggleSpectate);
+document
+    .getElementById("toggle-spectate-button")
+    .addEventListener("click", toggleSpectate);
 
 function setSpectateMode(requestedValue, spectatingValue) {
     const modeUnchanged = spectatingValue === spectating;
@@ -681,32 +734,38 @@ function setSpectateMode(requestedValue, spectatingValue) {
         showInfoDialog(
             `{{.Translation.Get "spectation-request-cancelled-title"}}`,
             `{{.Translation.Get "spectation-request-cancelled-text"}}`,
-            `{{.Translation.Get "confirm"}}`);
+            `{{.Translation.Get "confirm"}}`,
+        );
     } else if (spectateRequested && !requestedValue && modeUnchanged) {
         showInfoDialog(
             `{{.Translation.Get "participation-request-cancelled-title"}}`,
             `{{.Translation.Get "participation-request-cancelled-text"}}`,
-            `{{.Translation.Get "confirm"}}`);
+            `{{.Translation.Get "confirm"}}`,
+        );
     } else if (!spectateRequested && requestedValue && !spectatingValue) {
         showInfoDialog(
             `{{.Translation.Get "spectation-requested-title"}}`,
             `{{.Translation.Get "spectation-requested-text"}}`,
-            `{{.Translation.Get "confirm"}}`);
+            `{{.Translation.Get "confirm"}}`,
+        );
     } else if (!spectateRequested && requestedValue && spectatingValue) {
         showInfoDialog(
             `{{.Translation.Get "participation-requested-title"}}`,
             `{{.Translation.Get "participation-requested-text"}}`,
-            `{{.Translation.Get "confirm"}}`);
+            `{{.Translation.Get "confirm"}}`,
+        );
     } else if (spectatingValue && !spectating) {
         showInfoDialog(
             `{{.Translation.Get "now-spectating-title"}}`,
             `{{.Translation.Get "now-spectating-text"}}`,
-            `{{.Translation.Get "confirm"}}`);
+            `{{.Translation.Get "confirm"}}`,
+        );
     } else if (!spectatingValue && spectating) {
         showInfoDialog(
             `{{.Translation.Get "now-participating-title"}}`,
             `{{.Translation.Get "now-participating-text"}}`,
-            `{{.Translation.Get "confirm"}}`);
+            `{{.Translation.Get "confirm"}}`,
+        );
     }
 
     spectateRequested = requestedValue;
@@ -714,17 +773,25 @@ function setSpectateMode(requestedValue, spectatingValue) {
 }
 
 function toggleReadiness() {
-    socket.send(JSON.stringify({
-        type: "toggle-readiness",
-    }));
+    socket.send(
+        JSON.stringify({
+            type: "toggle-readiness",
+        }),
+    );
 }
-document.getElementById("ready-state-start").addEventListener("change", toggleReadiness)
-document.getElementById("ready-state-game-over").addEventListener("change", toggleReadiness)
+document
+    .getElementById("ready-state-start")
+    .addEventListener("change", toggleReadiness);
+document
+    .getElementById("ready-state-game-over")
+    .addEventListener("change", toggleReadiness);
 
 function forceStartGame() {
-    socket.send(JSON.stringify({
-        type: "start",
-    }));
+    socket.send(
+        JSON.stringify({
+            type: "start",
+        }),
+    );
 }
 forceStartButton.addEventListener("click", forceStartGame);
 forceRestartButton.addEventListener("click", forceStartGame);
@@ -733,28 +800,36 @@ function clearCanvasAndSendEvent() {
     if (allowDrawing) {
         //Avoid unnecessary traffic back to us and handle the clear directly.
         clear(context);
-        socket.send(JSON.stringify({
-            type: "clear-drawing-board"
-        }));
+        socket.send(
+            JSON.stringify({
+                type: "clear-drawing-board",
+            }),
+        );
     }
 }
-document.getElementById("clear-canvas-button").addEventListener("click", clearCanvasAndSendEvent);
+document
+    .getElementById("clear-canvas-button")
+    .addEventListener("click", clearCanvasAndSendEvent);
 
 function undoAndSendEvent() {
     if (allowDrawing) {
-        socket.send(JSON.stringify({
-            type: "undo"
-        }));
+        socket.send(
+            JSON.stringify({
+                type: "undo",
+            }),
+        );
     }
 }
-document.getElementById("undo-button").addEventListener("click", undoAndSendEvent);
+document
+    .getElementById("undo-button")
+    .addEventListener("click", undoAndSendEvent);
 
 //Used to restore the last message on arrow up.
 let lastMessage = "";
 
 const encoder = new TextEncoder();
 function sendMessage(event) {
-    if (event.key !== 'Enter') {
+    if (event.key !== "Enter") {
         return;
     }
     if (!messageInput.value) {
@@ -764,8 +839,11 @@ function sendMessage(event) {
     // While the backend already checks for message length, we want to
     // prevent the loss of input and omit the event / clear here.
     if (encoder.encode(messageInput.value).length > 10000) {
-        appendMessage("system-message", '{{.Translation.Get "system"}}',
-            '{{.Translation.Get "message-too-long"}}');
+        appendMessage(
+            "system-message",
+            '{{.Translation.Get "system"}}',
+            '{{.Translation.Get "message-too-long"}}',
+        );
         //We keep the messageInput content, since it could've been
         //something important and we don't want the user having to
         //rewrite it. Instead they can send it via some other means
@@ -773,17 +851,19 @@ function sendMessage(event) {
         return;
     }
 
-    socket.send(JSON.stringify({
-        type: "message",
-        data: messageInput.value
-    }));
+    socket.send(
+        JSON.stringify({
+            type: "message",
+            data: messageInput.value,
+        }),
+    );
     lastMessage = messageInput.value;
     messageInput.value = "";
 }
 
 messageInput.addEventListener("keypress", sendMessage);
-messageInput.addEventListener("keydown", function(event) {
-    if (event.key === 'ArrowUp' && messageInput.value.length === 0) {
+messageInput.addEventListener("keydown", function (event) {
+    if (event.key === "ArrowUp" && messageInput.value.length === 0) {
         messageInput.value = lastMessage;
         const length = lastMessage.length;
         // Postpone selection change onto next event queue loop iteration, as
@@ -808,29 +888,34 @@ function setAllowDrawing(value) {
 }
 
 function chooseWord(index) {
-    socket.send(JSON.stringify({
-        type: "choose-word",
-        data: index
-    }));
+    socket.send(
+        JSON.stringify({
+            type: "choose-word",
+            data: index,
+        }),
+    );
     setAllowDrawing(true);
     wordDialog.style.visibility = "hidden";
 }
 
 function onVotekickPlayer(playerId) {
-    socket.send(JSON.stringify({
-        type: "kick-vote",
-        data: playerId
-    }));
+    socket.send(
+        JSON.stringify({
+            type: "kick-vote",
+            data: playerId,
+        }),
+    );
     hideKickDialog();
 }
 
 //This automatically scrolls down the chat on arrivals of new messages
-new MutationObserver(() => messageContainer.scrollTop = messageContainer.scrollHeight)
-    .observe(messageContainer, {
-        attributes: false,
-        childList: true,
-        subtree: false
-    });
+new MutationObserver(
+    () => (messageContainer.scrollTop = messageContainer.scrollHeight),
+).observe(messageContainer, {
+    attributes: false,
+    childList: true,
+    subtree: false,
+});
 
 let ownID, ownerID, ownName, drawerID, drawerName;
 let round = 0;
@@ -839,181 +924,290 @@ let roundEndTime = 0;
 let gameState = "unstarted";
 let drawingTimeSetting = "∞";
 
-function registerMessageHandler(targetSocket) {
-    targetSocket.onmessage = event => {
-        const parsed = JSON.parse(event.data);
-        if (parsed.type === "ready") {
-            handleReadyEvent(parsed.data);
-        } else if (parsed.type === "game-over") {
-            let ready = parsed.data;
-            if (parsed.data.roundEndReason === "drawer_disconnected") {
-              appendMessage("system-message", null, `{{.Translation.Get "drawer-disconnected"}}`);
-            } else if (parsed.data.roundEndReason === "guessers_disconnected") {
-              appendMessage("system-message", null, `{{.Translation.Get "guessers-disconnected"}}`);
-            } else {
-              showRoundEndMessage(ready.previousWord);
-            }
-            handleReadyEvent(ready);
-        } else if (parsed.type === "update-players") {
-            applyPlayers(parsed.data);
-        } else if (parsed.type === "name-change") {
-            const player = getCachedPlayer(parsed.data.playerId);
+const handleEvent = (parsed) => {
+    if (parsed.type === "ready") {
+        handleReadyEvent(parsed.data);
+    } else if (parsed.type === "game-over") {
+        let ready = parsed.data;
+        if (parsed.data.roundEndReason === "drawer_disconnected") {
+            appendMessage(
+                "system-message",
+                null,
+                `{{.Translation.Get "drawer-disconnected"}}`,
+            );
+        } else if (parsed.data.roundEndReason === "guessers_disconnected") {
+            appendMessage(
+                "system-message",
+                null,
+                `{{.Translation.Get "guessers-disconnected"}}`,
+            );
+        } else {
+            showRoundEndMessage(ready.previousWord);
+        }
+        handleReadyEvent(ready);
+    } else if (parsed.type === "update-players") {
+        applyPlayers(parsed.data);
+    } else if (parsed.type === "name-change") {
+        const player = getCachedPlayer(parsed.data.playerId);
+        if (player !== null) {
+            player.name = parsed.data.playerName;
+        }
+
+        const playernameSpan = document.getElementById(
+            "playername-" + parsed.data.playerId,
+        );
+        if (playernameSpan !== null) {
+            playernameSpan.innerText = parsed.data.playerName;
+        }
+        if (parsed.data.playerId === ownID) {
+            setUsernameLocally(parsed.data.playerName);
+        }
+        if (parsed.data.playerId === drawerID) {
+            waitChooseDrawerSpan.innerText = parsed.data.playerName;
+        }
+    } else if (parsed.type === "correct-guess") {
+        playWav('{{.RootPath}}/resources/{{.WithCacheBust "plop.wav"}}');
+
+        if (parsed.data === ownID) {
+            appendMessage(
+                "correct-guess-message",
+                null,
+                `{{.Translation.Get "correct-guess"}}`,
+            );
+        } else {
+            const player = getCachedPlayer(parsed.data);
             if (player !== null) {
-                player.name = parsed.data.playerName;
+                appendMessage(
+                    "correct-guess-message-other-player",
+                    null,
+                    `{{.Translation.Get "correct-guess-other-player"}}`.format(
+                        player.name,
+                    ),
+                );
             }
+        }
+    } else if (parsed.type === "close-guess") {
+        appendMessage(
+            "close-guess-message",
+            null,
+            `{{.Translation.Get "close-guess"}}`.format(parsed.data),
+        );
+    } else if (parsed.type === "update-wordhint") {
+        wordDialog.style.visibility = "hidden";
+        waitChooseDialog.style.visibility = "hidden";
+        applyWordHints(parsed.data);
 
-            const playernameSpan = document.getElementById("playername-" + parsed.data.playerId);
-            if (playernameSpan !== null) {
-                playernameSpan.innerText = parsed.data.playerName;
-            }
-            if (parsed.data.playerId === ownID) {
-                setUsernameLocally(parsed.data.playerName);
-            }
-            if (parsed.data.playerId === drawerID) {
-                waitChooseDrawerSpan.innerText = parsed.data.playerName;
-            }
-        } else if (parsed.type === "correct-guess") {
-            playWav('{{.RootPath}}/resources/{{.WithCacheBust "plop.wav"}}');
-
-            if (parsed.data === ownID) {
-                appendMessage("correct-guess-message", null, `{{.Translation.Get "correct-guess"}}`);
-            } else {
-                const player = getCachedPlayer(parsed.data)
-                if (player !== null) {
-                    appendMessage("correct-guess-message-other-player", null, `{{.Translation.Get "correct-guess-other-player"}}`.format(player.name));
-                }
-            }
-        } else if (parsed.type === "close-guess") {
-            appendMessage("close-guess-message", null, `{{.Translation.Get "close-guess"}}`.format(parsed.data));
-        } else if (parsed.type === "update-wordhint") {
-            wordDialog.style.visibility = "hidden";
-            waitChooseDialog.style.visibility = "hidden";
-            applyWordHints(parsed.data);
-        } else if (parsed.type === "message") {
-            appendMessage(null, parsed.data.author, parsed.data.content);
-        } else if (parsed.type === "system-message") {
-            appendMessage("system-message", '{{.Translation.Get "system"}}', parsed.data);
-        } else if (parsed.type === "non-guessing-player-message") {
-            appendMessage("non-guessing-player-message", parsed.data.author, parsed.data.content);
-        } else if (parsed.type === "line") {
-            drawLine(
-                context,
-                imageData,
-                parsed.data.x, parsed.data.y,
-                parsed.data.x2, parsed.data.y2,
-                indexToRgbColor(parsed.data.color),
-                parsed.data.width);
-        } else if (parsed.type === "fill") {
-            if (floodfillUint8ClampedArray(
+        // We don't do this in applyWordHints because that's called in all kinds of places
+        if (parsed.data.some((hint) => hint.character)) {
+            appendMessage(
+                "system-message",
+                '{{.Translation.Get "system"}}',
+                `{{.Translation.Get "word-hint-revealed"}}`.format(
+                    parsed.data
+                        .map((hint) =>
+                            hint.character && hint.revealed
+                                ? String.fromCharCode(hint.character)
+                                : "_",
+                        )
+                        .join(" "),
+                ),
+            );
+        }
+    } else if (parsed.type === "message") {
+        appendMessage(null, parsed.data.author, parsed.data.content);
+    } else if (parsed.type === "system-message") {
+        appendMessage(
+            "system-message",
+            '{{.Translation.Get "system"}}',
+            parsed.data,
+        );
+    } else if (parsed.type === "non-guessing-player-message") {
+        appendMessage(
+            "non-guessing-player-message",
+            parsed.data.author,
+            parsed.data.content,
+        );
+    } else if (parsed.type === "line") {
+        drawLine(
+            context,
+            imageData,
+            parsed.data.x,
+            parsed.data.y,
+            parsed.data.x2,
+            parsed.data.y2,
+            indexToRgbColor(parsed.data.color),
+            parsed.data.width,
+        );
+    } else if (parsed.type === "fill") {
+        if (
+            floodfillUint8ClampedArray(
                 imageData.data,
                 parsed.data.x,
                 parsed.data.y,
                 indexToRgbColor(parsed.data.color),
                 imageData.width,
-                imageData.height)) {
-                context.putImageData(imageData, 0, 0);
-            }
-        } else if (parsed.type === "clear-drawing-board") {
-            clear(context);
-        } else if (parsed.type === "word-chosen") {
-            wordDialog.style.visibility = "hidden";
-            waitChooseDialog.style.visibility = "hidden";
-            setRoundTimeLeft(parsed.data.timeLeft);
-            applyWordHints(parsed.data.hints);
-            setAllowDrawing(drawerID === ownID);
-        } else if (parsed.type === "next-turn") {
-            if (gameState === "ongoing") {
-              if (parsed.data.roundEndReason === "drawer_disconnected") {
-                appendMessage("system-message", null, `{{.Translation.Get "drawer-disconnected"}}`);
-              } else if (parsed.data.roundEndReason === "guessers_disconnected") {
-                appendMessage("system-message", null, `{{.Translation.Get "guessers-disconnected"}}`);
-              } else {
-                showRoundEndMessage(parsed.data.previousWord);
-              }
-            } else {
-                //First turn, the game starts
-                gameState = "ongoing";
-            }
-
-            //As soon as a turn starts, the round should be ongoing, so we make
-            //sure that all types of dialogs, that indicate the game isn't
-            //ongoing, are not visible anymore.
-            startDialog.style.visibility = "hidden";
-            forceRestartButton.style.display = "none";
-            gameOverDialog.style.visibility = "hidden";
-
-            //If a player doesn't choose, the dialog will still be up.
-            wordDialog.style.visibility = "hidden";
-            playWav('{{.RootPath}}/resources/{{.WithCacheBust "end-turn.wav"}}');
-
-            clear(context);
-
-            round = parsed.data.round;
-            updateRoundsDisplay();
-            setRoundTimeLeft(parsed.data.choiceTimeLeft);
-            applyPlayers(parsed.data.players);
-
-            set_dummy_word_hints();
-
-            //Even though we always hide the dialog in the "your-turn"
-            //event handling, it will be shortly visible if we it here.
-            if (drawerID !== ownID) {
-                //Show additional dialog, that another user (drawer) is choosing a word
-                waitChooseDrawerSpan.innerText = drawerName;
-                waitChooseDialog.style.visibility = "visible";
-            }
-
-            setAllowDrawing(false);
-        } else if (parsed.type === "your-turn") {
-            playWav('{{.RootPath}}/resources/{{.WithCacheBust "your-turn.wav"}}');
-            //This dialog could potentially stay visible from last
-            //turn, in case nobody has chosen a word.
-            waitChooseDialog.style.visibility = "hidden";
-            promptWords(parsed.data);
-        } else if (parsed.type === "drawing") {
-            applyDrawData(parsed.data);
-        } else if (parsed.type === "kick-vote") {
-            if (parsed.data.playerId === ownID && parsed.data.voteCount >= parsed.data.requiredVoteCount) {
-                alert('{{.Translation.Get "self-kicked"}}');
-                document.location.href = "{{.RootPath}}/";
-            } else {
-                let kickMessage = '{{.Translation.Get "kick-vote"}}'.format(parsed.data.voteCount, parsed.data.requiredVoteCount, parsed.data.playerName);
-                if (parsed.data.voteCount >= parsed.data.requiredVoteCount) {
-                    kickMessage += ' {{.Translation.Get "player-kicked"}}';
-                }
-                appendMessage("system-message", '{{.Translation.Get "system"}}', kickMessage);
-            }
-        } else if (parsed.type === "owner-change") {
-            ownerID = parsed.data.playerId;
-            updateButtonVisibilities();
-            appendMessage("system-message", '{{.Translation.Get "system"}}', '{{.Translation.Get "owner-change"}}'.format(parsed.data.playerName));
-        } else if (parsed.type === "drawer-kicked") {
-            appendMessage("system-message", '{{.Translation.Get "system"}}', '{{.Translation.Get "drawer-kicked"}}');
-        } else if (parsed.type === "lobby-settings-changed") {
-            rounds = parsed.data.rounds;
-            updateRoundsDisplay();
-            updateButtonVisibilities();
-            appendMessage("system-message", '{{.Translation.Get "system"}}', '{{.Translation.Get "lobby-settings-changed"}}\n\n'
-                + '{{.Translation.Get "drawing-time-setting"}}: ' + parsed.data.drawingTime + "\n"
-                + '{{.Translation.Get "rounds-setting"}}: ' + parsed.data.rounds + "\n"
-                + '{{.Translation.Get "public-lobby-setting"}}: ' + parsed.data.public + "\n"
-                + '{{.Translation.Get "max-players-setting"}}: ' + parsed.data.maxPlayers + "\n"
-                + '{{.Translation.Get "custom-words-per-turn-setting"}}: ' + parsed.data.customWordsPerTurn + "%\n"
-                + '{{.Translation.Get "players-per-ip-limit-setting"}}: ' + parsed.data.clientsPerIpLimit);
-        } else if (parsed.type === "shutdown") {
-            socket.onclose = null;
-            socket.close();
-            showDialog("shutdown-info", '{{.Translation.Get "server-shutting-down-title"}}',
-                document.createTextNode('{{.Translation.Get "server-shutting-down-text"}}'));
+                imageData.height,
+            )
+        ) {
+            context.putImageData(imageData, 0, 0);
         }
+    } else if (parsed.type === "clear-drawing-board") {
+        clear(context);
+    } else if (parsed.type === "word-chosen") {
+        wordDialog.style.visibility = "hidden";
+        waitChooseDialog.style.visibility = "hidden";
+        setRoundTimeLeft(parsed.data.timeLeft);
+        applyWordHints(parsed.data.hints);
+        setAllowDrawing(drawerID === ownID);
+    } else if (parsed.type === "next-turn") {
+        if (gameState === "ongoing") {
+            if (parsed.data.roundEndReason === "drawer_disconnected") {
+                appendMessage(
+                    "system-message",
+                    null,
+                    `{{.Translation.Get "drawer-disconnected"}}`,
+                );
+            } else if (parsed.data.roundEndReason === "guessers_disconnected") {
+                appendMessage(
+                    "system-message",
+                    null,
+                    `{{.Translation.Get "guessers-disconnected"}}`,
+                );
+            } else {
+                showRoundEndMessage(parsed.data.previousWord);
+            }
+        } else {
+            //First turn, the game starts
+            gameState = "ongoing";
+        }
+
+        //As soon as a turn starts, the round should be ongoing, so we make
+        //sure that all types of dialogs, that indicate the game isn't
+        //ongoing, are not visible anymore.
+        startDialog.style.visibility = "hidden";
+        forceRestartButton.style.display = "none";
+        gameOverDialog.style.visibility = "hidden";
+
+        //If a player doesn't choose, the dialog will still be up.
+        wordDialog.style.visibility = "hidden";
+        playWav('{{.RootPath}}/resources/{{.WithCacheBust "end-turn.wav"}}');
+
+        clear(context);
+
+        round = parsed.data.round;
+        updateRoundsDisplay();
+        setRoundTimeLeft(parsed.data.choiceTimeLeft);
+        applyPlayers(parsed.data.players);
+
+        set_dummy_word_hints();
+
+        //Even though we always hide the dialog in the "your-turn"
+        //event handling, it will be shortly visible if we it here.
+        if (drawerID !== ownID) {
+            //Show additional dialog, that another user (drawer) is choosing a word
+            waitChooseDrawerSpan.innerText = drawerName;
+            waitChooseDialog.style.visibility = "visible";
+        }
+
+        setAllowDrawing(false);
+    } else if (parsed.type === "your-turn") {
+        playWav('{{.RootPath}}/resources/{{.WithCacheBust "your-turn.wav"}}');
+        //This dialog could potentially stay visible from last
+        //turn, in case nobody has chosen a word.
+        waitChooseDialog.style.visibility = "hidden";
+        promptWords(parsed.data);
+    } else if (parsed.type === "drawing") {
+        applyDrawData(parsed.data);
+    } else if (parsed.type === "kick-vote") {
+        if (
+            parsed.data.playerId === ownID &&
+            parsed.data.voteCount >= parsed.data.requiredVoteCount
+        ) {
+            alert('{{.Translation.Get "self-kicked"}}');
+            document.location.href = "{{.RootPath}}/";
+        } else {
+            let kickMessage = '{{.Translation.Get "kick-vote"}}'.format(
+                parsed.data.voteCount,
+                parsed.data.requiredVoteCount,
+                parsed.data.playerName,
+            );
+            if (parsed.data.voteCount >= parsed.data.requiredVoteCount) {
+                kickMessage += ' {{.Translation.Get "player-kicked"}}';
+            }
+            appendMessage(
+                "system-message",
+                '{{.Translation.Get "system"}}',
+                kickMessage,
+            );
+        }
+    } else if (parsed.type === "owner-change") {
+        ownerID = parsed.data.playerId;
+        updateButtonVisibilities();
+        appendMessage(
+            "system-message",
+            '{{.Translation.Get "system"}}',
+            '{{.Translation.Get "owner-change"}}'.format(
+                parsed.data.playerName,
+            ),
+        );
+    } else if (parsed.type === "drawer-kicked") {
+        appendMessage(
+            "system-message",
+            '{{.Translation.Get "system"}}',
+            '{{.Translation.Get "drawer-kicked"}}',
+        );
+    } else if (parsed.type === "lobby-settings-changed") {
+        rounds = parsed.data.rounds;
+        updateRoundsDisplay();
+        updateButtonVisibilities();
+        appendMessage(
+            "system-message",
+            '{{.Translation.Get "system"}}',
+            '{{.Translation.Get "lobby-settings-changed"}}\n\n' +
+                '{{.Translation.Get "drawing-time-setting"}}: ' +
+                parsed.data.drawingTime +
+                "\n" +
+                '{{.Translation.Get "rounds-setting"}}: ' +
+                parsed.data.rounds +
+                "\n" +
+                '{{.Translation.Get "public-lobby-setting"}}: ' +
+                parsed.data.public +
+                "\n" +
+                '{{.Translation.Get "max-players-setting"}}: ' +
+                parsed.data.maxPlayers +
+                "\n" +
+                '{{.Translation.Get "custom-words-per-turn-setting"}}: ' +
+                parsed.data.customWordsPerTurn +
+                "%\n" +
+                '{{.Translation.Get "players-per-ip-limit-setting"}}: ' +
+                parsed.data.clientsPerIpLimit,
+        );
+    } else if (parsed.type === "shutdown") {
+        socket.onclose = null;
+        socket.close();
+        showDialog(
+            "shutdown-info",
+            '{{.Translation.Get "server-shutting-down-title"}}',
+            document.createTextNode(
+                '{{.Translation.Get "server-shutting-down-text"}}',
+            ),
+        );
     }
 };
 
 function showRoundEndMessage(previousWord) {
     if (previousWord === "") {
-        appendMessage("system-message", null, `{{.Translation.Get "round-over"}}`);
+        appendMessage(
+            "system-message",
+            null,
+            `{{.Translation.Get "round-over"}}`,
+        );
     } else {
-        appendMessage("system-message", null, `{{.Translation.Get "round-over-no-word"}}`.format(previousWord));
+        appendMessage(
+            "system-message",
+            null,
+            `{{.Translation.Get "round-over-no-word"}}`.format(previousWord),
+        );
     }
 }
 
@@ -1048,7 +1242,7 @@ function setRoundTimeLeft(timeLeftMs) {
     roundEndTime = Date.now() + timeLeftMs;
 }
 
-function handleReadyEvent(ready) {
+const handleReadyEvent = (ready) => {
     ownerID = ready.ownerId;
     ownID = ready.playerId;
 
@@ -1116,7 +1310,9 @@ function handleReadyEvent(ready) {
                 const newScoreboardEntry = document.createElement("div");
                 newScoreboardEntry.classList.add("gameover-scoreboard-entry");
                 if (player.id === ownID) {
-                    newScoreboardEntry.classList.add("gameover-scoreboard-entry-self");
+                    newScoreboardEntry.classList.add(
+                        "gameover-scoreboard-entry-self",
+                    );
                 }
 
                 const scoreboardRankDiv = document.createElement("div");
@@ -1145,8 +1341,11 @@ function handleReadyEvent(ready) {
                 gameOverDialogTitle.innerText = `{{.Translation.Get "game-over-win"}}`;
             }
         } else {
-            gameOverDialogTitle.innerText = `{{.Translation.Get "game-over"}}`
-                .format(selfPlayer.rank, selfPlayer.score);
+            gameOverDialogTitle.innerText =
+                `{{.Translation.Get "game-over"}}`.format(
+                    selfPlayer.rank,
+                    selfPlayer.score,
+                );
         }
     } else if (ready.gameState === "ongoing") {
         // Lack of wordHints implies that word has been chosen yet.
@@ -1155,7 +1354,7 @@ function handleReadyEvent(ready) {
             waitChooseDialog.style.visibility = "visible";
         }
     }
-}
+};
 
 function updateButtonVisibilities() {
     if (ownerID === ownID) {
@@ -1167,20 +1366,22 @@ function updateButtonVisibilities() {
 
 function promptWords(data) {
     wordPreSelected.textContent = data.words[data.preSelectedWord];
-    wordButtonContainer.replaceChildren(...data.words.map((word, index) => {
-        const button = createDialogButton(word);
-        button.onclick = () => {
-            chooseWord(index);
-        };
-        return button;
-    }));
+    wordButtonContainer.replaceChildren(
+        ...data.words.map((word, index) => {
+            const button = createDialogButton(word);
+            button.onclick = () => {
+                chooseWord(index);
+            };
+            return button;
+        }),
+    );
     wordDialog.style.visibility = "visible";
 }
 
 function playWav(file) {
     if (sound) {
         const audio = new Audio(file);
-        audio.type = 'audio/wav';
+        audio.type = "audio/wav";
         audio.play();
     }
 }
@@ -1189,7 +1390,7 @@ window.setInterval(() => {
     if (gameState === "ongoing") {
         const msLeft = roundEndTime - Date.now();
         const secondsLeft = Math.max(0, Math.floor(msLeft / 1000));
-        timeLeftValue.innerText = "" + secondsLeft
+        timeLeftValue.innerText = "" + secondsLeft;
     } else {
         timeLeftValue.innerText = "∞";
     }
@@ -1234,7 +1435,7 @@ function applyPlayers(players) {
         let readyPlayers = 0;
         let readyPlayersRequired = 0;
 
-        players.forEach(player => {
+        players.forEach((player) => {
             if (!player.connected || player.state === "spectating") {
                 return;
             }
@@ -1245,8 +1446,10 @@ function applyPlayers(players) {
             }
 
             if (player.id === ownID) {
-                document.getElementById("ready-state-start").checked = player.state === "ready";
-                document.getElementById("ready-state-game-over").checked = player.state === "ready";
+                document.getElementById("ready-state-start").checked =
+                    player.state === "ready";
+                document.getElementById("ready-state-game-over").checked =
+                    player.state === "ready";
             }
         });
 
@@ -1262,7 +1465,7 @@ function applyPlayers(players) {
     }
 
     playerContainer.innerHTML = "";
-    players.forEach(player => {
+    players.forEach((player) => {
         // Makes sure that the "is choosing" a word dialog doesn't show
         // "undefined" as the player name. Can happen, if the player
         // disconnects after being assigned the drawer.
@@ -1277,20 +1480,33 @@ function applyPlayers(players) {
         }
 
         if (player.id === ownID) {
-            setSpectateMode(player.spectateToggleRequested, player.state === "spectating");
+            setSpectateMode(
+                player.spectateToggleRequested,
+                player.state === "spectating",
+            );
         }
 
         const oldPlayer = getCachedPlayer(player.id);
-        if (oldPlayer && oldPlayer.state === "spectating" && player.state !== "spectating") {
+        if (
+            oldPlayer &&
+            oldPlayer.state === "spectating" &&
+            player.state !== "spectating"
+        ) {
             appendMessage(
                 "system-message",
                 '{{.Translation.Get "system"}}',
-                `${player.name} is now participating`);
-        } else if (oldPlayer && oldPlayer.state !== "spectating" && player.state === "spectating") {
+                `${player.name} is now participating`,
+            );
+        } else if (
+            oldPlayer &&
+            oldPlayer.state !== "spectating" &&
+            player.state === "spectating"
+        ) {
             appendMessage(
                 "system-message",
                 '{{.Translation.Get "system"}}',
-                `${player.name} is now spectating`);
+                `${player.name} is now spectating`,
+            );
         }
 
         if (player.state === "spectating") {
@@ -1313,11 +1529,15 @@ function applyPlayers(players) {
             if (player.state === "standby") {
                 playerDiv.classList.add("player-done");
             } else if (player.state === "drawing") {
-                const playerStateImage = createPlayerStateImageNode(`{{.RootPath}}/resources/{{.WithCacheBust "pencil.svg"}}`);
+                const playerStateImage = createPlayerStateImageNode(
+                    `{{.RootPath}}/resources/{{.WithCacheBust "pencil.svg"}}`,
+                );
                 playerStateImage.style.transform = "scaleX(-1)";
                 scoreAndStatusDiv.appendChild(playerStateImage);
             } else if (player.state === "standby") {
-                const playerStateImage = createPlayerStateImageNode(`{{.RootPath}}/resources/{{.WithCacheBust "checkmark.svg"}}`);
+                const playerStateImage = createPlayerStateImageNode(
+                    `{{.RootPath}}/resources/{{.WithCacheBust "checkmark.svg"}}`,
+                );
                 scoreAndStatusDiv.appendChild(playerStateImage);
             }
         } else {
@@ -1329,7 +1549,7 @@ function applyPlayers(players) {
         const rankSpan = document.createElement("span");
         rankSpan.classList.add("rank");
         rankSpan.innerText = player.rank;
-        playerDiv.appendChild(rankSpan)
+        playerDiv.appendChild(rankSpan);
 
         const playernameSpan = document.createElement("span");
         playernameSpan.classList.add("playername");
@@ -1347,7 +1567,8 @@ function applyPlayers(players) {
 
         const lastPlayerscoreSpan = document.createElement("span");
         lastPlayerscoreSpan.classList.add("last-turn-score");
-        lastPlayerscoreSpan.innerText = '{{.Translation.Get "last-turn"}}'.format(player.lastScore);
+        lastPlayerscoreSpan.innerText =
+            '{{.Translation.Get "last-turn"}}'.format(player.lastScore);
         playerscoreDiv.appendChild(lastPlayerscoreSpan);
 
         playerContainer.appendChild(playerDiv);
@@ -1370,7 +1591,9 @@ function updateRoundsDisplay() {
     maxRoundSpan.innerText = rounds;
 }
 
-function applyWordHints(wordHints, dummy) {
+const applyWordHints = (wordHints, dummy) => {
+    const isDrawer = drawerID === ownID;
+
     // We abuse the container to prevent the layout from jumping.
     if (!dummy) {
         wordContainer.style.visibility = "visible";
@@ -1378,50 +1601,75 @@ function applyWordHints(wordHints, dummy) {
         wordContainer.style.visibility = "hidden";
     }
 
-    wordContainer.replaceChildren(...wordHints.map(hint => {
-        const hintSpan = document.createElement("span");
-        hintSpan.classList.add("hint");
-        if (hint.character === 0) {
-            hintSpan.classList.add("hint-underline");
-            hintSpan.innerHTML = "&nbsp;";
-        } else {
-            if (hint.underline) {
+    wordContainer.replaceChildren(
+        ...wordHints.map((hint) => {
+            const hintSpan = document.createElement("span");
+            hintSpan.classList.add("hint");
+            if (hint.character === 0) {
                 hintSpan.classList.add("hint-underline");
+                hintSpan.innerHTML = "&nbsp;";
+            } else {
+                if (hint.underline) {
+                    hintSpan.classList.add("hint-underline");
+                }
+                hintSpan.innerText = String.fromCharCode(hint.character);
             }
-            hintSpan.innerText = String.fromCharCode(hint.character);
-        }
 
-        return hintSpan;
-    }));
-}
+            if (hint.revealed && isDrawer) {
+                hintSpan.classList.add("hint-revealed");
+            }
 
-function applyDrawData(drawElements) {
+            return hintSpan;
+        }),
+    );
+};
+
+const set_dummy_word_hints = () => {
+    // Dummy wordhint to prevent layout changes.
+    applyWordHints(
+        [
+            {
+                character: "D",
+                underline: true,
+            },
+        ],
+        true,
+    );
+};
+set_dummy_word_hints();
+
+const applyDrawData = (drawElements) => {
     clear(context);
 
-    drawElements
-        .forEach(drawElement => {
-            const drawData = drawElement.data;
-            if (drawElement.type === "fill") {
-                floodfillUint8ClampedArray(
-                    imageData.data,
-                    drawData.x, drawData.y,
-                    indexToRgbColor(drawData.color),
-                    imageData.width, imageData.height);
-            } else if (drawElement.type === "line") {
-                drawLineNoPut(
-                    context,
-                    imageData,
-                    drawData.x, drawData.y,
-                    drawData.x2, drawData.y2,
-                    indexToRgbColor(drawData.color),
-                    drawData.width);
-            } else {
-                console.log("Unknown draw element type: " + drawData.type);
-            }
-        });
+    drawElements.forEach((drawElement) => {
+        const drawData = drawElement.data;
+        if (drawElement.type === "fill") {
+            floodfillUint8ClampedArray(
+                imageData.data,
+                drawData.x,
+                drawData.y,
+                indexToRgbColor(drawData.color),
+                imageData.width,
+                imageData.height,
+            );
+        } else if (drawElement.type === "line") {
+            drawLineNoPut(
+                context,
+                imageData,
+                drawData.x,
+                drawData.y,
+                drawData.x2,
+                drawData.y2,
+                indexToRgbColor(drawData.color),
+                drawData.width,
+            );
+        } else {
+            console.log("Unknown draw element type: " + drawData.type);
+        }
+    });
 
     context.putImageData(imageData, 0, 0);
-}
+};
 
 let lastX = 0;
 let lastY = 0;
@@ -1436,8 +1684,8 @@ function onTouchStart(event) {
 
         // calculate the offset coordinates based on client touch position and drawing board client origin
         const clientRect = drawingBoard.getBoundingClientRect();
-        lastX = (touch.clientX - clientRect.left);
-        lastY = (touch.clientY - clientRect.top);
+        lastX = touch.clientX - clientRect.left;
+        lastY = touch.clientY - clientRect.top;
     }
 }
 
@@ -1452,8 +1700,8 @@ function onTouchMove(event) {
 
                 // calculate the offset coordinates based on client touch position and drawing board client origin
                 const clientRect = drawingBoard.getBoundingClientRect();
-                const offsetX = (touch.clientX - clientRect.left);
-                const offsetY = (touch.clientY - clientRect.top);
+                const offsetX = touch.clientX - clientRect.left;
+                const offsetY = touch.clientY - clientRect.top;
 
                 // drawing functions must check for context boundaries
                 drawLineAndSendEvent(context, lastX, lastY, offsetX, offsetY);
@@ -1475,16 +1723,18 @@ function onTouchEnd(event) {
     }
 }
 
-drawingBoard.addEventListener('touchend', onTouchEnd);
-drawingBoard.addEventListener('touchcancel', onTouchEnd);
-drawingBoard.addEventListener('touchstart', onTouchStart);
-drawingBoard.addEventListener('touchmove', onTouchMove);
+drawingBoard.addEventListener("touchend", onTouchEnd);
+drawingBoard.addEventListener("touchcancel", onTouchEnd);
+drawingBoard.addEventListener("touchstart", onTouchStart);
+drawingBoard.addEventListener("touchmove", onTouchMove);
 
 function onMouseDown(event) {
-    if (allowDrawing
-        && event.pointerType !== "touch"
-        && event.buttons === 1
-        && localTool !== fillBucket) {
+    if (
+        allowDrawing &&
+        event.pointerType !== "touch" &&
+        event.buttons === 1 &&
+        localTool !== fillBucket
+    ) {
         const clientRect = drawingBoard.getBoundingClientRect();
         lastX = event.clientX - clientRect.left;
         lastY = event.clientY - clientRect.top;
@@ -1494,7 +1744,11 @@ function onMouseDown(event) {
 function pressureToLineWidth(event) {
     //event.button === 0 could be wrong, as it can also be the uninitialized state.
     //Therefore we use event.buttons, which works differently.
-    if (event.buttons !== 1 || event.pressure === 0 || event.pointerType === "touch") {
+    if (
+        event.buttons !== 1 ||
+        event.pressure === 0 ||
+        event.pointerType === "touch"
+    ) {
         return 0;
     }
     if (!penPressure || event.pressure === 0.5 || !event.pressure) {
@@ -1508,17 +1762,21 @@ function pressureToLineWidth(event) {
 // we are handling that with mouseleave instead of pointerleave. pointerlave
 // is not triggered until the pen is let go.
 function onMouseLeave(event) {
-    if (allowDrawing
-        && lastLineWidth
-        && localTool !== fillBucket) {
-
+    if (allowDrawing && lastLineWidth && localTool !== fillBucket) {
         // calculate the offset coordinates based on client mouse position and drawing board client origin
         const clientRect = drawingBoard.getBoundingClientRect();
-        const offsetX = (event.clientX - clientRect.left);
-        const offsetY = (event.clientY - clientRect.top);
+        const offsetX = event.clientX - clientRect.left;
+        const offsetY = event.clientY - clientRect.top;
 
         // drawing functions must check for context boundaries
-        drawLineAndSendEvent(context, lastX, lastY, offsetX, offsetY, lastLineWidth);
+        drawLineAndSendEvent(
+            context,
+            lastX,
+            lastY,
+            offsetX,
+            offsetY,
+            lastLineWidth,
+        );
         lastX = offsetX;
         lastY = offsetY;
     }
@@ -1529,17 +1787,21 @@ function onMouseMove(event) {
     const pressureLineWidth = pressureToLineWidth(event);
     lastLineWidth = pressureLineWidth;
 
-    if (allowDrawing
-        && pressureLineWidth
-        && localTool !== fillBucket) {
-
+    if (allowDrawing && pressureLineWidth && localTool !== fillBucket) {
         // calculate the offset coordinates based on client mouse position and drawing board client origin
         const clientRect = drawingBoard.getBoundingClientRect();
-        const offsetX = (event.clientX - clientRect.left);
-        const offsetY = (event.clientY - clientRect.top);
+        const offsetX = event.clientX - clientRect.left;
+        const offsetY = event.clientY - clientRect.top;
 
         // drawing functions must check for context boundaries
-        drawLineAndSendEvent(context, lastX, lastY, offsetX, offsetY, pressureLineWidth);
+        drawLineAndSendEvent(
+            context,
+            lastX,
+            lastY,
+            offsetX,
+            offsetY,
+            pressureLineWidth,
+        );
         lastX = offsetX;
         lastY = offsetY;
     }
@@ -1551,29 +1813,46 @@ function onMouseClick(event) {
     //clicked and 0 won't be the uninitialized state.
     if (allowDrawing && event.button === 0) {
         if (localTool === fillBucket) {
-            fillAndSendEvent(context, event.offsetX, event.offsetY, localColorIndex);
+            fillAndSendEvent(
+                context,
+                event.offsetX,
+                event.offsetY,
+                localColorIndex,
+            );
         } else {
-            drawLineAndSendEvent(context, event.offsetX, event.offsetY, event.offsetX, event.offsetY);
+            drawLineAndSendEvent(
+                context,
+                event.offsetX,
+                event.offsetY,
+                event.offsetX,
+                event.offsetY,
+            );
         }
     }
 }
 
-drawingBoard.addEventListener('pointerdown', onMouseDown)
-drawingBoard.addEventListener('pointermove', onMouseMove);
-drawingBoard.addEventListener('mouseleave', onMouseLeave);
-drawingBoard.addEventListener('click', onMouseClick);
+drawingBoard.addEventListener("pointerdown", onMouseDown);
+drawingBoard.addEventListener("pointermove", onMouseMove);
+drawingBoard.addEventListener("mouseleave", onMouseLeave);
+drawingBoard.addEventListener("click", onMouseClick);
 
 function onGlobalMouseMove(event) {
     const clientRect = drawingBoard.getBoundingClientRect();
-    lastX = Math.min(clientRect.width - 1, Math.max(0, event.clientX - clientRect.left));
-    lastY = Math.min(clientRect.height - 1, Math.max(0, event.clientY - clientRect.top));
+    lastX = Math.min(
+        clientRect.width - 1,
+        Math.max(0, event.clientX - clientRect.left),
+    );
+    lastY = Math.min(
+        clientRect.height - 1,
+        Math.max(0, event.clientY - clientRect.top),
+    );
 }
 
 //necessary for mousemove to not use the previous exit coordinates.
 //If this is done via mouseleave and mouseenter of the
 //drawingBoard, the lines will end too early on leave and start
 //too late on exit.
-window.addEventListener('mousemove', onGlobalMouseMove);
+window.addEventListener("mousemove", onGlobalMouseMove);
 
 function isAnyDialogVisible() {
     for (let i = 0; i < centerDialogs.children.length; i++) {
@@ -1623,7 +1902,7 @@ function onKeyDown(event) {
     } else if (event.key === "4") {
         sizeButton32.click();
         setLineWidth(32);
-    } else if (event.key === 'z' && event.ctrlKey) {
+    } else if (event.key === "z" && event.ctrlKey) {
         undoAndSendEvent();
     }
 }
@@ -1636,7 +1915,9 @@ function debounce(func, timeout) {
     let timer;
     return (...args) => {
         clearTimeout(timer);
-        timer = setTimeout(() => { func.apply(this, args); }, timeout);
+        timer = setTimeout(() => {
+            func.apply(this, args);
+        }, timeout);
     };
 }
 
@@ -1644,7 +1925,12 @@ function clear(context) {
     context.fillStyle = "#FFFFFF";
     context.fillRect(0, 0, drawingBoard.width, drawingBoard.height);
     // Refetch, as we don't manually fill here.
-    imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
+    imageData = context.getImageData(
+        0,
+        0,
+        context.canvas.width,
+        context.canvas.height,
+    );
 }
 
 // Clear initially, as it will be black otherwise.
@@ -1654,7 +1940,16 @@ function fillAndSendEvent(context, x, y, colorIndex) {
     const xScaled = convertToServerCoordinate(x);
     const yScaled = convertToServerCoordinate(y);
     const color = indexToRgbColor(colorIndex);
-    if (floodfillUint8ClampedArray(imageData.data, xScaled, yScaled, color, imageData.width, imageData.height)) {
+    if (
+        floodfillUint8ClampedArray(
+            imageData.data,
+            xScaled,
+            yScaled,
+            color,
+            imageData.width,
+            imageData.height,
+        )
+    ) {
         context.putImageData(imageData, 0, 0);
         const fillInstruction = {
             type: "fill",
@@ -1668,7 +1963,14 @@ function fillAndSendEvent(context, x, y, colorIndex) {
     }
 }
 
-function drawLineAndSendEvent(context, x1, y1, x2, y2, lineWidth = localLineWidth) {
+function drawLineAndSendEvent(
+    context,
+    x1,
+    y1,
+    x2,
+    y2,
+    lineWidth = localLineWidth,
+) {
     const color = localTool === rubber ? rubberColor : localColor;
     const colorIndex = localTool === rubber ? 0 /* white */ : localColorIndex;
 
@@ -1676,8 +1978,16 @@ function drawLineAndSendEvent(context, x1, y1, x2, y2, lineWidth = localLineWidt
     const y1Scaled = convertToServerCoordinate(y1);
     const x2Scaled = convertToServerCoordinate(x2);
     const y2Scaled = convertToServerCoordinate(y2);
-    drawLine(context, imageData, x1Scaled, y1Scaled,
-        x2Scaled, y2Scaled, color, lineWidth);
+    drawLine(
+        context,
+        imageData,
+        x1Scaled,
+        y1Scaled,
+        x2Scaled,
+        y2Scaled,
+        color,
+        lineWidth,
+    );
 
     const drawInstruction = {
         type: "line",
@@ -1688,16 +1998,87 @@ function drawLineAndSendEvent(context, x1, y1, x2, y2, lineWidth = localLineWidt
             y2: y2Scaled,
             color: colorIndex,
             width: lineWidth,
-        }
+        },
     };
     socket.send(JSON.stringify(drawInstruction));
 }
 
 function getCookie(name) {
     let cookie = {};
-    document.cookie.split(';').forEach(function(el) {
-        let split = el.split('=');
+    document.cookie.split(";").forEach(function (el) {
+        let split = el.split("=");
         cookie[split[0].trim()] = split.slice(1).join("=");
-    })
+    });
     return cookie[name];
 }
+
+const connectToWebsocket = () => {
+    if (socketIsConnecting === true) {
+        return;
+    }
+
+    socketIsConnecting = true;
+
+    socket = new WebSocket(`${rootPath}/v1/lobby/ws`);
+
+    socket.onerror = (error) => {
+        //Is not connected and we haven't yet said that we are done trying to
+        //connect, this means that we could never even establish a connection.
+        if (socket.readyState != 1 && !hasSocketEverConnected) {
+            socketIsConnecting = false;
+            showTextDialog(
+                "connection-error-dialog",
+                '{{.Translation.Get "error-connecting"}}',
+                `{{.Translation.Get "error-connecting-text"}}`,
+            );
+            console.log("Error establishing connection: ", error);
+        } else {
+            console.log("Socket error: ", error);
+        }
+    };
+
+    socket.onopen = () => {
+        closeDialog(reconnectDialogId);
+
+        hasSocketEverConnected = true;
+        socketIsConnecting = false;
+
+        socket.onclose = (event) => {
+            //We want to avoid handling the error multiple times and showing the incorrect dialogs.
+            socket.onerror = null;
+
+            console.log("Socket Closed Connection: ", event);
+
+            if (event.code === 4000) {
+                showTextDialog(
+                    reconnectDialogId,
+                    "Kicked",
+                    `You have been kicked from the lobby.`,
+                );
+            } else {
+                console.log("Attempting to reestablish socket connection.");
+                showReconnectDialogIfNotShown();
+                connectToWebsocket();
+            }
+        };
+
+        socket.onmessage = (jsonMessage) => {
+            handleEvent(JSON.parse(jsonMessage.data));
+        };
+
+        console.log("Successfully Connected");
+    };
+};
+
+connectToWebsocket();
+
+//In order to avoid automatically canceling the socket connection, we keep
+//sending dummy events every 5 seconds. This was a problem on Heroku. If
+//a player took a very long time to choose a word, the connection of all
+//players could be killed and even cause the lobby being closed. Since
+//that's very frustrating, we want to avoid that.
+window.setInterval(() => {
+    if (socket) {
+        socket.send(JSON.stringify({ type: "keep-alive" }));
+    }
+}, 5000);

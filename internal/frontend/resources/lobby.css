@@ -13,7 +13,7 @@
 
 .custom-check-or-radio {
     /* Little hack in order to hide the original components of the check/radio button */
-    opacity: 0.0;
+    opacity: 0;
     position: absolute;
 }
 
@@ -26,11 +26,11 @@
     row-gap: 10px;
 }
 
-.input-container>b {
+.input-container > b {
     align-self: baseline;
 }
 
-.input-container>input[type="checkbox"] {
+.input-container > input[type="checkbox"] {
     /* By default checkboxes seem to have a bigger margin on the left. */
     margin-left: 0;
     margin-right: 0;
@@ -40,10 +40,12 @@ kbd {
     background-color: #eee;
     border-radius: 3px;
     border: 1px solid #b4b4b4;
-    box-shadow: 0 1px 1px rgb(0 0 0 / 20%), 0 2px 0 0 rgb(255 255 255 / 70%) inset;
+    box-shadow:
+        0 1px 1px rgb(0 0 0 / 20%),
+        0 2px 0 0 rgb(255 255 255 / 70%) inset;
     color: #333;
     display: inline-block;
-    font-size: .85em;
+    font-size: 0.85em;
     font-weight: 700;
     line-height: 1;
     vertical-align: middle;
@@ -52,7 +54,7 @@ kbd {
 }
 
 @media only screen and (max-width: 812px),
-(orientation: portrait) or (max-aspect-ratio: 4/3) {
+    (orientation: portrait) or (max-aspect-ratio: 4/3) {
     h1 {
         font-size: 4rem;
     }
@@ -69,11 +71,11 @@ kbd {
         row-gap: 5px;
     }
 
-    .input-container>input[type="checkbox"] {
+    .input-container > input[type="checkbox"] {
         width: initial;
     }
 
-    .input-container>* {
+    .input-container > * {
         width: 100%;
         /* These two prevent blow-out of the input elements */
         display: block;
@@ -112,7 +114,7 @@ kbd {
     grid-gap: 5px;
 }
 
-#lobby-header>* {
+#lobby-header > * {
     background-color: white;
     height: 100%;
     align-items: center;
@@ -139,7 +141,7 @@ kbd {
 }
 
 #rounds::after {
-    content: '/';
+    content: "/";
 }
 
 #time-left-value {
@@ -160,6 +162,11 @@ kbd {
 
 .hint-underline {
     border-bottom: 0.2rem black solid;
+    padding-bottom: 0.1rem;
+}
+
+.hint-revealed {
+    border-bottom: 0.2rem rgb(38, 187, 38) solid;
     padding-bottom: 0.1rem;
 }
 
@@ -266,7 +273,8 @@ kbd {
     overflow-y: scroll;
     background-color: white;
     flex: 1;
-    border-radius: var(--component-border-radius) var(--component-border-radius) 0 0;
+    border-radius: var(--component-border-radius) var(--component-border-radius)
+        0 0;
 }
 
 .chat-name {
@@ -301,7 +309,8 @@ kbd {
     padding: 10px;
     margin-top: 5px;
     border: 0;
-    border-radius: 0 0 var(--component-border-radius) var(--component-border-radius);
+    border-radius: 0 0 var(--component-border-radius)
+        var(--component-border-radius);
 }
 
 .dialog-title {
@@ -366,8 +375,8 @@ kbd {
     justify-content: center;
 }
 
-.line-width-button-content>*,
-.canvas-button>* {
+.line-width-button-content > *,
+.canvas-button > * {
     width: 40px;
     height: 40px;
 }
@@ -376,7 +385,7 @@ kbd {
     background-color: var(--component-base-color);
 }
 
-.line-width-button:checked+.line-width-button-content {
+.line-width-button:checked + .line-width-button-content {
     background-color: var(--component-active-background);
 }
 
@@ -387,7 +396,7 @@ kbd {
     padding: 0;
 }
 
-.canvas-button>img {
+.canvas-button > img {
     display: inline-block;
     vertical-align: middle;
 }
@@ -479,7 +488,7 @@ kbd {
     border-radius: var(--component-border-radius);
 }
 
-.player+.player {
+.player + .player {
     margin-top: 5px;
 }
 
@@ -538,7 +547,7 @@ kbd {
     width: 100%;
 }
 
-.kick-player-button+.kick-player-button {
+.kick-player-button + .kick-player-button {
     margin-top: 0.5rem;
 }
 
@@ -550,7 +559,7 @@ kbd {
     background-color: rgb(245, 245, 245);
 }
 
-.gameover-scoreboard-entry+.gameover-scoreboard-entry {
+.gameover-scoreboard-entry + .gameover-scoreboard-entry {
     margin-top: 0.5rem;
 }
 
@@ -634,8 +643,8 @@ kbd {
         height: 40px;
     }
 
-    .line-width-button-content>*,
-    .canvas-button>* {
+    .line-width-button-content > *,
+    .canvas-button > * {
         width: 32px;
         height: 32px;
     }
@@ -647,8 +656,7 @@ kbd {
     }
 }
 
-@media only screen and (orientation: portrait),
-(max-aspect-ratio: 4/3) {
+@media only screen and (orientation: portrait), (max-aspect-ratio: 4/3) {
     #lobby {
         grid-template-columns: 2fr 3fr;
         grid-template-rows: min-content min-content min-content auto;
