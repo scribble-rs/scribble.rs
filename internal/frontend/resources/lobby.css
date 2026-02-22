@@ -160,6 +160,11 @@ kbd {
     overflow-x: hidden;
 }
 
+.hint-chat-message {
+    white-space: pre;
+    text-wrap-mode: wrap;
+}
+
 .hint-underline {
     border-bottom: 0.2rem black solid;
     padding-bottom: 0.1rem;
