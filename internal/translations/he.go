@@ -101,6 +101,7 @@ func initHebrewTranslation() {
 	translation.put("game-over", "סיימת במקום ה %s עם %s נקודות")
 	translation.put("drawer-disconnected", "התור הסתיים, השחקן שצייר התנתק")
 	translation.put("guessers-disconnected", "התור הסתיים, כל השחקנים המנחשים התנתקו")
+	translation.put("word-hint-revealed", "נחשף רמז")
 
 	translation.put("change-active-color", "שינוי צבע")
 	translation.put("use-pencil", "עיפרון")
