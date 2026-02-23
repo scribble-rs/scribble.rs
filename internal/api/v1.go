@@ -168,9 +168,17 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 	}
 
 	playerName := GetPlayername(request)
+	lobbySettings := &game.EditableLobbySettings{
+		Rounds:             rounds,
+		DrawingTime:        drawingTime,
+		MaxPlayers:         maxPlayers,
+		CustomWordsPerTurn: customWordsPerTurn,
+		ClientsPerIPLimit:  clientsPerIPLimit,
+		Public:             publicLobby,
+		WordsPerTurn:       wordsPerTurn,
+	}
 	player, lobby, err := game.CreateLobby(lobbyId, playerName,
-		languageKey, publicLobby, drawingTime, rounds, maxPlayers,
-		customWordsPerTurn, clientsPerIPLimit, customWords, scoreCalculation, wordsPerTurn)
+		languageKey, lobbySettings, customWords, scoreCalculation)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
