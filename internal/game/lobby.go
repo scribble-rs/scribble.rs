@@ -1032,30 +1032,20 @@ func (lobby *Lobby) selectWord(index int) error {
 func CreateLobby(
 	desiredLobbyId string,
 	playerName, chosenLanguage string,
-	publicLobby bool,
-	drawingTime, rounds, maxPlayers, customWordsPerTurn, clientsPerIPLimit int,
+	settings *EditableLobbySettings,
 	customWords []string,
 	scoringCalculation ScoreCalculation,
-	wordsPerTurn int,
 ) (*Player, *Lobby, error) {
 	if desiredLobbyId == "" {
 		desiredLobbyId = uuid.Must(uuid.NewV4()).String()
 	}
 	lobby := &Lobby{
-		LobbyID: desiredLobbyId,
-		EditableLobbySettings: EditableLobbySettings{
-			Rounds:             rounds,
-			DrawingTime:        drawingTime,
-			MaxPlayers:         maxPlayers,
-			CustomWordsPerTurn: customWordsPerTurn,
-			ClientsPerIPLimit:  clientsPerIPLimit,
-			Public:             publicLobby,
-			WordsPerTurn:       wordsPerTurn,
-		},
-		CustomWords:      customWords,
-		currentDrawing:   make([]any, 0),
-		State:            Unstarted,
-		ScoreCalculation: scoringCalculation,
+		LobbyID:               desiredLobbyId,
+		EditableLobbySettings: *settings,
+		CustomWords:           customWords,
+		currentDrawing:        make([]any, 0),
+		State:                 Unstarted,
+		ScoreCalculation:      scoringCalculation,
 	}
 
 	if len(customWords) > 1 {

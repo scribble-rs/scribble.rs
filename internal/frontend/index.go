@@ -275,9 +275,17 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 		clientsPerIPLimit = maxPlayers
 	}
 
+	lobbySettings := &game.EditableLobbySettings{
+		Rounds:             rounds,
+		DrawingTime:        drawingTime,
+		MaxPlayers:         maxPlayers,
+		CustomWordsPerTurn: customWordsPerTurn,
+		ClientsPerIPLimit:  clientsPerIPLimit,
+		Public:             publicLobby,
+		WordsPerTurn:       wordsPerTurn,
+	}
 	player, lobby, err := game.CreateLobby(lobbyId, playerName, languageKey,
-		publicLobby, drawingTime, rounds, maxPlayers, customWordsPerTurn,
-		clientsPerIPLimit, customWords, scoreCalculation, wordsPerTurn)
+		lobbySettings, customWords, scoreCalculation)
 	if err != nil {
 		pageData.Errors = append(pageData.Errors, err.Error())
 		if err := pageTemplates.ExecuteTemplate(writer, "index", pageData); err != nil {
