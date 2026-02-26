@@ -92,20 +92,22 @@ function hideMenu() {
     menu.hidePopover();
 }
 
-// Since chromes implementation of the popup is dumb, we can't position
-// it correctly without javascript.
-if (!navigator.userAgent.toLowerCase().includes("firefox")) {
-    const menu_button = document.getElementById("menu-button");
-    menu.addEventListener("toggle", (event) => {
-        if (event.newState === "open") {
-            const bounds = menu_button.getBoundingClientRect();
-            // Technically this won't correctly handle the scrolling
-            // position, but we'll cope for now.
-            menu.style.top = bounds.bottom + "px";
+const menu_button = document.getElementById("menu-button");
+menu.addEventListener("toggle", (event) => {
+    if (event.newState === "open") {
+        const bounds = menu_button.getBoundingClientRect();
+        menu.style.top = bounds.bottom + "px";
+
+        // making sure the menu doesn't go off-screen
+        const menuWidth = menu.offsetWidth;
+        const viewportWidth = window.innerWidth;
+        if (bounds.left + menuWidth > viewportWidth) {
+            menu.style.left = (viewportWidth - menuWidth - 5) + "px";
+        } else {
             menu.style.left = bounds.left + "px";
         }
-    });
-}
+    }
+});
 
 function showDialog(id, title, contentNode, buttonBar) {
     hideMenu();
@@ -1601,8 +1603,11 @@ const applyWordHints = (wordHints, dummy) => {
         wordContainer.style.visibility = "hidden";
     }
 
+    var wordLengths = [];
+    var count = 0;
+
     wordContainer.replaceChildren(
-        ...wordHints.map((hint) => {
+      ...wordHints.map((hint, index) => {
             const hintSpan = document.createElement("span");
             hintSpan.classList.add("hint");
             if (hint.character === 0) {
@@ -1615,6 +1620,16 @@ const applyWordHints = (wordHints, dummy) => {
                 hintSpan.innerText = String.fromCharCode(hint.character);
             }
 
+            if (hint.character === 32) {
+              wordLengths.push(count);
+              count = 0;
+            } else if (index === wordHints.length - 1) {
+              count += 1;
+              wordLengths.push(count);
+            } else {
+              count += 1;
+            }
+
             if (hint.revealed && isDrawer) {
                 hintSpan.classList.add("hint-revealed");
             }
@@ -1622,6 +1637,12 @@ const applyWordHints = (wordHints, dummy) => {
             return hintSpan;
         }),
     );
+
+    const lengthHint = document.createElement("sub");
+    lengthHint.classList.add("word-length-hint");
+    lengthHint.setAttribute("dir", wordContainer.getAttribute("dir"));
+    lengthHint.innerText = `(${wordLengths.join(", ")})`;
+    wordContainer.appendChild(lengthHint);
 };
 
 const set_dummy_word_hints = () => {

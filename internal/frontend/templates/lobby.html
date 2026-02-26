@@ -34,7 +34,7 @@
 
                 <div id="lobby-header-center-element">
                     <div>
-                        <div>
+                        <div id="menu-button-container">
                             <button id="menu-button" popovertarget="menu" alt="Show menu" title="Show menu">
                                 <img src='{{.RootPath}}/resources/{{.WithCacheBust "menu.svg"}}'
                                     class="header-button-image" />
@@ -103,7 +103,7 @@
                             </div>
                         </div>
                     </div>
-            <div id="word-container" {{if eq .IsWordpackRtl true}} dir="rtl" {{else}} dir="ltr" {{end}}></div>
+                  <div id="word-container" {{if eq .IsWordpackRtl true}} dir="rtl" {{else}} dir="ltr" {{end}}></div>
                 </div>
                 <div id="time-left">
                     <img src='{{.RootPath}}/resources/{{.WithCacheBust "clock.svg"}}' class="header-button-image" />
