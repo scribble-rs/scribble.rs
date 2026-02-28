@@ -1001,19 +1001,21 @@ const handleEvent = (parsed) => {
 
         // We don't do this in applyWordHints because that's called in all kinds of places
         if (parsed.data.some((hint) => hint.character)) {
-            appendMessage(
-                "system-message",
-                '{{.Translation.Get "system"}}',
-                `{{.Translation.Get "word-hint-revealed"}}`.format(
-                    parsed.data
-                        .map((hint) =>
-                            hint.character && hint.revealed
-                                ? String.fromCharCode(hint.character)
-                                : "_",
-                        )
-                        .join(" "),
-                ),
-            );
+          var hints = parsed.data.map((hint) => {
+              if (hint.character) {
+                  var char = String.fromCharCode(hint.character);
+                  if (char === " " || hint.revealed) {
+                      return char;
+                  }
+              }
+              return "_";
+          }).join(" ");
+          appendMessage(
+              ["system-message", "hint-chat-message"],
+              '{{.Translation.Get "system"}}',
+              '{{.Translation.Get "word-hint-revealed"}}\n' + hints,
+              { "dir": wordContainer.getAttribute("dir") },
+          );
         }
     } else if (parsed.type === "message") {
         appendMessage(null, parsed.data.author, parsed.data.content);
@@ -1401,15 +1403,19 @@ window.setInterval(() => {
 //appendMessage adds a new message to the message container. If the
 //message amount is too high, we cut off a part of the messages to
 //prevent lagging and useless memory usage.
-function appendMessage(styleClass, author, message) {
+function appendMessage(styleClass, author, message, attrs) {
     if (messageContainer.childElementCount >= 100) {
         messageContainer.removeChild(messageContainer.firstChild);
     }
 
     const newMessageDiv = document.createElement("div");
     newMessageDiv.classList.add("message");
-    if (styleClass !== null && styleClass !== "") {
-        newMessageDiv.classList.add(styleClass);
+    if (isString(styleClass)) {
+      styleClass = [styleClass];
+    }
+
+    for (const cls of styleClass){
+      newMessageDiv.classList.add(cls);
     }
 
     if (author !== null && author !== "") {
@@ -1423,6 +1429,14 @@ function appendMessage(styleClass, author, message) {
     messageSpan.classList.add("message-content");
     messageSpan.innerText = message;
     newMessageDiv.appendChild(messageSpan);
+
+    if (attrs !== null && attrs !== "") {
+      if (isObject(attrs)) {
+        for (const [attrKey, attrValue] of Object.entries(attrs)) {
+          messageSpan.setAttribute(attrKey, attrValue);
+        }
+      }
+    }
 
     messageContainer.appendChild(newMessageDiv);
 }
@@ -2031,6 +2045,17 @@ function getCookie(name) {
         cookie[split[0].trim()] = split.slice(1).join("=");
     });
     return cookie[name];
+}
+
+function isString(obj) {
+  return typeof obj === 'string';
+}
+
+function isObject(obj) {
+  return typeof obj === 'object' &&
+    obj !== null &&
+    !Array.isArray(obj) &&
+    Object.prototype.toString.call(obj) === '[object Object]';
 }
 
 const connectToWebsocket = () => {
