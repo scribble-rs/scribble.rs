@@ -114,7 +114,8 @@ kbd {
     grid-gap: 5px;
 }
 
-#lobby-header > * {
+#lobby-header > *,
+#menu-button-container {
     background-color: white;
     height: 100%;
     align-items: center;
@@ -125,6 +126,7 @@ kbd {
 
 #lobby-header-center-element {
     display: flex;
+    justify-content: center;
     /* Hack to remove extra space between buttons */
     font-size: 0;
 }
@@ -158,6 +160,17 @@ kbd {
     column-gap: 0.5rem;
     width: 0;
     overflow-x: hidden;
+}
+
+.word-length-hint {
+    font-family: monospace;
+    font-size: 0.8rem;
+    padding-top: 0.4rem;
+}
+
+.hint-chat-message {
+    white-space: pre;
+    text-wrap-mode: wrap;
 }
 
 .hint-underline {
@@ -667,11 +680,50 @@ kbd {
     }
 
     #lobby-header {
-        grid-template-columns: max-content auto max-content;
-
-        grid-column-start: 1;
+        background-color: transparent;
+        display: grid;
         grid-column-end: 3;
+        grid-column-start: 1;
+        grid-gap: 5px;
         grid-row: 1;
+        grid-template-columns: 1fr auto 1fr;
+        grid-template-rows: auto auto;
+    }
+
+    #lobby-header-center-element {
+        display: contents;
+    }
+
+    #menu-button-container {
+        grid-column: 2;
+        grid-row: 1;
+        display: flex;
+        justify-content: center;
+    }
+
+    #round-container {
+        grid-column: 1;
+        grid-row: 1;
+        justify-content: flex-start;
+    }
+
+    #time-left {
+        grid-column: 3;
+        grid-row: 1;
+        justify-content: flex-end;
+    }
+
+    #word-container {
+        grid-column: 1 / 4;
+        grid-row: 2;
+        background-color: white;
+        align-items: center;
+        padding: 0.1rem 0.2rem;
+        border-radius: var(--component-border-radius);
+        column-gap: 0.2rem;
+        width: auto;
+        min-width: 0;
+        overflow: visible;
     }
 
     #round-container,
@@ -726,9 +778,21 @@ kbd {
     }
 }
 
+#menu-button-container {
+    position: relative;
+}
+
+#menu-button {
+    anchor-name: menu-anchor;
+}
+
 #menu {
-    position: absolute;
-    inset: unset;
+    position-anchor: menu-anchor;
+    position-area: bottom span-right;
+    position-try-fallbacks: flip-block, flip-inline;
+
+    margin: 0;
+    inset: auto;
     border: 1px solid gray;
     border-radius: var(--component-border-radius);
 }
