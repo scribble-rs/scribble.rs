@@ -100,16 +100,15 @@ const set_lobbies = (lobbies, visible) => {
         const lobby_list_item = document.createElement("div");
         lobby_list_item.className = "lobby-list-item";
 
+        const language_flag = document.createElement("span");
+        language_flag.className = "language-flag";
+        language_flag.innerText = language_to_flag(lobby.wordpack);
+
         const lobby_list_rows = document.createElement("div");
         lobby_list_rows.className = "lobby-list-rows";
 
         const lobby_list_row_a = document.createElement("div");
         lobby_list_row_a.className = "lobby-list-row";
-
-        const language_flag = document.createElement("span");
-        language_flag.className = "language-flag";
-        language_flag.innerText = language_to_flag(lobby.wordpack);
-        lobby_list_row_a.appendChild(language_flag);
 
         const new_custom_tag = (text) => {
             const tag = document.createElement("span");
@@ -188,7 +187,7 @@ const set_lobbies = (lobbies, visible) => {
             window.location.href = `{{.RootPath}}/lobby/${lobby.lobbyId}`;
         });
 
-        lobby_list_item.replaceChildren(lobby_list_rows, join_button);
+        lobby_list_item.replaceChildren(language_flag, lobby_list_rows, join_button);
 
         return lobby_list_item;
     });

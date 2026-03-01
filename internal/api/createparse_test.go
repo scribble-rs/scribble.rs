@@ -185,7 +185,7 @@ func Test_parseCustomWordsPerTurn(t *testing.T) {
 	}{
 		{"empty value", "", 0, true},
 		{"space", " ", 0, true},
-		{"lesss than minimum, zero", "0", 0, true},
+		{"less than minimum, zero", "0", 0, true},
 		{"less than minimum, negative", "-1", 0, true},
 		{"more than maximum", "4", 0, true},
 		{"minimum", "1", 1, false},
@@ -203,6 +203,38 @@ func Test_parseCustomWordsPerTurn(t *testing.T) {
 			}
 			if got != testCase.want {
 				t.Errorf("parseCustomWordsPerTurn() = %v, want %v", got, testCase.want)
+			}
+		})
+	}
+}
+
+func Test_parseWordsPerTurn(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		value   string
+		want    int
+		wantErr bool
+	}{
+		{"empty value", "", 0, true},
+		{"space", " ", 0, true},
+		{"less than minimum, zero", "0", 0, true},
+		{"less than minimum, negative", "-1", 0, true},
+		{"minimum", "1", 1, false},
+		{"something valid", "10", 10, false},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			got, err := ParseWordsPerTurn(testCase.value)
+			if (err != nil) != testCase.wantErr {
+				t.Errorf("ParseWordsPerTurn() error = %v, wantErr %v", err, testCase.wantErr)
+				return
+			}
+			if got != testCase.want {
+				t.Errorf("ParseWordsPerTurn() = %v, want %v", got, testCase.want)
 			}
 		})
 	}
