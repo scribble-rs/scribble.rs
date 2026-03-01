@@ -33,73 +33,71 @@
                 </div>
 
                 <div id="lobby-header-center-element">
-                    <div>
-                        <div id="menu-button-container">
-                            <button id="menu-button" popovertarget="menu" alt="Show menu" title="Show menu">
-                                <img src='{{.RootPath}}/resources/{{.WithCacheBust "menu.svg"}}'
-                                    class="header-button-image" />
-                            </button>
-                            <div id="menu" popover>
-                                <div class="menu-list">
-                                    <!-- this button is basically behaving like a checkbox, but in order to
-                    have a uniform look with the other buttons in the header, we are not using
-                    a checkbox anymore. -->
-                                    <button id="toggle-sound-button" class="dialog-button menu-item header-button"
-                                        alt="{{.Translation.Get "toggle-soundeffects"}}"
-                                        title="{{.Translation.Get "toggle-soundeffects"}}">
-                                        <img id="sound-toggle-label" class="header-button-image" />
-                                        {{.Translation.Get "toggle-soundeffects"}}
-                                    </button>
-                                    <button id="toggle-pen-pressure-button"
-                                        class="dialog-button menu-item header-button"
-                                        alt="{{.Translation.Get "toggle-pen-pressure"}}"
-                                        title="{{.Translation.Get "toggle-pen-pressure"}}">
-                                        <img id="pen-pressure-toggle-label" class="header-button-image" />
-                                        {{.Translation.Get "toggle-pen-pressure"}}
-                                    </button>
-                                    <button id="name-change-button" class="dialog-button menu-item header-button"
-                                        alt="{{.Translation.Get "change-your-name"}}"
-                                        title="{{.Translation.Get "change-your-name"}}">
-                                        <img src='{{.RootPath}}/resources/{{.WithCacheBust "user.svg"}}'
-                                            class="header-button-image" />
-                                        {{.Translation.Get "change-your-name"}}
-                                    </button>
-                                    <button id="toggle-fullscreen-button" class="dialog-button menu-item header-button"
-                                        alt="{{.Translation.Get "toggle-fullscreen"}}"
-                                        title="{{.Translation.Get "toggle-fullscreen"}}">
-                                        <img src='{{.RootPath}}/resources/{{.WithCacheBust "fullscreen.svg"}}'
-                                            class="header-button-image" />
-                                        {{.Translation.Get "toggle-fullscreen"}}
-                                    </button>
-                                    <button id="toggle-spectate-button" class="dialog-button menu-item header-button"
-                                        alt="{{.Translation.Get "toggle-spectate"}}"
-                                        title="{{.Translation.Get "toggle-spectate"}}">
-                                        <img src='{{.RootPath}}/resources/{{.WithCacheBust "spectate.svg"}}'
-                                            class="header-button-image" />
-                                        {{.Translation.Get "toggle-spectate"}}
-                                    </button>
-                                    <button id="help-button" class="dialog-button menu-item header-button"
-                                        alt="{{.Translation.Get "show-help"}}" title="{{.Translation.Get "show-help"}}">
-                                        <img src='{{.RootPath}}/resources/{{.WithCacheBust "help.svg"}}'
-                                            class="header-button-image" />
-                                        {{.Translation.Get "show-help"}}
-                                    </button>
-                                    <button id="kick-button" class="dialog-button menu-item header-button"
-                                        alt="{{.Translation.Get "votekick-a-player"}}"
-                                        title="{{.Translation.Get "votekick-a-player"}}">
-                                        <img src='{{.RootPath}}/resources/{{.WithCacheBust "kick.png"}}'
-                                            class="header-button-image" />
-                                        {{.Translation.Get "votekick-a-player"}}
-                                    </button>
-                                    <button id="lobby-settings-button" style="display: none;"
-                                        class="dialog-button menu-item header-button"
-                                        alt="{{.Translation.Get "change-lobby-settings-tooltip"}}"
-                                        title="{{.Translation.Get "change-lobby-settings-tooltip"}}">
-                                        <img src='{{.RootPath}}/resources/{{.WithCacheBust "settings.svg"}}'
-                                            class="header-button-image" />
-                                        {{.Translation.Get "change-lobby-settings-tooltip"}}
-                                    </button>
-                                </div>
+                    <div id="menu-button-container">
+                        <button id="menu-button" popovertarget="menu" alt="Show menu" title="Show menu">
+                            <img src='{{.RootPath}}/resources/{{.WithCacheBust "menu.svg"}}'
+                                class="header-button-image" />
+                        </button>
+                        <div id="menu" popover>
+                            <div class="menu-list">
+                                <!-- this button is basically behaving like a checkbox, but in order to
+                have a uniform look with the other buttons in the header, we are not using
+                a checkbox anymore. -->
+                                <button id="toggle-sound-button" class="dialog-button menu-item header-button"
+                                    alt="{{.Translation.Get "toggle-soundeffects"}}"
+                                    title="{{.Translation.Get "toggle-soundeffects"}}">
+                                    <img id="sound-toggle-label" class="header-button-image" />
+                                    {{.Translation.Get "toggle-soundeffects"}}
+                                </button>
+                                <button id="toggle-pen-pressure-button"
+                                    class="dialog-button menu-item header-button"
+                                    alt="{{.Translation.Get "toggle-pen-pressure"}}"
+                                    title="{{.Translation.Get "toggle-pen-pressure"}}">
+                                    <img id="pen-pressure-toggle-label" class="header-button-image" />
+                                    {{.Translation.Get "toggle-pen-pressure"}}
+                                </button>
+                                <button id="name-change-button" class="dialog-button menu-item header-button"
+                                    alt="{{.Translation.Get "change-your-name"}}"
+                                    title="{{.Translation.Get "change-your-name"}}">
+                                    <img src='{{.RootPath}}/resources/{{.WithCacheBust "user.svg"}}'
+                                        class="header-button-image" />
+                                    {{.Translation.Get "change-your-name"}}
+                                </button>
+                                <button id="toggle-fullscreen-button" class="dialog-button menu-item header-button"
+                                    alt="{{.Translation.Get "toggle-fullscreen"}}"
+                                    title="{{.Translation.Get "toggle-fullscreen"}}">
+                                    <img src='{{.RootPath}}/resources/{{.WithCacheBust "fullscreen.svg"}}'
+                                        class="header-button-image" />
+                                    {{.Translation.Get "toggle-fullscreen"}}
+                                </button>
+                                <button id="toggle-spectate-button" class="dialog-button menu-item header-button"
+                                    alt="{{.Translation.Get "toggle-spectate"}}"
+                                    title="{{.Translation.Get "toggle-spectate"}}">
+                                    <img src='{{.RootPath}}/resources/{{.WithCacheBust "spectate.svg"}}'
+                                        class="header-button-image" />
+                                    {{.Translation.Get "toggle-spectate"}}
+                                </button>
+                                <button id="help-button" class="dialog-button menu-item header-button"
+                                    alt="{{.Translation.Get "show-help"}}" title="{{.Translation.Get "show-help"}}">
+                                    <img src='{{.RootPath}}/resources/{{.WithCacheBust "help.svg"}}'
+                                        class="header-button-image" />
+                                    {{.Translation.Get "show-help"}}
+                                </button>
+                                <button id="kick-button" class="dialog-button menu-item header-button"
+                                    alt="{{.Translation.Get "votekick-a-player"}}"
+                                    title="{{.Translation.Get "votekick-a-player"}}">
+                                    <img src='{{.RootPath}}/resources/{{.WithCacheBust "kick.png"}}'
+                                        class="header-button-image" />
+                                    {{.Translation.Get "votekick-a-player"}}
+                                </button>
+                                <button id="lobby-settings-button" style="display: none;"
+                                    class="dialog-button menu-item header-button"
+                                    alt="{{.Translation.Get "change-lobby-settings-tooltip"}}"
+                                    title="{{.Translation.Get "change-lobby-settings-tooltip"}}">
+                                    <img src='{{.RootPath}}/resources/{{.WithCacheBust "settings.svg"}}'
+                                        class="header-button-image" />
+                                    {{.Translation.Get "change-lobby-settings-tooltip"}}
+                                </button>
                             </div>
                         </div>
                     </div>

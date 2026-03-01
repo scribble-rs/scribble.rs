@@ -1610,20 +1610,16 @@ function updateRoundsDisplay() {
 const applyWordHints = (wordHints, dummy) => {
     const isDrawer = drawerID === ownID;
 
-    // We abuse the container to prevent the layout from jumping.
-    if (!dummy) {
-        wordContainer.style.visibility = "visible";
-    } else {
-        wordContainer.style.visibility = "hidden";
-    }
-
-    var wordLengths = [];
-    var count = 0;
+    let wordLengths = [];
+    let count = 0;
 
     wordContainer.replaceChildren(
       ...wordHints.map((hint, index) => {
             const hintSpan = document.createElement("span");
             hintSpan.classList.add("hint");
+            if (dummy) {
+                hintSpan.style.visibility = "hidden";
+            }
             if (hint.character === 0) {
                 hintSpan.classList.add("hint-underline");
                 hintSpan.innerHTML = "&nbsp;";
@@ -1634,6 +1630,7 @@ const applyWordHints = (wordHints, dummy) => {
                 hintSpan.innerText = String.fromCharCode(hint.character);
             }
 
+            // space
             if (hint.character === 32) {
               wordLengths.push(count);
               count = 0;
@@ -1654,6 +1651,9 @@ const applyWordHints = (wordHints, dummy) => {
 
     const lengthHint = document.createElement("sub");
     lengthHint.classList.add("word-length-hint");
+    if (dummy) {
+        lengthHint.style.visibility = "hidden";
+    }
     lengthHint.setAttribute("dir", wordContainer.getAttribute("dir"));
     lengthHint.innerText = `(${wordLengths.join(", ")})`;
     wordContainer.appendChild(lengthHint);

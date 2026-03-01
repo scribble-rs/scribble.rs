@@ -114,7 +114,8 @@ kbd {
     grid-gap: 5px;
 }
 
-#lobby-header > * {
+#lobby-header > *,
+#menu-button-container {
     background-color: white;
     height: 100%;
     align-items: center;
@@ -692,12 +693,8 @@ kbd {
     #menu-button-container {
         grid-column: 2;
         grid-row: 1;
-        background-color: white;
         display: flex;
         justify-content: center;
-        align-items: center;
-        padding: 0.1rem 0.2rem;
-        border-radius: var(--component-border-radius);
     }
 
     #round-container {
