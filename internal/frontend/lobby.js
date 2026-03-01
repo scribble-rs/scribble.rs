@@ -92,23 +92,6 @@ function hideMenu() {
     menu.hidePopover();
 }
 
-const menu_button = document.getElementById("menu-button");
-menu.addEventListener("toggle", (event) => {
-    if (event.newState === "open") {
-        const bounds = menu_button.getBoundingClientRect();
-        menu.style.top = bounds.bottom + "px";
-
-        // making sure the menu doesn't go off-screen
-        const menuWidth = menu.offsetWidth;
-        const viewportWidth = window.innerWidth;
-        if (bounds.left + menuWidth > viewportWidth) {
-            menu.style.left = (viewportWidth - menuWidth - 5) + "px";
-        } else {
-            menu.style.left = bounds.left + "px";
-        }
-    }
-});
-
 function showDialog(id, title, contentNode, buttonBar) {
     hideMenu();
 
@@ -1001,21 +984,23 @@ const handleEvent = (parsed) => {
 
         // We don't do this in applyWordHints because that's called in all kinds of places
         if (parsed.data.some((hint) => hint.character)) {
-          var hints = parsed.data.map((hint) => {
-              if (hint.character) {
-                  var char = String.fromCharCode(hint.character);
-                  if (char === " " || hint.revealed) {
-                      return char;
-                  }
-              }
-              return "_";
-          }).join(" ");
-          appendMessage(
-              ["system-message", "hint-chat-message"],
-              '{{.Translation.Get "system"}}',
-              '{{.Translation.Get "word-hint-revealed"}}\n' + hints,
-              { "dir": wordContainer.getAttribute("dir") },
-          );
+            var hints = parsed.data
+                .map((hint) => {
+                    if (hint.character) {
+                        var char = String.fromCharCode(hint.character);
+                        if (char === " " || hint.revealed) {
+                            return char;
+                        }
+                    }
+                    return "_";
+                })
+                .join(" ");
+            appendMessage(
+                ["system-message", "hint-chat-message"],
+                '{{.Translation.Get "system"}}',
+                '{{.Translation.Get "word-hint-revealed"}}\n' + hints,
+                { dir: wordContainer.getAttribute("dir") },
+            );
         }
     } else if (parsed.type === "message") {
         appendMessage(null, parsed.data.author, parsed.data.content);
@@ -1411,11 +1396,11 @@ function appendMessage(styleClass, author, message, attrs) {
     const newMessageDiv = document.createElement("div");
     newMessageDiv.classList.add("message");
     if (isString(styleClass)) {
-      styleClass = [styleClass];
+        styleClass = [styleClass];
     }
 
-    for (const cls of styleClass){
-      newMessageDiv.classList.add(cls);
+    for (const cls of styleClass) {
+        newMessageDiv.classList.add(cls);
     }
 
     if (author !== null && author !== "") {
@@ -1431,11 +1416,11 @@ function appendMessage(styleClass, author, message, attrs) {
     newMessageDiv.appendChild(messageSpan);
 
     if (attrs !== null && attrs !== "") {
-      if (isObject(attrs)) {
-        for (const [attrKey, attrValue] of Object.entries(attrs)) {
-          messageSpan.setAttribute(attrKey, attrValue);
+        if (isObject(attrs)) {
+            for (const [attrKey, attrValue] of Object.entries(attrs)) {
+                messageSpan.setAttribute(attrKey, attrValue);
+            }
         }
-      }
     }
 
     messageContainer.appendChild(newMessageDiv);
@@ -1614,7 +1599,7 @@ const applyWordHints = (wordHints, dummy) => {
     let count = 0;
 
     wordContainer.replaceChildren(
-      ...wordHints.map((hint, index) => {
+        ...wordHints.map((hint, index) => {
             const hintSpan = document.createElement("span");
             hintSpan.classList.add("hint");
             if (dummy) {
@@ -1632,13 +1617,13 @@ const applyWordHints = (wordHints, dummy) => {
 
             // space
             if (hint.character === 32) {
-              wordLengths.push(count);
-              count = 0;
+                wordLengths.push(count);
+                count = 0;
             } else if (index === wordHints.length - 1) {
-              count += 1;
-              wordLengths.push(count);
+                count += 1;
+                wordLengths.push(count);
             } else {
-              count += 1;
+                count += 1;
             }
 
             if (hint.revealed && isDrawer) {
@@ -2048,14 +2033,16 @@ function getCookie(name) {
 }
 
 function isString(obj) {
-  return typeof obj === 'string';
+    return typeof obj === "string";
 }
 
 function isObject(obj) {
-  return typeof obj === 'object' &&
-    obj !== null &&
-    !Array.isArray(obj) &&
-    Object.prototype.toString.call(obj) === '[object Object]';
+    return (
+        typeof obj === "object" &&
+        obj !== null &&
+        !Array.isArray(obj) &&
+        Object.prototype.toString.call(obj) === "[object Object]"
+    );
 }
 
 const connectToWebsocket = () => {

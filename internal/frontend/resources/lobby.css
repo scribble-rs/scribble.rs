@@ -778,8 +778,15 @@ kbd {
     position: relative;
 }
 
+#menu-button {
+    anchor-name: menu-anchor;
+}
+
 #menu {
-    position: fixed;
+    position-anchor: menu-anchor;
+    position-area: bottom span-right;
+    position-try-fallbacks: flip-block, flip-inline;
+
     margin: 0;
     inset: auto;
     border: 1px solid gray;
