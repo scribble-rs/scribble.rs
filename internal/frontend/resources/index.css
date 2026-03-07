@@ -17,6 +17,7 @@
     display: flex;
     flex-direction: row;
     gap: 1rem;
+    justify-content: center;
 }
 
 .home-choice-header {
@@ -33,6 +34,7 @@
     row-gap: 1rem;
     display: flex;
     flex-direction: column;
+    height: 100%;
 }
 
 .home-choice {
@@ -41,7 +43,7 @@
     border-radius: 1.3rem;
     overflow: hidden;
     width: min(42.5vw, 35rem);
-    height: 55vh;
+    height: 59vh;
 }
 
 .home {
@@ -57,6 +59,7 @@
     overflow-y: auto;
     gap: 0.75rem;
     padding: 0.25rem;
+    min-height: 10rem;
 }
 
 .lobby-list-item {
@@ -67,14 +70,12 @@
     grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 1.25rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
     border: 1px solid rgba(0,0,0,0.05);
 }
 
 .lobby-list-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.12);
     background-color: #fafafa;
 }
 
@@ -149,7 +150,7 @@
 }
 
 .join-button {
-    background-color: rgb(240, 105, 127);
+    background-color: rgb(38, 187, 38);
     color: white;
     font-weight: 800;
     font-size: 1.1rem;
@@ -169,7 +170,9 @@
 }
 
 .join-button:hover {
-    background-color: rgb(225, 85, 107);
+    background-color: rgb(34, 167, 34);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
 
 .join-button:active {
@@ -196,6 +199,7 @@
     scrollbar-gutter: stable;
     padding-right: 0.5rem;
     flex: 1;
+    min-height: 0;
     grid-template-rows: max-content max-content max-content max-content max-content max-content max-content auto;
 }
 
@@ -247,6 +251,7 @@
     border: 2px hidden;
     min-width: 0;
     box-sizing: border-box;
+    height: 2rem;
 }
 
 .number-input>button {
@@ -324,32 +329,39 @@
     #logo {
         width: 95vw;
         max-height: 10vh;
-        margin-left: 2.5vw;
-        margin-right: 2.5vw;
+        margin-left: 0;
+        margin-right: 0;
         margin-top: 0;
     }
 
     #home-choices {
         flex-direction: column;
-        height: 87vh;
+        height: auto;
+        gap: 1.5rem;
+        padding-bottom: 4rem;
+        width: 100%;
+        box-sizing: border-box;
+        padding-left: 1rem;
+        padding-right: 1rem;
     }
 
     .home-choice {
-        width: 90vw;
-        padding: 3vw;
+        width: 100%;
+        box-sizing: border-box;
+        height: auto;
+        min-height: 15rem;
+        max-height: none;
+        flex: none;
+        overflow: visible;
     }
 
-    #home-choices>.home-choice:nth-child(1) {
-        height: max-content;
-    }
-
-    #home-choices>.home-choice:nth-child(2) {
-        flex: 1;
-        min-height: 0;
+    #lobby-create {
+        overflow-y: visible;
+        flex: none;
     }
 
     .home-choice-inner {
-        height: 100%;
+        height: auto;
         min-height: 0;
     }
 
@@ -397,10 +409,9 @@
     }
 
     .advanced-toggle-checkbox:checked ~ .advanced-section-content {
-        max-height: 1000px;
+        max-height: fit-content;
         opacity: 1;
         margin-top: 0.5rem;
-        margin-bottom: 0.5rem;
         row-gap: 0.5rem;
         pointer-events: auto;
         align-items: center;
