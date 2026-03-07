@@ -121,6 +121,7 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 	customWordsPerTurn, customWordsPerTurnInvalid := ParseCustomWordsPerTurn(request.Form.Get("custom_words_per_turn"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(handler.cfg, request.Form.Get("clients_per_ip_limit"))
 	publicLobby, publicLobbyInvalid := ParseBoolean("public", request.Form.Get("public"))
+	wordsPerTurn, wordsPerTurnInvalid := ParseWordsPerTurn(request.Form.Get("words_per_turn"))
 
 	var lowercaser cases.Caser
 	if languageInvalid != nil {
@@ -157,6 +158,9 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 	if publicLobbyInvalid != nil {
 		requestErrors = append(requestErrors, publicLobbyInvalid.Error())
 	}
+	if wordsPerTurnInvalid != nil {
+		requestErrors = append(requestErrors, wordsPerTurnInvalid.Error())
+	}
 
 	if len(requestErrors) != 0 {
 		http.Error(writer, strings.Join(requestErrors, ";"), http.StatusBadRequest)
@@ -164,9 +168,17 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 	}
 
 	playerName := GetPlayername(request)
+	lobbySettings := &game.EditableLobbySettings{
+		Rounds:             rounds,
+		DrawingTime:        drawingTime,
+		MaxPlayers:         maxPlayers,
+		CustomWordsPerTurn: customWordsPerTurn,
+		ClientsPerIPLimit:  clientsPerIPLimit,
+		Public:             publicLobby,
+		WordsPerTurn:       wordsPerTurn,
+	}
 	player, lobby, err := game.CreateLobby(lobbyId, playerName,
-		languageKey, publicLobby, drawingTime, rounds, maxPlayers,
-		customWordsPerTurn, clientsPerIPLimit, customWords, scoreCalculation)
+		languageKey, lobbySettings, customWords, scoreCalculation)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
@@ -362,6 +374,7 @@ func (handler *V1Handler) patchLobby(writer http.ResponseWriter, request *http.R
 	customWordsPerTurn, customWordsPerTurnInvalid := ParseCustomWordsPerTurn(request.Form.Get("custom_words_per_turn"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(handler.cfg, request.Form.Get("clients_per_ip_limit"))
 	publicLobby, publicLobbyInvalid := ParseBoolean("public", request.Form.Get("public"))
+	wordsPerTurn, wordsPerTurnInvalid := ParseWordsPerTurn(request.Form.Get("words_per_turn"))
 
 	owner := lobby.GetOwner()
 	if owner == nil || owner.GetUserSession() != userSession {
@@ -392,6 +405,9 @@ func (handler *V1Handler) patchLobby(writer http.ResponseWriter, request *http.R
 	if publicLobbyInvalid != nil {
 		requestErrors = append(requestErrors, publicLobbyInvalid.Error())
 	}
+	if wordsPerTurnInvalid != nil {
+		requestErrors = append(requestErrors, wordsPerTurnInvalid.Error())
+	}
 
 	if len(requestErrors) != 0 {
 		http.Error(writer, strings.Join(requestErrors, ";"), http.StatusBadRequest)
@@ -410,6 +426,7 @@ func (handler *V1Handler) patchLobby(writer http.ResponseWriter, request *http.R
 		lobby.ClientsPerIPLimit = clientsPerIPLimit
 		lobby.Public = publicLobby
 		lobby.Rounds = rounds
+		lobby.WordsPerTurn = wordsPerTurn
 
 		if lobby.State == game.Ongoing {
 			lobby.DrawingTimeNew = drawingTime

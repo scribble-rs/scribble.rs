@@ -25,7 +25,7 @@
 
 html,
 body {
-    height: 100vh;
+    min-height: 100vh;
 }
 
 body,
@@ -37,12 +37,11 @@ body:fullscreen {
 
 body::before {
     content: ' ';
-    position: absolute;
+    position: fixed;
     left: 0;
     top: 0;
     width: 100vw;
     height: 100vh;
-    max-height: 100vh;
     opacity: 0.50;
     background: var(--scribble-background) repeat;
     background-size: 400px 400px;
@@ -140,7 +139,6 @@ textarea {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    max-height: 100vh;
 }
 
 .noscript {
