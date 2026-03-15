@@ -59,8 +59,10 @@ type SettingBounds struct {
 	MinClientsPerIPLimit  int `json:"minClientsPerIpLimit" env:"MIN_CLIENTS_PER_IP_LIMIT"`
 	MaxClientsPerIPLimit  int `json:"maxClientsPerIpLimit" env:"MAX_CLIENTS_PER_IP_LIMIT"`
 	MinCustomWordsPerTurn int `json:"minCustomWordsPerTurn" env:"MIN_CUSTOM_WORDS_PER_TURN"`
-	MaxCustomWordsPerTurn int `json:"maxCustomWordsPerTurn" env:"MAX_CUSTOM_WORDS_PER_TURN"`
-	MinWordsPerTurn       int `json:"minWordsPerTurn" env:"MIN_WORDS_PER_TURN"`
+	// MaxWordsPerTurn is now used for max words in general, as both amount of words and custom
+	// can be configured now.
+	MaxWordsPerTurn int `json:"maxWordsPerTurn" env:"MAX_WORDS_PER_TURN"`
+	MinWordsPerTurn int `json:"minWordsPerTurn" env:"MIN_WORDS_PER_TURN"`
 }
 
 func (lobby *Lobby) HandleEvent(eventType string, payload []byte, player *Player) error {

@@ -67,10 +67,10 @@
                             <select class="input-item" name="score_calculation" id="score_calculation"
                                 placeholder="Choose how player scores are determined">
                                 {{$scoreCalculation := .ScoreCalculation}}
-                                {{range .ScoreCalculations}}
-                                {{$alt := $.Translation.Get (print . "-alt")}}
-                                <option alt="{{$alt}}" title="{{$alt}}" value="{{.}}" label="{{$.Translation.Get .}}"
-                                    {{if eq . $scoreCalculation}}selected="selected" {{end}}>
+                                {{range $k := .ScoreCalculations}}
+                                {{$alt := $.Translation.Get (print $k "-alt")}}
+                                <option alt="{{$alt}}" title="{{$alt}}" value="{{$k}}" label="{{$.Translation.Get $k}}"
+                                    {{if eq $k $scoreCalculation}}selected="selected" {{end}}>
                                 </option>
                                 {{end}}
                             </select>
@@ -124,7 +124,7 @@
                                 <div class="number-input">
                                     <button class="number-decrement" type="button">-</button>
                                     <input size="4" type="number" name="words_per_turn" id="words_per_turn"
-                                      min="{{.MinWordsPerTurn}}" value="{{.WordsPerTurn}}">
+                                      min="{{.MinWordsPerTurn}}" max="{{.MaxWordsPerTurn}}" value="{{.WordsPerTurn}}">
                                     <button class="number-increment" type="button">+</button>
                                 </div>
                                 <label class="lobby-create-label" for="custom_words_per_turn">
@@ -133,8 +133,7 @@
                                 <div class="number-input">
                                     <button class="number-decrement" type="button">-</button>
                                     <input size="4" type="number" name="custom_words_per_turn" id="custom_words_per_turn"
-                                        min="{{.MinCustomWordsPerTurn}}" max="{{.MaxCustomWordsPerTurn}}"
-                                        value="{{.CustomWordsPerTurn}}">
+                                        min="{{.MinCustomWordsPerTurn}}" max="{{.MaxWordsPerTurn}}" value="{{.CustomWordsPerTurn}}">
                                     <button class="number-increment" type="button">+</button>
                                 </div>
                                 <label class="lobby-create-label" for="custom_words">

@@ -102,6 +102,8 @@ const set_lobbies = (lobbies, visible) => {
 
         const language_flag = document.createElement("span");
         language_flag.className = "language-flag";
+        language_flag.setAttribute("title", lobby.wordpack);
+        language_flag.setAttribute("english", lobby.wordpack);
         language_flag.innerText = language_to_flag(lobby.wordpack);
 
         const lobby_list_rows = document.createElement("div");
@@ -187,7 +189,11 @@ const set_lobbies = (lobbies, visible) => {
             window.location.href = `{{.RootPath}}/lobby/${lobby.lobbyId}`;
         });
 
-        lobby_list_item.replaceChildren(language_flag, lobby_list_rows, join_button);
+        lobby_list_item.replaceChildren(
+            language_flag,
+            lobby_list_rows,
+            join_button,
+        );
 
         return lobby_list_item;
     });

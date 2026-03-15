@@ -4,6 +4,7 @@ import (
 	//nolint:gosec //We just use this for cache busting, so it's secure enough
 
 	"crypto/md5"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -188,10 +189,14 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 	drawingTime, drawingTimeInvalid := api.ParseDrawingTime(handler.cfg, request.Form.Get("drawing_time"))
 	rounds, roundsInvalid := api.ParseRounds(handler.cfg, request.Form.Get("rounds"))
 	maxPlayers, maxPlayersInvalid := api.ParseMaxPlayers(handler.cfg, request.Form.Get("max_players"))
-	customWordsPerTurn, customWordsPerTurnInvalid := api.ParseCustomWordsPerTurn(request.Form.Get("custom_words_per_turn"))
+	customWordsPerTurn, customWordsPerTurnInvalid := api.ParseCustomWordsPerTurn(handler.cfg, request.Form.Get("custom_words_per_turn"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := api.ParseClientsPerIPLimit(handler.cfg, request.Form.Get("clients_per_ip_limit"))
 	publicLobby, publicLobbyInvalid := api.ParseBoolean("public", request.Form.Get("public"))
-	wordsPerTurn, wordsPerTurnInvalid := api.ParseWordsPerTurn(request.Form.Get("words_per_turn"))
+	wordsPerTurn, wordsPerTurnInvalid := api.ParseWordsPerTurn(handler.cfg, request.Form.Get("words_per_turn"))
+
+	if wordsPerTurn < customWordsPerTurn {
+		wordsPerTurnInvalid = errors.New("words per turn must be greater than or equal to custom words per turn")
+	}
 
 	var lowercaser cases.Caser
 	if languageInvalid != nil {
@@ -218,7 +223,8 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 			ScoreCalculation:   request.Form.Get("score_calculation"),
 			WordsPerTurn:       request.Form.Get("words_per_turn"),
 		},
-		Languages: game.SupportedLanguages,
+		Languages:         game.SupportedLanguages,
+		ScoreCalculations: game.SupportedScoreCalculations,
 	}
 
 	if scoreCalculationInvalid != nil {

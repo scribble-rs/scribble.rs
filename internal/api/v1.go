@@ -118,10 +118,14 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 	drawingTime, drawingTimeInvalid := ParseDrawingTime(handler.cfg, request.Form.Get("drawing_time"))
 	rounds, roundsInvalid := ParseRounds(handler.cfg, request.Form.Get("rounds"))
 	maxPlayers, maxPlayersInvalid := ParseMaxPlayers(handler.cfg, request.Form.Get("max_players"))
-	customWordsPerTurn, customWordsPerTurnInvalid := ParseCustomWordsPerTurn(request.Form.Get("custom_words_per_turn"))
+	customWordsPerTurn, customWordsPerTurnInvalid := ParseCustomWordsPerTurn(handler.cfg, request.Form.Get("custom_words_per_turn"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(handler.cfg, request.Form.Get("clients_per_ip_limit"))
 	publicLobby, publicLobbyInvalid := ParseBoolean("public", request.Form.Get("public"))
-	wordsPerTurn, wordsPerTurnInvalid := ParseWordsPerTurn(request.Form.Get("words_per_turn"))
+	wordsPerTurn, wordsPerTurnInvalid := ParseWordsPerTurn(handler.cfg, request.Form.Get("words_per_turn"))
+
+	if wordsPerTurn < customWordsPerTurn {
+		wordsPerTurnInvalid = errors.New("words per turn must be greater than or equal to custom words per turn")
+	}
 
 	var lowercaser cases.Caser
 	if languageInvalid != nil {
@@ -371,10 +375,14 @@ func (handler *V1Handler) patchLobby(writer http.ResponseWriter, request *http.R
 	maxPlayers, maxPlayersInvalid := ParseMaxPlayers(handler.cfg, request.Form.Get("max_players"))
 	drawingTime, drawingTimeInvalid := ParseDrawingTime(handler.cfg, request.Form.Get("drawing_time"))
 	rounds, roundsInvalid := ParseRounds(handler.cfg, request.Form.Get("rounds"))
-	customWordsPerTurn, customWordsPerTurnInvalid := ParseCustomWordsPerTurn(request.Form.Get("custom_words_per_turn"))
+	customWordsPerTurn, customWordsPerTurnInvalid := ParseCustomWordsPerTurn(handler.cfg, request.Form.Get("custom_words_per_turn"))
 	clientsPerIPLimit, clientsPerIPLimitInvalid := ParseClientsPerIPLimit(handler.cfg, request.Form.Get("clients_per_ip_limit"))
 	publicLobby, publicLobbyInvalid := ParseBoolean("public", request.Form.Get("public"))
-	wordsPerTurn, wordsPerTurnInvalid := ParseWordsPerTurn(request.Form.Get("words_per_turn"))
+	wordsPerTurn, wordsPerTurnInvalid := ParseWordsPerTurn(handler.cfg, request.Form.Get("words_per_turn"))
+
+	if wordsPerTurn < customWordsPerTurn {
+		wordsPerTurnInvalid = errors.New("words per turn must be greater than or equal to custom words per turn")
+	}
 
 	owner := lobby.GetOwner()
 	if owner == nil || owner.GetUserSession() != userSession {

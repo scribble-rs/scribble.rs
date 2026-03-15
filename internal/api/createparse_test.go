@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/scribble-rs/scribble.rs/internal/config"
+	"github.com/scribble-rs/scribble.rs/internal/game"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
@@ -177,6 +178,13 @@ func Test_parseCustomWords(t *testing.T) {
 func Test_parseCustomWordsPerTurn(t *testing.T) {
 	t.Parallel()
 
+	cfg := &config.Config{
+		LobbySettingBounds: game.SettingBounds{
+			MinCustomWordsPerTurn: 1,
+			MinWordsPerTurn:       1,
+			MaxWordsPerTurn:       3,
+		},
+	}
 	tests := []struct {
 		name    string
 		value   string
@@ -196,7 +204,7 @@ func Test_parseCustomWordsPerTurn(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 
-			got, err := ParseCustomWordsPerTurn(testCase.value)
+			got, err := ParseCustomWordsPerTurn(cfg, testCase.value)
 			if (err != nil) != testCase.wantErr {
 				t.Errorf("parseCustomWordsPerTurn() error = %v, wantErr %v", err, testCase.wantErr)
 				return
@@ -211,6 +219,13 @@ func Test_parseCustomWordsPerTurn(t *testing.T) {
 func Test_parseWordsPerTurn(t *testing.T) {
 	t.Parallel()
 
+	cfg := &config.Config{
+		LobbySettingBounds: game.SettingBounds{
+			MinCustomWordsPerTurn: 1,
+			MinWordsPerTurn:       1,
+			MaxWordsPerTurn:       3,
+		},
+	}
 	tests := []struct {
 		name    string
 		value   string
@@ -228,7 +243,7 @@ func Test_parseWordsPerTurn(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 
-			got, err := ParseWordsPerTurn(testCase.value)
+			got, err := ParseWordsPerTurn(cfg, testCase.value)
 			if (err != nil) != testCase.wantErr {
 				t.Errorf("ParseWordsPerTurn() error = %v, wantErr %v", err, testCase.wantErr)
 				return
