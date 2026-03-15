@@ -200,17 +200,17 @@
                                     <b>{{.Translation.Get "public-lobby-setting"}}</b>
                                     <input id="lobby-settings-public" type="checkbox" name="public" {{if eq
                                             .Public true}}checked{{end}} />
+                                    <b>{{.Translation.Get "words-per-turn-setting"}}</b>
+                                    <input id="lobby-settings-words-per-turn" type="number" name="words_per_turn"
+                                        min="{{.MinWordsPerTurn}}" max="{{.MaxWordsPerTurn}}" value="{{.WordsPerTurn}}" />
                                     <b>{{.Translation.Get "custom-words-per-turn-setting"}}</b>
                                     <input id="lobby-settings-custom-words-per-turn" class="input-item" type="number"
                                         name="custom_words_per_turn" min="{{.MinCustomWordsPerTurn}}"
-                                        max="{{.MaxCustomWordsPerTurn}}" value="{{.CustomWordsPerTurn}}" />
+                                        max="{{.MaxWordsPerTurn}}" value="{{.CustomWordsPerTurn}}" />
                                     <b>{{.Translation.Get "players-per-ip-limit-setting"}}</b>
                                     <input id="lobby-settings-clients-per-ip-limit" type="number"
                                         name="clients_per_ip_limit" min="{{.MinClientsPerIPLimit}}"
                                         max="{{.MaxClientsPerIPLimit}}" value="{{.ClientsPerIPLimit}}" />
-                                    <b>{{.Translation.Get "words-per-turn-setting"}}</b>
-                                    <input id="lobby-settings-words-per-turn" type="number"
-                                        name="words_per_turn" min="{{.MinWordsPerTurn}}" value="{{.WordsPerTurn}}" />
                                 </div>
                             </div>
                             <div class="button-bar">

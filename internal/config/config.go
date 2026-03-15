@@ -99,7 +99,7 @@ var Default = Config{
 		MinClientsPerIPLimit:  1,
 		MaxClientsPerIPLimit:  24,
 		MinCustomWordsPerTurn: 1,
-		MaxCustomWordsPerTurn: 3,
+		MaxWordsPerTurn:       6,
 		MinWordsPerTurn:       1,
 	},
 	CORS: CORS{

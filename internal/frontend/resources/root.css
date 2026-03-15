@@ -25,25 +25,29 @@
 
 html,
 body {
-    height: 100vh;
+    min-height: 100vh;
 }
 
 body,
 body::backdrop,
 body:fullscreen {
     margin: 0;
-    background: linear-gradient(90deg, rgba(46, 46, 175, 1) 0%, rgba(37, 79, 191, 1) 42%, rgba(0, 170, 255, 1) 100%);
+    background: linear-gradient(
+        90deg,
+        rgba(46, 46, 175, 1) 0%,
+        rgba(37, 79, 191, 1) 42%,
+        rgba(0, 170, 255, 1) 100%
+    );
 }
 
 body::before {
-    content: ' ';
-    position: absolute;
+    content: " ";
+    position: fixed;
     left: 0;
     top: 0;
     width: 100vw;
     height: 100vh;
-    max-height: 100vh;
-    opacity: 0.50;
+    opacity: 0.5;
     background: var(--scribble-background) repeat;
     background-size: 400px 400px;
     background-repeat: repeat;
@@ -130,8 +134,8 @@ select {
 }
 
 textarea {
-    padding-left: 0.40rem;
-    padding-top: 0.20rem;
+    padding-left: 0.4rem;
+    padding-top: 0.2rem;
     min-width: 0;
     resize: none;
 }
@@ -140,7 +144,6 @@ textarea {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    max-height: 100vh;
 }
 
 .noscript {

@@ -109,12 +109,12 @@ func ParseClientsPerIPLimit(cfg *config.Config, value string) (int, error) {
 // ParseCustomWordsPerTurn checks whether the given value is an integer between
 // 0 and 100. All other invalid input, including empty strings, will return an
 // error.
-func ParseCustomWordsPerTurn(value string) (int, error) {
-	return parseIntValue(value, 1, 3, "custom words per turn")
+func ParseCustomWordsPerTurn(cfg *config.Config, value string) (int, error) {
+	return parseIntValue(value, 1, cfg.LobbySettingBounds.MaxWordsPerTurn, "custom words per turn")
 }
 
-func ParseWordsPerTurn(value string) (int, error) {
-	return parseIntValue(value, 1, -1, "words per turn")
+func ParseWordsPerTurn(cfg *config.Config, value string) (int, error) {
+	return parseIntValue(value, 1, cfg.LobbySettingBounds.MaxWordsPerTurn, "words per turn")
 }
 
 func newIntOutOfBounds(value, valueName string, lower, upper int) error {

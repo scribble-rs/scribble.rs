@@ -336,7 +336,7 @@ function saveLobbySettings() {
                     "lobby-settings-custom-words-per-turn",
                 ).value,
                 words_per_turn: document.getElementById(
-                  "lobby-settings-words-per-turn"
+                    "lobby-settings-words-per-turn",
                 ).value,
             }),
         {
@@ -1170,7 +1170,7 @@ const handleEvent = (parsed) => {
                 "\n" +
                 '{{.Translation.Get "custom-words-per-turn-setting"}}: ' +
                 parsed.data.customWordsPerTurn +
-                "%\n" +
+                "\n" +
                 '{{.Translation.Get "players-per-ip-limit-setting"}}: ' +
                 parsed.data.clientsPerIpLimit +
                 "\n" +
