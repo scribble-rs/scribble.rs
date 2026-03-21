@@ -105,6 +105,7 @@ input,
 button,
 textarea {
     background-color: var(--component-base-color);
+    color: inherit;
     border-radius: var(--component-border-radius);
     border: 2px hidden;
 }
