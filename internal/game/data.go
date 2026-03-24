@@ -36,7 +36,10 @@ type Lobby struct {
 	DrawingTimeNew int
 
 	CustomWords []string
-	words       []string
+	// customWordIndex is used to keep track of the next word to be drawn from
+	// the custom word stack. Only used if exclusive custom word mode is active.
+	customWordIndex int
+	words           []string
 
 	// players references all participants of the Lobby.
 	players []*Player

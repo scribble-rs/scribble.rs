@@ -22,6 +22,10 @@ type LanguageData struct {
 var (
 	ErrUnknownWordList = errors.New("wordlist unknown")
 	WordlistData       = map[string]LanguageData{
+		"custom": {
+			LanguageCode: "en_gb",
+			Lowercaser:   func() cases.Caser { return cases.Lower(language.BritishEnglish) },
+		},
 		"english_gb": {
 			LanguageCode: "en_gb",
 			Lowercaser:   func() cases.Caser { return cases.Lower(language.BritishEnglish) },
@@ -141,6 +145,19 @@ func GetRandomWords(wordCount int, lobby *Lobby) []string {
 // running into a panic on reload.
 func getRandomWords(wordCount int, lobby *Lobby, reloadWords func(lobby *Lobby) ([]string, error)) []string {
 	words := make([]string, wordCount)
+
+	// If we have custom words only, we don't want to pop them off the stack.
+	// We want to keep going in circles, worstcase returning the same word 3 times.
+	if lobby.Wordpack == "custom" && len(lobby.CustomWords) > 0 {
+		for i := range wordCount {
+			if lobby.customWordIndex >= len(lobby.CustomWords) {
+				lobby.customWordIndex = 0
+			}
+			words[i] = lobby.CustomWords[lobby.customWordIndex]
+			lobby.customWordIndex++
+		}
+		return words
+	}
 
 	for customWordsLeft, i := lobby.CustomWordsPerTurn, 0; i < wordCount; i++ {
 		if customWordsLeft > 0 && len(lobby.CustomWords) > 0 {

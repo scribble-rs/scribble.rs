@@ -185,7 +185,8 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 	}
 
 	scoreCalculation, scoreCalculationInvalid := api.ParseScoreCalculation(request.Form.Get("score_calculation"))
-	languageData, languageKey, languageInvalid := api.ParseLanguage(request.Form.Get("language"))
+	languageRawValue := request.Form.Get("language")
+	languageData, languageKey, languageInvalid := api.ParseLanguage(languageRawValue)
 	drawingTime, drawingTimeInvalid := api.ParseDrawingTime(handler.cfg, request.Form.Get("drawing_time"))
 	rounds, roundsInvalid := api.ParseRounds(handler.cfg, request.Form.Get("rounds"))
 	maxPlayers, maxPlayersInvalid := api.ParseMaxPlayers(handler.cfg, request.Form.Get("max_players"))
@@ -247,6 +248,10 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 	}
 	if customWordsPerTurnInvalid != nil {
 		pageData.Errors = append(pageData.Errors, customWordsPerTurnInvalid.Error())
+	} else {
+		if languageRawValue == "custom" && len(customWords) == 0 {
+			pageData.Errors = append(pageData.Errors, "custom words must be provided when using custom language")
+		}
 	}
 	if clientsPerIPLimitInvalid != nil {
 		pageData.Errors = append(pageData.Errors, clientsPerIPLimitInvalid.Error())

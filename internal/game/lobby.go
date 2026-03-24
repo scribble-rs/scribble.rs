@@ -26,6 +26,7 @@ var SupportedScoreCalculations = []string{
 }
 
 var SupportedLanguages = map[string]string{
+	"custom":     "Custom words only",
 	"english_gb": "English (GB)",
 	"english":    "English (US)",
 	"italian":    "Italian",

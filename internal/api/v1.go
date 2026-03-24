@@ -114,7 +114,8 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 	}
 
 	scoreCalculation, scoreCalculationInvalid := ParseScoreCalculation(request.Form.Get("score_calculation"))
-	languageData, languageKey, languageInvalid := ParseLanguage(request.Form.Get("language"))
+	languageRawValue := strings.ToLower(strings.TrimSpace(request.Form.Get("language")))
+	languageData, languageKey, languageInvalid := ParseLanguage(languageRawValue)
 	drawingTime, drawingTimeInvalid := ParseDrawingTime(handler.cfg, request.Form.Get("drawing_time"))
 	rounds, roundsInvalid := ParseRounds(handler.cfg, request.Form.Get("rounds"))
 	maxPlayers, maxPlayersInvalid := ParseMaxPlayers(handler.cfg, request.Form.Get("max_players"))
@@ -133,6 +134,7 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 	} else {
 		lowercaser = languageData.Lowercaser()
 	}
+
 	customWords, customWordsInvalid := ParseCustomWords(lowercaser, request.Form.Get("custom_words"))
 
 	if scoreCalculationInvalid != nil {
@@ -155,6 +157,10 @@ func (handler *V1Handler) postLobby(writer http.ResponseWriter, request *http.Re
 	}
 	if customWordsPerTurnInvalid != nil {
 		requestErrors = append(requestErrors, customWordsPerTurnInvalid.Error())
+	} else {
+		if languageRawValue == "custom" && len(customWords) == 0 {
+			requestErrors = append(requestErrors, "custom words must be provided when using custom language")
+		}
 	}
 	if clientsPerIPLimitInvalid != nil {
 		requestErrors = append(requestErrors, clientsPerIPLimitInvalid.Error())
