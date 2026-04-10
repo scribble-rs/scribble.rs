@@ -127,8 +127,8 @@ func initHebrewTranslation() {
 	translation.put("pencil", "עיפרון")
 	translation.put("eraser", "מחק")
 	translation.put("fill-bucket", "דלי")
-	translation.put("switch-tools-intro", "ניתן להחליך בין הכלים השונים על-ידי שימוש בקיצורים")
-	translation.put("switch-pencil-sizes", "ניתן לעבור בין גדלי העיפרון/מחק השונים על-ידי שימוש בכפתורים %s עד %s")
+	translation.put("switch-pencil-sizes", "גדלי כלים")
+	translation.put("undo-help-message", "ביטול שינוי אחרון")
 
 	// Generic words
 	// "close" as in "closing the window"

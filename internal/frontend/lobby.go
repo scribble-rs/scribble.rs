@@ -18,6 +18,7 @@ type lobbyPageData struct {
 
 	Translation *translations.Translation
 	Locale      string
+	Keys        *keys
 }
 
 type lobbyJsData struct {
@@ -26,6 +27,7 @@ type lobbyJsData struct {
 
 	Translation *translations.Translation
 	Locale      string
+	Keys        *keys
 }
 
 func (handler *SSRHandler) lobbyJs(writer http.ResponseWriter, request *http.Request) {
@@ -35,6 +37,7 @@ func (handler *SSRHandler) lobbyJs(writer http.ResponseWriter, request *http.Req
 		GameConstants:  api.GameConstantsData,
 		Translation:    translation,
 		Locale:         locale,
+		Keys:           &lobbyKeyboardShortcuts,
 	}
 
 	writer.Header().Set("Content-Type", "text/javascript")
@@ -111,6 +114,7 @@ func (handler *SSRHandler) ssrEnterLobbyNoChecks(
 			LobbyData:      api.CreateLobbyData(handler.cfg, lobby),
 			Translation:    translation,
 			Locale:         locale,
+			Keys:           &lobbyKeyboardShortcuts,
 		}
 	})
 

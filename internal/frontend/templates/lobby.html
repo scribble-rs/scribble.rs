@@ -298,7 +298,7 @@
                         <input id="tool-type-pencil" class="custom-check-or-radio line-width-button" type="radio"
                             name="tool-type" checked>
                         <div id="tool-type-pencil-wrapper" class="line-width-button-content">
-                            <img title="{{.Translation.Get "use-pencil"}}" alt="{{.Translation.Get "use-pencil"}}"
+                <img title="{{.Translation.Get "use-pencil"}} ({{.Keys.Pen}})" alt="{{.Translation.Get "use-pencil"}}"
                                 src='{{.RootPath}}/resources/{{.WithCacheBust "pencil.svg"}}'
                                 style="transform: scaleX(-1)" />
                         </div>
@@ -308,7 +308,7 @@
                             name="tool-type">
                         <div id="tool-type-fill-wrapper" class="line-width-button-content">
                             <img alt="{{.Translation.Get "use-fill-bucket"}}"
-                                title="{{.Translation.Get "use-fill-bucket"}}"
+                  title="{{.Translation.Get "use-fill-bucket"}} ({{.Keys.Bucket}})"
                                 src='{{.RootPath}}/resources/{{.WithCacheBust "fill.svg"}}' />
                         </div>
                     </label>
@@ -316,7 +316,7 @@
                         <input id="tool-type-rubber" class="custom-check-or-radio line-width-button" type="radio"
                             name="tool-type">
                         <div id="tool-type-rubber-wrapper" class="line-width-button-content">
-                            <img alt="{{.Translation.Get "use-eraser"}}" title="{{.Translation.Get "use-eraser"}}"
+                <img alt="{{.Translation.Get "use-eraser"}}" title="{{.Translation.Get "use-eraser"}} ({{.Keys.Rubber}})"
                                 src='{{.RootPath}}/resources/{{.WithCacheBust "rubber.svg"}}' />
                         </div>
                     </label>
@@ -327,7 +327,7 @@
                             name="line-width" checked>
                         <div id="size-8-button-wrapper" class="line-width-button-content"
                             alt="{{printf (.Translation.Get "change-pencil-size-to") "8"}}"
-                            title="{{printf (.Translation.Get "change-pencil-size-to") "8"}}">
+                title="{{printf (.Translation.Get "change-pencil-size-to") "8"}} ({{.Keys.Size8}})">
                             <div class="dot" style="width: 8px; height: 8px"></div>
                         </div>
                     </label>
@@ -336,7 +336,7 @@
                             name="line-width">
                         <div id="size-16-button-wrapper" class="line-width-button-content"
                             alt="{{printf (.Translation.Get "change-pencil-size-to") "16"}}"
-                            title="{{printf (.Translation.Get "change-pencil-size-to") "16"}}">
+                title="{{printf (.Translation.Get "change-pencil-size-to") "16"}} ({{.Keys.Size16}})">
                             <div class="dot" style="width: 16px; height: 16px"></div>
                         </div>
                     </label>
@@ -345,7 +345,7 @@
                             name="line-width">
                         <div id="size-24-button-wrapper" class="line-width-button-content"
                             alt="{{printf (.Translation.Get "change-pencil-size-to") "24"}}"
-                            title="{{printf (.Translation.Get "change-pencil-size-to") "24"}}">
+                title="{{printf (.Translation.Get "change-pencil-size-to") "24"}} ({{.Keys.Size24}})">
                             <div class="dot" style="width: 24px; height: 24px"></div>
                         </div>
                     </label>
@@ -354,7 +354,7 @@
                             name="line-width">
                         <div id="size-32-button-wrapper" class="line-width-button-content"
                             alt="{{printf (.Translation.Get "change-pencil-size-to") "32"}}"
-                            title="{{printf (.Translation.Get "change-pencil-size-to") "32"}}">
+                title="{{printf (.Translation.Get "change-pencil-size-to") "32"}} ({{.Keys.Size32}})">
                             <div class="dot" style="width: 32px; height: 32px"></div>
                         </div>
                     </label>
@@ -368,7 +368,7 @@
                 <!--We won't make this button easier to click, as there's no going back. -->
                 <button id="undo-button" class="canvas-button toolbox-group" alt="{{.Translation.Get "undo"}}"
                     title="{{.Translation.Get "undo"}}">
-                    <img alt="{{.Translation.Get "undo"}}" title="{{.Translation.Get "undo"}}"
+                    <img alt="{{.Translation.Get "undo"}}" title="{{.Translation.Get "undo"}} ({{.Keys.UndoModifier}}+{{.Keys.Undo}})"
                         src='{{.RootPath}}/resources/{{.WithCacheBust "undo.svg"}}' />
                 </button>
             </div>

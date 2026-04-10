@@ -128,8 +128,8 @@ func initEnglishTranslation() *Translation {
 	translation.put("pencil", "Pencil")
 	translation.put("eraser", "Eraser")
 	translation.put("fill-bucket", "Fill bucket")
-	translation.put("switch-tools-intro", "You can switch between tools using shortcuts")
-	translation.put("switch-pencil-sizes", "You can also switch between pencil sizes using keys %s to %s.")
+	translation.put("switch-pencil-sizes", "Tool sizes")
+	translation.put("undo-help-message", "Undo")
 
 	// Generic words
 	// "close" as in "closing the window"

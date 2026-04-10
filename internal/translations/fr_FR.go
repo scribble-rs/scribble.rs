@@ -128,7 +128,6 @@ func initFrenchTranslation() *Translation {
 	translation.put("pencil", "Crayon")
 	translation.put("eraser", "Gomme")
 	translation.put("fill-bucket", "Pot de peinture")
-	translation.put("switch-tools-intro", "Vous pouvez changer d'outil à l'aide des raccourcis")
 	translation.put("switch-pencil-sizes", "Vous pouvez aussi changer la taille du crayon avec les touches %s à %s.")
 
 	// Generic words

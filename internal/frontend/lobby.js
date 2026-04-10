@@ -151,7 +151,7 @@ function createDialogButton(text) {
 function createDialogButtonBar(...buttons) {
     const buttonBar = document.createElement("div");
     buttonBar.classList.add("button-bar");
-    buttons.forEach(buttonBar.appendChild);
+    buttons.forEach((button) => buttonBar.appendChild(button));
     return buttonBar;
 }
 
@@ -171,18 +171,19 @@ function showHelpDialog() {
     const controlsLabel = document.createElement("b");
     controlsLabel.innerText = '{{.Translation.Get "controls"}}';
 
-    const controlsTextOne = document.createElement("p");
-    controlsTextOne.innerText = '{{.Translation.Get "switch-tools-intro"}}:';
-
-    const controlsTextTwo = document.createElement("p");
-    controlsTextTwo.innerHTML =
-        '{{.Translation.Get "pencil"}}: <kbd>Q</kbd><br/>' +
-        '{{.Translation.Get "fill-bucket"}}: <kbd>W</kbd><br/>' +
-        '{{.Translation.Get "eraser"}}: <kbd>E</kbd><br/>';
-
-    const controlsTextThree = document.createElement("p");
-    controlsTextThree.innerHTML =
-        '{{printf (.Translation.Get "switch-pencil-sizes") "<kbd>1</kbd>" "<kbd>4</kbd>"}}';
+    const size8Key = {{printf "%q" .Keys.Size8}};
+    const size32Key = {{printf "%q" .Keys.Size32}};
+    const undoModifierKeysString = {{printf "%q" .Keys.UndoModifier}}.split("+").map(k => `<kbd>${k}</kbd>`).join("+");
+    const controlsText = document.createElement("div");
+    controlsText.classList.add("help-controls-grid");
+    controlsText.innerHTML =
+        `
+        <span>{{.Translation.Get "pencil"}}</span><span dir="ltr"><kbd>{{.Keys.Pen}}</kbd></span>
+        <span>{{.Translation.Get "fill-bucket"}}</span><span dir="ltr"><kbd>{{.Keys.Bucket}}</kbd></span>
+        <span>{{.Translation.Get "eraser"}}</span><span dir="ltr"><kbd>{{.Keys.Rubber}}</kbd></span>
+        <span>{{.Translation.Get "undo-help-message"}}</span><span dir="ltr">${undoModifierKeysString}+<kbd>{{.Keys.Undo}}</kbd></span>
+        <span>{{.Translation.Get "switch-pencil-sizes"}}</span><span dir="ltr"><kbd>${size8Key}</kbd>-<kbd>${size32Key}</kbd></span>
+        `;
 
     const closeButton = createDialogButton('{{.Translation.Get "close"}}');
     closeButton.addEventListener("click", () => {
@@ -197,9 +198,7 @@ function showHelpDialog() {
 
     const dialogContent = document.createElement("div");
     dialogContent.appendChild(controlsLabel);
-    dialogContent.appendChild(controlsTextOne);
-    dialogContent.appendChild(controlsTextTwo);
-    dialogContent.appendChild(controlsTextThree);
+    dialogContent.appendChild(controlsText);
     dialogContent.appendChild(footer);
 
     showDialog(
@@ -1890,6 +1889,13 @@ function isAnyDialogVisible() {
     return false;
 }
 
+function getModifierKey(event, modifierKey) {
+    // Split by "+" and ensure every specified modifier property is true on the event.
+    // e.g. "ctrl+shift" checks event.ctrlKey AND event.shiftKey
+    return modifierKey.split("+").every(modifier => event[`${modifier}Key`]);
+}
+
+
 function onKeyDown(event) {
     //Avoid firing actions if the user is in the chat.
     if (document.activeElement instanceof HTMLInputElement) {
@@ -1907,28 +1913,28 @@ function onKeyDown(event) {
     //find it better than having to find specific keys on your
     //keyboard. Especially for people that aren't used to typing
     //without looking at their keyboard, this might help.
-    if (event.key === "q") {
+    if (event.key === {{printf "%q" .Keys.Pen}}) {
         toolButtonPen.click();
         chooseTool(pen);
-    } else if (event.key === "w") {
+    } else if (event.key === {{printf "%q" .Keys.Bucket}}) {
         toolButtonFill.click();
         chooseTool(fillBucket);
-    } else if (event.key === "e") {
+    } else if (event.key === {{printf "%q" .Keys.Rubber}}){
         toolButtonRubber.click();
         chooseTool(rubber);
-    } else if (event.key === "1") {
+    } else if (event.key === {{printf "%q" .Keys.Size8}}) {
         sizeButton8.click();
         setLineWidth(8);
-    } else if (event.key === "2") {
+    } else if (event.key === {{printf "%q" .Keys.Size16}}) {
         sizeButton16.click();
         setLineWidth(16);
-    } else if (event.key === "3") {
+    } else if (event.key === {{printf "%q" .Keys.Size24}}) {
         sizeButton24.click();
         setLineWidth(24);
-    } else if (event.key === "4") {
+    } else if (event.key === {{printf "%q" .Keys.Size32}}) {
         sizeButton32.click();
         setLineWidth(32);
-    } else if (event.key === "z" && event.ctrlKey) {
+    } else if (getModifierKey(event, "{{.Keys.UndoModifier}}") && event.key.toLowerCase() === {{printf "%q" .Keys.Undo }}) {
         undoAndSendEvent();
     }
 }
