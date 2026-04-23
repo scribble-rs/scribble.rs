@@ -24,7 +24,6 @@ func Test_templateLobbyPage(t *testing.T) {
 				GameConstants: api.GameConstantsData,
 			},
 			Translation: translations.DefaultTranslation,
-			Keys:        &lobbyKeyboardShortcuts,
 		})
 	if err != nil {
 		t.Errorf("Error templating: %s", err)
