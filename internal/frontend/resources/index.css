@@ -22,12 +22,26 @@
 
 .home-choice-header {
     display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--nb-black);
 }
 
 .home-choice-title {
-    font-size: 1.25rem;
-    font-weight: bold;
+    font-size: 1.5rem;
+    font-weight: 900;
     flex: 1;
+    color: var(--nb-black);
+    background: var(--nb-yellow);
+    padding: 0.35rem 0.9rem;
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+    box-shadow: var(--nb-shadow-sm);
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    transform: rotate(-1deg);
+    align-self: flex-start;
 }
 
 .home-choice-inner {
@@ -38,12 +52,14 @@
 }
 
 .home-choice {
-    background-color: var(--pane-background);
+    background: var(--nb-card);
     padding: 1.5rem;
-    border-radius: 1.3rem;
+    border-radius: var(--nb-radius);
     overflow: hidden;
     width: min(42.5vw, 35rem);
     height: 59vh;
+    border: var(--nb-border);
+    box-shadow: var(--nb-shadow-lg);
 }
 
 .home {
@@ -241,12 +257,245 @@
 .create-buttons {
     display: flex;
     flex-direction: row;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
 .create-button {
-    height: 2rem;
     flex: 1;
+    padding: 0.7rem 1rem;
+    font-size: 1rem;
+    font-weight: 800;
+    border-radius: var(--nb-radius);
+    border: var(--nb-border);
+    background: var(--nb-card);
+    color: var(--nb-black);
+    cursor: pointer;
+    box-shadow: var(--nb-shadow-sm);
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.08s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-family: inherit;
+}
+
+.create-button:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 0 var(--nb-black);
+    background: var(--nb-lime) !important;
+}
+
+.create-button:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 0 var(--nb-black);
+}
+
+/* "Create PUBLIC lobby" = primary accent (pink), secondary stays white */
+#create-public {
+    background: var(--nb-pink);
+    color: var(--nb-black);
+}
+
+#create-public:hover {
+    background: var(--nb-yellow) !important;
+}
+
+/* Refresh button in the Join-lobby header */
+#refresh-lobby-list-button {
+    padding: 0.4rem 0.9rem;
+    font-weight: 800;
+    border-radius: var(--nb-radius);
+    border: var(--nb-border);
+    background: var(--nb-cyan);
+    color: var(--nb-black);
+    cursor: pointer;
+    box-shadow: var(--nb-shadow-sm);
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.08s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-family: inherit;
+}
+
+#refresh-lobby-list-button:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 0 var(--nb-black);
+    background: var(--nb-lime) !important;
+}
+
+#refresh-lobby-list-button:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 0 var(--nb-black);
+}
+
+/* Form controls inside the create-lobby panel */
+#lobby-create select,
+#lobby-create textarea {
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+    padding: 0.45rem 0.7rem;
+    background: var(--nb-card);
+    box-shadow: var(--nb-shadow-sm);
+    font-weight: 600;
+    font-family: inherit;
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.08s ease;
+}
+
+/* Custom select widget (JS-driven replacement for native <select> popup) */
+.custom-select {
+    position: relative;
+}
+
+/* Keep native <select> in DOM for form submission, but hide it visually */
+.custom-select > select {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    overflow: hidden;
+    clip-path: inset(50%);
+}
+
+.custom-select-button {
+    width: 100%;
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+    padding: 0.45rem 2rem 0.45rem 0.7rem;
+    background: var(--nb-card);
+    box-shadow: var(--nb-shadow-sm);
+    font-weight: 600;
+    font-family: inherit;
+    font-size: 1rem;
+    text-align: left;
+    color: var(--nb-black);
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.08s ease;
+}
+
+.custom-select-button:hover {
+    background: var(--nb-yellow) !important;
+}
+
+.custom-select-button[aria-expanded="true"] {
+    background: var(--nb-yellow);
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 0 var(--nb-black);
+}
+
+.custom-select-label {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.custom-select-chevron {
+    position: absolute;
+    right: 0.6rem;
+    top: 50%;
+    width: 1.1rem;
+    height: 1.1rem;
+    transform: translateY(-50%);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231e2d5c' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-size: contain;
+    transition: transform 0.15s ease;
+}
+
+.custom-select-button[aria-expanded="true"] .custom-select-chevron {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.custom-select-list {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 100;
+    margin: 0;
+    padding: 0.3rem;
+    list-style: none;
+    background: var(--nb-card);
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+    box-shadow: var(--nb-shadow-sm);
+    max-height: 14rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.custom-select-option {
+    padding: 0.45rem 0.7rem;
+    border-radius: calc(var(--nb-radius) - 0.15rem);
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--nb-black);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.custom-select-option:hover {
+    background: var(--nb-cyan);
+}
+
+.custom-select-option.selected {
+    background: var(--nb-yellow);
+}
+
+#lobby-create select:focus,
+#lobby-create textarea:focus,
+#lobby-create input[type="number"]:focus {
+    outline: none;
+    background-color: var(--nb-yellow);
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 0 var(--nb-black);
+}
+
+.lobby-create-label {
+    font-weight: 800;
+    color: var(--nb-black);
+    align-self: center;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+}
+
+/* Chunky +/- number stepper */
+.number-input {
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+    overflow: hidden;
+    background: var(--nb-card);
+    box-shadow: var(--nb-shadow-sm);
+}
+
+.number-input > button {
+    width: 2rem !important;
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: var(--nb-black);
+    background: var(--nb-card);
+    cursor: pointer;
+    transition: background 0.08s ease;
+    font-family: inherit;
+    border-radius: 0;
+}
+
+.number-input > button:hover {
+    background: var(--nb-lime) !important;
+}
+
+.number-input > input {
+    text-align: center;
+    font-weight: 700;
+    border: none;
+    border-radius: 0;
+    background: var(--nb-card);
+    font-family: inherit;
 }
 
 .number-input {

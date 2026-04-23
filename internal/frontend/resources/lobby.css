@@ -254,14 +254,30 @@ kbd {
     /* A dialog should never fully hide the canvas. */
     max-width: 80%;
     max-height: 80%;
-    background-color: rgb(225, 221, 221);
-    padding: 1rem;
+    background: var(--nb-card);
+    padding: 1.5rem 1.75rem 1.25rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    border-radius: var(--component-border-radius);
+    border-radius: var(--nb-radius);
+    border: var(--nb-border);
+    box-shadow: var(--nb-shadow-lg);
+    animation: dialog-pop 0.18s ease-out;
+}
+
+@keyframes dialog-pop {
+    0% {
+        opacity: 0;
+        transform: translate(-6px, -6px);
+        box-shadow: 0 0 0 0 var(--nb-black);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(0, 0);
+        box-shadow: var(--nb-shadow-lg);
+    }
 }
 
 .center-dialog-content {
@@ -270,6 +286,21 @@ kbd {
     width: 100%;
     justify-content: center;
     display: flex;
+    /* breathing room so hover-translated buttons/shadows aren't clipped */
+    padding: 5px;
+    box-sizing: border-box;
+}
+
+/* Hide the browser's native number-input spinners inside dialogs so they
+   don't break the brutalist look. Users can still use keyboard/wheel. */
+.center-dialog input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+.center-dialog input[type="number"]::-webkit-inner-spin-button,
+.center-dialog input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 #chat {
@@ -327,11 +358,20 @@ kbd {
 }
 
 .dialog-title {
-    margin-bottom: 1rem;
-    font-size: 2.75rem;
-    font-weight: bold;
-    color: rgb(240, 105, 127);
+    margin: 0 0 1rem;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--nb-black);
     text-align: center;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    text-transform: uppercase;
+    background: var(--nb-yellow);
+    padding: 0.4rem 1rem;
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+    box-shadow: var(--nb-shadow-sm);
+    transform: rotate(-1deg);
 }
 
 #word-button-container {
@@ -339,8 +379,39 @@ kbd {
     grid-template-columns: repeat(3, 1fr);
     margin-left: 20px;
     margin-right: 20px;
-    gap: 0.5rem;
+    gap: 0.9rem;
     align-self: stretch;
+    padding-bottom: 0.5rem;
+}
+
+/* Word-choice buttons: neobrutalist chunky cards */
+#word-button-container > button {
+    background: var(--nb-card);
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+    padding: 0.9rem 1rem;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--nb-black);
+    cursor: pointer;
+    box-shadow: var(--nb-shadow-sm);
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.08s ease;
+    text-transform: capitalize;
+    font-family: inherit;
+}
+
+#word-button-container > button:nth-child(3n+1):hover { background: var(--nb-pink) !important; }
+#word-button-container > button:nth-child(3n+2):hover { background: var(--nb-lime) !important; }
+#word-button-container > button:nth-child(3n):hover   { background: var(--nb-cyan) !important; }
+
+#word-button-container > button:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 0 var(--nb-black);
+}
+
+#word-button-container > button:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 0 var(--nb-black);
 }
 
 @media only screen and (max-width: 600px) {
@@ -349,18 +420,126 @@ kbd {
     }
 }
 
-.dialog-button {
-    border: none;
-    background-color: var(--component-base-color);
-    padding: 0.5rem 1rem 0.5rem 1rem;
+/* Dialog buttons: scoped to .center-dialog so the burger menu
+   (which also uses .dialog-button) stays untouched. */
+.center-dialog .dialog-button {
+    border: var(--nb-border);
+    background: var(--nb-card);
+    padding: 0.55rem 1.2rem;
+    font-weight: 800;
+    font-size: 1rem;
+    border-radius: var(--nb-radius);
+    color: var(--nb-black);
+    cursor: pointer;
+    box-shadow: var(--nb-shadow-sm);
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.08s ease;
+    font-family: inherit;
+}
+
+.center-dialog .dialog-button:hover {
+    background: var(--nb-pink) !important;
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 0 var(--nb-black);
+}
+
+.center-dialog .dialog-button:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 0 var(--nb-black) !important;
+    background: var(--nb-pink-deep) !important;
+    color: var(--nb-black);
+}
+
+/* Primary call-to-action variant (force-start, force-restart, save) */
+.center-dialog #force-start-button,
+.center-dialog #force-restart-button,
+.center-dialog #lobby-settings-save-button,
+.center-dialog #namechange-button,
+.center-dialog #namechange-button-start-dialog {
+    background: var(--nb-pink) !important;
+    color: var(--nb-black);
+}
+
+.center-dialog #force-start-button:hover,
+.center-dialog #force-restart-button:hover,
+.center-dialog #lobby-settings-save-button:hover,
+.center-dialog #namechange-button:hover,
+.center-dialog #namechange-button-start-dialog:hover {
+    background: var(--nb-lime) !important;
 }
 
 .button-bar {
     display: flex;
     align-items: stretch;
     justify-content: center;
-    margin-top: 1em;
-    gap: 0.25rem;
+    margin-top: 1.1rem;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+/* Ready checkbox: chunky brutalist block */
+.ready-check-box {
+    padding: 0.55rem 1.1rem !important;
+    border-radius: var(--nb-radius) !important;
+    font-weight: 800;
+    background: var(--nb-card);
+    border: var(--nb-border);
+    box-shadow: var(--nb-shadow-sm);
+    cursor: pointer;
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.08s ease;
+    user-select: none;
+    font-family: inherit;
+}
+
+.ready-check-box:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 0 var(--nb-black);
+    background: var(--nb-cyan);
+}
+
+.ready-check-box:has(input[type="checkbox"]:checked) {
+    background-color: var(--nb-yellow) !important;
+}
+
+/* Inputs inside dialogs */
+.center-dialog input[type="text"],
+.center-dialog input[type="number"],
+.center-dialog .namechange-field {
+    border: var(--nb-border);
+    border-radius: var(--nb-radius);
+    padding: 0.45rem 0.8rem;
+    font-size: 1rem;
+    background: var(--nb-card);
+    box-shadow: var(--nb-shadow-sm);
+    font-weight: 700;
+    font-family: inherit;
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.center-dialog input[type="text"]:focus,
+.center-dialog input[type="number"]:focus,
+.center-dialog .namechange-field:focus {
+    outline: none;
+    background: var(--nb-yellow);
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 0 var(--nb-black);
+}
+
+/* "Waiting for word selection" dialog: pulsing neobrutalist dot */
+#waitchoose-dialog .center-dialog-content::after {
+    content: "";
+    display: inline-block;
+    width: 0.75rem;
+    height: 0.75rem;
+    margin-left: 0.5rem;
+    background: var(--nb-pink);
+    border: 2px solid var(--nb-black);
+    animation: waitchoose-pulse 1s steps(2, end) infinite;
+    align-self: center;
+}
+
+@keyframes waitchoose-pulse {
+    0%, 100% { background: var(--nb-pink); }
+    50% { background: var(--nb-lime); }
 }
 
 .line-width-button-content:hover {

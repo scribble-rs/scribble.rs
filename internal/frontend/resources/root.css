@@ -7,6 +7,25 @@
     --component-active-background: rgb(192, 58, 200);
     --component-border-radius: 0.5rem;
 
+    /* Neobrutalism tokens - softened to match the app's blue mood */
+    --nb-black: #1e2d5c;               /* deep navy from the body gradient */
+    --nb-border: 2px solid var(--nb-black);
+    --nb-radius: 0.6rem;
+    --nb-shadow: 4px 4px 0 0 var(--nb-black);
+    --nb-shadow-lg: 6px 6px 0 0 var(--nb-black);
+    --nb-shadow-sm: 3px 3px 0 0 var(--nb-black);
+    --nb-shadow-hover: 2px 2px 0 0 var(--nb-black);
+    --nb-surface: #eaf2ff;
+    --nb-card: #eaf2ff;                /* soft baby blue card */
+    --nb-card-2: #d6e6ff;              /* slightly deeper for contrast */
+    --nb-pink: #ff9ac8;
+    --nb-pink-deep: #ff6fb0;
+    --nb-yellow: #ffe880;
+    --nb-lime: #c8f585;
+    --nb-cyan: #9ceeff;
+    --nb-purple: #cfa0ff;
+    --nb-coral: #ffa482;
+
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
 

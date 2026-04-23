@@ -1,6 +1,128 @@
 const discordInstanceId = getCookie("discord-instance-id");
 const rootPath = `${discordInstanceId ? ".proxy/" : ""}{{.RootPath}}`;
 
+// Replace native <select> dropdowns with a custom styled widget. The original
+// <select> stays in the DOM (hidden) so form submission keeps working.
+(function initCustomSelects() {
+    const selects = document.querySelectorAll("#lobby-create select");
+    selects.forEach(enhanceSelect);
+
+    function enhanceSelect(select) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "custom-select";
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "custom-select-button";
+        button.setAttribute("aria-haspopup", "listbox");
+        button.setAttribute("aria-expanded", "false");
+
+        const label = document.createElement("span");
+        label.className = "custom-select-label";
+        button.appendChild(label);
+
+        const chevron = document.createElement("span");
+        chevron.className = "custom-select-chevron";
+        chevron.setAttribute("aria-hidden", "true");
+        button.appendChild(chevron);
+
+        const list = document.createElement("ul");
+        list.className = "custom-select-list";
+        list.setAttribute("role", "listbox");
+        list.hidden = true;
+
+        Array.from(select.options).forEach((opt) => {
+            const li = document.createElement("li");
+            li.className = "custom-select-option";
+            li.setAttribute("role", "option");
+            li.dataset.value = opt.value;
+            li.textContent = opt.label || opt.text;
+            if (opt.title) li.title = opt.title;
+            if (opt.selected) li.classList.add("selected");
+            li.addEventListener("click", () => {
+                selectValue(opt.value);
+                closeList();
+                button.focus();
+            });
+            list.appendChild(li);
+        });
+
+        function updateLabel() {
+            const selected = select.options[select.selectedIndex];
+            label.textContent = selected
+                ? selected.label || selected.text
+                : "";
+        }
+
+        function selectValue(value) {
+            select.value = value;
+            select.dispatchEvent(new Event("change", { bubbles: true }));
+            updateLabel();
+            list.querySelectorAll(".custom-select-option").forEach((li) => {
+                li.classList.toggle("selected", li.dataset.value === value);
+            });
+        }
+
+        function openList() {
+            list.hidden = false;
+            button.setAttribute("aria-expanded", "true");
+            const selectedLi = list.querySelector(
+                ".custom-select-option.selected",
+            );
+            if (selectedLi)
+                selectedLi.scrollIntoView({ block: "nearest" });
+            document.addEventListener("mousedown", onOutside, true);
+            document.addEventListener("keydown", onKey, true);
+        }
+
+        function closeList() {
+            list.hidden = true;
+            button.setAttribute("aria-expanded", "false");
+            document.removeEventListener("mousedown", onOutside, true);
+            document.removeEventListener("keydown", onKey, true);
+        }
+
+        function onOutside(e) {
+            if (!wrapper.contains(e.target)) closeList();
+        }
+
+        function onKey(e) {
+            if (e.key === "Escape") {
+                closeList();
+                button.focus();
+                return;
+            }
+            if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                e.preventDefault();
+                const items = Array.from(
+                    list.querySelectorAll(".custom-select-option"),
+                );
+                const currentIdx = items.findIndex((li) =>
+                    li.classList.contains("selected"),
+                );
+                const nextIdx =
+                    e.key === "ArrowDown"
+                        ? Math.min(items.length - 1, currentIdx + 1)
+                        : Math.max(0, currentIdx - 1);
+                selectValue(items[nextIdx].dataset.value);
+                items[nextIdx].scrollIntoView({ block: "nearest" });
+            }
+        }
+
+        button.addEventListener("click", () => {
+            if (list.hidden) openList();
+            else closeList();
+        });
+
+        updateLabel();
+
+        select.parentNode.insertBefore(wrapper, select);
+        wrapper.appendChild(select);
+        wrapper.appendChild(button);
+        wrapper.appendChild(list);
+    }
+})();
+
 Array.from(document.getElementsByClassName("number-input")).forEach(
     (number_input) => {
         const input = number_input.children.item(1);
