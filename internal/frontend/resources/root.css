@@ -1,10 +1,10 @@
 :root {
     --pane-background: #eee5e9;
     --component-base-color: #ffffff;
-    --component-hover-background: rgb(250, 211, 252) !important;
-    --component-hover-lighter-background: rgb(252, 231, 253) !important;
-    --component-focus-background: rgb(244, 183, 247);
-    --component-active-background: rgb(192, 58, 200);
+    --component-hover-background: #dde4f2 !important;
+    --component-hover-lighter-background: #ecf0f9 !important;
+    --component-focus-background: #c4cfe9;
+    --component-active-background: #8195d2;
     --component-border-radius: 0.5rem;
 
     /* Neobrutalism tokens - softened to match the app's blue mood */
