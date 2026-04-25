@@ -1,9 +1,12 @@
+import KeyboardManager from "./resources/keyboardManager.js"
+
 String.prototype.format = function () {
     return [...arguments].reduce((p, c) => p.replace(/%s/, c), this);
 };
 
 const discordInstanceId = getCookie("discord-instance-id");
 const rootPath = `${discordInstanceId ? ".proxy/" : ""}{{.RootPath}}`;
+const keyboardManager = new KeyboardManager();
 
 let socketIsConnecting = false;
 let hasSocketEverConnected = false;
@@ -151,7 +154,7 @@ function createDialogButton(text) {
 function createDialogButtonBar(...buttons) {
     const buttonBar = document.createElement("div");
     buttonBar.classList.add("button-bar");
-    buttons.forEach(buttonBar.appendChild);
+    buttons.forEach((button) => buttonBar.appendChild(button));
     return buttonBar;
 }
 
@@ -171,18 +174,17 @@ function showHelpDialog() {
     const controlsLabel = document.createElement("b");
     controlsLabel.innerText = '{{.Translation.Get "controls"}}';
 
-    const controlsTextOne = document.createElement("p");
-    controlsTextOne.innerText = '{{.Translation.Get "switch-tools-intro"}}:';
-
-    const controlsTextTwo = document.createElement("p");
-    controlsTextTwo.innerHTML =
-        '{{.Translation.Get "pencil"}}: <kbd>Q</kbd><br/>' +
-        '{{.Translation.Get "fill-bucket"}}: <kbd>W</kbd><br/>' +
-        '{{.Translation.Get "eraser"}}: <kbd>E</kbd><br/>';
-
-    const controlsTextThree = document.createElement("p");
-    controlsTextThree.innerHTML =
-        '{{printf (.Translation.Get "switch-pencil-sizes") "<kbd>1</kbd>" "<kbd>4</kbd>"}}';
+    const undoModifierKeysString = keyboardManager.get("undoModifier").split("+").map(k => `<kbd>${k}</kbd>`).join("+");
+    const controlsText = document.createElement("div");
+    controlsText.classList.add("help-controls-grid");
+    controlsText.innerHTML =
+        `
+        <span>{{.Translation.Get "pencil"}}</span><span dir="ltr"><kbd>${keyboardManager.get("pen")}</kbd></span>
+        <span>{{.Translation.Get "fill-bucket"}}</span><span dir="ltr"><kbd>${keyboardManager.get("bucket")}</kbd></span>
+        <span>{{.Translation.Get "eraser"}}</span><span dir="ltr"><kbd>${keyboardManager.get("rubber")}</kbd></span>
+        <span>{{.Translation.Get "undo-help-message"}}</span><span dir="ltr">${undoModifierKeysString}+<kbd>${keyboardManager.get("undo")}</kbd></span>
+        <span>{{.Translation.Get "switch-pencil-sizes"}}</span><span dir="ltr"><kbd>${keyboardManager.get("size8")}</kbd>-<kbd>${keyboardManager.get("size32")}</kbd></span>
+        `;
 
     const closeButton = createDialogButton('{{.Translation.Get "close"}}');
     closeButton.addEventListener("click", () => {
@@ -197,9 +199,7 @@ function showHelpDialog() {
 
     const dialogContent = document.createElement("div");
     dialogContent.appendChild(controlsLabel);
-    dialogContent.appendChild(controlsTextOne);
-    dialogContent.appendChild(controlsTextTwo);
-    dialogContent.appendChild(controlsTextThree);
+    dialogContent.appendChild(controlsText);
     dialogContent.appendChild(footer);
 
     showDialog(
@@ -452,6 +452,22 @@ const toolButtonPen = document.getElementById("tool-type-pencil");
 const toolButtonRubber = document.getElementById("tool-type-rubber");
 const toolButtonFill = document.getElementById("tool-type-fill");
 
+const pencilImage = document.getElementById("use-pencil-button-image"); 
+const eraserImage = document.getElementById("use-eraser-button-image"); 
+const bucketImage = document.getElementById("use-fill-bucket-button-image"); 
+const undoImage = document.getElementById("undo-button-image"); 
+const size8buttonWrapper = document.getElementById("size-8-button-wrapper");
+const size16buttonWrapper = document.getElementById("size-16-button-wrapper");
+const size24buttonWrapper = document.getElementById("size-24-button-wrapper");
+const size32buttonWrapper = document.getElementById("size-32-button-wrapper");
+
+
+pencilImage.setAttribute("title", `${pencilImage.getAttribute("title")} (${keyboardManager.get("pencil")})`);
+eraserImage.setAttribute("title", `${eraserImage.getAttribute("title")} (${keyboardManager.get("rubber")})`);
+bucketImage.setAttribute("title", `${bucketImage.getAttribute("title")} (${keyboardManager.get("bucket")})`);
+undoImage.setAttribute("title", `${undoImage.getAttribute("title")} (${keyboardManager.get("undoModifier")}+${keyboardManager.get("undo")})`);
+
+
 if (sizeButton8.checked) {
     setLineWidthNoUpdate(8);
 } else if (sizeButton16.checked) {
@@ -516,34 +532,19 @@ function setLineWidth(value) {
     setLineWidthNoUpdate(value);
     updateDrawingStateUI();
 }
+
 sizeButton8.addEventListener("change", () => setLineWidth(8));
-document
-    .getElementById("size-8-button-wrapper")
-    .addEventListener("mouseup", sizeButton8.click);
-document
-    .getElementById("size-8-button-wrapper")
-    .addEventListener("mousedown", sizeButton8.click);
+size8buttonWrapper.addEventListener("mouseup", sizeButton8.click);
+size8buttonWrapper.addEventListener("mousedown", sizeButton8.click);
 sizeButton16.addEventListener("change", () => setLineWidth(16));
-document
-    .getElementById("size-16-button-wrapper")
-    .addEventListener("mouseup", sizeButton16.click);
-document
-    .getElementById("size-16-button-wrapper")
-    .addEventListener("mousedown", sizeButton16.click);
+size16buttonWrapper.addEventListener("mouseup", sizeButton16.click);
+size16buttonWrapper.addEventListener("mousedown", sizeButton16.click);
 sizeButton24.addEventListener("change", () => setLineWidth(24));
-document
-    .getElementById("size-24-button-wrapper")
-    .addEventListener("mouseup", sizeButton24.click);
-document
-    .getElementById("size-24-button-wrapper")
-    .addEventListener("mousedown", sizeButton24.click);
+size24buttonWrapper.addEventListener("mouseup", sizeButton24.click);
+size24buttonWrapper.addEventListener("mousedown", sizeButton24.click);
 sizeButton32.addEventListener("change", () => setLineWidth(32));
-document
-    .getElementById("size-32-button-wrapper")
-    .addEventListener("mouseup", sizeButton32.click);
-document
-    .getElementById("size-32-button-wrapper")
-    .addEventListener("mousedown", sizeButton32.click);
+size32buttonWrapper.addEventListener("mouseup", sizeButton32.click);
+size32buttonWrapper.addEventListener("mousedown", sizeButton32.click);
 
 function setLineWidthNoUpdate(value) {
     localLineWidth = value;
@@ -1890,6 +1891,13 @@ function isAnyDialogVisible() {
     return false;
 }
 
+function getModifierKey(event, modifierKey) {
+    // Split by "+" and ensure every specified modifier property is true on the event.
+    // e.g. "ctrl+shift" checks event.ctrlKey AND event.shiftKey
+    return modifierKey.split("+").every(modifier => event[`${modifier}Key`]);
+}
+
+
 function onKeyDown(event) {
     //Avoid firing actions if the user is in the chat.
     if (document.activeElement instanceof HTMLInputElement) {
@@ -1907,28 +1915,28 @@ function onKeyDown(event) {
     //find it better than having to find specific keys on your
     //keyboard. Especially for people that aren't used to typing
     //without looking at their keyboard, this might help.
-    if (event.key === "q") {
+    if (event.key === keyboardManager.get("pen")) {
         toolButtonPen.click();
         chooseTool(pen);
-    } else if (event.key === "w") {
+    } else if (event.key === keyboardManager.get("bucket")) {
         toolButtonFill.click();
         chooseTool(fillBucket);
-    } else if (event.key === "e") {
+    } else if (event.key === keyboardManager.get("rubber")){
         toolButtonRubber.click();
         chooseTool(rubber);
-    } else if (event.key === "1") {
+    } else if (event.key === keyboardManager.get("size8")) {
         sizeButton8.click();
         setLineWidth(8);
-    } else if (event.key === "2") {
+    } else if (event.key === keyboardManager.get("size16")) {
         sizeButton16.click();
         setLineWidth(16);
-    } else if (event.key === "3") {
+    } else if (event.key === keyboardManager.get("size24")) {
         sizeButton24.click();
         setLineWidth(24);
-    } else if (event.key === "4") {
+    } else if (event.key === keyboardManager.get("size32")) {
         sizeButton32.click();
         setLineWidth(32);
-    } else if (event.key === "z" && event.ctrlKey) {
+    } else if (getModifierKey(event, keyboardManager.get("undoModifier")) && event.key.toLowerCase() === keyboardManager.get("undo")) {
         undoAndSendEvent();
     }
 }
