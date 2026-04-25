@@ -76,7 +76,7 @@ func initHebrewTranslation() {
 	translation.put("create-private-lobby", "לובי פרטי")
 	translation.put("no-lobbies-yet", "אין לובים")
 	translation.put("lobby-full", "הלובי מלא")
-	translation.put("lobby-ip-limit-excceeded", "עברת את מקבלת החיבורים עבור כתובת IP")
+	translation.put("lobby-ip-limit-excceeded", "עברת את מגבלת החיבורים עבור כתובת IP")
 	translation.put("lobby-open-tab-exists", "נראה שכבר פתחת את לובי זה בלשונית אחרת")
 	translation.put("lobby-doesnt-exist", "הלובי המבוקש אינו קיים")
 
