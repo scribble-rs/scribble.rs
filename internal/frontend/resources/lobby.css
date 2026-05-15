@@ -47,10 +47,10 @@ kbd {
     display: inline-block;
     font-size: 0.85em;
     font-weight: 700;
-    line-height: 1;
     vertical-align: middle;
     padding: 2px 4px;
     white-space: nowrap;
+    width: fit-content;
 }
 
 @media only screen and (max-width: 812px),
@@ -810,4 +810,15 @@ kbd {
     flex-direction: row;
     gap: 10px;
     font-size: 1rem !important;
+}
+
+#help-dialog {
+  width: 16%;
+}
+
+.help-controls-grid {
+    display: grid;
+    grid-template-columns: max-content auto;
+    gap: 0.25rem 1rem;
+    margin-top: 0.5rem;
 }

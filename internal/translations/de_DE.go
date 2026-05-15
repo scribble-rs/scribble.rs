@@ -110,7 +110,6 @@ func initGermanTranslation() {
 	translation.put("pencil", "Stift")
 	translation.put("eraser", "Radiergummi")
 	translation.put("fill-bucket", "Fülleimer")
-	translation.put("switch-tools-intro", "Zwischen den Werkzeugen kannst du mit Tastaturkürzel wechseln")
 	translation.put("switch-pencil-sizes", "Die Stiftgröße kannst du mit den Tasten %s bis %s verändern.")
 
 	// Generic words

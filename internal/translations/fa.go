@@ -127,7 +127,6 @@ func initPersianTranslation() *Translation {
 	translation.put("pencil", "قلم")
 	translation.put("eraser", "پاک‌کن")
 	translation.put("fill-bucket", "سطل رنگ")
-	translation.put("switch-tools-intro", "شما می‌تونید ابزارها رو با استفاده از کلیدای میانبر عوض کنید")
 	translation.put("switch-pencil-sizes", "همچنین می‌تونید اندازه قلم رو با کلیدای %s تا %s عوض کنید.")
 
 	// Generic words

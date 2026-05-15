@@ -109,7 +109,6 @@ func initPolishTranslation() {
 	translation.put("pencil", "Ołówek")
 	translation.put("eraser", "Gumka")
 	translation.put("fill-bucket", "Wiadro")
-	translation.put("switch-tools-intro", "Możesz przełączać się pomiędzy narzędziami za pomocą skrótów")
 	translation.put("switch-pencil-sizes", "Możesz też zmieniać rozmiary ołówka używają klawiszy %s do %s.")
 
 	// Generic words

@@ -116,7 +116,6 @@ func initSpainTranslation() {
 	translation.put("pencil", "Lápiz")
 	translation.put("eraser", "Borrador")
 	translation.put("fill-bucket", "Llenar el cubo")
-	translation.put("switch-tools-intro", "Puede cambiar entre herramientas mediante atajos")
 	translation.put("switch-pencil-sizes", "También puedes cambiar entre tamaños de lápiz usando teclas %s para %s.")
 
 	// Generic words

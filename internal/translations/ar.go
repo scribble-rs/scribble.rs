@@ -117,7 +117,6 @@ func initArabicTranslation() *Translation {
 	translation.put("pencil", "القلم")
 	translation.put("eraser", "الممحاة")
 	translation.put("fill-bucket", "الملء بالدلو")
-	translation.put("switch-tools-intro", "يمكنك التحويل بين الأدوات بواسطة الاختصارات")
 	translation.put("switch-pencil-sizes", "يمكنك التغيير بين احجام القلم من %s إلى %s.")
 
 	// Generic words
