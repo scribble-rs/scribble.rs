@@ -312,13 +312,14 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 
 			sender.State = Standby
 
-			lobby.Broadcast(&Event{Type: EventTypeCorrectGuess, Data: sender.ID})
+			// Send event, so that even in case of advancement, the clients get the chance
+			// to play the sound and display infos in chat.
+			lobby.broadcastConditional(&Event{Type: EventTypeCorrectGuess, Data: sender.ID}, ExcludePlayer(sender))
+			_ = lobby.WriteObject(sender, Event{Type: EventTypeCorrectGuessSelf, Data: lobby.wordHintsShown})
 
 			if !lobby.isAnyoneStillGuessing() {
 				advanceLobby(lobby)
 			} else {
-				// Since the word has been guessed correctly, we reveal it.
-				_ = lobby.WriteObject(sender, Event{Type: EventTypeUpdateWordHint, Data: lobby.wordHintsShown})
 				recalculateRanks(lobby)
 				lobby.Broadcast(&Event{Type: EventTypeUpdatePlayers, Data: lobby.players})
 			}

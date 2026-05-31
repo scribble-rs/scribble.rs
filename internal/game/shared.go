@@ -23,10 +23,14 @@ const (
 
 // Events that are outgoing only.
 const (
-	EventTypeUpdatePlayers            = "update-players"
-	EventTypeUpdateWordHint           = "update-wordhint"
-	EventTypeWordChosen               = "word-chosen"
-	EventTypeCorrectGuess             = "correct-guess"
+	EventTypeUpdatePlayers  = "update-players"
+	EventTypeUpdateWordHint = "update-wordhint"
+	EventTypeWordChosen     = "word-chosen"
+	// EventTypeCloseGuess shows all players, except the affected player, there has been a correct guess.
+	EventTypeCorrectGuess = "correct-guess"
+	// EventTypeCorrectGuessSelf shows the affected player that they have guessed correctly.
+	// Also includes wordHints for displaying the word at the top.
+	EventTypeCorrectGuessSelf         = "correct-guess-self"
 	EventTypeCloseGuess               = "close-guess"
 	EventTypeSystemMessage            = "system-message"
 	EventTypeNonGuessingPlayerMessage = "non-guessing-player-message"

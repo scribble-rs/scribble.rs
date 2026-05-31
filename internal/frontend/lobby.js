@@ -966,26 +966,29 @@ const handleEvent = (parsed) => {
         if (parsed.data.playerId === drawerID) {
             waitChooseDrawerSpan.innerText = parsed.data.playerName;
         }
-    } else if (parsed.type === "correct-guess") {
+    } else if (parsed.type === "correct-guess-self") {
         playWav('{{.RootPath}}/resources/{{.WithCacheBust "plop.wav"}}');
 
-        if (parsed.data === ownID) {
+        wordDialog.style.visibility = "hidden";
+        waitChooseDialog.style.visibility = "hidden";
+        applyWordHints(parsed.data);
+
+        appendMessage(
+            "correct-guess-message",
+            null,
+            `{{.Translation.Get "correct-guess"}}`,
+        );
+    } else if (parsed.type === "correct-guess") {
+        playWav('{{.RootPath}}/resources/{{.WithCacheBust "plop.wav"}}');
+        const player = getCachedPlayer(parsed.data);
+        if (player !== null) {
             appendMessage(
-                "correct-guess-message",
+                "correct-guess-message-other-player",
                 null,
-                `{{.Translation.Get "correct-guess"}}`,
+                `{{.Translation.Get "correct-guess-other-player"}}`.format(
+                    player.name,
+                ),
             );
-        } else {
-            const player = getCachedPlayer(parsed.data);
-            if (player !== null) {
-                appendMessage(
-                    "correct-guess-message-other-player",
-                    null,
-                    `{{.Translation.Get "correct-guess-other-player"}}`.format(
-                        player.name,
-                    ),
-                );
-            }
         }
     } else if (parsed.type === "close-guess") {
         appendMessage(
@@ -997,6 +1000,10 @@ const handleEvent = (parsed) => {
         wordDialog.style.visibility = "hidden";
         waitChooseDialog.style.visibility = "hidden";
         applyWordHints(parsed.data);
+
+        // What it does:
+        // 1. Show new word hints when they come in.
+        // 2. Show new word hints for other players, if even you are already done guessing
 
         // We don't do this in applyWordHints because that's called in all kinds of places
         if (parsed.data.some((hint) => hint.character)) {
