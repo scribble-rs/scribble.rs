@@ -184,7 +184,7 @@ const set_lobbies = (lobbies, visible) => {
         const join_button = document.createElement("button");
         join_button.className = "join-button";
         join_button.innerText = '{{.Translation.Get "join"}}';
-        join_button.addEventListener("click", (event) => {
+        join_button.addEventListener("click", () => {
             window.location.href = `{{.RootPath}}/lobby/${lobby.lobbyId}`;
         });
 
@@ -230,15 +230,6 @@ refresh_lobby_list();
 document
     .getElementById("refresh-lobby-list-button")
     .addEventListener("click", refresh_lobby_list);
-
-function getCookie(name) {
-    let cookie = {};
-    document.cookie.split(";").forEach(function (el) {
-        let split = el.split("=");
-        cookie[split[0].trim()] = split.slice(1).join("=");
-    });
-    return cookie[name];
-}
 
 // Makes sure, that navigating back after creating a lobby also shows it in the list.
 window.addEventListener("pageshow", (event) => {

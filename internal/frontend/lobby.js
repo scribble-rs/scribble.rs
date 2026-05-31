@@ -42,7 +42,6 @@ window.onbeforeunload = () => {
 const messageInput = document.getElementById("message-input");
 const playerContainer = document.getElementById("player-container");
 const wordContainer = document.getElementById("word-container");
-const chat = document.getElementById("chat");
 const messageContainer = document.getElementById("message-container");
 const roundSpan = document.getElementById("rounds");
 const maxRoundSpan = document.getElementById("max-rounds");
@@ -399,8 +398,6 @@ function updateTogglePenIcon() {
 //that the actual canvas has to be resized accordingly too. This is needed
 //since not every client has the same screensize.
 const baseWidth = 1600;
-const baseHeight = 900;
-const boardRatio = baseWidth / baseHeight;
 
 // Moving this here to extract the context after resizing
 const context = drawingBoard.getContext("2d", { alpha: false });
@@ -923,7 +920,6 @@ let round = 0;
 let rounds = 0;
 let roundEndTime = 0;
 let gameState = "unstarted";
-let drawingTimeSetting = "∞";
 
 const handleEvent = (parsed) => {
     if (parsed.type === "ready") {
@@ -1267,7 +1263,6 @@ const handleReadyEvent = (ready) => {
     round = ready.round;
     rounds = ready.rounds;
     gameState = ready.gameState;
-    drawingTimeSetting = ready.drawingTimeSetting;
     updateRoundsDisplay();
     updateButtonVisibilities();
 
@@ -1966,16 +1961,6 @@ function onKeyDown(event) {
 //must've clicked it at least once in order for that to work.
 window.addEventListener("keydown", onKeyDown);
 
-function debounce(func, timeout) {
-    let timer;
-    return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-            func.apply(this, args);
-        }, timeout);
-    };
-}
-
 function clear(context) {
     context.fillStyle = "#FFFFFF";
     context.fillRect(0, 0, drawingBoard.width, drawingBoard.height);
@@ -2056,15 +2041,6 @@ function drawLineAndSendEvent(
         },
     };
     socket.send(JSON.stringify(drawInstruction));
-}
-
-function getCookie(name) {
-    let cookie = {};
-    document.cookie.split(";").forEach(function (el) {
-        let split = el.split("=");
-        cookie[split[0].trim()] = split.slice(1).join("=");
-    });
-    return cookie[name];
 }
 
 function isString(obj) {
