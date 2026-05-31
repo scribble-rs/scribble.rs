@@ -134,19 +134,6 @@ func (handler *SSRHandler) indexPageHandler(writer http.ResponseWriter, request 
 	createPageData.Translation = translation
 	createPageData.Locale = locale
 
-	api.SetDiscordCookies(writer, request)
-	discordInstanceId := api.GetDiscordInstanceId(request)
-	if discordInstanceId != "" {
-		lobby := state.GetLobby(discordInstanceId)
-		if lobby != nil {
-			handler.ssrEnterLobbyNoChecks(lobby, writer, request,
-				func() *game.Player {
-					return api.GetPlayer(lobby, request)
-				})
-			return
-		}
-	}
-
 	err := pageTemplates.ExecuteTemplate(writer, "index", createPageData)
 	if err != nil {
 		log.Printf("Error templating home page: %s\n", err)
@@ -207,7 +194,6 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 	}
 	customWords, customWordsInvalid := api.ParseCustomWords(lowercaser, request.Form.Get("custom_words"))
 
-	api.SetDiscordCookies(writer, request)
 	// Prevent resetting the form, since that would be annoying as hell.
 	pageData := IndexPageData{
 		BasePageConfig: handler.basePageConfig,
@@ -277,15 +263,6 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 
 	playerName := api.GetPlayername(request)
 
-	var lobbyId string
-	discordInstanceId := api.GetDiscordInstanceId(request)
-	if discordInstanceId != "" {
-		lobbyId = discordInstanceId
-		// Workaround, since the discord proxy potentially always has the same
-		// IP address, preventing all players from connecting.
-		clientsPerIPLimit = maxPlayers
-	}
-
 	lobbySettings := &game.EditableLobbySettings{
 		Rounds:             rounds,
 		DrawingTime:        drawingTime,
@@ -295,7 +272,7 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 		Public:             publicLobby,
 		WordsPerTurn:       wordsPerTurn,
 	}
-	player, lobby, err := game.CreateLobby(lobbyId, playerName, languageKey,
+	player, lobby, err := game.CreateLobby("", playerName, languageKey,
 		lobbySettings, customWords, scoreCalculation)
 	if err != nil {
 		pageData.Errors = append(pageData.Errors, err.Error())
@@ -313,16 +290,6 @@ func (handler *SSRHandler) ssrCreateLobby(writer http.ResponseWriter, request *h
 
 	// We only add the lobby if we could do all necessary pre-steps successfully.
 	state.AddLobby(lobby)
-
-	// Workaround for discord activity case not correctly being able to read
-	// user session, as the cookie isn't being passed.
-	if discordInstanceId != "" {
-		handler.ssrEnterLobbyNoChecks(lobby, writer, request,
-			func() *game.Player {
-				return player
-			})
-		return
-	}
 
 	http.Redirect(writer, request, handler.basePageConfig.RootPath+"/lobby/"+lobby.LobbyID, http.StatusFound)
 }

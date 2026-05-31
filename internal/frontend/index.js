@@ -1,5 +1,4 @@
-const discordInstanceId = getCookie("discord-instance-id");
-const rootPath = `${discordInstanceId ? ".proxy/" : ""}{{.RootPath}}`;
+const rootPath = `{{.RootPath}}`;
 
 Array.from(document.getElementsByClassName("number-input")).forEach(
     (number_input) => {

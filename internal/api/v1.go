@@ -269,34 +269,6 @@ func (handler *V1Handler) postPlayer(writer http.ResponseWriter, request *http.R
 	}
 }
 
-func GetDiscordInstanceId(request *http.Request) string {
-	discordInstanceId := request.URL.Query().Get("instance_id")
-	if discordInstanceId == "" {
-		cookie, _ := request.Cookie("discord-instance-id")
-		if cookie != nil {
-			discordInstanceId = cookie.Value
-		}
-	}
-	return discordInstanceId
-}
-
-const discordDomain = "1320396325925163070.discordsays.com"
-
-func SetDiscordCookies(w http.ResponseWriter, request *http.Request) {
-	discordInstanceId := GetDiscordInstanceId(request)
-	if discordInstanceId != "" {
-		http.SetCookie(w, &http.Cookie{
-			Name:        "discord-instance-id",
-			Value:       discordInstanceId,
-			Domain:      discordDomain,
-			Path:        "/",
-			SameSite:    http.SameSiteNoneMode,
-			Partitioned: true,
-			Secure:      true,
-		})
-	}
-}
-
 // SetGameplayCookies takes the players usersession and lobby id
 // and sets them as a cookie.
 func SetGameplayCookies(
@@ -305,42 +277,18 @@ func SetGameplayCookies(
 	player *game.Player,
 	lobby *game.Lobby,
 ) {
-	discordInstanceId := GetDiscordInstanceId(request)
-	if discordInstanceId != "" {
-		http.SetCookie(w, &http.Cookie{
-			Name:        "usersession",
-			Value:       player.GetUserSession().String(),
-			Domain:      discordDomain,
-			Path:        "/",
-			SameSite:    http.SameSiteNoneMode,
-			Partitioned: true,
-			Secure:      true,
-		})
-		http.SetCookie(w, &http.Cookie{
-			Name:        "lobby-id",
-			Value:       lobby.LobbyID,
-			Domain:      discordDomain,
-			Path:        "/",
-			SameSite:    http.SameSiteNoneMode,
-			Partitioned: true,
-			Secure:      true,
-		})
-	} else {
-		// For the discord case, we need both, as the discord specific cookies
-		// aren't available during the readirect from ssrCreate to ssrEnter.
-		http.SetCookie(w, &http.Cookie{
-			Name:     "usersession",
-			Value:    player.GetUserSession().String(),
-			Path:     "/",
-			SameSite: http.SameSiteStrictMode,
-		})
-		http.SetCookie(w, &http.Cookie{
-			Name:     "lobby-id",
-			Value:    lobby.LobbyID,
-			Path:     "/",
-			SameSite: http.SameSiteStrictMode,
-		})
-	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "usersession",
+		Value:    player.GetUserSession().String(),
+		Path:     "/",
+		SameSite: http.SameSiteStrictMode,
+	})
+	http.SetCookie(w, &http.Cookie{
+		Name:     "lobby-id",
+		Value:    lobby.LobbyID,
+		Path:     "/",
+		SameSite: http.SameSiteStrictMode,
+	})
 }
 
 func (handler *V1Handler) patchLobby(writer http.ResponseWriter, request *http.Request) {

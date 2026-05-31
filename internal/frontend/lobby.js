@@ -1,11 +1,10 @@
-import KeyboardManager from "./resources/keyboardManager.js"
+import KeyboardManager from "./resources/keyboardManager.js";
 
 String.prototype.format = function () {
     return [...arguments].reduce((p, c) => p.replace(/%s/, c), this);
 };
 
-const discordInstanceId = getCookie("discord-instance-id");
-const rootPath = `${discordInstanceId ? ".proxy/" : ""}{{.RootPath}}`;
+const rootPath = `{{.RootPath}}`;
 const keyboardManager = new KeyboardManager();
 
 let socketIsConnecting = false;
@@ -174,11 +173,14 @@ function showHelpDialog() {
     const controlsLabel = document.createElement("b");
     controlsLabel.innerText = '{{.Translation.Get "controls"}}';
 
-    const undoModifierKeysString = keyboardManager.get("undoModifier").split("+").map(k => `<kbd>${k}</kbd>`).join("+");
+    const undoModifierKeysString = keyboardManager
+        .get("undoModifier")
+        .split("+")
+        .map((k) => `<kbd>${k}</kbd>`)
+        .join("+");
     const controlsText = document.createElement("div");
     controlsText.classList.add("help-controls-grid");
-    controlsText.innerHTML =
-        `
+    controlsText.innerHTML = `
         <span>{{.Translation.Get "pencil"}}</span><span dir="ltr"><kbd>${keyboardManager.get("pen")}</kbd></span>
         <span>{{.Translation.Get "fill-bucket"}}</span><span dir="ltr"><kbd>${keyboardManager.get("bucket")}</kbd></span>
         <span>{{.Translation.Get "eraser"}}</span><span dir="ltr"><kbd>${keyboardManager.get("rubber")}</kbd></span>
@@ -452,21 +454,31 @@ const toolButtonPen = document.getElementById("tool-type-pencil");
 const toolButtonRubber = document.getElementById("tool-type-rubber");
 const toolButtonFill = document.getElementById("tool-type-fill");
 
-const pencilImage = document.getElementById("use-pencil-button-image"); 
-const eraserImage = document.getElementById("use-eraser-button-image"); 
-const bucketImage = document.getElementById("use-fill-bucket-button-image"); 
-const undoImage = document.getElementById("undo-button-image"); 
+const pencilImage = document.getElementById("use-pencil-button-image");
+const eraserImage = document.getElementById("use-eraser-button-image");
+const bucketImage = document.getElementById("use-fill-bucket-button-image");
+const undoImage = document.getElementById("undo-button-image");
 const size8buttonWrapper = document.getElementById("size-8-button-wrapper");
 const size16buttonWrapper = document.getElementById("size-16-button-wrapper");
 const size24buttonWrapper = document.getElementById("size-24-button-wrapper");
 const size32buttonWrapper = document.getElementById("size-32-button-wrapper");
 
-
-pencilImage.setAttribute("title", `${pencilImage.getAttribute("title")} (${keyboardManager.get("pencil")})`);
-eraserImage.setAttribute("title", `${eraserImage.getAttribute("title")} (${keyboardManager.get("rubber")})`);
-bucketImage.setAttribute("title", `${bucketImage.getAttribute("title")} (${keyboardManager.get("bucket")})`);
-undoImage.setAttribute("title", `${undoImage.getAttribute("title")} (${keyboardManager.get("undoModifier")}+${keyboardManager.get("undo")})`);
-
+pencilImage.setAttribute(
+    "title",
+    `${pencilImage.getAttribute("title")} (${keyboardManager.get("pencil")})`,
+);
+eraserImage.setAttribute(
+    "title",
+    `${eraserImage.getAttribute("title")} (${keyboardManager.get("rubber")})`,
+);
+bucketImage.setAttribute(
+    "title",
+    `${bucketImage.getAttribute("title")} (${keyboardManager.get("bucket")})`,
+);
+undoImage.setAttribute(
+    "title",
+    `${undoImage.getAttribute("title")} (${keyboardManager.get("undoModifier")}+${keyboardManager.get("undo")})`,
+);
 
 if (sizeButton8.checked) {
     setLineWidthNoUpdate(8);
@@ -1894,9 +1906,8 @@ function isAnyDialogVisible() {
 function getModifierKey(event, modifierKey) {
     // Split by "+" and ensure every specified modifier property is true on the event.
     // e.g. "ctrl+shift" checks event.ctrlKey AND event.shiftKey
-    return modifierKey.split("+").every(modifier => event[`${modifier}Key`]);
+    return modifierKey.split("+").every((modifier) => event[`${modifier}Key`]);
 }
-
 
 function onKeyDown(event) {
     //Avoid firing actions if the user is in the chat.
@@ -1921,7 +1932,7 @@ function onKeyDown(event) {
     } else if (event.key === keyboardManager.get("bucket")) {
         toolButtonFill.click();
         chooseTool(fillBucket);
-    } else if (event.key === keyboardManager.get("rubber")){
+    } else if (event.key === keyboardManager.get("rubber")) {
         toolButtonRubber.click();
         chooseTool(rubber);
     } else if (event.key === keyboardManager.get("size8")) {
@@ -1936,7 +1947,10 @@ function onKeyDown(event) {
     } else if (event.key === keyboardManager.get("size32")) {
         sizeButton32.click();
         setLineWidth(32);
-    } else if (getModifierKey(event, keyboardManager.get("undoModifier")) && event.key.toLowerCase() === keyboardManager.get("undo")) {
+    } else if (
+        getModifierKey(event, keyboardManager.get("undoModifier")) &&
+        event.key.toLowerCase() === keyboardManager.get("undo")
+    ) {
         undoAndSendEvent();
     }
 }
@@ -2066,7 +2080,20 @@ const connectToWebsocket = () => {
 
     socketIsConnecting = true;
 
-    socket = new WebSocket(`${rootPath}/v1/lobby/ws`);
+    // rootPath is required to always contain a trailing slash OR be empty.
+    const socketPath = `${rootPath}/v1/lobby/ws`;
+    let host = location.hostname;
+    if (location.port && location.port !== "") {
+        host += ":" + location.port;
+    }
+
+    if (location.protocol === "https:") {
+        console.log("Attempting secure socket connection ...");
+        socket = new WebSocket(`wss://${host}${socketPath}`);
+    } else {
+        console.log("Attempting socket connection ...");
+        socket = new WebSocket(`ws://${host}${socketPath}`);
+    }
 
     socket.onerror = (error) => {
         //Is not connected and we haven't yet said that we are done trying to
