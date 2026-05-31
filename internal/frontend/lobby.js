@@ -1416,12 +1416,15 @@ function appendMessage(styleClass, author, message, attrs) {
 
     const newMessageDiv = document.createElement("div");
     newMessageDiv.classList.add("message");
+
+    // Support both string (one class) and array (multiple classes)
     if (isString(styleClass)) {
         styleClass = [styleClass];
     }
-
-    for (const cls of styleClass) {
-        newMessageDiv.classList.add(cls);
+    if (styleClass) {
+        for (const cls of styleClass) {
+            newMessageDiv.classList.add(cls);
+        }
     }
 
     if (author !== null && author !== "") {
