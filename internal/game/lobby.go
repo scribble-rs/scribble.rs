@@ -754,15 +754,24 @@ func determineNextDrawer(lobby *Lobby) (*Player, bool) {
 	}
 
 	// We prefer the first connected player and non-spectating.
-	for _, player := range lobby.players {
+	 currentDrawer := lobby.Drawer()
+	 for _, player := range lobby.players {
 		if !player.desiresToDraw() || !player.Connected {
 			continue
 		}
+
+		// Don't select the same drawer again if they are the only
+		// connected player remaining.
+		if currentDrawer != nil && player.ID == currentDrawer.ID {
+			continue
+		}
+
 		return player, true
 	}
 
-	// If no player is available, we will simply end the game.
+	// If no player is available, we will simply end the game.....
 	return nil, true
+
 }
 
 // startTurnTimeTicker executes a loop that listens to the lobbies

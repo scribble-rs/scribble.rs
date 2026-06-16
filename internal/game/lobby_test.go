@@ -388,6 +388,67 @@ func Test_kickDrawer(t *testing.T) {
 	}
 }
 
+func Test_determineNextDrawer_DoesNotReselectCurrentDrawer(t *testing.T) {
+	t.Parallel()
+
+	host := &Player{
+		ID:        uuid.Must(uuid.NewV4()),
+		Name:      "host",
+		Connected: true,
+		State:     Drawing,
+	}
+
+	guesser := &Player{
+		ID:        uuid.Must(uuid.NewV4()),
+		Name:      "guesser",
+		Connected: false,
+		State:     Guessing,
+	}
+
+	lobby := &Lobby{
+		players: []*Player{host, guesser},
+	}
+
+	drawer, roundOver := determineNextDrawer(lobby)
+
+	require.Nil(t, drawer)
+	require.True(t, roundOver)
+}
+func Test_determineNextDrawer_SelectsAnotherEligiblePlayer(t *testing.T) {
+	t.Parallel()
+
+	host := &Player{
+		ID:        uuid.Must(uuid.NewV4()),
+		Name:      "host",
+		Connected: true,
+		State:     Drawing,
+	}
+
+	disconnected := &Player{
+		ID:        uuid.Must(uuid.NewV4()),
+		Name:      "g1",
+		Connected: false,
+		State:     Guessing,
+	}
+
+	next := &Player{
+		ID:        uuid.Must(uuid.NewV4()),
+		Name:      "g2",
+		Connected: true,
+		State:     Guessing,
+	}
+
+	lobby := &Lobby{
+		players: []*Player{host, disconnected, next},
+	}
+
+	drawer, roundOver := determineNextDrawer(lobby)
+
+	require.NotNil(t, drawer)
+	require.Equal(t, next.ID, drawer.ID)
+	require.False(t, roundOver)
+}
+
 func Test_lobby_calculateDrawerScore(t *testing.T) {
 	t.Parallel()
 
