@@ -18,3 +18,7 @@ playground/
 *.pprof
 # Additional files for hosting. Workaround for now ig.
 public/
+# Nix build file
+/result
+# Go vendor directory
+/vendor
