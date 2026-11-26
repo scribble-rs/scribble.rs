@@ -308,7 +308,9 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 	switch CheckGuess(normInput, normSearched) {
 	case EqualGuess:
 		{
-			sender.LastScore = lobby.calculateGuesserScore()
+			sender.lastGuesserScore = lobby.calculateGuesserScore()
+			secondsLeft := int(lobby.roundEndTime/1000 - time.Now().UTC().Unix())
+			sender.LastScore = sender.lastGuesserScore + lobby.calculateGuesserBonus(secondsLeft)
 			sender.Score += sender.LastScore
 
 			sender.State = Standby
@@ -423,6 +425,7 @@ func (lobby *Lobby) startGame() {
 	for _, otherPlayer := range lobby.players {
 		otherPlayer.Score = 0
 		otherPlayer.LastScore = 0
+		otherPlayer.lastGuesserScore = 0
 		// Everyone has the same score and therefore the same rank.
 		otherPlayer.Rank = 1
 	}
@@ -530,6 +533,7 @@ func kickPlayer(lobby *Lobby, playerToKick *Player, playerToKickIndex int) {
 		for _, otherPlayer := range lobby.players {
 			otherPlayer.Score -= otherPlayer.LastScore
 			otherPlayer.LastScore = 0
+			otherPlayer.lastGuesserScore = 0
 		}
 
 		advanceLobbyPredefineDrawer(lobby, roundOver, newDrawer)
@@ -597,6 +601,32 @@ func (lobby *Lobby) calculateGuesserScore() int {
 	return lobby.ScoreCalculation.CalculateGuesserScore(lobby)
 }
 
+func (lobby *Lobby) calculateGuesserBonus(secondsLeft int) int {
+	const guesserSpeedBonusPercent = 5
+
+	if lobby.DrawingTime <= 0 || secondsLeft <= 0 {
+		return 0
+	}
+
+	activePlayerCount := 0
+	for _, player := range lobby.players {
+		if player.Connected && player.State != Spectating {
+			activePlayerCount++
+		}
+	}
+	if activePlayerCount != 2 {
+		return 0
+	}
+
+	if secondsLeft > lobby.DrawingTime {
+		secondsLeft = lobby.DrawingTime
+	}
+
+	// Reward fast guesses with up to 5% of the selected scoring mode's
+	// maximum guesser score. This bonus is not included in drawer scoring.
+	return lobby.ScoreCalculation.MaxScore() * guesserSpeedBonusPercent * secondsLeft / (100 * lobby.DrawingTime)
+}
+
 func (lobby *Lobby) calculateDrawerScore() int {
 	return lobby.ScoreCalculation.CalculateDrawerScore(lobby)
 }
@@ -617,6 +647,10 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 		newDrawerScore := lobby.calculateDrawerScore()
 		drawer.LastScore = newDrawerScore
 		drawer.Score += newDrawerScore
+	}
+
+	for _, player := range lobby.players {
+		player.lastGuesserScore = 0
 	}
 
 	// We need this for the next-turn / game-over event, in order to allow the
@@ -1246,6 +1280,7 @@ type ScoreCalculation interface {
 	Identifier() string
 	CalculateGuesserScore(lobby *Lobby) int
 	CalculateDrawerScore(lobby *Lobby) int
+	MaxScore() int
 }
 
 var ChillScoring = &adjustableScoringAlgorithm{
@@ -1318,8 +1353,8 @@ func (s *adjustableScoringAlgorithm) CalculateDrawerScore(lobby *Lobby) int {
 			// even if they aren't connected anymore. If the player is
 			// connected, but hasn't guessed, it is still as well, as the
 			// drawing must've not been good enough to be guessable.
-			(player.Connected || player.LastScore > 0) {
-			scoreSum += player.LastScore
+			(player.Connected || player.lastGuesserScore > 0) {
+			scoreSum += player.lastGuesserScore
 			playerCount++
 		}
 	}
