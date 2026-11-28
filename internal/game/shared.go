@@ -275,8 +275,8 @@ type Player struct {
 	Score     int `json:"score"`
 	LastScore int `json:"lastScore"`
 	Rank      int `json:"rank"`
-	// lastGuesserScore excludes the speed bonus and is used for drawer scoring.
-	lastGuesserScore int
+	// lastUnbonusedGuesserScore excludes the speed bonus and is used for drawer scoring.
+	lastUnbonusedGuesserScore int
 	// Connected defines whether the players websocket connection is currently
 	// established. This has previously been in state but has been moved out
 	// in order to avoid losing the state on refreshing the page.

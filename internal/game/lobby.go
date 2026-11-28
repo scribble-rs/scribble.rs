@@ -308,9 +308,7 @@ func handleMessage(message string, sender *Player, lobby *Lobby) {
 	switch CheckGuess(normInput, normSearched) {
 	case EqualGuess:
 		{
-			sender.lastGuesserScore = lobby.calculateGuesserScore()
-			secondsLeft := int(lobby.roundEndTime/1000 - time.Now().UTC().Unix())
-			sender.LastScore = sender.lastGuesserScore + lobby.calculateGuesserBonus(secondsLeft)
+			sender.lastUnbonusedGuesserScore, sender.LastScore = lobby.calculateGuesserScore()
 			sender.Score += sender.LastScore
 
 			sender.State = Standby
@@ -425,7 +423,7 @@ func (lobby *Lobby) startGame() {
 	for _, otherPlayer := range lobby.players {
 		otherPlayer.Score = 0
 		otherPlayer.LastScore = 0
-		otherPlayer.lastGuesserScore = 0
+		otherPlayer.lastUnbonusedGuesserScore = 0
 		// Everyone has the same score and therefore the same rank.
 		otherPlayer.Rank = 1
 	}
@@ -533,7 +531,7 @@ func kickPlayer(lobby *Lobby, playerToKick *Player, playerToKickIndex int) {
 		for _, otherPlayer := range lobby.players {
 			otherPlayer.Score -= otherPlayer.LastScore
 			otherPlayer.LastScore = 0
-			otherPlayer.lastGuesserScore = 0
+			otherPlayer.lastUnbonusedGuesserScore = 0
 		}
 
 		advanceLobbyPredefineDrawer(lobby, roundOver, newDrawer)
@@ -597,34 +595,8 @@ func handleNameChangeEvent(caller *Player, lobby *Lobby, name string) {
 	}
 }
 
-func (lobby *Lobby) calculateGuesserScore() int {
+func (lobby *Lobby) calculateGuesserScore() (unbonusedScore, guesserAward int) {
 	return lobby.ScoreCalculation.CalculateGuesserScore(lobby)
-}
-
-func (lobby *Lobby) calculateGuesserBonus(secondsLeft int) int {
-	const guesserSpeedBonusPercent = 5
-
-	if lobby.DrawingTime <= 0 || secondsLeft <= 0 {
-		return 0
-	}
-
-	activePlayerCount := 0
-	for _, player := range lobby.players {
-		if player.Connected && player.State != Spectating {
-			activePlayerCount++
-		}
-	}
-	if activePlayerCount != 2 {
-		return 0
-	}
-
-	if secondsLeft > lobby.DrawingTime {
-		secondsLeft = lobby.DrawingTime
-	}
-
-	// Reward fast guesses with up to 5% of the selected scoring mode's
-	// maximum guesser score. This bonus is not included in drawer scoring.
-	return lobby.ScoreCalculation.MaxScore() * guesserSpeedBonusPercent * secondsLeft / (100 * lobby.DrawingTime)
 }
 
 func (lobby *Lobby) calculateDrawerScore() int {
@@ -650,7 +622,7 @@ func advanceLobbyPredefineDrawer(lobby *Lobby, roundOver bool, newDrawer *Player
 	}
 
 	for _, player := range lobby.players {
-		player.lastGuesserScore = 0
+		player.lastUnbonusedGuesserScore = 0
 	}
 
 	// We need this for the next-turn / game-over event, in order to allow the
@@ -1278,9 +1250,10 @@ func (lobby *Lobby) Shutdown() {
 // ScoreCalculation allows having different scoring systems for a lobby.
 type ScoreCalculation interface {
 	Identifier() string
-	CalculateGuesserScore(lobby *Lobby) int
+	// CalculateGuesserScore returns the unbonused score used for drawer scoring,
+	// followed by the total award to the guesser.
+	CalculateGuesserScore(lobby *Lobby) (unbonusedScore, guesserAward int)
 	CalculateDrawerScore(lobby *Lobby) int
-	MaxScore() int
 }
 
 var ChillScoring = &adjustableScoringAlgorithm{
@@ -1311,8 +1284,17 @@ func (s *adjustableScoringAlgorithm) Identifier() string {
 	return s.identifier
 }
 
-func (s *adjustableScoringAlgorithm) CalculateGuesserScore(lobby *Lobby) int {
-	return s.CalculateGuesserScoreInternal(lobby.hintCount, lobby.hintsLeft, lobby.DrawingTime, lobby.roundEndTime)
+func (s *adjustableScoringAlgorithm) CalculateGuesserScore(lobby *Lobby) (unbonusedScore, guesserAward int) {
+	unbonusedScore = s.CalculateGuesserScoreInternal(
+		lobby.hintCount,
+		lobby.hintsLeft,
+		lobby.DrawingTime,
+		lobby.roundEndTime,
+	)
+
+	const guesserBonusPercent = 5
+	bonus := unbonusedScore * guesserBonusPercent / 100
+	return unbonusedScore, unbonusedScore + bonus
 }
 
 func (s *adjustableScoringAlgorithm) MaxScore() int {
@@ -1353,8 +1335,8 @@ func (s *adjustableScoringAlgorithm) CalculateDrawerScore(lobby *Lobby) int {
 			// even if they aren't connected anymore. If the player is
 			// connected, but hasn't guessed, it is still as well, as the
 			// drawing must've not been good enough to be guessable.
-			(player.Connected || player.lastGuesserScore > 0) {
-			scoreSum += player.lastGuesserScore
+			(player.Connected || player.lastUnbonusedGuesserScore > 0) {
+			scoreSum += player.lastUnbonusedGuesserScore
 			playerCount++
 		}
 	}

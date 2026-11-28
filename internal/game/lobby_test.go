@@ -209,87 +209,48 @@ func Test_chillScoring_calculateGuesserScore(t *testing.T) {
 	}
 }
 
-func Test_lobby_calculateGuesserBonus(t *testing.T) {
+func Test_adjustableScoringAlgorithm_CalculateGuesserScoreIncludesBonus(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name          string
-		scoring       ScoreCalculation
-		players       []*Player
-		secondsLeft   int
-		expectedBonus int
+		name        string
+		scoring     *adjustableScoringAlgorithm
+		hintCount   int
+		hintsLeft   int
+		playerCount int
 	}{
 		{
-			name:          "chill at start of round",
-			scoring:       ChillScoring,
-			secondsLeft:   120,
-			expectedBonus: 13,
+			name:        "chill two-player game",
+			scoring:     ChillScoring,
+			hintCount:   2,
+			hintsLeft:   2,
+			playerCount: 2,
 		},
 		{
-			name:          "competitive at start of round",
-			scoring:       CompetitiveScoring,
-			secondsLeft:   120,
-			expectedBonus: 21,
-		},
-		{
-			name:          "competitive halfway through round",
-			scoring:       CompetitiveScoring,
-			secondsLeft:   60,
-			expectedBonus: 10,
-		},
-		{
-			name:          "no bonus when fewer than two active players",
-			scoring:       ChillScoring,
-			players:       []*Player{{Connected: true, State: Drawing}},
-			secondsLeft:   120,
-			expectedBonus: 0,
-		},
-		{
-			name:    "spectators do not count as active players",
-			scoring: ChillScoring,
-			players: []*Player{
-				{Connected: true, State: Drawing},
-				{Connected: true, State: Guessing},
-				{Connected: true, State: Spectating},
-			},
-			secondsLeft:   120,
-			expectedBonus: 13,
-		},
-		{
-			name:    "no bonus in games with more than two active players",
-			scoring: ChillScoring,
-			players: []*Player{
-				{Connected: true, State: Drawing},
-				{Connected: true, State: Guessing},
-				{Connected: true, State: Guessing},
-			},
-			secondsLeft:   120,
-			expectedBonus: 0,
-		},
-		{
-			name:          "no bonus when no time remains",
-			scoring:       ChillScoring,
-			secondsLeft:   0,
-			expectedBonus: 0,
+			name:        "competitive multiplayer game after a hint",
+			scoring:     CompetitiveScoring,
+			hintCount:   2,
+			hintsLeft:   1,
+			playerCount: 4,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			players := test.players
-			if players == nil {
-				players = []*Player{
-					{Connected: true, State: Drawing},
-					{Connected: true, State: Guessing},
-				}
+			players := make([]*Player, test.playerCount)
+			for i := range players {
+				players[i] = &Player{Connected: true, State: Guessing}
 			}
 			lobby := &Lobby{
 				EditableLobbySettings: EditableLobbySettings{DrawingTime: 120},
+				hintCount:             test.hintCount,
+				hintsLeft:             test.hintsLeft,
+				roundEndTime:          time.Now().Add(115 * time.Second).UnixMilli(),
 				players:               players,
-				ScoreCalculation:      test.scoring,
 			}
 
-			require.Equal(t, test.expectedBonus, lobby.calculateGuesserBonus(test.secondsLeft))
+			unbonusedScore, guesserAward := test.scoring.CalculateGuesserScore(lobby)
+			require.Equal(t, unbonusedScore*5/100, guesserAward-unbonusedScore)
 		})
 	}
 }
@@ -485,12 +446,12 @@ func Test_lobby_calculateDrawerScore(t *testing.T) {
 				{
 					Connected:        false,
 					LastScore:        100,
-					lastGuesserScore: 100,
+					lastUnbonusedGuesserScore: 100,
 				},
 				{
 					Connected:        false,
 					LastScore:        200,
-					lastGuesserScore: 200,
+					lastUnbonusedGuesserScore: 200,
 				},
 			},
 			ScoreCalculation: ChillScoring,
@@ -507,12 +468,12 @@ func Test_lobby_calculateDrawerScore(t *testing.T) {
 				{
 					Connected:        false,
 					LastScore:        0,
-					lastGuesserScore: 0,
+					lastUnbonusedGuesserScore: 0,
 				},
 				{
 					Connected:        false,
 					LastScore:        0,
-					lastGuesserScore: 0,
+					lastUnbonusedGuesserScore: 0,
 				},
 			},
 			ScoreCalculation: ChillScoring,
@@ -549,12 +510,12 @@ func Test_lobby_calculateDrawerScore(t *testing.T) {
 				{
 					Connected:        true,
 					LastScore:        110,
-					lastGuesserScore: 100,
+					lastUnbonusedGuesserScore: 100,
 				},
 				{
 					Connected:        true,
 					LastScore:        220,
-					lastGuesserScore: 200,
+					lastUnbonusedGuesserScore: 200,
 				},
 			},
 			ScoreCalculation: ChillScoring,
@@ -571,22 +532,22 @@ func Test_lobby_calculateDrawerScore(t *testing.T) {
 				{
 					Connected:        true,
 					LastScore:        100,
-					lastGuesserScore: 100,
+					lastUnbonusedGuesserScore: 100,
 				},
 				{
 					Connected:        false,
 					LastScore:        200,
-					lastGuesserScore: 200,
+					lastUnbonusedGuesserScore: 200,
 				},
 				{
 					Connected:        true,
 					LastScore:        0,
-					lastGuesserScore: 0,
+					lastUnbonusedGuesserScore: 0,
 				},
 				{
 					Connected:        false,
 					LastScore:        0,
-					lastGuesserScore: 0,
+					lastUnbonusedGuesserScore: 0,
 				},
 			},
 			ScoreCalculation: ChillScoring,
@@ -603,22 +564,22 @@ func Test_lobby_calculateDrawerScore(t *testing.T) {
 				{
 					Connected:        true,
 					LastScore:        100,
-					lastGuesserScore: 100,
+					lastUnbonusedGuesserScore: 100,
 				},
 				{
 					Connected:        true,
 					LastScore:        200,
-					lastGuesserScore: 200,
+					lastUnbonusedGuesserScore: 200,
 				},
 				{
 					Connected:        false,
 					LastScore:        300,
-					lastGuesserScore: 300,
+					lastUnbonusedGuesserScore: 300,
 				},
 				{
 					Connected:        false,
 					LastScore:        400,
-					lastGuesserScore: 400,
+					lastUnbonusedGuesserScore: 400,
 				},
 			},
 			ScoreCalculation: ChillScoring,
